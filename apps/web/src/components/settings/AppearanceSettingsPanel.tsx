@@ -294,6 +294,49 @@ export function AppearanceSettingsPanel() {
           }
         />
         <SettingsRow
+          {...searchableSetting("effort-display", t)}
+          description={t("nightly.effortDescription")}
+          resetAction={
+            settings.effortDisplay !== DEFAULT_UNIFIED_SETTINGS.effortDisplay ? (
+              <SettingResetButton
+                label={t("nightly.effortDisplay")}
+                onClick={() =>
+                  updateSettings({ effortDisplay: DEFAULT_UNIFIED_SETTINGS.effortDisplay })
+                }
+              />
+            ) : null
+          }
+          control={
+            <div className="w-full sm:w-40">
+              <Select
+                value={settings.effortDisplay}
+                onValueChange={(value) => {
+                  if (value === "bars" || value === "label")
+                    updateSettings({ effortDisplay: value });
+                }}
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="w-full min-w-0"
+                  aria-label={t("nightly.effortDisplay")}
+                >
+                  <SelectValue>
+                    {t(
+                      settings.effortDisplay === "bars"
+                        ? "nightly.effortBars"
+                        : "nightly.effortWord",
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectPopup align="end" alignItemWithTrigger={false}>
+                  <SelectItem value="label">{t("nightly.effortWordDefault")}</SelectItem>
+                  <SelectItem value="bars">{t("nightly.effortBars")}</SelectItem>
+                </SelectPopup>
+              </Select>
+            </div>
+          }
+        />
+        <SettingsRow
           {...searchableSetting("math-rendering")}
           description={t(
             "settings.pages.AppearanceSettingsPanel.typeset-latex-math-such-as-x-2-or-x-2-in-messages-and-markdown-previews-the-composer-keeps-tex-source-editable",

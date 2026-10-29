@@ -1,3 +1,4 @@
+import { nightlyMergeZhCN } from "./nightly-merge.zh-CN.ts";
 import { prQuickZhCN } from "./pr-quick.zh-CN.ts";
 import { prSaveZhCN } from "./pr-save.zh-CN.ts";
 import { workspaceStatusZhCN } from "./workspace-status.zh-CN.ts";
@@ -128,6 +129,7 @@ import { wizardZhCN } from "./wizard.zh-CN.ts";
 import type { en } from "./en.ts";
 
 export const zhCN = {
+  ...nightlyMergeZhCN,
   ...prQuickZhCN,
   ...prSaveZhCN,
   ...workspaceStatusZhCN,

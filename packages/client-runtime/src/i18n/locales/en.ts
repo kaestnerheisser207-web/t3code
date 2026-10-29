@@ -1,3 +1,4 @@
+import { nightlyMergeEn } from "./nightly-merge.en.ts";
 import { prQuickEn } from "./pr-quick.en.ts";
 import { prSaveEn } from "./pr-save.en.ts";
 import { workspaceStatusEn } from "./workspace-status.en.ts";
@@ -127,6 +128,7 @@ import { settingsEn } from "./settings.en.ts";
 import { wizardEn } from "./wizard.en.ts";
 
 export const en = {
+  ...nightlyMergeEn,
   ...prQuickEn,
   ...prSaveEn,
   ...workspaceStatusEn,

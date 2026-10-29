@@ -329,6 +329,12 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     searchTerms: ["wide full width column layout messages composer monitor"],
   },
   {
+    id: "effort-display",
+    titleKey: "nightly.effortDisplay",
+    to: "/settings/appearance",
+    searchTerms: ["reasoning effort thinking bars graph word label level composer"],
+  },
+  {
     id: "math-rendering",
     titleKey: "settings.items.math-rendering.title",
     to: "/settings/appearance",
@@ -387,7 +393,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     id: "word-wrap",
     titleKey: "settings.items.word-wrap.title",
     to: "/settings/appearance",
-    searchTerms: ["long lines code blocks tables diffs file previews"],
+    searchTerms: ["long lines code blocks diffs file previews"],
   },
   {
     id: "composer-context",
@@ -439,6 +445,12 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     searchTerms: ["beta folders project tree legacy old classic sidebar"],
   },
   {
+    id: "boring-sidebar-multiline",
+    title: "Two-line folder rows",
+    to: "/settings/labs",
+    searchTerms: ["beta boring sidebar folder rows multiline branch pull request details"],
+  },
+  {
     id: "guest-links",
     titleKey: "settings.items.guest-links.title",
     to: "/settings/labs",
@@ -451,6 +463,13 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     to: "/settings/labs",
     scope: "environment",
     searchTerms: ["beta link another machine vps peer agents work there delegate"],
+  },
+  {
+    id: "simlock-hosts",
+    title: "Simlock device hosts (alpha)",
+    to: "/settings/labs",
+    scope: "environment",
+    searchTerms: ["beta alpha simlock callstack simulator emulator ios android pool lease gateway"],
   },
   {
     id: "auto-settle-inactive-threads",
@@ -553,12 +572,6 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     titleKey: "settings.items.composer-rich-text.title",
     to: "/settings/chat",
     searchTerms: ["composer rich text tiptap bold italic markdown styled wysiwyg"],
-  },
-  {
-    id: "composer-collapse",
-    titleKey: "settings.items.composer-collapse.title",
-    to: "/settings/chat",
-    searchTerms: ["composer rest resting scroll wheel conversation timeline shrink minimize"],
   },
   {
     id: "send-shortcut",
@@ -813,10 +826,12 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     searchTerms: ["allow disable enable open drive preview tools sessions project override"],
   },
   {
-    id: "device-hosts",
-    titleKey: "settings.items.device-hosts.title",
+    id: "device-sources",
+    titleKey: "nightly.DeviceSourcesSettings.device-sources",
     to: "/settings/devices",
-    searchTerms: ["ssh remote simulator emulator ios android mac mini identity key connection"],
+    searchTerms: [
+      "device hosts ssh remote mac mini identity key connection eas expo cloud simlock pool gateway local simulators",
+    ],
   },
   {
     id: "agent-device-access",
@@ -830,14 +845,14 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     titleKey: "settings.items.device-hub.title",
     to: "/settings/devices",
     targetId: "devices",
-    searchTerms: ["simulator emulator ios android install start"],
+    searchTerms: ["device hub simulator emulator ios android install start version"],
   },
   {
     id: "device-platform-support",
     titleKey: "settings.items.device-platform-support.title",
     to: "/settings/devices",
-    targetId: "devices",
-    searchTerms: ["xcode android studio sdk avd runtime"],
+    targetId: "device-sources",
+    searchTerms: ["simulator support xcode android studio sdk avd runtime"],
   },
   {
     id: "browser-profiles",
