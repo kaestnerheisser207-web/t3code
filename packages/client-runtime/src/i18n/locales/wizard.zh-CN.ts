@@ -36,7 +36,7 @@ export const wizardZhCN = {
   "wizard.agentsDescription": "选择一个编程代理开始编程。你之后可以再添加更多。",
   "wizard.computer": "电脑",
   "wizard.noTerminalPermission": "此连接无法控制终端。",
-  "wizard.anotherAccount": "连接另一个 ChatGPT 账号",
+  "wizard.anotherAccount": "连接另一个 ChatGPT 账户",
   "wizard.codexSettings": "Codex 设置选项",
   "wizard.ready": "就绪",
   "wizard.checking": "正在检查…",

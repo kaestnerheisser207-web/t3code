@@ -122,7 +122,7 @@ export const webDynamicJsx2ZhCN = {
   "web.dynamic.PullRequestDetailActions.confirm-approve": "确认批准？",
   "web.dynamic.PullRequestDetailActions.approve-workflows-to-run": "批准工作流运行",
   "web.dynamic.PullRequestDetailCrumbs.open-param-param-on-host":
-    "在主机上打开{{singular}} #{{number}}",
+    "在托管平台上打开{{singular}} #{{number}}",
   "web.dynamic.PullRequestDetailCrumbs.open-param-repository": "打开 {{repository}} 仓库",
   "web.dynamic.PullRequestDetailPanel.collapse-param-panel": "折叠{{singular}}面板",
   "web.dynamic.PullRequestDetailPanel.checks-param": "检查：{{checksSummary}}",
@@ -138,7 +138,8 @@ export const webDynamicJsx2ZhCN = {
   "web.dynamic.PullRequestDetailPanel.loading-param-diff": "正在加载{{singular}}差异...",
   "web.dynamic.PullRequestGhosts.loading-pull-requests": "正在加载拉取请求",
   "web.dynamic.PullRequestGhosts.loading-param": "正在加载{{singular}}",
-  "web.dynamic.PullRequestGhosts.open-param-param-on-host": "在主机上打开{{singular}} #{{number}}",
+  "web.dynamic.PullRequestGhosts.open-param-param-on-host":
+    "在托管平台上打开{{singular}} #{{number}}",
   "web.dynamic.PullRequestGhosts.param-actions-loading": "{{value}} 个操作正在加载",
   "web.dynamic.PullRequestGhosts.collapse-param-panel": "折叠{{singular}}面板",
   "web.dynamic.PullRequestGhosts.loading-param-conversation": "正在加载{{singular}}对话",
@@ -207,7 +208,7 @@ export const webDynamicJsx2ZhCN = {
     "此拉取请求已不在任何堆叠中。",
   "web.dynamic.PullRequestStackPopover.stack-param-layer-param-of-param":
     "堆叠 {{number}}，第 {{position}} 层，共 {{size}} 层",
-  "web.dynamic.PullRequestSummaryTab.open-comment-on-host": " · 在主机上打开评论",
+  "web.dynamic.PullRequestSummaryTab.open-comment-on-host": " · 在托管平台上打开评论",
   "web.dynamic.PullRequestSummaryTab.reply": "条回复",
   "web.dynamic.PullRequestSummaryTab.replies": "条回复",
   "web.dynamic.PullRequestSummaryTab.preparing": "正在准备...",
@@ -248,8 +249,8 @@ export const webDynamicJsx2ZhCN = {
   "web.dynamic.ThreadPullRequestsPanel.param-param-chained-by-base-branch":
     "{{size}} 个{{plural}}，以基础分支串联。",
   "web.dynamic.ThreadPullRequestsPanel.actions-for-param": "#{{number}} 的操作",
-  "web.dynamic.ThreadPullRequestsPanel.stop-watching": "停止关注",
-  "web.dynamic.ThreadPullRequestsPanel.watch-for-changes": "关注更改",
+  "web.dynamic.ThreadPullRequestsPanel.stop-watching": "停止监视",
+  "web.dynamic.ThreadPullRequestsPanel.watch-for-changes": "监视变更",
   "web.dynamic.ThreadPullRequestsPanel.dismiss-from-thread": "从会话中移除",
   "web.dynamic.ThreadPullRequestsPanel.unlink-from-thread": "解除与会话的关联",
   "web.dynamic.ThreadPullRequestsPanel.synced": " · 已同步 ",

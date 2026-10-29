@@ -22,7 +22,7 @@ export const webDynamicJsx5ZhCN = {
   "web.dynamic.SavedEnvironmentRows.t3-connect-is-on-reachability-has-not-been-checked-yet":
     "T3 Connect 已开启。尚未检查可达性。",
   "web.dynamic.SavedEnvironmentRows.t3-connect-is-out-of-sync-this-environment-is-linked-only-to-publish-agent-activity-so-other-devices-cannot-connect-turn-t3-connect-on-to-repair-it":
-    "T3 Connect 状态不同步。此环境仅用于发布 Agent 活动，因此其他设备无法连接。开启 T3 Connect 以修复。",
+    "T3 Connect 状态不同步。此环境仅用于发布编程代理活动，因此其他设备无法连接。开启 T3 Connect 以修复。",
   "web.dynamic.SavedEnvironmentRows.make-this-environment-available-to-your-other-devices-through-t3-connect":
     "通过 T3 Connect 让此环境可供你的其他设备使用。",
   "web.dynamic.SavedEnvironmentRows.sign-in-to-send-activity-to-mobile-notifications-and-live-activities":
@@ -45,13 +45,13 @@ export const webDynamicJsx5ZhCN = {
   "web.dynamic.ScheduledTasksSettings.enable-param": "启用 {{title}}",
   "web.dynamic.ScheduledTasksSettings.actions-for-param": "{{title}} 的操作",
   "web.dynamic.ScheduledTasksSettings.scheduled-run": "定时运行",
-  "web.dynamic.ScheduledTasksSettings.prompt-sent-to-the-agent": "发送给 Agent 的提示词",
+  "web.dynamic.ScheduledTasksSettings.prompt-sent-to-the-agent": "发送给编程代理的提示词",
   "web.dynamic.ScheduledTasksSettings.run-scheduled-when-the-window-closes-no-run-started-yet":
     "将在时间窗口结束时运行；当前尚未启动。",
   "web.dynamic.ScheduledTasksSettings.no-run-was-started-for-this-request":
     "此请求未启动任何运行。",
   "web.dynamic.ScheduledTasksSettings.body-truncated": "正文（已截断）",
-  "web.dynamic.ScheduledTasksSettings.body": "正文",
+  "web.dynamic.ScheduledTasksSettings.body": "请求体",
   "web.dynamic.ScheduledTasksSettings.empty": "（空）",
   "web.dynamic.ScheduledTasksSettings.copied": "已复制",
   "web.dynamic.ScheduledTasksSettings.copy": "复制",
@@ -72,7 +72,7 @@ export const webDynamicJsx5ZhCN = {
     "这些权限适用于你当前活动的路由。其他路由可能有不同的权限。",
   "web.dynamic.SessionPermissions.these-permissions-apply-to-this-client-s-current-connection":
     "这些权限适用于此客户端的当前连接。",
-  "web.dynamic.SessionPermissions.allowed": "允许",
+  "web.dynamic.SessionPermissions.allowed": "已允许",
   "web.dynamic.SessionPermissions.not-granted": "未授予",
   "web.dynamic.SnapShotSettings.choose-a-window-to-capture-from-any-app":
     "选择要截取的窗口，可来自任意应用。",

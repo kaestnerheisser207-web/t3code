@@ -1,7 +1,7 @@
 import type { threadMenusEn } from "./thread-menus.en.ts";
 export const threadMenusZhCN = {
   "thread.menu.approval": "待批准",
-  "thread.menu.input": "待输入",
+  "thread.menu.input": "待回应",
   "thread.menu.request": "待处理请求",
   "thread.menu.working": "处理中",
   "thread.menu.waiting": "等待中",

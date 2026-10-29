@@ -4,7 +4,7 @@ export const mobilePrMergeZhCN = {
   "pr.merge.closed": "请先重新打开此{{kind}}再进行合并。",
   "pr.merge.readOnly": "此环境连接为只读。",
   "pr.merge.unsupported": "此提供方不支持在此处合并。",
-  "pr.merge.noPermission": "你的账号无法合并此{{kind}}。",
+  "pr.merge.noPermission": "你的账户无法合并此{{kind}}。",
   "pr.merge.draft": "合并前请先将此草稿标记为可供审查。",
   "pr.merge.noMethods": "此仓库没有可用的合并方式。",
   "pr.merge.reconnect": "重新连接后再合并。",

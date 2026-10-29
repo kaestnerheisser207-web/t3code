@@ -5,7 +5,7 @@ export const mobileConnect0ZhCN = {
   "mobile.connect.ConnectOnboardingRouteScreen.refreshing-environments": "正在刷新环境",
   "mobile.connect.ConnectOnboardingRouteScreen.refresh-environments": "刷新环境",
   "mobile.connect.ConnectOnboardingRouteScreen.sign-in-to-your-t3-account-to-set-up-t3-connect":
-    "登录你的 T3 账号以设置 T3 Connect。",
+    "登录你的 T3 账户以设置 T3 Connect。",
   "mobile.connect.T3ConnectProfilePage.registered-servers": "已注册的服务器",
   "mobile.connect.T3ConnectProfilePage.could-not-load-t3-connect-environments":
     "无法加载 T3 Connect 环境",

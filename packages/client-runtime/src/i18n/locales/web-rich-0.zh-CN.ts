@@ -23,7 +23,7 @@ export const webRich0ZhCN = {
   "web.rich.LinkRequestCard.part-part-part-part-part-create-a-link-on-part-settings-connections-create-link-then-paste-its-code-here-part":
     "<part0><value1/></part0><part2/><part3>在 <value4/> 上创建链接：设置 → 连接 → 创建链接，然后在此粘贴其代码。</part3>",
   "web.rich.LinkRequestCard.this-environment-is-already-linked-to-part-the-agent-can-use-that-link-as-it-is-change-its-access-in-settings-connections":
-    "此环境已关联到 <value0/>。代理可直接使用该链接；在 设置 → 连接 中更改其访问权限。",
+    "此环境已关联到 <value0/>。编程代理可直接使用该关联；在 设置 → 连接 中更改其访问权限。",
   "web.rich.McpAppFrame.the-part-app-was-closed": "<value0/> 应用已关闭",
   "web.rich.McpAppFrame.the-part-app-left-its-page-and-was-stopped":
     "<value0/> 应用离开了其页面并已停止",
@@ -37,7 +37,7 @@ export const webRich0ZhCN = {
   "web.rich.ThreadRelationshipsControl.part-show-part-more": "<part0/>再显示 <value1/> 个",
   "web.rich.ThreadRelationshipsControl.on-part-part": "于 <value0/> · <value1/>",
   "web.rich.ThreadServersPanel.open-in-the-browser-panel-part-for-your-browser":
-    "在浏览器面板中打开。<value0/> 用于你的浏览器。",
+    "在浏览器面板中打开。<value0/> 可在你的浏览器中打开。",
   "web.rich.TimelineOverlays.part-scroll-to-end-part": "<part0/>滚动到底部<value1/>",
   "web.rich.TimelineUserMessageRow.download-part": "下载 <value0/>",
   "web.rich.TimelineWorkGroupRows.compacting-for-part": "正在压缩 <part0/>",
@@ -48,7 +48,7 @@ export const webRich0ZhCN = {
   "web.rich.RelayClientInstallDialog.part-of-part": "<value1/> 中的第 <value0/> 个",
   "web.rich.RelayClientInstallDialog.t3-code-will-download-and-install-version-part-locally":
     "T3 Code 将在本地下载并安装版本 <value0/>。",
-  "web.rich.TunnelUsage.part-of-part-tunnels-in-use": "使用中的隧道：<value1/> 中的 <value0/>",
+  "web.rich.TunnelUsage.part-of-part-tunnels-in-use": "已使用 <value0/>/<value1/> 个隧道",
   "web.rich.SshPasswordPromptDialog.enter-the-password-or-verification-code-required-by-part-t3-code-passes-your-response-to-the-local-ssh-process-and-keeps-it-in-memory-to-reuse-for-this-host-t3-code-does-not-write-it-to-disk":
     "请输入 <part0/> 所需的密码或验证码。T3 Code 会将你的输入传给本地 SSH 进程，并保留在内存中以便复用给此主机。T3 Code 不会将其写入磁盘。",
   "web.rich.DevicePanel.device-discovery-warning-part": "设备发现警告 · <value0/>",
@@ -71,7 +71,7 @@ export const webRich0ZhCN = {
   "web.rich.OpenXmlOfficeViewer.part-save-it-or-open-it-in-another-app":
     "<value0/> 请保存它，或在其他应用中打开。",
   "web.rich.Presentation.slide-part-of-part": "第 <value0/> 张幻灯片，共 <value1/> 张",
-  "web.rich.PreviewMoreMenu.profile-part": "配置：<value0/>",
+  "web.rich.PreviewMoreMenu.profile-part": "配置文件：<value0/>",
   "web.rich.PreviewUnreachable.part-part-part-from-part-was-downloaded-instead":
     "改为下载了来自 <value2/> 的<part0><value1/></part0>。",
   "web.rich.projectScriptEditor.press-a-shortcut-use-part-to-clear-shortcuts-are-environment-wide-projects-using-the-same-action-share-its-shortcut":
@@ -88,11 +88,11 @@ export const webRich0ZhCN = {
   "web.rich.PullRequestCodeTab.line-part": "第 <value0/> 行",
   "web.rich.PullRequestDetailActions.check-out-this-part": "检出此 <value0/>",
   "web.rich.PullRequestDetailActions.part-the-host-will-merge-this-on-its-own-once-its-requirements-are-met":
-    "<value0/>：满足要求后，主机将自行合并此内容",
+    "<value0/>：满足要求后，托管平台将自行合并此内容",
   "web.rich.PullRequestDetailPanel.updated-part": "更新于 <part0/>",
   "web.rich.PullRequestDiffUnavailableState.part-open-on-part": "<part0/>在 <value1/> 上打开",
   "web.rich.PullRequestGhosts.updated-part": "更新于 <part0/>",
-  "web.rich.PullRequestLinkPreview.opened-part": "打开于 <part0/>",
+  "web.rich.PullRequestLinkPreview.opened-part": "创建于 <part0/>",
   "web.rich.PullRequestListFilters.part-merges-loaded": "已加载 <value0/> 个合并",
   "web.rich.PullRequestMarkdown.open-attachment-on-part": "在 <value0/> 上打开附件",
   "web.rich.PullRequestStackHeader.stack-part": "堆叠 #<value0/>",
@@ -145,7 +145,7 @@ export const webRich0ZhCN = {
   "web.rich.CaptureShortcutConfig.part-change-the-keys-if-needed":
     "<value0/> 如有需要，请更换按键。",
   "web.rich.CaptureShortcutConfig.turn-capture-off-in-t3-code-to-stop-it-remove-the-shortcut-from-part-to-free-up-the-keys":
-    "在 T3 Code 中关闭捕获即可停止。从 <value0/> 中移除该快捷键以释放按键。",
+    "在 T3 Code 中关闭截取即可停止。从 <value0/> 中移除该快捷键以释放按键。",
   "web.rich.ChatGptWelcomeCoordinator.part-on-part": "<value0/> 于 <value1/>",
   "web.rich.ConnectionDiagnosisDetails.attempt-part": "第 <value0/> 次尝试",
   "web.rich.CustomModelEditor.option-part": "选项 <value0/>",

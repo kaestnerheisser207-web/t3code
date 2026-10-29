@@ -2,14 +2,14 @@ import type { settingsGroup1En } from "./settings-group-1.en.ts";
 
 export const settingsGroup1ZhCN = {
   "settings.pages.CodexSetupSection.signed-in-as": "登录身份：",
-  "settings.pages.CodexSetupSection.toggle-account-email-visibility": "切换账号邮箱可见性",
+  "settings.pages.CodexSetupSection.toggle-account-email-visibility": "切换账户邮箱可见性",
   "settings.pages.CodexSetupSection.ready": "已就绪",
   "settings.pages.CodexSetupSection.checking": "检查中…",
   "settings.pages.CodexSetupSection.continue-with-chatgpt": "使用 ChatGPT 继续",
   "settings.pages.CodexSetupSection.use-existing-cli": "使用现有 CLI",
   "settings.pages.CodexSetupSection.open-sign-in-page": "打开登录页面",
   "settings.pages.CodexSetupSection.cancel": "取消",
-  "settings.pages.CodexSetupSection.chatgpt-account": "ChatGPT 账号",
+  "settings.pages.CodexSetupSection.chatgpt-account": "ChatGPT 账户",
   "settings.pages.CodexSetupSection.preparing-sign-in": "正在准备登录。",
   "settings.pages.CodexSetupSection.if-sign-in-doesn-t-return-to-t3-code-paste-the-url-from-the-final-localhost-page":
     "如果登录后没有返回 T3 Code，请粘贴最后一个 localhost 页面的 URL。",
@@ -21,9 +21,9 @@ export const settingsGroup1ZhCN = {
   "settings.pages.CodexSetupSection.use-t3-desktop-for-automatic-return":
     "使用 T3 桌面版以自动返回",
   "settings.pages.CodexSetupSection.having-trouble-signing-in": "登录遇到问题？",
-  "settings.pages.CodexSetupSection.use-a-different-account": "使用其他账号",
+  "settings.pages.CodexSetupSection.use-a-different-account": "使用其他账户",
   "settings.pages.CodexSetupSection.codex-setup": "Codex 设置",
-  "settings.pages.CodexSetupSection.change-account": "更换账号",
+  "settings.pages.CodexSetupSection.change-account": "更换账户",
   "settings.pages.CodexSetupSection.disconnect": "断开连接",
   "settings.pages.CodexSetupSection.binary-path": "可执行文件路径",
   "settings.pages.CodexSetupSection.selected-by-t3-code": "由 T3 Code 选定。",
@@ -139,7 +139,7 @@ export const settingsGroup1ZhCN = {
   "settings.pages.DiagnosticsSettings.top-span-names": "高频跨度名称",
   "settings.pages.EasDeviceHostsSettings.eas-simulator": "EAS 模拟器",
   "settings.pages.EasDeviceHostsSettings.run-ios-simulators-in-expo-s-cloud-from-this-environment-sessions-bill-the-expo-account-until-they-stop-so-each-host-limits-how-many-run-and-for-how-long-editing-or-removing-a-host-stops-its-running-sessions":
-    "从此环境在 Expo 云中运行 iOS 模拟器。会话在停止前会持续计入 Expo 账号费用，因此每台主机都限制了同时运行的数量和时长。编辑或移除主机会停止其正在运行的会话。",
+    "从此环境在 Expo 云中运行 iOS 模拟器。会话在停止前会持续计入 Expo 账户费用，因此每台主机都限制了同时运行的数量和时长。编辑或移除主机会停止其正在运行的会话。",
   "settings.pages.EasDeviceHostsSettings.add-eas-host": "添加 EAS 主机",
   "settings.pages.EasDeviceHostsSettings.no-eas-hosts": "没有 EAS 主机。",
   "settings.pages.EasDeviceHostsSettings.edit": "编辑",
@@ -153,7 +153,7 @@ export const settingsGroup1ZhCN = {
   "settings.pages.EasDeviceHostsSettings.eas-project": "EAS 项目",
   "settings.pages.EasDeviceHostsSettings.from-the-thread-s-project": "来自会话所属项目",
   "settings.pages.EasDeviceHostsSettings.sessions-bill-the-project-s-expo-account-from-the-thread-s-project-reads-extra-eas-projectid-from-the-project-s-app-config":
-    "会话会计入项目所属的 Expo 账号。“来自会话所属项目”会从该项目的应用配置中读取 extra.eas.projectId。",
+    "会话会计入项目所属的 Expo 账户。“来自会话所属项目”会从该项目的应用配置中读取 extra.eas.projectId。",
   "settings.pages.EasDeviceHostsSettings.cancel": "取消",
   "settings.pages.EnvironmentIconPicker.icon": "图标",
   "settings.pages.EnvironmentRoutesList.add-route": "添加路由",

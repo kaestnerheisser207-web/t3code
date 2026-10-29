@@ -47,8 +47,8 @@ export const settingsStatusZhCN = {
   "settings.status.holdWebhooks": "离线期间暂存 Webhook",
   "settings.status.stopHoldingWebhooks": "不再暂存 Webhook",
   "settings.status.holdHint": "此环境离线期间，T3 Connect 会暂存 Webhook 请求，最长 24 小时。",
-  "settings.status.stopHoldingHint": "现在向离线环境发出的新请求会失败，但已缓存的请求仍会送达。",
-  "settings.writer.repositoryHint": "在每个项目中，匹配最近的更改描述和更改请求标题。",
-  "settings.writer.conventionalHint": "使用 Conventional Commit 前缀，并保持更改请求文本简洁。",
-  "settings.writer.customHint": "在每个项目中，按你的指令生成更改描述和更改请求。",
+  "settings.status.stopHoldingHint": "现在向离线环境发出的新请求会失败，但已暂存的请求仍会送达。",
+  "settings.writer.repositoryHint": "在每个项目中，匹配最近的变更描述和变更请求标题。",
+  "settings.writer.conventionalHint": "使用 Conventional Commit 前缀，并保持变更请求文本简洁。",
+  "settings.writer.customHint": "在每个项目中，按你的指令生成变更描述和变更请求。",
 } as const;

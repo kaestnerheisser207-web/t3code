@@ -10,7 +10,7 @@ export const webLateRich0ZhCN = {
   "web.rich.ThreadDetailsPrRow.merge-conflicts-with-part": "与 <value0/> 存在合并冲突",
   "web.rich.ThreadDetailsPrRow.merge-part": "合并 <value0/>？",
   "web.rich.ThreadDetailsPrRow.this-merges-part-using-part": "这将使用 <value1/> 合并 #<value0/>。",
-  "web.rich.TimelineWorkGroupRows.working-for-part": "已工作 <part0/>",
+  "web.rich.TimelineWorkGroupRows.working-for-part": "已运行 <part0/>",
   "web.rich.V2ItemInspector.couldn-t-load-output-part": "无法加载输出：<value0/>",
   "web.rich.V2ItemInspector.exit-part": "退出码 <value0/>",
   "web.rich.RemoveT3ConnectEnvironmentDialog.remove-part-from-this-device":

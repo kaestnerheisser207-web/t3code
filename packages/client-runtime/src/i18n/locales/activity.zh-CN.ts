@@ -25,6 +25,6 @@ export const activityZhCN = {
   "activity.threadCount_one": "{{count}} 个会话",
   "activity.threadCount_other": "{{count}} 个会话",
   "activity.connecting": "正在连接",
-  "activity.input": "待输入",
+  "activity.input": "待回应",
   "activity.approval": "待批准",
 } as const satisfies Record<keyof typeof activityEn, string>;

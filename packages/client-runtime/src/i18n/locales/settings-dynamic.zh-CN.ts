@@ -1,7 +1,7 @@
 import type { settingsDynamicEn } from "./settings-dynamic.en.ts";
 export const settingsDynamicZhCN = {
   "settings.dynamic.scopeSentence": "<project/> 的设置应用于 <environment/>",
-  "settings.dynamic.scopeSentenceAcross": "<project/> 的设置应用于 <environment/>",
+  "settings.dynamic.scopeSentenceAcross": "<project/> 的设置统一应用于 <environment/>",
   "settings.dynamic.unavailableEnvironment": "环境不可用",
   "settings.dynamic.noEnvironments": "无环境",
   "settings.dynamic.allEnvironments": "所有环境",

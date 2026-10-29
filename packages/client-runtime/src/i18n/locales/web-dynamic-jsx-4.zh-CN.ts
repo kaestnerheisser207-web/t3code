@@ -29,9 +29,9 @@ export const webDynamicJsx4ZhCN = {
   "web.dynamic.EasDeviceHostsSettings.edit-eas-host": "编辑 EAS 主机",
   "web.dynamic.EasDeviceHostsSettings.signed-in-as-param-with-param":
     "已登录为 {{signedInAs}}，使用 {{value}}。",
-  "web.dynamic.EasDeviceHostsSettings.checking-the-expo-account": "正在检查 Expo 账号…",
+  "web.dynamic.EasDeviceHostsSettings.checking-the-expo-account": "正在检查 Expo 账户…",
   "web.dynamic.EasDeviceHostsSettings.check-the-expo-account-before-choosing-a-project":
-    "请先检查 Expo 账号，再选择项目。",
+    "请先检查 Expo 账户，再选择项目。",
   "web.dynamic.EasDeviceHostsSettings.saving-restarts-this-host-which-stops-its-running-sessions":
     " 保存会重启此主机，从而停止其正在运行的会话。",
   "web.dynamic.EnvironmentIconPicker.detected": "已检测到",
@@ -78,8 +78,8 @@ export const webDynamicJsx4ZhCN = {
   "web.dynamic.KeybindingsSettings.this-connection-can-view-keybindings-but-cannot-change-them":
     "此连接可以查看快捷键，但无法更改它们。",
   "web.dynamic.LinkMachineSelect.not-connected": "未连接",
-  "web.dynamic.LinkedEnvironmentsSettings.forgetting": "正在遗忘…",
-  "web.dynamic.LinkedEnvironmentsSettings.forget": "遗忘",
+  "web.dynamic.LinkedEnvironmentsSettings.forgetting": "正在移除关联…",
+  "web.dynamic.LinkedEnvironmentsSettings.forget": "移除关联",
   "web.dynamic.LinkedEnvironmentsSettings.from-that-environment-s-connections-or-t3-pair-there":
     "在该环境的“连接”中，或在那里运行 t3 pair",
   "web.dynamic.LinkedEnvironmentsSettings.paste-the-code": "粘贴代码",
@@ -156,7 +156,7 @@ export const webDynamicJsx4ZhCN = {
   "web.dynamic.ProviderAccentColorPicker.param-accent-color-for-param":
     "{{displayName}} 的 {{value}} 强调色",
   "web.dynamic.ProviderAuthenticationSection.provider-default": "提供方默认",
-  "web.dynamic.ProviderAuthenticationSection.change-account": "切换账号",
+  "web.dynamic.ProviderAuthenticationSection.change-account": "切换账户",
   "web.dynamic.ProviderAuthenticationSection.retry-sign-in": "重试登录",
   "web.dynamic.ProviderAuthenticationSection.sign-in": "登录",
   "web.dynamic.ProviderInstanceCard.clear-param": "清除 {{label}}",

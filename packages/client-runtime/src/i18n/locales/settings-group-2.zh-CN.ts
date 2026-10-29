@@ -4,7 +4,7 @@ export const settingsGroup2ZhCN = {
   "settings.pages.LabsSettingsPanel.beta": "Beta",
   "settings.pages.LabsSettingsPanel.group-sidebar-threads-into-project-folders-pinned-threads-stay-on-top-and-snoozed-and-settled-stay-below-the-folders":
     "将侧栏会话归入项目文件夹。置顶的会话留在顶部，稍后处理和已收起的会话排在文件夹下方。",
-  "settings.pages.LabsSettingsPanel.boring-sidebar-group-by-project": "简洁侧栏（按项目分组）",
+  "settings.pages.LabsSettingsPanel.boring-sidebar-group-by-project": "朴素侧栏（按项目分组）",
   "settings.pages.LabsSettingsPanel.share-a-thread-with-a-guest-who-watches-it-live-in-their-browser-and-sends-messages-you-approve-sign-in-to-t3-connect-to-use-guest-links":
     "与访客分享会话，访客可在自己的浏览器中实时查看，并发送经你批准的消息。登录 T3 Connect 即可使用访客链接。",
   "settings.pages.LabsSettingsPanel.sign-in": "登录",

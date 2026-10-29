@@ -51,8 +51,8 @@ export const webComponents2ZhCN = {
   "web.ui.AttachmentFilePreview.close": "关闭",
   "web.ui.BinaryViewer.preview-limited-to-the-first-1-mb": "预览仅限前 1 MB。",
   "web.ui.BinaryViewer.table": "表",
-  "web.ui.BinaryViewer.previous-rows": "上一页行",
-  "web.ui.BinaryViewer.next-rows": "下一页行",
+  "web.ui.BinaryViewer.previous-rows": "上一页",
+  "web.ui.BinaryViewer.next-rows": "下一页",
   "web.ui.BinaryViewer.read-only-up-to-50-columns-and-1-024-characters-per-cell-blob-contents-are-omitted":
     "只读。最多 50 列，每格最多 1,024 个字符。Blob 内容已省略。",
   "web.ui.BinaryViewer.archive-entries": "压缩包条目",

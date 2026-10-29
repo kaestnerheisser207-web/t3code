@@ -55,13 +55,13 @@ export const mobileSurfaces0ZhCN = {
   "mobile.surfaces.GlobalVoiceInputControl.finish-dictation": "完成语音输入",
   "mobile.surfaces.WorkspaceDock.new-chat": "新建会话",
   "mobile.surfaces.WorkspaceListToolbarRow.close-search": "关闭搜索",
-  "mobile.surfaces.WorkspaceNoTabs.all-sections-are-hidden": "所有版块均已隐藏",
+  "mobile.surfaces.WorkspaceNoTabs.all-sections-are-hidden": "所有分区均已隐藏",
   "mobile.surfaces.WorkspaceNoTabs.show-a-section-to-add-it-back-to-navigation":
-    "显示某个版块即可将其重新加入导航。",
+    "显示某个分区即可将其重新加入导航。",
   "mobile.surfaces.WorkspaceRootScreen.android.pull-requests": "拉取请求",
   "mobile.surfaces.WorkspaceRootScreen.android.select-a-pull-request": "选择拉取请求",
   "mobile.surfaces.WorkspaceRootScreen.android.choose-a-pull-request-from-the-sidebar-to-review-it":
-    "从侧栏中选择一个拉取请求进行审阅。",
+    "从侧栏中选择一个拉取请求进行审查。",
   "mobile.surfaces.WorkspaceSearchField.clear-search": "清除搜索",
   "mobile.surfaces.WorkspaceSectionToolbar.settings": "设置",
   "mobile.surfaces.WorkspaceSectionToolbar.new-chat": "新建会话",

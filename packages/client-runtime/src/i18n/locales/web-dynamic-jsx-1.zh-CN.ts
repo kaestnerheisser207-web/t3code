@@ -10,7 +10,7 @@ export const webDynamicJsx1ZhCN = {
   "web.dynamic.ThreadAutomationsPanel.resume-param": "恢复{{title}}",
   "web.dynamic.ThreadDetailsPrRow.file": "文件",
   "web.dynamic.ThreadDetailsPrRow.files": "文件",
-  "web.dynamic.ThreadDetailsPrRow.stop-watching-param": "停止关注 #{{number}}",
+  "web.dynamic.ThreadDetailsPrRow.stop-watching-param": "停止监视 #{{number}}",
   "web.dynamic.ThreadDetailsPrRows.show-less": "收起",
   "web.dynamic.ThreadDetailsPrRows.show-param-more": "再显示 {{length}} 个",
   "web.dynamic.ThreadErrorBanner.you-ve-reached-your-workspace-s-limit-for-using-your-chatgpt-plan-in-other-apps-copy-a-request-to-ask-your-workspace-admin-for-increased-usage-limits":
@@ -92,7 +92,7 @@ export const webDynamicJsx1ZhCN = {
   "web.dynamic.MobileClientsUserProfilePage.off": "关",
   "web.dynamic.RemoveT3ConnectEnvironmentDialog.t3-connect-settings": "T3 Connect 设置",
   "web.dynamic.T3ChatUserProfilePage.link-a-paid-t3-chat-account-for-more-t3-connect-tunnels-up-to-param-with-pro-param-with-premier":
-    "关联付费 T3 Chat 账号可获得更多 T3 Connect 隧道：Pro 最多 {{pro}} 条，Premier 最多 {{premier}} 条。",
+    "关联付费 T3 Chat 账户可获得更多 T3 Connect 隧道：Pro 最多 {{pro}} 条，Premier 最多 {{premier}} 条。",
   "web.dynamic.T3ChatUserProfilePage.not-linked": "未关联",
   "web.dynamic.T3ChatUserProfilePage.you-confirm-the-link-on-t3-chat":
     "你需要在 t3.chat 上确认关联。",

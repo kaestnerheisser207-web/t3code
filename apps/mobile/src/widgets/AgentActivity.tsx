@@ -63,7 +63,7 @@ function AgentActivity(
     Connecting: "正在连接",
     Working: "处理中",
     Approval: "待批准",
-    Input: "待输入",
+    Input: "待回应",
     Waiting: "等待中",
     Done: "完成",
     Failed: "失败",

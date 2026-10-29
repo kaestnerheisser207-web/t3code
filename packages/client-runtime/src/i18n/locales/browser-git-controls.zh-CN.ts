@@ -25,7 +25,7 @@ export const browserGitControlsZhCN = {
   "browser.extra.screenshotSaved": "截图已保存",
   "browser.extra.screenshotPathFailed": "无法复制截图路径",
   "browser.extra.screenshotCopyFailed": "无法复制截图",
-  "browser.extra.screenshotFailed": "无法捕获截图",
+  "browser.extra.screenshotFailed": "截图失败",
   "browser.extra.elementCaptureFailed": "无法捕获所选元素",
   "browser.extra.annotationKept": "已保留标注，但未附加截图。",
   "browser.extra.phone": "手机",

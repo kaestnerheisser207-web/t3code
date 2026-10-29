@@ -8,7 +8,7 @@ export const chatDynamicZhCN = {
   "chat.dynamic.submit-answers": "提交答案",
   "chat.dynamic.submit-answer": "提交答案",
   "chat.dynamic.sending": "正在发送…",
-  "chat.dynamic.refine": "润色需求",
+  "chat.dynamic.refine": "完善计划",
   "chat.dynamic.implement": "开始实现",
   "chat.dynamic.resume-thread": "继续会话",
   "chat.dynamic.update-queued-message": "更新排队消息",

@@ -90,7 +90,7 @@ export const webDynamicJsx3ZhCN = {
   "web.dynamic.AuthorizedClientsSettings.creating": "正在创建…",
   "web.dynamic.AuthorizedClientsSettings.create-link": "创建链接",
   "web.dynamic.AuthorizedClientsSettings.restarting": "正在重启…",
-  "web.dynamic.AuthorizedClientsSettings.setup": "设置",
+  "web.dynamic.AuthorizedClientsSettings.setup": "配置",
   "web.dynamic.AuthorizedClientsSettings.disable": "禁用",
   "web.dynamic.AuthorizedClientsSettings.hide": "隐藏",
   "web.dynamic.BackgroundActivitySettings.param-one-environment": "{{advanced}}（一个环境）",
@@ -122,13 +122,13 @@ export const webDynamicJsx3ZhCN = {
     "已保存，但该快捷键需要处理。请查看“高级”获取帮助。",
   "web.dynamic.CaptureShortcutConfig.shortcut-removed": "快捷键已移除。",
   "web.dynamic.CaptureShortcutConfig.use-param-from-another-app-to-capture-a-window":
-    "使用其他应用中的 {{value}} 来捕获窗口。",
+    "使用其他应用中的 {{value}} 来截取窗口。",
   "web.dynamic.CaptureShortcutConfig.review-the-change-below-to-remove-your-shortcut":
     "请查看下方的更改以移除你的快捷键。",
   "web.dynamic.CaptureShortcutConfig.review-the-change-below-then-save-your-shortcut":
     "请查看下方的更改，然后保存你的快捷键。",
   "web.dynamic.CaptureShortcutConfig.there-s-no-capture-shortcut-to-remove":
-    "没有可移除的捕获快捷键。",
+    "没有可移除的截取快捷键。",
   "web.dynamic.CaptureShortcutConfig.this-shortcut-is-already-set-up": "此快捷键已设置。",
   "web.dynamic.CaptureShortcutConfig.saving": "正在保存…",
   "web.dynamic.CaptureShortcutConfig.save-shortcut": "保存快捷键",
@@ -229,7 +229,7 @@ export const webDynamicJsx3ZhCN = {
   "web.dynamic.ConnectionsSettings.switch-to-windows": "切换到 Windows",
   "web.dynamic.ConnectionsSettings.disable-wsl": "禁用 WSL",
   "web.dynamic.ConnectionsSettings.switch-distro": "切换发行版",
-  "web.dynamic.ConnectionsSettings.pending-magicdns-endpoint": "待处理的 MagicDNS 端点",
+  "web.dynamic.ConnectionsSettings.pending-magicdns-endpoint": "等待 MagicDNS 端点",
   "web.dynamic.ConnectionsSettings.enable": "启用",
   "web.dynamic.CustomModelEditor.custom": "自定义…",
   "web.dynamic.CustomModelEditor.toggle": "切换",

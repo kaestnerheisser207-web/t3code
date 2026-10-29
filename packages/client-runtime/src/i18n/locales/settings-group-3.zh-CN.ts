@@ -19,7 +19,7 @@ export const settingsGroup3ZhCN = {
   "settings.pages.ResourceTelemetryDiagnostics.read-total": "读取总量",
   "settings.pages.ResourceTelemetryDiagnostics.write-total": "写入总量",
   "settings.pages.ResourceTelemetryDiagnostics.pid": "PID",
-  "settings.pages.ResourceTelemetryDiagnostics.kill": "结束进程",
+  "settings.pages.ResourceTelemetryDiagnostics.kill": "终止",
   "settings.pages.ResourceTelemetryDiagnostics.waiting-for-the-native-process-monitor":
     "正在等待原生进程监视器。",
   "settings.pages.ResourceTelemetryDiagnostics.peak-cpu": "CPU 峰值",
@@ -91,7 +91,7 @@ export const settingsGroup3ZhCN = {
   "settings.pages.SavedEnvironmentRows.sign-in": "登录",
   "settings.pages.SavedEnvironmentRows.more-info": "更多信息",
   "settings.pages.SavedEnvironmentRows.this-environment-was-removed-from-t3-connect-run-t3-connect-link-on-the-host-to-link-it-again":
-    "此环境已从 T3 Connect 中移除。请在主机上运行 `t3 connect link` 以重新链接。",
+    "此环境已从 T3 Connect 中移除。请在主机上运行 `t3 connect link` 以重新关联。",
   "settings.pages.SavedEnvironmentRows.publish-agent-activity-to-mobile-clients":
     "将编程代理活动发布到移动客户端",
   "settings.pages.SavedEnvironmentRows.keep-webhook-requests-for-up-to-24-hours-while-this-environment-is-offline-then-deliver-them-off-t3-connect-only-forwards-requests-and-stores-nothing":
@@ -138,7 +138,7 @@ export const settingsGroup3ZhCN = {
   "settings.pages.ScheduledTasksSettings.done": "完成",
   "settings.pages.ScheduledTasksSettings.the-url-appears-after-you-save": "保存后即会显示 URL。",
   "settings.pages.ScheduledTasksSettings.webhook-url": "Webhook URL",
-  "settings.pages.ScheduledTasksSettings.rotate": "轮换",
+  "settings.pages.ScheduledTasksSettings.rotate": "重新生成",
   "settings.pages.ScheduledTasksSettings.change-in-sharing-access": "在“共享与访问”中更改",
   "settings.pages.ScheduledTasksSettings.run-a-prompt-automatically-on-an-interval-at-a-fixed-time-or-when-a-webhook-is-called":
     "按间隔、在固定时间或调用 Webhook 时自动运行提示词。",
@@ -163,8 +163,8 @@ export const settingsGroup3ZhCN = {
   "settings.pages.ScheduledTasksSettings.model": "模型",
   "settings.pages.ScheduledTasksSettings.this-task-uses-a-legacy-interval-below-one-minute-saving-updates-it-to-at-least-one-minute":
     "此任务使用了低于一分钟的旧版间隔。保存后会将其更新为至少一分钟。",
-  "settings.pages.ScheduledTasksSettings.schedule": "日程",
-  "settings.pages.ScheduledTasksSettings.schedule-type": "日程类型",
+  "settings.pages.ScheduledTasksSettings.schedule": "计划",
+  "settings.pages.ScheduledTasksSettings.schedule-type": "计划类型",
   "settings.pages.ScheduledTasksSettings.at-a-time": "在指定时间",
   "settings.pages.ScheduledTasksSettings.every-interval": "每隔一段时间",
   "settings.pages.ScheduledTasksSettings.on-webhook": "收到 Webhook 时",
@@ -193,8 +193,8 @@ export const settingsGroup3ZhCN = {
   "settings.pages.SessionPermissions.permissions-not-checked-connect-to-this-environment-to-view-this-session-s-permissions":
     "未检查权限。请连接到此环境以查看此会话的权限。",
   "settings.pages.SettingInheritance.same-on-all-machines": "在所有机器上相同",
-  "settings.pages.SettingInheritance.overridden-by": "覆盖来源",
-  "settings.pages.SettingsFontPreviews.prompt-font-preview": "提示词字体预览",
+  "settings.pages.SettingInheritance.overridden-by": "被以下设置覆盖",
+  "settings.pages.SettingsFontPreviews.prompt-font-preview": "输入框字体预览",
   "settings.pages.SettingsFontPreviews.terminal-font-preview": "终端字体预览",
   "settings.pages.SettingsScopeSentence.applying-settings-for": "正在应用设置：",
   "settings.pages.SettingsScopeSentence.offline": "离线",
@@ -211,7 +211,7 @@ export const settingsGroup3ZhCN = {
   "settings.pages.SnapShotSettings.cancel": "取消",
   "settings.pages.SnapShotSettings.shortcut-permissions": "快捷键权限",
   "settings.pages.SnapShotSettings.choose-the-sound-played-when-capture-starts":
-    "选择开始捕获时播放的声音。",
+    "选择开始截取时播放的声音。",
   "settings.pages.SnapShotSettings.whoosh": "嗖声",
   "settings.pages.SnapShotSettings.default": "（默认）",
   "settings.pages.SnapShotSettings.off": "关闭",
@@ -219,9 +219,9 @@ export const settingsGroup3ZhCN = {
   "settings.pages.SnapShotSettings.click": "咔哒声",
   "settings.pages.SnapShotSettings.play-click": "播放咔哒声",
   "settings.pages.SnapShotSettings.show-a-gentle-cue-on-the-captured-window":
-    "在捕获的窗口上显示柔和的提示。",
-  "settings.pages.SnapShotSettings.flash-captured-window": "闪烁捕获的窗口",
+    "在截取的窗口上显示柔和的提示。",
+  "settings.pages.SnapShotSettings.flash-captured-window": "闪烁截取的窗口",
   "settings.pages.SnapShotSettings.animate-captured-windows-into-your-draft":
-    "将捕获的窗口以动画形式加入你的草稿。",
+    "将截取的窗口以动画形式加入你的草稿。",
   "settings.pages.SnapShotSettings.animate-snapshots": "为 SnapShots 添加动画",
 } as const satisfies Record<keyof typeof settingsGroup3En, string>;

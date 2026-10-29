@@ -116,7 +116,7 @@ export const settingsPagesZhCN = {
     "增大提供方健康检查间隔",
   "settings.pages.ProviderSettingsPanel.cursor-account": "Cursor 账户",
   "settings.pages.ProviderSettingsPanel.using-cursor-api-key-remove-it-from-this-provider-s-environment-to-use-browser-sign-in":
-    "正在使用 CURSOR_API_KEY。从此提供方的环境中移除它，即可使用浏览器登录。",
+    "正在使用 CURSOR_API_KEY。从此提供方的环境变量中移除它，即可使用浏览器登录。",
   "settings.pages.KeybindingsSettings.search-keybindings": "搜索快捷键",
   "settings.pages.KeybindingsSettings.t3-code-does-not-recognize-this-condition-yet-it-can-still-be-saved-but-it-may-not-match-unless-the-runtime-provides-it":
     "T3 Code 尚无法识别此条件。它仍可被保存，但除非运行时提供该条件，否则可能不会匹配。",

@@ -41,7 +41,7 @@ export const mobileThreads0ZhCN = {
   "mobile.threads.LinkRequestCard.machine": "机器",
   "mobile.threads.LinkRequestCard.another-address": "其他地址…",
   "mobile.threads.LinkRequestCard.link-a-machine-this-app-does-not-know-by-its-https-or-tailscale-address":
-    "通过 https 或 Tailscale 地址连接一台此应用尚不认识的机器。",
+    "通过 https 或 Tailscale 地址关联一台此应用尚不认识的机器。",
   "mobile.threads.LinkRequestCard.address": "地址",
   "mobile.threads.LinkRequestCard.pairing-code": "配对码",
   "mobile.threads.LinkRequestCard.paste-the-code": "粘贴配对码",

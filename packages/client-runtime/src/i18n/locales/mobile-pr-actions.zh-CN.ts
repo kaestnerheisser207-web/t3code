@@ -13,7 +13,7 @@ export const mobilePrActionsZhCN = {
   "pr.actions.readOnly": "此设备无权更改此环境上的源代码管理。",
   "pr.actions.labelsUnsupported": "此提供方不支持更改标签。",
   "pr.actions.triageRequired": "更改标签需要此仓库的 triage（分类管理）权限。",
-  "pr.actions.closeLabels": "关闭标签",
+  "pr.actions.closeLabels": "关闭标签选择",
   "pr.actions.clearLabelSearch": "清除标签搜索",
   "pr.actions.requestReviewer": "请求 {{login}} 审查",
   "pr.actions.removeReviewer": "移除对 {{login}} 的审查请求",

@@ -13,7 +13,7 @@ export const mobileSettingsConfirmZhCN = {
     "在 {{environment}} 上共享此登录状态的运行中会话将停止。会话历史会保留。",
   "settings.extra.cancel": "取消",
   "settings.extra.signOut": "退出登录",
-  "settings.extra.changeAccount": "切换账号",
+  "settings.extra.changeAccount": "切换账户",
   "settings.extra.docsFailed": "无法打开提供方文档。",
   "settings.extra.terminalResponse": "终端响应",
   "settings.extra.callbackUrl": "最终 localhost URL",
@@ -30,6 +30,6 @@ export const mobileSettingsConfirmZhCN = {
   "settings.extra.clearCache": "清除缓存",
   "settings.extra.clearAllTitle": "清除所有客户端缓存？",
   "settings.extra.clearAllDetail":
-    "这会删除所有环境的离线数据。连接、凭据、账号数据和应用偏好不受影响。",
+    "这会删除所有环境的离线数据。连接、凭据、账户数据和应用偏好不受影响。",
   "settings.extra.clearAll": "清除所有缓存",
 } as const;

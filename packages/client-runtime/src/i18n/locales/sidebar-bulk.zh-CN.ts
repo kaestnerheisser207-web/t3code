@@ -4,7 +4,7 @@ export const sidebarBulkZhCN = {
   "sidebar.extra.newThread": "新建会话",
   "sidebar.extra.copyPath": "复制路径",
   "sidebar.extra.renameFailed": "无法重命名会话",
-  "sidebar.extra.unsettleFailed": "无法将会话恢复到收件箱",
+  "sidebar.extra.unsettleFailed": "无法取消收起会话",
   "sidebar.extra.reorderActiveFailed": "无法重新排序活跃会话",
   "sidebar.extra.reorderPinnedFailed": "无法重新排序置顶会话",
   "sidebar.extra.settleCount": "收起（{{count}}）",

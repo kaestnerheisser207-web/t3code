@@ -4,7 +4,7 @@ export const webComponents3ZhCN = {
   "web.ui.PullRequestCodeTab.changed": "已更改",
   "web.ui.PullRequestCodeTab.this-file-has-been-pushed-to-since-you-marked-it-viewed":
     "自你将其标记为已读以来，此文件已有新的推送。",
-  "web.ui.PullRequestCodeTab.viewed": "已读",
+  "web.ui.PullRequestCodeTab.viewed": "已查看",
   "web.ui.PullRequestCodeTab.the-rest-of-this-diff-could-not-be-loaded":
     "此差异的其余部分无法加载。",
   "web.ui.PullRequestCodeTab.retry": "重试",
@@ -45,7 +45,7 @@ export const webComponents3ZhCN = {
   "web.ui.PullRequestDetailActions.in-this-repository": "在此仓库中",
   "web.ui.PullRequestDetailActions.switches-the-branch-you-are-working-in":
     "切换你当前工作的分支。",
-  "web.ui.PullRequestDetailActions.ready-for-review": "已准备好接受审查",
+  "web.ui.PullRequestDetailActions.ready-for-review": "标记为可审查",
   "web.ui.PullRequestDetailActions.approve-workflows-to-run": "批准工作流运行",
   "web.ui.PullRequestDetailActions.confirm-approve": "确认批准？",
   "web.ui.PullRequestDetailCrumbs.back-to-this-thread-s-pull-requests": "返回此会话的拉取请求",
@@ -216,7 +216,7 @@ export const webComponents3ZhCN = {
   "web.ui.UpdateEverythingDialog.cancel": "取消",
   "web.ui.UpdateEverythingDialog.update": "更新",
   "web.ui.UsageLimits.the-line-is-where-even-spending-would-be":
-    "这条线表示即便花钱也会到达的上限。",
+    "这条线表示按匀速消耗此时应到达的位置。",
   "web.ui.UsageLimits.use-a-reset-credit": "使用重置额度？",
   "web.ui.UsageLimits.this-redeems-one-credit-on-your-account-and-clears-the-current-rate-limit-windows-it-cannot-be-undone":
     "这将在你的账户上扣除一次重置额度，并清除当前的速率限制窗口。此操作不可撤销。",

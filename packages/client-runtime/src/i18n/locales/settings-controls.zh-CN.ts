@@ -6,7 +6,7 @@ export const settingsControlsZhCN = {
   "settings.controls.loadSummary": "{{environment}} {{preference}}",
   "settings.controls.shortcutSaved": "快捷键已保存",
   "settings.controls.shortcutHint": "在其他应用里使用 {{shortcut}}。",
-  "settings.controls.traces": "链路追踪",
+  "settings.controls.traces": "跟踪",
   "settings.controls.metrics": "指标",
   "settings.controls.logs": "日志",
   "settings.controls.byEnvironment": "由环境设定",

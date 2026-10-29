@@ -10,7 +10,7 @@ export const settingsGroup4ZhCN = {
   "settings.pages.SnapShotSetupDialog.included-with-t3-code-no-download-needed":
     "随 T3 Code 附带，无需下载。",
   "settings.pages.SnapShotSetupDialog.disable-extension": "禁用扩展",
-  "settings.pages.SnapShotSetupDialog.remove-capture-helper": "移除截取辅助程序",
+  "settings.pages.SnapShotSetupDialog.remove-capture-helper": "移除截取助手",
   "settings.pages.SnapShotSetupDialog.back": "返回",
   "settings.pages.SnoozePresetsSettings.choices-in-every-snooze-menu-listed-soonest-first-weekdays-mean-the-next-one-after-today":
     "各“稍后处理”菜单中的选项按时间由近到远排列。星期选项指今天之后的下一个对应星期几。",
@@ -125,7 +125,7 @@ export const settingsGroup4ZhCN = {
   "settings.pages.TelemetryExportSettings.choose-one-environment-to-configure-its-telemetry-exports":
     "选择一个环境以配置其遥测导出。",
   "settings.pages.TelemetryExportSettings.send-traces-metrics-and-logs-to-an-otlp-http-receiver-restart-the-server-to-apply-environment-variables-override-these-settings":
-    "将追踪、指标和日志发送到 OTLP HTTP 接收端。重启服务器以生效。环境变量会覆盖这些设置。",
+    "将跟踪、指标和日志发送到 OTLP HTTP 接收端。重启服务器以生效。环境变量会覆盖这些设置。",
   "settings.pages.TelemetryExportSettings.enter-an-http-or-https-endpoint-or-leave-empty-to-disable-export":
     "输入 HTTP 或 HTTPS 端点，留空则禁用导出。",
   "settings.pages.TelemetryExportSettings.test": "测试",

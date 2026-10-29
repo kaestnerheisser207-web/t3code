@@ -21,7 +21,7 @@ export const mobileRich0ZhCN = {
   "mobile.rich.LinkRequestCard.this-app-has-no-address-for-part-that-another-machine-can-reach-enter-its-https-or-tailscale-address":
     "此应用没有可供其他机器访问的 <value0/> 地址。请输入其 https 或 Tailscale 地址。",
   "mobile.rich.LinkRequestCard.this-environment-is-already-linked-to-part-the-agent-can-use-that-link-as-it-is-change-its-access-in-settings-connections":
-    "此环境已链接到 <value0/>。代理可以直接使用该链接；可在“设置 → 连接”中更改其访问权限。",
+    "此环境已关联到 <value0/>。编程代理可以直接使用该关联；可在“设置 → 连接”中更改其访问权限。",
   "mobile.rich.LinkRequestCard.create-a-link-on-part-settings-connections-create-link-then-paste-its-code-here":
     "在 <value0/> 上创建链接：设置 → 连接 → 创建链接，然后在此处粘贴配对码。",
   "mobile.rich.McpAppWebView.the-part-app-is-open-full-screen": "<value0/> 应用已全屏打开",
@@ -41,7 +41,7 @@ export const mobileRich0ZhCN = {
     "已选 <value0/> / <value1/> · +<value2/> −<value3/>",
   "mobile.rich.thread-work-log.exit-part": "退出码 <value0/>",
   "mobile.rich.ChatGptUsageSummary.part-open-chatgpt-with-the-account-you-connected":
-    "<value0/>。请用你已连接的账号打开 ChatGPT。",
+    "<value0/>。请用你已连接的账户打开 ChatGPT。",
   "mobile.rich.UsageLimitsPooled.part-could-not-refresh-limits-showing-the-last-known-values":
     "<value0/> 无法刷新限额。正在显示上次已知的值。",
   "mobile.rich.UsageLimitsPooled.part-left": "剩余 <value0/>%",

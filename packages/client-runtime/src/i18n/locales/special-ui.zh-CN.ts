@@ -16,7 +16,7 @@ export const specialUiZhCN = {
   "goal.clear": "清除",
   "goal.resumeFailed": "恢复目标失败。",
   "goal.clearFailed": "清除目标失败。",
-  "branch.changedFrom": "分支已从以下分支切换",
+  "branch.changedFrom": "分支已变更，原分支：",
   "branch.mismatch": "此会话上次运行于 {{previous}}。发送后将在 {{current}} 上继续。",
   "branch.restoring": "正在恢复...",
   "branch.restore": "恢复分支",
