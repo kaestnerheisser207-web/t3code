@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   NavigationContext,
   NavigationRouteContext,
@@ -188,6 +189,8 @@ export function NativeStackScreenOptions(props: {
   readonly listeners?: Record<string, (event: never) => void>;
   readonly name?: string;
 }) {
+  const { i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? "en";
   const navigation = useNativeStackNavigation();
   const setOptions = useScreenOptionsWriter();
   const tabActive = use(NativeWorkspaceTabActivityContext)?.active ?? true;
@@ -217,7 +220,7 @@ export function NativeStackScreenOptions(props: {
     if (!setOptions || !normalizedOptions) {
       return;
     }
-    const signature = optionsSignature([stableOptions, props.optionsVersion]);
+    const signature = optionsSignature([stableOptions, props.optionsVersion, language]);
     if (lastAppliedOptionsSignatureRef.current === signature) {
       return;
     }
@@ -234,7 +237,7 @@ export function NativeStackScreenOptions(props: {
         optionFunctionWrappersRef.current,
       ) as NativeStackNavigationOptions,
     );
-  }, [setOptions, props.options, props.optionsVersion, tabActive]);
+  }, [setOptions, props.options, props.optionsVersion, tabActive, language]);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- subscribes the given listeners to navigator events for the screen's lifetime
   useEffect(() => {

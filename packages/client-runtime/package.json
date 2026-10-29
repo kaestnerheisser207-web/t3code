@@ -502,6 +502,10 @@
     "./provider-clients": {
       "types": "./src/providerClients.ts",
       "default": "./src/providerClients.ts"
+    },
+    "./i18n": {
+      "types": "./src/i18n/index.ts",
+      "default": "./src/i18n/index.ts"
     }
   },
   "scripts": {
@@ -523,12 +527,14 @@
     "@t3tools/source-control-core": "workspace:*",
     "@t3tools/source-control-definitions": "workspace:*",
     "effect": "catalog:",
+    "i18next": "catalog:",
     "jszip": "3.10.1",
     "three": "0.180.0"
   },
   "devDependencies": {
     "@effect/vitest": "catalog:",
     "@types/three": "0.180.0",
+    "typescript": "catalog:",
     "vite-plus": "catalog:"
   }
 }

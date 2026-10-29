@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import type { StaticScreenProps } from "@react-navigation/native";
 import { squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
@@ -20,6 +21,7 @@ import { usePullRequestConnected } from "./usePullRequestConnected";
 import { pullRequestTarget, type PullRequestParams } from "./usePullRequestDiff";
 
 export function PullRequestLabelsScreen({ route }: StaticScreenProps<PullRequestParams>) {
+  const t = useTranslate();
   const target = pullRequestTarget(route.params);
   const pr = useEnvironmentQuery(composerPullRequests.detail(target)).data;
   const canWrite = useAtomValue(
@@ -36,12 +38,12 @@ export function PullRequestLabelsScreen({ route }: StaticScreenProps<PullRequest
     !pr || allowed
       ? null
       : !connected
-        ? "Reconnect to change labels."
+        ? t("pr.actions.reconnectLabels")
         : !canWrite
-          ? "This device isn't allowed to change source control on this environment."
+          ? t("pr.actions.readOnly")
           : pr.capabilities.labels !== true
-            ? "This provider doesn't support changing labels."
-            : "Changing labels needs triage access on this repository.";
+            ? t("pr.actions.labelsUnsupported")
+            : t("pr.actions.triageRequired");
   const result = useEnvironmentQuery(composerPullRequests.labelCandidates(target));
   const setLabels = useAtomCommand(composerPullRequests.setLabels, { reportFailure: false });
   const [query, setQuery] = useState("");
@@ -71,10 +73,10 @@ export function PullRequestLabelsScreen({ route }: StaticScreenProps<PullRequest
   };
   return (
     <PullRequestSearchSheet
-      title="Labels"
-      placeholder="Search labels"
-      closeAccessibilityLabel="Close labels"
-      clearAccessibilityLabel="Clear label search"
+      title={t("mobile.review.PullRequestLabelsScreen.labels")}
+      placeholder={t("mobile.review.PullRequestLabelsScreen.search-labels")}
+      closeAccessibilityLabel={t("pr.actions.closeLabels")}
+      clearAccessibilityLabel={t("pr.actions.clearLabelSearch")}
       searchTextChangeId="pr-label-search"
       query={query}
       onQueryChange={setQuery}
@@ -126,28 +128,36 @@ export function PullRequestLabelsScreen({ route }: StaticScreenProps<PullRequest
                 <EmptyState
                   title={
                     result.error
-                      ? "Couldn't load labels"
+                      ? t("mobile.dynamic.PullRequestLabelsScreen.couldn-t-load-labels")
                       : needle
-                        ? "No matching labels"
-                        : "This repository has no labels"
+                        ? t("mobile.dynamic.PullRequestLabelsScreen.no-matching-labels")
+                        : t("mobile.dynamic.PullRequestLabelsScreen.this-repository-has-no-labels")
                   }
                   detail={
                     result.error ??
                     (needle
-                      ? "Try another name."
-                      : "Create labels on the provider to use them here.")
+                      ? t("mobile.dynamic.PullRequestLabelsScreen.try-another-name")
+                      : t(
+                          "mobile.dynamic.PullRequestLabelsScreen.create-labels-on-the-provider-to-use-them-here",
+                        ))
                   }
                   variant="plain"
                 />
-                {result.error ? <Button label="Retry" onPress={result.refresh} /> : null}
+                {result.error ? (
+                  <Button
+                    label={t("mobile.review.PullRequestLabelsScreen.retry")}
+                    onPress={result.refresh}
+                  />
+                ) : null}
               </View>
             )
           }
           ListFooterComponent={
             result.data?.truncated ? (
               <Text className="py-4 text-xs text-foreground-muted">
-                This repository has more labels than are listed here. Apply the rest on the
-                provider.
+                {t(
+                  "mobile.review.PullRequestLabelsScreen.this-repository-has-more-labels-than-are-listed-here-apply-the-rest-on-the-provider",
+                )}
               </Text>
             ) : undefined
           }

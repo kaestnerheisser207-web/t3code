@@ -1,10 +1,13 @@
+import { useTranslate } from "../../i18n";
+import { localizeSettingsSections } from "./settingsLabels";
+import { useSettingsPageTitle } from "./useSettingsPageTitle";
 import {
   navigationCustomizationAvailable,
   overflowNavigationTabs,
 } from "../workspace/navigation-tab-order";
 import {
   NAVIGATION_TAB_ICONS,
-  WORKSPACE_TAB_LABELS,
+  workspaceTabLabel,
   useNavigationTabOrder,
   useHiddenNavigationTabs,
 } from "../workspace/navigation-tabs";
@@ -57,6 +60,8 @@ export function SettingsListScreen(props: {
   readonly sidebar: boolean;
   readonly selected: string | null;
 }) {
+  const t = useTranslate();
+  const title = useSettingsPageTitle(t("settings.title"));
   const surface = useWorkspaceSurface();
   const workspace = useWorkspaceTabs();
   const inSidebar = props.sidebar;
@@ -74,7 +79,7 @@ export function SettingsListScreen(props: {
         <SettingsEnvironmentFilterHeader />
         {Platform.OS === "android" ? (
           <SettingsScreen
-            title="Settings"
+            title={title}
             workspaceRoot={inSidebar}
             trailing={<AndroidSettingsEnvironmentFilter />}
             search={
@@ -83,7 +88,7 @@ export function SettingsListScreen(props: {
                     value: workspace.state.tabs.settings.query,
                     onChangeText: (query) =>
                       workspace.dispatch({ type: "query", tab: "settings", query }),
-                    placeholder: "Search settings",
+                    placeholder: t("settings.searchLabel"),
                   }
                 : undefined
             }
@@ -106,15 +111,16 @@ interface SettingsListSection {
 }
 
 function ConfiguredSettingsRouteScreen() {
+  const t = useTranslate();
   const navigation = useNavigation();
   const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
   const { user } = useUser();
   const { savedConnectionsById } = useSavedRemoteConnections();
   const accountLabel = !isLoaded
-    ? "Checking"
+    ? t("mobile.settings.checking")
     : !isSignedIn
-      ? "Sign in"
-      : (user?.primaryEmailAddress?.emailAddress ?? "Signed in");
+      ? t("mobile.settings.signIn")
+      : (user?.primaryEmailAddress?.emailAddress ?? t("mobile.settings.signedIn"));
 
   return (
     <SettingsList
@@ -156,6 +162,7 @@ function environmentsRow(count: number): SettingsListRow {
 }
 
 function SettingsList(props: { readonly connections: readonly SettingsListRow[] }) {
+  const t = useTranslate();
   // UIKit's scroll-edge material takes the scroll view's own color; like the chat list, match
   // the sidebar's surface so the bar doesn't darken over content at rest.
   // Grouped cards only lift off the screen surface; the drawer is as dark as they are.
@@ -168,7 +175,10 @@ function SettingsList(props: { readonly connections: readonly SettingsListRow[] 
   const overflowRows = useOverflowRows();
   const indexSections = useSettingsIndexSections();
   const sections = filterSettingsSections(
-    [{ rows: overflowRows }, { title: "Connections", rows: props.connections }, ...indexSections],
+    localizeSettingsSections(
+      [{ rows: overflowRows }, { title: "Connections", rows: props.connections }, ...indexSections],
+      t,
+    ),
     query,
   );
 
@@ -192,7 +202,7 @@ function SettingsList(props: { readonly connections: readonly SettingsListRow[] 
         {sections.length ? (
           sections.map((section, index) => (
             <SettingsSection key={section.title ?? `untitled-${index}`} title={section.title}>
-              {section.rows.map(({ id, ...row }) => (
+              {section.rows.map(({ id, searchTerms: _searchTerms, ...row }) => (
                 <SettingsRow key={id} {...row} />
               ))}
             </SettingsSection>
@@ -200,8 +210,8 @@ function SettingsList(props: { readonly connections: readonly SettingsListRow[] 
         ) : (
           <EmptyState
             variant="plain"
-            title="No results"
-            detail={`No settings match “${query.trim()}”.`}
+            title={t("mobile.settings.noResults")}
+            detail={t("mobile.settings.noMatch", { query: query.trim() })}
           />
         )}
       </ScrollView>
@@ -210,6 +220,7 @@ function SettingsList(props: { readonly connections: readonly SettingsListRow[] 
 }
 
 function useSettingsIndexSections(): SettingsListSection[] {
+  const t = useTranslate();
   const { selectedTargets, projectGroups, selectedProjectKey } = useSettingsEnvironmentFilter();
   const noServerTargets = selectedTargets.length === 0;
   const selectedProject = projectGroups.find((group) => group.key === selectedProjectKey);
@@ -225,7 +236,7 @@ function useSettingsIndexSections(): SettingsListSection[] {
           representative: scopedProjectMembers[0]!,
           members: scopedProjectMembers,
         })
-      : (selectedProject?.label ?? "Unavailable project");
+      : (selectedProject?.label ?? t("mobile.settings.unavailableProject"));
   const page = (
     target: SettingsPageTarget,
     icon: SettingsListRow["icon"],
@@ -285,6 +296,7 @@ function useSettingsIndexSections(): SettingsListSection[] {
 }
 
 function useOverflowRows(): SettingsListRow[] {
+  const t = useTranslate();
   const order = useNavigationTabOrder();
   const hidden = useHiddenNavigationTabs();
   const { layout } = useAdaptiveWorkspaceLayout();
@@ -294,7 +306,7 @@ function useOverflowRows(): SettingsListRow[] {
   return tabs.map((tab) => ({
     id: tab,
     icon: NAVIGATION_TAB_ICONS[tab],
-    label: WORKSPACE_TAB_LABELS[tab],
+    label: workspaceTabLabel(tab, t),
     onPress: () => selectTab(tab),
   }));
 }

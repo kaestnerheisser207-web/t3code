@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import * as Dialog from "../../components/ui/Dialog";
@@ -115,6 +117,7 @@ export function ThreadMcpApp(props: {
   readonly onExitFullscreen?: () => void;
   readonly height?: number;
 }) {
+  const t = useTranslate();
   const [height, setHeight] = useState(MCP_APP_INLINE_MAX_HEIGHT);
   const [documentKey, setDocumentKeyState] = useState(0);
   // The view keeps its first URL: a re-minted one would reload the app.
@@ -487,7 +490,11 @@ export function ThreadMcpApp(props: {
         className="items-center justify-center rounded-lg border border-border"
       >
         <Text className="text-sm text-foreground-muted">
-          The {app.server} app is open full screen
+          <Trans
+            t={t}
+            i18nKey="mobile.rich.McpAppWebView.the-part-app-is-open-full-screen"
+            components={{ value0: <>{app.server}</> }}
+          />
         </Text>
       </View>
     );
@@ -499,10 +506,16 @@ export function ThreadMcpApp(props: {
         style={{ height, marginBottom: ROW_BOTTOM_MARGIN }}
         className="items-center justify-center gap-2 rounded-lg border border-border"
       >
-        <Text className="text-sm text-foreground-muted">The {app.server} app was closed</Text>
+        <Text className="text-sm text-foreground-muted">
+          <Trans
+            t={t}
+            i18nKey="mobile.rich.McpAppWebView.the-part-app-was-closed"
+            components={{ value0: <>{app.server}</> }}
+          />
+        </Text>
         <View className="items-center">
           <Button
-            label="Show app"
+            label={t("mobile.threads.McpAppWebView.show-app")}
             tone="secondary"
             onPress={() => {
               reopenDocument();
@@ -519,7 +532,11 @@ export function ThreadMcpApp(props: {
       {navigatedAway ? (
         <View className="flex-1 items-center justify-center">
           <Text className="text-sm text-foreground-muted">
-            The {app.server} app left its page and was stopped
+            <Trans
+              t={t}
+              i18nKey="mobile.rich.McpAppWebView.the-part-app-left-its-page-and-was-stopped"
+              components={{ value0: <>{app.server}</> }}
+            />
           </Text>
         </View>
       ) : uri !== null && !crashed ? (
@@ -529,7 +546,7 @@ export function ThreadMcpApp(props: {
           onContentProcessDidTerminate={restart}
           onRenderProcessGone={restart}
           source={source!}
-          accessibilityLabel={`${app.server} app`}
+          accessibilityLabel={t("mobile.dynamic.McpAppWebView.param-app", { server: app.server })}
           style={{ flex: 1, backgroundColor: "transparent" }}
           nestedScrollEnabled
           originWhitelist={["*"]}
@@ -564,7 +581,13 @@ export function ThreadMcpApp(props: {
         />
       ) : asset._tag === "Failure" || crashed ? (
         <View className="flex-1 items-center justify-center">
-          <Text className="text-sm text-foreground-muted">Unable to load the {app.server} app</Text>
+          <Text className="text-sm text-foreground-muted">
+            <Trans
+              t={t}
+              i18nKey="mobile.rich.McpAppWebView.unable-to-load-the-part-app"
+              components={{ value0: <>{app.server}</> }}
+            />
+          </Text>
         </View>
       ) : null}
       {uri !== null && !loaded && !crashed && !navigatedAway ? (

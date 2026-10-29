@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { Ref } from "react";
 import { Keyboard, Pressable, TextInput, View, type TextInputInstance } from "react-native";
 import { useResolveClassNames } from "uniwind";
@@ -18,9 +19,13 @@ export function WorkspaceSearchField({
   readonly onBlur?: () => void;
   readonly onClear: () => void;
 }) {
+  const t = useTranslate();
   const inputStyle = useResolveClassNames("text-foreground font-sans text-base");
   const placeholderStyle = useResolveClassNames("text-foreground-muted");
-  const label = props.tab === "pullRequests" ? "Search pull requests" : "Search threads";
+  const label =
+    props.tab === "pullRequests"
+      ? t("mobile.review.PullRequestToolbar.android.search-pull-requests")
+      : t("mobile.surfaces.ThreadListToolbar.search-threads");
   return (
     <GlassSurface
       className="min-w-0 flex-1"
@@ -47,7 +52,7 @@ export function WorkspaceSearchField({
         {props.query ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Clear search"
+            accessibilityLabel={t("mobile.surfaces.WorkspaceSearchField.clear-search")}
             onPress={props.onClear}
             className="h-11 w-11 items-center justify-center"
           >

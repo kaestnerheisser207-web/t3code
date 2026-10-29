@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { ProviderDriverKind, ProviderInstanceId, type ServerProvider } from "@t3tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -68,6 +69,14 @@ describe("Antigravity with unchecked sign-in", () => {
         detail: unchecked.message,
       });
       expect(getProviderStatusKey(candidate)).toBe("neutral");
+      const t = createI18n("zh-CN").t;
+      expect(getProviderSummary(candidate, t)).toEqual({
+        headline: t("provider.summary.unchecked"),
+        detail: unchecked.message,
+      });
+      expect(getProviderSummary(candidate, t).headline).not.toBe(
+        t("provider.summary.authenticated"),
+      );
     }
   });
 

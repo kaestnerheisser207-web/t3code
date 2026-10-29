@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import { ThreadSubagentGroup } from "./thread-subagent-group";
 import { ProposedPlanCard } from "./ProposedPlanCard";
@@ -791,6 +793,7 @@ function WorkspacePreparationRetryButton(props: {
   readonly threadId: ThreadId;
   readonly runId: RunId;
 }) {
+  const t = useTranslate();
   const retryable = useAtomValue(
     environmentThreadDetails.threadAtom(scopeThreadRef(props.environmentId, props.threadId)),
     (thread) => {
@@ -804,9 +807,9 @@ function WorkspacePreparationRetryButton(props: {
   return (
     <View className="ml-7 mt-2">
       <Button
-        label="Retry"
+        label={t("mobile.threads.thread-work-log.retry")}
         tone="secondary"
-        accessibilityLabel="Retry workspace preparation"
+        accessibilityLabel={t("mobile.threads.thread-work-log.retry-workspace-preparation")}
         disabled={busy}
         onPress={() => {
           setBusy(true);
@@ -870,6 +873,7 @@ const ThreadWorkLogRow = function ThreadWorkLogRow(
     readonly expanded: boolean;
   },
 ) {
+  const t = useTranslate();
   const { row, expanded } = props;
   const openLinkedThread = useOpenLinkedThread();
   const streamsOutput =
@@ -899,7 +903,7 @@ const ThreadWorkLogRow = function ThreadWorkLogRow(
     return (
       <WorkLogPressable
         accessibilityLabel={warning ? label : `${row.summary}: ${failureItem.failure.message}`}
-        accessibilityHint="Long press to copy."
+        accessibilityHint={t("mobile.threads.thread-work-log.long-press-to-copy")}
         onLongPress={() => props.onCopyRow(row.id, row.getCopyText())}
       >
         <View className="flex-1 py-1">
@@ -922,7 +926,7 @@ const ThreadWorkLogRow = function ThreadWorkLogRow(
             </Text>
             {props.copied ? (
               <Text className="pr-1 font-t3-medium text-3xs text-adaptive-emerald-600-400">
-                Copied
+                {t("mobile.threads.thread-work-log.copied")}
               </Text>
             ) : null}
             <Text
@@ -1003,7 +1007,11 @@ const ThreadWorkLogRow = function ThreadWorkLogRow(
   const exitLine =
     failedExitCode === null ? null : (
       <Text className="mt-1.5 font-mono text-2xs leading-normal text-danger-foreground">
-        exit {failedExitCode}
+        <Trans
+          t={t}
+          i18nKey="mobile.rich.thread-work-log.exit-part"
+          components={{ value0: <>{failedExitCode}</> }}
+        />
       </Text>
     );
   const toolPresentation = resolveWorkEntryToolPresentation(row.workEntry);
@@ -1034,13 +1042,23 @@ const ThreadWorkLogRow = function ThreadWorkLogRow(
         accessibilityRole={
           notifiedSubagentThreadId !== undefined ? "link" : canExpand ? "button" : undefined
         }
-        accessibilityLabel={failed ? `${accessiblePreview}, tool call failed` : accessiblePreview}
+        accessibilityLabel={
+          failed
+            ? t("mobile.dynamic.thread-work-log.param-tool-call-failed", {
+                accessiblePreview: accessiblePreview,
+              })
+            : accessiblePreview
+        }
         accessibilityHint={
           notifiedSubagentThreadId !== undefined
-            ? "Opens this agent's thread. Long press to copy."
+            ? t("mobile.dynamic.thread-work-log.opens-this-agent-s-thread-long-press-to-copy")
             : canExpand
-              ? `Double tap to ${expanded ? "hide" : "show"} full details. Long press to copy.`
-              : "Long press to copy."
+              ? t(
+                  expanded
+                    ? "mobile.dynamic.thread-work-log.expandedDetailsYes"
+                    : "mobile.dynamic.thread-work-log.expandedDetailsNo",
+                )
+              : t("mobile.dynamic.thread-work-log.long-press-to-copy")
         }
         accessibilityState={canExpand ? { expanded } : undefined}
         onPress={() => {
@@ -1117,7 +1135,7 @@ const ThreadWorkLogRow = function ThreadWorkLogRow(
         <View className="shrink-0 flex-row items-center gap-px">
           {props.copied ? (
             <Text className="pr-1 font-t3-medium text-3xs text-adaptive-emerald-600-400">
-              Copied
+              {t("mobile.threads.thread-work-log.copied")}
             </Text>
           ) : null}
           {failed && toolIcon !== undefined ? (
@@ -1287,6 +1305,7 @@ export function ThreadWorkGroupToggle(props: {
   readonly trailing?: ReactNode;
   readonly onToggle: () => void;
 }) {
+  const t = useTranslate();
   const statusLabel = props.hasFailure ? `${props.summary}, tool call failed` : props.summary;
   const accessibilityLabel = props.thought ? `${props.thought} ${statusLabel}` : statusLabel;
   const icon =
@@ -1323,7 +1342,12 @@ export function ThreadWorkGroupToggle(props: {
             accessibilityRole="button"
             accessibilityState={{ expanded: props.expanded }}
             accessibilityLabel={accessibilityLabel}
-            accessibilityHint={`Double tap to ${props.expanded ? "hide" : "show"} ${props.hiddenCount} tool ${props.hiddenCount === 1 ? "call" : "calls"}.`}
+            accessibilityHint={t(
+              props.expanded
+                ? "mobile.dynamic.thread-work-log.hideTools"
+                : "mobile.dynamic.thread-work-log.showTools",
+              { count: props.hiddenCount },
+            )}
             onPress={() => {
               void Haptics.selectionAsync();
               props.onToggle();
@@ -1373,10 +1397,11 @@ export function ThreadThinkingRow(props: {
   readonly rowSizing: ReturnType<typeof deriveThreadWorkLogSizing>;
   readonly iconSubtleColor: ColorValue;
 }) {
+  const t = useTranslate();
   return (
     <View
       accessible
-      accessibilityLabel="Thinking"
+      accessibilityLabel={t("mobile.threads.thread-work-log.thinking")}
       className="-mx-1 min-h-8 flex-row items-center px-1.5 py-0"
       style={{ minHeight: props.rowSizing.estimatedRowHeight }}
     >
@@ -1384,7 +1409,7 @@ export function ThreadThinkingRow(props: {
         key={props.rowSizing.textSizeKey}
         icon="brain"
         iconSubtleColor={props.iconSubtleColor}
-        label="Thinking"
+        label={t("mobile.threads.thread-work-log.thinking")}
         showIcon
       />
     </View>

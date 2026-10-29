@@ -1,0 +1,16 @@
+export const nativePromptsZhCN = {
+  "snoozeSettings.after": "之后",
+  "snoozeSettings.today": "今天",
+  "snoozeSettings.passed": "今日已过",
+  "snoozeSettings.duplicate": "与上方某个选项重复",
+  "snoozeSettings.sameTime": "与上方某个选项时间相同",
+  "desktop.prompt.unnamedPasskey": "未命名通行密钥",
+  "desktop.prompt.choosePasskey": "选择通行密钥",
+  "desktop.prompt.cancel": "取消",
+  "desktop.prompt.open": "打开",
+  "desktop.prompt.allow": "允许",
+  "desktop.prompt.block": "阻止",
+  "desktop.prompt.openProtocol": "要打开此 {{protocol}} 链接吗？",
+  "desktop.prompt.externalApp": "浏览器中的某个页面想要打开另一个应用：\n\n{{url}}",
+  "desktop.prompt.clipboard": "{{origin}} 想要查看复制到剪贴板的文本和图片",
+} as const;

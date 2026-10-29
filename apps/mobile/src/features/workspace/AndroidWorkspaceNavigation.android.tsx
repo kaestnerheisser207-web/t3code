@@ -1,3 +1,4 @@
+import { useNativeControlLabels } from "../../native/useNativeControlLabels";
 import { selectedNavigationTab, visibleNavigationTabs } from "./navigation-tab-order";
 import { requireNativeView } from "expo";
 import { CommonActions, useNavigation } from "@react-navigation/native";
@@ -31,6 +32,7 @@ import { FLOATING_TABS, floatingTabsMetrics } from "./floating-workspace-tabs";
 export const ANDROID_WORKSPACE_RAIL_WIDTH = 72;
 
 interface NativeNavigationProps extends ViewProps {
+  readonly labels: Readonly<Record<string, string>>;
   readonly rail: boolean;
   readonly floating: boolean;
   readonly tabs: readonly string[];
@@ -71,6 +73,7 @@ export function AndroidWorkspaceNavigation(props: {
   /** The rail needs the whole workspace while it widens over the list. */
   readonly onOverlayChange?: (overlay: boolean) => void;
 }) {
+  const labels = useNativeControlLabels();
   const workspace = useWorkspaceTabs()!;
   const order = useNavigationTabOrder();
   const hidden = useHiddenNavigationTabs();
@@ -117,6 +120,7 @@ export function AndroidWorkspaceNavigation(props: {
       }
     >
       <NativeNavigation
+        labels={labels}
         rail={rail}
         floating={floating}
         tabs={tabs}

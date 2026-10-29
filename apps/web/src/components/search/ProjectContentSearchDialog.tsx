@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Spinner } from "~/components/ui/spinner";
 import { AuthFilesystemReadScope, type ProjectContentMatch } from "@t3tools/contracts";
 
@@ -79,9 +80,10 @@ function SearchOptionButton(props: {
 }
 
 function EmptyContentSearchDialog() {
+  const t = useTranslate();
   return (
     <CommandPaletteContent
-      aria-label="Search project contents"
+      aria-label={t("web.ui.ProjectContentSearchDialog.search-project-contents")}
       escapeLabel="Back"
       footerActionLabel="Open file"
       inputProps={{ disabled: true, placeholder: "Search project contents…" }}
@@ -91,7 +93,7 @@ function EmptyContentSearchDialog() {
       value=""
     >
       <p className="m-auto px-6 text-center text-muted-foreground text-sm">
-        Open a project to search its files.
+        {t("web.ui.ProjectContentSearchDialog.open-a-project-to-search-its-files")}
       </p>
     </CommandPaletteContent>
   );
@@ -105,6 +107,7 @@ function OpenContentSearchDialog(props: {
   readonly onOpenChange: (open: boolean) => void;
   readonly target: ActiveProjectTarget;
 }) {
+  const t = useTranslate();
   const { target } = props;
   const { resolvedTheme } = useTheme();
   const renderedAppearance = useRenderedAppearance();
@@ -163,7 +166,9 @@ function OpenContentSearchDialog(props: {
 
   return (
     <CommandPaletteContent
-      aria-label={`Search file contents in ${target.projectName}`}
+      aria-label={t("web.dynamic.ProjectContentSearchDialog.search-file-contents-in-param", {
+        projectName: target.projectName,
+      })}
       escapeLabel="Back"
       footerActionLabel="Open file"
       inputAccessory={
@@ -171,7 +176,7 @@ function OpenContentSearchDialog(props: {
           <SearchOptionButton
             active={caseSensitive}
             disabled={!search.canReadFiles}
-            label="Match case"
+            label={t("web.ui.ProjectContentSearchDialog.match-case")}
             onClick={() => setCaseSensitive((current) => !current)}
           >
             Aa
@@ -179,7 +184,7 @@ function OpenContentSearchDialog(props: {
           <SearchOptionButton
             active={wholeWord}
             disabled={!search.canReadFiles}
-            label="Match whole word"
+            label={t("web.ui.ProjectContentSearchDialog.match-whole-word")}
             onClick={() => setWholeWord((current) => !current)}
           >
             <span className="underline decoration-2 underline-offset-2">ab</span>
@@ -187,7 +192,7 @@ function OpenContentSearchDialog(props: {
           <SearchOptionButton
             active={useRegex}
             disabled={!search.canReadFiles}
-            label="Use regular expression"
+            label={t("web.ui.ProjectContentSearchDialog.use-regular-expression")}
             onClick={() => setUseRegex((current) => !current)}
           >
             .*
@@ -228,14 +233,21 @@ function OpenContentSearchDialog(props: {
         <div className="flex h-9 shrink-0 items-center border-b px-3 text-xs text-muted-foreground">
           {search.isPending ? (
             <span className="flex items-center gap-2">
-              <Spinner size="sm" /> Searching…
+              <Spinner size="sm" />
+              {t("web.ui.ProjectContentSearchDialog.searching")}
             </span>
           ) : search.error ? (
             <span className="text-destructive">{search.error}</span>
           ) : search.invalidRegex ? (
-            <span className="text-destructive">Invalid regular expression</span>
+            <span className="text-destructive">
+              {t("web.ui.ProjectContentSearchDialog.invalid-regular-expression")}
+            </span>
           ) : (
-            `${matches.length.toLocaleString()}${search.truncated ? "+" : ""} results in ${fileCount.toLocaleString()} files`
+            t("web.dynamic.ProjectContentSearchDialog.paramparam-results-in-param-files", {
+              value: matches.length.toLocaleString(),
+              value2: search.truncated ? "+" : "",
+              value3: fileCount.toLocaleString(),
+            })
           )}
         </div>
       ) : null}
@@ -243,12 +255,12 @@ function OpenContentSearchDialog(props: {
       {matches.length === 0 ? (
         <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-muted-foreground">
           {search.isCheckingAccess
-            ? "Checking file access…"
+            ? t("web.dynamic.ProjectContentSearchDialog.checking-file-access")
             : !search.canReadFiles
               ? search.error
               : search.hasQuery && !search.isPending && !search.error
-                ? "No results found."
-                : "Type to search across your project."}
+                ? t("web.dynamic.ProjectContentSearchDialog.no-results-found")
+                : t("web.dynamic.ProjectContentSearchDialog.type-to-search-across-your-project")}
         </div>
       ) : (
         <ScrollArea className="min-h-0 flex-1" scrollFade>

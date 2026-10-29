@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n";
 import * as Dialog from "../../../components/ui/Dialog";
 import { SheetHeader } from "../../../components/ui/SheetHeader";
 import { useOpenPullRequest } from "../../../native/useOpenPullRequest";
@@ -74,6 +75,7 @@ export function GitOverviewSheet(props: GitOverviewSheetProps) {
 }
 
 function GitOverviewSheetContent(props: GitOverviewSheetProps) {
+  const t = useTranslate();
   const { layout } = useAdaptiveWorkspaceLayout();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -116,7 +118,7 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
   const hasPrimaryRemote = gitStatus.data?.hasPrimaryRemote ?? false;
   const isDefaultRef = gitStatus.data?.isDefaultRef ?? false;
 
-  const menuItems = isRepo ? buildMenuItems(gitStatus.data, busy, hasPrimaryRemote) : [];
+  const menuItems = isRepo ? buildMenuItems(gitStatus.data, busy, hasPrimaryRemote, t) : [];
 
   const sheetMenuItems = menuItems.map((item) => ({
     item: {
@@ -125,13 +127,16 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
     },
     disabledReason:
       !canWriteSourceControl && item.kind !== "open_pr"
-        ? "This connection cannot change source control."
-        : getGitActionDisabledReason({
-            item,
-            gitStatus: gitStatus.data,
-            isBusy: busy,
-            hasOriginRemote: hasPrimaryRemote,
-          }),
+        ? t("web.git.this-connection-cannot-change-source-control")
+        : getGitActionDisabledReason(
+            {
+              item,
+              gitStatus: gitStatus.data,
+              isBusy: busy,
+              hasOriginRemote: hasPrimaryRemote,
+            },
+            t,
+          ),
   }));
 
   const { shortLabel, singular } = sourceControlClients.get(
@@ -266,11 +271,11 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
         {behindCount > 0 ? (
           <ListRow
             icon="arrow.down.circle"
-            label="Pull latest"
+            label={t("mobile.threads.GitOverviewSheet.pull-latest")}
             description={
               canWriteSourceControl
-                ? `${behindCount} commit${behindCount === 1 ? "" : "s"} behind upstream`
-                : "This connection cannot change source control."
+                ? t("mobile.dynamic.GitOverviewSheet.behindCount", { count: behindCount })
+                : t("mobile.dynamic.GitOverviewSheet.this-connection-cannot-change-source-control")
             }
             disabled={!canWriteSourceControl || busy || !isRepo}
             onPress={() => void gitActions.onPullSelectedThreadBranch()}
@@ -278,8 +283,10 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
         ) : null}
         <ListRow
           icon="text.bubble"
-          label="Review changes"
-          description="Inspect changes, uncommitted edits, and turn diffs"
+          label={t("mobile.threads.GitOverviewSheet.review-changes")}
+          description={t(
+            "mobile.threads.GitOverviewSheet.inspect-changes-uncommitted-edits-and-turn-diffs",
+          )}
           disabled={busy || !isRepo}
           onPress={() => {
             const params = { environmentId, threadId };
@@ -292,11 +299,13 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
         />
         <ListRow
           icon="point.topleft.down.curvedto.point.bottomright.up"
-          label="Branches & worktrees"
+          label={t("mobile.threads.GitOverviewSheet.branches-worktrees")}
           description={
             canChangeThreadBranch
-              ? "Switch branch, create branch, or move to a worktree"
-              : "View branches and worktrees"
+              ? t(
+                  "mobile.dynamic.GitOverviewSheet.switch-branch-create-branch-or-move-to-a-worktree",
+                )
+              : t("mobile.dynamic.GitOverviewSheet.view-branches-and-worktrees")
           }
           disabled={busy || !isRepo}
           onPress={() =>
@@ -309,15 +318,23 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
         {linkedPrActions.canLink ? (
           <ListRow
             icon="link"
-            label={`Link ${linkedPrActions.terminology.singular}`}
-            description={`Attach a ${linkedPrActions.terminology.singular} by URL or number`}
+            label={t("mobile.dynamic.GitOverviewSheet.link-param", {
+              singular: linkedPrActions.terminology.singular,
+            })}
+            description={t("mobile.dynamic.GitOverviewSheet.attach-a-param-by-url-or-number", {
+              singular: linkedPrActions.terminology.singular,
+            })}
             onPress={linkedPrActions.promptLink}
           />
         ) : null}
       </ListSection>
 
       {linkedPrLines.length > 0 ? (
-        <ListSection title={`Linked ${linkedPrActions.terminology.plural}`}>
+        <ListSection
+          title={t("mobile.dynamic.GitOverviewSheet.linked-param", {
+            plural: linkedPrActions.terminology.plural,
+          })}
+        >
           {linkedPrLines.map((line, index) => (
             <LinkedPullRequestRow
               key={linkedPullRequestKey(line)}
@@ -332,7 +349,7 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
       ) : null}
 
       {currentWorktreePath ? (
-        <ListSection title="Worktree">
+        <ListSection title={t("mobile.threads.GitOverviewSheet.worktree")}>
           <Text selectable textRole="footnote" className="p-4 text-foreground-muted">
             {currentWorktreePath}
           </Text>
@@ -388,7 +405,7 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
 
   const refreshMenu = (
     <AndroidAnchoredMenu
-      title="Repository options"
+      title={t("mobile.threads.GitOverviewSheet.repository-options")}
       actions={[
         {
           id: "refresh",
@@ -402,7 +419,7 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
     >
       {(open) => (
         <AndroidHeaderIconButton
-          accessibilityLabel="Repository options"
+          accessibilityLabel={t("mobile.threads.GitOverviewSheet.repository-options")}
           icon="ellipsis"
           onPress={open}
         />
@@ -459,7 +476,7 @@ function GitOverviewSheetContent(props: GitOverviewSheetProps) {
             </Pressable>
           )}
           <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
-            Repository
+            {t("mobile.threads.GitOverviewSheet.repository")}
           </Text>
           <Text className="pr-10 text-xl font-t3-bold">{currentBranchLabel}</Text>
           <Text className="text-foreground-secondary text-sm font-medium leading-normal">

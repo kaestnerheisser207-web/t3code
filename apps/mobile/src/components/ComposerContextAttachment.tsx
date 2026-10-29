@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { Button } from "./ui/Button";
 import { settlePromise, squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
 import { AsyncResult } from "effect/reactivity";
@@ -24,6 +25,7 @@ export function ComposerContextAttachment(props: {
   environmentId?: EnvironmentId;
   attachment?: DraftComposerAttachment;
 }) {
+  const t = useTranslate();
   const { record, attachment } = props;
   const shareSourceIdentifier = useId();
   const resource = {
@@ -83,7 +85,9 @@ export function ComposerContextAttachment(props: {
       {record.kind === "image" && uri ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Preview ${record.name}`}
+          accessibilityLabel={t("mobile.dynamic.ComposerContextAttachment.preview-param", {
+            name: record.name,
+          })}
           onPress={() => setPreviewOpen(true)}
         >
           <Image
@@ -100,12 +104,19 @@ export function ComposerContextAttachment(props: {
       ) : null}
       {error || (!local && asset._tag === "Failure") ? (
         <Text className="text-foreground-muted">
-          {error ?? "Attachment unavailable. Reconnect and try again."}
+          {error ??
+            t(
+              "mobile.dynamic.ComposerContextAttachment.attachment-unavailable-reconnect-and-try-again",
+            )}
         </Text>
       ) : null}
       <PresentationSource identifier={shareSourceIdentifier}>
         <Button
-          label={sharing ? "Opening attachment…" : "Open or share attachment"}
+          label={
+            sharing
+              ? t("mobile.dynamic.ComposerContextAttachment.opening-attachment")
+              : t("mobile.dynamic.ComposerContextAttachment.open-or-share-attachment")
+          }
           tone="secondary"
           disabled={sharing}
           onPress={() => void share()}

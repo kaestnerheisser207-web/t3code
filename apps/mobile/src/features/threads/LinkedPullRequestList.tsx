@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { EnvironmentThreadShell } from "@t3tools/client-runtime/state/shell";
 import {
   capitalizeTerm,
@@ -63,19 +64,23 @@ export const LinkedPullRequestRow = memo(function LinkedPullRequestRow(props: {
   readonly openPullRequest: (url: string) => Promise<boolean>;
   readonly actions: LinkedPullRequestActions | null;
 }) {
+  const t = useTranslate();
   const { link, depth, stack } = props.line;
   const snapshot = link.snapshot;
-  const status = snapshot === null ? null : pullRequestStatus(snapshot);
-  const conflict = snapshot === null ? null : pullRequestConflict(snapshot);
+  const status = snapshot === null ? null : pullRequestStatus(snapshot, t);
+  const conflict = snapshot === null ? null : pullRequestConflict(snapshot, t);
   const open = snapshot === null || snapshot.state === "open";
   const checks =
     open && snapshot?.checksState ? pullRequestChecksStatus(snapshot.checksState) : null;
   const review =
     open && snapshot?.reviewDecision
-      ? pullRequestListReviewStatus({
-          reviewDecision: snapshot.reviewDecision,
-          viewerReviewRequested: false,
-        })
+      ? pullRequestListReviewStatus(
+          {
+            reviewDecision: snapshot.reviewDecision,
+            viewerReviewRequested: false,
+          },
+          t,
+        )
       : null;
   const watching = open && link.watch !== undefined;
   const additions = snapshot?.additions ?? 0;
@@ -88,7 +93,11 @@ export const LinkedPullRequestRow = memo(function LinkedPullRequestRow(props: {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${capitalizeTerm(singular)} ${link.number}, ${snapshot?.title ?? "waiting for host state"}${status ? `, ${status.label}` : ""}${conflict ? `, ${conflict.label.toLowerCase()}` : ""}, ${link.repository}${stack ? `, stack of ${stack.size}` : ""}${watching ? ", watching" : ""}${checks ? `, checks ${snapshot?.checksState}` : ""}${review ? `, ${review.accessibleLabel}` : ""}`}
-      accessibilityHint={props.actions ? "Touch and hold for actions." : undefined}
+      accessibilityHint={
+        props.actions
+          ? t("mobile.dynamic.LinkedPullRequestList.touch-and-hold-for-actions")
+          : undefined
+      }
       onPress={() => {
         void props.openPullRequest(link.url).then((opened) => {
           if (!opened)
@@ -150,7 +159,7 @@ export const LinkedPullRequestRow = memo(function LinkedPullRequestRow(props: {
               ) : null}
               {snapshot?.updatedAt ? (
                 <Text className="text-2xs tabular-nums text-foreground-tertiary">
-                  {relativeTime(snapshot.updatedAt)}
+                  {relativeTime(snapshot.updatedAt, t)}
                 </Text>
               ) : null}
             </View>
@@ -161,7 +170,7 @@ export const LinkedPullRequestRow = memo(function LinkedPullRequestRow(props: {
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {snapshot?.title ?? "Waiting for host state"}
+          {snapshot?.title ?? t("mobile.dynamic.LinkedPullRequestList.waiting-for-host-state")}
         </Text>
       </View>
     </Pressable>

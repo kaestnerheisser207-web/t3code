@@ -1,0 +1,18 @@
+export const snoozeModelEn = {
+  "snooze.now": "now",
+  "snooze.remaining": "Snoozed, {{time}} left",
+  "snooze.state": "Snoozed",
+  "snooze.settledAt": "Settled {{time}}",
+  "modelFilter.all": "All providers",
+  "modelFilter.favorites": "Favorites",
+  "modelFilter.filters": "Model filters",
+  "modelFilter.provider": "Provider",
+  "modelFilter.legacy": "Show legacy models",
+  "modelFilter.save": "Save",
+  "modelFilter.find": "Find a model",
+  "modelFilter.runtime": "Runtime",
+  "modelFilter.option": "Option",
+  "modelFilter.saveSettings": "Save thread settings",
+  "modelFilter.done": "Done",
+  "modelFilter.settings": "Thread settings",
+} as const;

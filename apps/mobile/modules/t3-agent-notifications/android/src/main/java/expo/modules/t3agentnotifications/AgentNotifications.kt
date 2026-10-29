@@ -255,7 +255,9 @@ object AgentNotifications {
       Intent(context, AgentActivityDismissReceiver::class.java),
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
-    val presentation = ActivityPresentation(data, active)
+    val labels = context.getSharedPreferences("t3-activity-language", Context.MODE_PRIVATE).all
+      .mapNotNull { (key, value) -> (value as? String)?.let { key to it } }.toMap()
+    val presentation = ActivityPresentation(data, active, labels)
     val openThread = contentIntent(context, scheme, data["activity_path"], ACTIVITY_ID)
     val builder = base(context, ACTIVITY_CHANNEL)
       .setOngoing(active).setOnlyAlertOnce(true).setSilent(true)

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { SheetHeader } from "../../components/ui/SheetHeader";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import * as Dialog from "../../components/ui/Dialog";
@@ -75,6 +76,7 @@ function BrowserPreviewScreen({
   readonly initialTabId: string | null;
   readonly onClose: () => void;
 }) {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
   const { themeVariables } = useAppearancePreferences();
   const prepared = usePreparedConnection(environmentId);
@@ -112,7 +114,7 @@ function BrowserPreviewScreen({
   return (
     <View className="flex-1 bg-sheet" style={{ paddingBottom: insets.bottom }}>
       <AppBar
-        title={tab ? browserTabTitle(tab) : "Browser"}
+        title={tab ? browserTabTitle(tab) : t("mobile.dynamic.BrowserPreviewRouteScreen.browser")}
         sidebar={false}
         onBack={onClose}
         options={{ headerBackVisible: false }}
@@ -156,9 +158,9 @@ function BrowserPreviewScreen({
       />
       {Platform.OS === "ios" ? (
         <SheetHeader
-          title={tab ? browserTabTitle(tab) : "Browser"}
+          title={tab ? browserTabTitle(tab) : t("mobile.dynamic.BrowserPreviewRouteScreen.browser")}
           onClose={onClose}
-          accessibilityLabel="Close browser"
+          accessibilityLabel={t("mobile.tools.BrowserPreviewRouteScreen.close-browser")}
         />
       ) : null}
       {tab ? (
@@ -216,6 +218,7 @@ function BrowserAddressBar({
   readonly onCommand: PreviewStreamRef["command"];
   readonly onPaste: () => void;
 }) {
+  const t = useTranslate();
   const url = browserTabUrl(tab);
   const [draft, setDraft] = useState<string | null>(null);
   const submit = () => {
@@ -231,24 +234,24 @@ function BrowserAddressBar({
     <View className="flex-row items-center gap-1 px-2 pb-2">
       <ControlPill
         icon="chevron.left"
-        accessibilityLabel="Back"
+        accessibilityLabel={t("mobile.tools.BrowserPreviewRouteScreen.back")}
         disabled={!ready || !tab.canGoBack}
         onPress={() => onCommand({ type: "history", delta: -1 })}
       />
       <ControlPill
         icon="chevron.right"
-        accessibilityLabel="Forward"
+        accessibilityLabel={t("mobile.tools.BrowserPreviewRouteScreen.forward")}
         disabled={!ready || !tab.canGoForward}
         onPress={() => onCommand({ type: "history", delta: 1 })}
       />
       <TextInput
-        accessibilityLabel="Address"
+        accessibilityLabel={t("mobile.tools.BrowserPreviewRouteScreen.address")}
         editable={ready}
         value={draft ?? url}
         onChangeText={setDraft}
         onBlur={() => setDraft(null)}
         onSubmitEditing={submit}
-        placeholder="Enter a URL"
+        placeholder={t("mobile.tools.BrowserPreviewRouteScreen.enter-a-url")}
         placeholderTextColorClassName="accent-placeholder"
         autoCapitalize="none"
         autoCorrect={false}
@@ -260,7 +263,7 @@ function BrowserAddressBar({
       />
       <ControlPill
         icon="arrow.clockwise"
-        accessibilityLabel="Reload page"
+        accessibilityLabel={t("mobile.tools.BrowserPreviewRouteScreen.reload-page")}
         disabled={!ready}
         onPress={() => onCommand({ type: "reload" })}
       />

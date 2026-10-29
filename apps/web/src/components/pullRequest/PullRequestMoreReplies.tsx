@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { PullRequestReplyAvailability } from "./pullRequestDetail.logic";
 
 export function PullRequestMoreReplies({
@@ -5,13 +6,17 @@ export function PullRequestMoreReplies({
   hasMoreReplies,
   url,
 }: PullRequestReplyAvailability) {
+  const t = useTranslate();
   if (!hasMoreReplies) return null;
   return (
     <div className="flex flex-wrap items-baseline gap-2 py-1 text-xs text-muted-foreground">
       <span>
         {moreReplies > 0
-          ? `${moreReplies.toLocaleString()} more ${moreReplies === 1 ? "reply" : "replies"}`
-          : "More replies"}
+          ? t("web.dynamic.PullRequestMoreReplies.moreReplyCount", {
+              formattedCount: moreReplies.toLocaleString(),
+              count: moreReplies,
+            })
+          : t("web.dynamic.PullRequestMoreReplies.more-replies")}
       </span>
       {url ? (
         <a
@@ -20,7 +25,7 @@ export function PullRequestMoreReplies({
           rel="noopener noreferrer"
           className="hover:text-foreground hover:underline"
         >
-          View on host
+          {t("web.ui.PullRequestMoreReplies.view-on-host")}
         </a>
       ) : null}
     </div>

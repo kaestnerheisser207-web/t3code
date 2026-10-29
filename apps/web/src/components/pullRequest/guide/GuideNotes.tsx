@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n";
 import type { PullRequestReviewGuideNote } from "@t3tools/contracts";
 
 import { cn } from "~/lib/utils";
@@ -22,13 +23,16 @@ export function GuideNotes({
   notes: ReadonlyArray<{ readonly marker: string; readonly note: PullRequestReviewGuideNote }>;
   className?: string;
 }) {
+  const t = useTranslate();
   if (notes.length === 0) return null;
   return (
     <section className={cn("flex min-w-0 flex-col gap-2", className)}>
       <h4 className="flex items-baseline justify-between gap-2 text-xs font-medium text-foreground">
-        Notes on this stop
+        {t("web.ui.GuideNotes.notes-on-this-stop")}
         <span className="font-normal text-muted-foreground tabular-nums">
-          {notes.length === 1 ? "1 note" : `${notes.length} notes`}
+          {notes.length === 1
+            ? t("web.dynamic.GuideNotes.1-note")
+            : t("web.dynamic.GuideNotes.param-notes", { length: notes.length })}
         </span>
       </h4>
       <ol className="flex flex-col gap-3">

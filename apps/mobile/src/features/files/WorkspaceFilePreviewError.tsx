@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { View } from "react-native";
 
@@ -13,6 +14,7 @@ export function WorkspaceFilePreviewError(props: {
   readonly reason: AssetUrlFailureReason;
   readonly onRetry: () => void;
 }) {
+  const t = useTranslate();
   const { environmentId, onRetry } = props;
   const environment = useEnvironmentPresentation(environmentId);
   const retryEnvironment = useAtomCommand(environmentCatalog.retryNow, "environment retry");
@@ -43,8 +45,10 @@ export function WorkspaceFilePreviewError(props: {
   return (
     <View className="flex-1 items-center justify-center bg-sheet px-6">
       <EmptyState
-        title="Preview unavailable"
-        detail="This file may be missing, unsupported, or unavailable on this environment."
+        title={t("mobile.tools.WorkspaceFilePreviewError.preview-unavailable")}
+        detail={t(
+          "mobile.tools.WorkspaceFilePreviewError.this-file-may-be-missing-unsupported-or-unavailable-on-this-environment",
+        )}
         actionLabel="Try again"
         onAction={props.onRetry}
       />

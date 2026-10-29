@@ -1,0 +1,41 @@
+import { useTranslate } from "../i18n";
+
+export function useNativeControlLabels() {
+  const t = useTranslate();
+  return {
+    newTask: t("native.newTask"),
+    find: t("native.find"),
+    commandPalette: t("native.commandPalette"),
+    focusSearch: t("native.focusSearch"),
+    nextResult: t("native.nextResult"),
+    previousResult: t("native.previousResult"),
+    closeCommandPalette: t("native.closeCommandPalette"),
+    back: t("native.back"),
+    openFiles: t("native.openFiles"),
+    openTerminal: t("native.openTerminal"),
+    openReview: t("native.openReview"),
+    copyLink: t("native.copyLink"),
+    toggleSidebar: t("native.toggleSidebar"),
+    nextMachine: t("native.nextMachine"),
+    closeRail: t("native.closeRail"),
+    collapseRail: t("native.collapseRail"),
+    expandRail: t("native.expandRail"),
+    newThread: t("native.newThread"),
+    newChat: t("native.newChat"),
+    chats: t("native.chats"),
+    pullRequests: t("native.pullRequests"),
+    pulls: t("native.pulls"),
+    prs: t("native.prs"),
+    usage: t("native.usage"),
+    settings: t("native.settings"),
+    "thread.jump.1": t("native.jumpToThread", { index: 1 }),
+    "thread.jump.2": t("native.jumpToThread", { index: 2 }),
+    "thread.jump.3": t("native.jumpToThread", { index: 3 }),
+    "thread.jump.4": t("native.jumpToThread", { index: 4 }),
+    "thread.jump.5": t("native.jumpToThread", { index: 5 }),
+    "thread.jump.6": t("native.jumpToThread", { index: 6 }),
+    "thread.jump.7": t("native.jumpToThread", { index: 7 }),
+    "thread.jump.8": t("native.jumpToThread", { index: 8 }),
+    "thread.jump.9": t("native.jumpToThread", { index: 9 }),
+  };
+}

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { useWorkspaceTabs } from "../workspace/WorkspaceTabsContext";
@@ -30,6 +31,7 @@ export function ThreadListToolbar(props: {
   readonly onLayout?: (event: LayoutChangeEvent) => void;
   readonly onRequestVisibility?: () => void;
 }) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const workspace = useWorkspaceTabs();
   const isTabActive = workspace?.isTabActive;
@@ -81,9 +83,9 @@ export function ThreadListToolbar(props: {
   const searchField = (
     <SearchField
       inputRef={searchRef}
-      accessibilityLabel="Search threads"
+      accessibilityLabel={t("mobile.surfaces.ThreadListToolbar.search-threads")}
       clearAccessibilityLabel="Clear search"
-      placeholder="Search"
+      placeholder={t("mobile.surfaces.ThreadListToolbar.search")}
       value={props.searchQuery}
       onChangeText={onSearchQueryChange}
     />
@@ -92,7 +94,7 @@ export function ThreadListToolbar(props: {
     <AndroidAnchoredMenu actions={props.filterActions} onPressAction={props.onFilterAction}>
       {(open) => (
         <AndroidHeaderIconButton
-          accessibilityLabel="Filter threads"
+          accessibilityLabel={t("mobile.surfaces.ThreadListToolbar.filter-threads")}
           icon={filterIcon}
           onPress={open}
         />
@@ -111,8 +113,8 @@ export function ThreadListToolbar(props: {
         searchField={searchField}
         onCloseSearch={closeSearch}
         onOpenSearch={openSearch}
-        searchAccessibilityLabel="Search threads"
-        titleAccessibilityLabel="T3 Code, Threads"
+        searchAccessibilityLabel={t("mobile.surfaces.ThreadListToolbar.search-threads")}
+        titleAccessibilityLabel={t("workspace.title.threads")}
         onOpenEnvironments={props.onOpenEnvironments}
         filter={filterButton}
       />

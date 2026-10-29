@@ -1,3 +1,5 @@
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import type { PullRequestAction } from "@t3tools/contracts";
 import { createContext, use, type ReactNode } from "react";
@@ -44,6 +46,7 @@ export function PullRequestSpeedActions<Entry extends PullRequestSpeedActionEntr
   sweeping?: boolean;
   onCloseSweepStart?: (entry: Entry, event: PointerEvent) => void;
 }) {
+  const t = useTranslate();
   const canWrite = useAtomValue(
     pullRequestEnvironment.runAction.permissionAtom(entry.environmentId),
   );
@@ -83,7 +86,10 @@ export function PullRequestSpeedActions<Entry extends PullRequestSpeedActionEntr
     <SpeedModeGroup
       busy={busy}
       pending={actionPending || closing}
-      label={`Quick actions for ${terminology.singular} #${entry.number}`}
+      label={t("web.dynamic.PullRequestSpeedActions.quick-actions-for-param-param", {
+        singular: sourceControlTerm(t, terminology.singular),
+        number: entry.number,
+      })}
     >
       {actions.map((action) => {
         const label = ACTIONS[action].label;
@@ -111,10 +117,14 @@ export function PullRequestSpeedActions<Entry extends PullRequestSpeedActionEntr
             </TooltipTrigger>
             <TooltipPopup>
               {action === "merge" && entry.stack
-                ? `Open this ${terminology.singular} to merge its stack`
+                ? t("web.dynamic.PullRequestSpeedActions.open-this-param-to-merge-its-stack", {
+                    singular: sourceControlTerm(t, terminology.singular),
+                  })
                 : action === "close" && onCloseSweepStart
-                  ? "Close immediately, or drag across rows to close several"
-                  : `${label} immediately`}
+                  ? t(
+                      "web.dynamic.PullRequestSpeedActions.close-immediately-or-drag-across-rows-to-close-several",
+                    )
+                  : t("web.dynamic.PullRequestSpeedActions.param-immediately", { label: label })}
             </TooltipPopup>
           </Tooltip>
         );

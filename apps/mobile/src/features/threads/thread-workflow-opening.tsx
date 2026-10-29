@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { scopeThreadRef } from "@t3tools/client-runtime/environment";
 import {
@@ -80,6 +81,7 @@ export function ThreadWorkflowOpening(props: {
   readonly threadId: ThreadId;
   readonly opening: WorkflowOpeningValue;
 }) {
+  const t = useTranslate();
   const openLinkedThread = useOpenLinkedThread();
   const { opening } = props;
   const headline = workflowOpeningHeadline(opening);
@@ -92,7 +94,11 @@ export function ThreadWorkflowOpening(props: {
       <Pressable
         key={member.id}
         accessibilityRole={threadId === null ? undefined : "link"}
-        accessibilityHint={threadId === null ? undefined : "Opens this agent's thread"}
+        accessibilityHint={
+          threadId === null
+            ? undefined
+            : t("mobile.dynamic.thread-workflow-opening.opens-this-agent-s-thread")
+        }
         disabled={threadId === null}
         onPress={() => {
           if (threadId !== null)
@@ -113,7 +119,9 @@ export function ThreadWorkflowOpening(props: {
       <View className="mb-5 gap-3">
         <View className="flex-row items-start gap-2">
           <View className="min-w-0 flex-1 gap-0.5">
-            <Text className="font-t3-medium text-2xs text-foreground-muted">Workflow started</Text>
+            <Text className="font-t3-medium text-2xs text-foreground-muted">
+              {t("mobile.threads.thread-workflow-opening.workflow-started")}
+            </Text>
             <Text numberOfLines={1} className="font-t3-medium text-sm text-foreground">
               {headline.title}
             </Text>
@@ -145,6 +153,7 @@ export function ThreadWorkflowOpening(props: {
 }
 
 function WorkflowScript(props: { readonly script: string }) {
+  const t = useTranslate();
   const [expanded, setExpanded] = useState(false);
   const { themeAppearance } = useAppearancePreferences();
   const script = props.script.trimEnd();
@@ -189,7 +198,9 @@ function WorkflowScript(props: { readonly script: string }) {
           className="self-start py-1 active:opacity-70"
         >
           <Text className="font-t3-medium text-xs text-foreground-muted">
-            {expanded ? "Show less" : "Show full script"}
+            {expanded
+              ? t("mobile.dynamic.thread-workflow-opening.show-less")
+              : t("mobile.dynamic.thread-workflow-opening.show-full-script")}
           </Text>
         </Pressable>
       ) : null}

@@ -15,6 +15,14 @@ const SETTINGS_SEARCH_TERMS = {
   ],
   SettingsNotifications: ["push", "alerts", "live activity", "agent activity"],
   SettingsAppearance: [
+    "language",
+    "locale",
+    "Chinese",
+    "English",
+    "语言",
+    "中文",
+    "简体中文",
+    "跟随系统",
     "theme",
     "dark mode",
     "light mode",
@@ -103,6 +111,7 @@ const termsById: ReadonlyMap<string, readonly string[]> = new Map(
 export interface SettingsSearchRow {
   readonly id: string;
   readonly label: string;
+  readonly searchTerms?: readonly string[];
 }
 
 export interface SettingsSearchSection<Row extends SettingsSearchRow> {
@@ -127,7 +136,12 @@ export function filterSettingsSections<
         rankSearchItems(rows, ({ row, section }, options) =>
           scoreSearchTerms(
             normalizedQuery,
-            [row.label, ...(section ? [section] : []), ...(termsById.get(row.id) ?? [])],
+            [
+              row.label,
+              ...(row.searchTerms ?? []),
+              ...(section ? [section] : []),
+              ...(termsById.get(row.id) ?? []),
+            ],
             options,
           ),
         ).map(({ item }) => item.row),

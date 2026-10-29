@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
 import { ThreadHoverCardPopup } from "../ThreadHoverCard";
@@ -100,11 +102,12 @@ function ThreadLineageRowList(props: {
   readonly onShowMore: () => void;
   readonly children: ReactNode;
 }) {
+  const t = useTranslate();
   return (
     <>
       {/* ScrollArea's max-height viewport measures badly inside this scrolling panel. */}
       <ul
-        aria-label="Related threads"
+        aria-label={t("web.ui.ThreadRelationshipsControl.related-threads")}
         className="m-0 max-h-[13.5rem] list-none overflow-y-auto overscroll-contain p-0 has-data-workflow-expanded:max-h-[min(28rem,55dvh)]"
       >
         {props.children}
@@ -115,8 +118,14 @@ function ThreadLineageRowList(props: {
           onClick={props.onShowMore}
           className={`flex h-8 w-full cursor-pointer items-center rounded-lg ${THREAD_DETAILS_PANEL_ROW_CONTENT_CLASS} text-sm font-medium text-muted-foreground/70 hover:bg-black/[0.055] hover:text-foreground/80 dark:hover:bg-white/[0.075]`}
         >
-          <PlusIcon aria-hidden className="size-4 shrink-0" />
-          Show {Math.min(props.hiddenCount, THREAD_LINEAGE_PAGE_COUNT)} more
+          <Trans
+            t={t}
+            i18nKey="web.rich.ThreadRelationshipsControl.part-show-part-more"
+            components={{
+              part0: <PlusIcon aria-hidden className="size-4 shrink-0" />,
+              value1: <>{Math.min(props.hiddenCount, THREAD_LINEAGE_PAGE_COUNT)}</>,
+            }}
+          />
         </button>
       ) : null}
     </>
@@ -229,6 +238,7 @@ function RemoteSubagentRow(props: {
   };
   readonly provider: ServerProvider | undefined;
 }) {
+  const t = useTranslate();
   const navigate = useNavigate();
   const environment = useEnvironment(props.agent.remoteChild.environmentId);
   const { remoteChild } = props.agent;
@@ -274,13 +284,25 @@ function RemoteSubagentRow(props: {
           <span
             className={`shrink-0 text-2xs ${failed ? "text-destructive" : "text-muted-foreground"}`}
           >
-            on {remoteChild.label} · {threadRelationshipStatusLabel(status)}
+            <Trans
+              t={t}
+              i18nKey="web.rich.ThreadRelationshipsControl.on-part-part"
+              components={{
+                value0: <>{remoteChild.label}</>,
+                value1: <>{threadRelationshipStatusLabel(status)}</>,
+              }}
+            />
           </span>
         </TooltipTrigger>
         <TooltipPopup side="left">
           {environment === null
-            ? `Runs on ${remoteChild.label}. Connect to it to open the thread there.`
-            : `Open on ${remoteChild.label}`}
+            ? t(
+                "web.dynamic.ThreadRelationshipsControl.runs-on-param-connect-to-it-to-open-the-thread-there",
+                { label: remoteChild.label },
+              )
+            : t("web.dynamic.ThreadRelationshipsControl.open-on-param", {
+                label: remoteChild.label,
+              })}
         </TooltipPopup>
       </Tooltip>
     </li>
@@ -291,6 +313,7 @@ export function ThreadRelationshipsPanel(props: {
   readonly environmentId: EnvironmentId;
   readonly threadId: ThreadId;
 }) {
+  const t = useTranslate();
   const ref = scopeThreadRef(props.environmentId, props.threadId);
   const projection = useThreadProjection(ref)?.projection ?? null;
   const providersByEnvironment = useEnvironmentProviders();
@@ -485,7 +508,13 @@ export function ThreadRelationshipsPanel(props: {
   return (
     <ThreadDetailsSection
       headingId="thread-details-lineage-heading"
-      title={runningCount > 0 ? `Lineage · ${runningCount} running` : "Lineage"}
+      title={
+        runningCount > 0
+          ? t("web.dynamic.ThreadRelationshipsControl.lineage-param-running", {
+              runningCount: runningCount,
+            })
+          : t("web.dynamic.ThreadRelationshipsControl.lineage")
+      }
       // A lone "Previous agents" row names itself; the heading returns for status or actions.
       showHeading={runningCount > 0 || canDetach || related.length > 0 || active.length > 0}
       data-thread-relationships-panel
@@ -498,7 +527,7 @@ export function ThreadRelationshipsPanel(props: {
                   size="icon-xs"
                   variant="ghost"
                   part="icon"
-                  aria-label="More thread actions"
+                  aria-label={t("web.ui.ThreadRelationshipsControl.more-thread-actions")}
                   disabled={busyAction !== null}
                 />
               }
@@ -508,7 +537,7 @@ export function ThreadRelationshipsPanel(props: {
             <MenuPopup align="end" className="min-w-60 max-w-(--available-width)">
               <MenuItem onClick={() => void detach()}>
                 <UnplugIcon className="size-3.5" />
-                Disconnect agent session
+                {t("web.ui.ThreadRelationshipsControl.disconnect-agent-session")}
               </MenuItem>
             </MenuPopup>
           </Menu>
@@ -714,8 +743,13 @@ export function ThreadRelationshipsPanel(props: {
                               part="secondary"
                               aria-label={
                                 parentTitle
-                                  ? `Merge back to ${parentTitle}`
-                                  : "Merge back to source conversation"
+                                  ? t(
+                                      "web.dynamic.ThreadRelationshipsControl.merge-back-to-param",
+                                      { parentTitle: parentTitle },
+                                    )
+                                  : t(
+                                      "web.dynamic.ThreadRelationshipsControl.merge-back-to-source-conversation",
+                                    )
                               }
                               disabled={!canMerge || busyAction !== null}
                               onClick={() => void merge()}
@@ -730,10 +764,17 @@ export function ThreadRelationshipsPanel(props: {
                         />
                         <TooltipPopup side="left">
                           {latestMergeBackRun === null
-                            ? "Complete a run in this fork before merging it back"
+                            ? t(
+                                "web.dynamic.ThreadRelationshipsControl.complete-a-run-in-this-fork-before-merging-it-back",
+                              )
                             : parentTitle
-                              ? `Merge this conversation back into ${parentTitle}`
-                              : "Merge this conversation back into its source"}
+                              ? t(
+                                  "web.dynamic.ThreadRelationshipsControl.merge-this-conversation-back-into-param",
+                                  { parentTitle: parentTitle },
+                                )
+                              : t(
+                                  "web.dynamic.ThreadRelationshipsControl.merge-this-conversation-back-into-its-source",
+                                )}
                         </TooltipPopup>
                       </Tooltip>
                       <span className="shrink-0 border border-transparent ps-1 pe-2.5 text-2xs font-medium text-muted-foreground">
@@ -753,7 +794,10 @@ export function ThreadRelationshipsPanel(props: {
                               variant="ghost"
                               part="icon"
                               tone="destructive"
-                              aria-label={`Stop subagent ${threadTitle}`}
+                              aria-label={t(
+                                "web.dynamic.ThreadRelationshipsControl.stop-subagent-param",
+                                { threadTitle: threadTitle },
+                              )}
                               disabled={stoppingId !== null}
                               onClick={() => void stopSubagent(threadId, agent)}
                             />
@@ -765,7 +809,9 @@ export function ThreadRelationshipsPanel(props: {
                             <SquareIcon aria-hidden className="size-3 fill-current" />
                           )}
                         </TooltipTrigger>
-                        <TooltipPopup side="left">Stop subagent</TooltipPopup>
+                        <TooltipPopup side="left">
+                          {t("web.ui.ThreadRelationshipsControl.stop-subagent")}
+                        </TooltipPopup>
                       </Tooltip>
                     </div>
                   ) : null}

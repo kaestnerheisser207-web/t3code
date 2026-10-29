@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { resolveThreadWorkingStartedAt } from "@t3tools/client-runtime/state/models";
 import { isShownUnderParent } from "@t3tools/client-runtime/state/threads";
 import { backgroundWorkHoldsCompletion } from "@t3tools/shared/orchestrationV2PendingBackgroundWork";
@@ -591,29 +592,44 @@ export function filterSidebarV2VisibleThreads<
   );
 }
 
-export function buildBulkTitleRegenerationContextMenuItem(input: {
-  supportedCount: number;
-  actionableCount: number;
-}): ContextMenuItem<"regenerate-title"> | null {
+export function buildBulkTitleRegenerationContextMenuItem(
+  input: {
+    supportedCount: number;
+    actionableCount: number;
+  },
+  t?: TFunction,
+): ContextMenuItem<"regenerate-title"> | null {
   if (input.supportedCount === 0) return null;
   if (input.actionableCount === 0) {
     return {
       id: "regenerate-title",
-      label: `Regenerating… (${input.supportedCount})`,
+      label:
+        t?.("sidebar.extra.regeneratingCount", { count: input.supportedCount }) ??
+        `Regenerating… (${input.supportedCount})`,
       disabled: true,
     };
   }
   return {
     id: "regenerate-title",
-    label: `Regenerate titles (${input.actionableCount})`,
+    label:
+      t?.("sidebar.extra.regenerateCount", { count: input.actionableCount }) ??
+      `Regenerate titles (${input.actionableCount})`,
   };
 }
 
-export function buildBulkUnpinContextMenuItem(input: {
-  pinnedCount: number;
-}): ContextMenuItem<"unpin"> | null {
+export function buildBulkUnpinContextMenuItem(
+  input: {
+    pinnedCount: number;
+  },
+  t?: TFunction,
+): ContextMenuItem<"unpin"> | null {
   if (input.pinnedCount === 0) return null;
-  return { id: "unpin", label: `Unpin (${input.pinnedCount})` };
+  return {
+    id: "unpin",
+    label:
+      t?.("sidebar.extra.unpinCount", { count: input.pinnedCount }) ??
+      `Unpin (${input.pinnedCount})`,
+  };
 }
 
 export interface ThreadStatusPill {

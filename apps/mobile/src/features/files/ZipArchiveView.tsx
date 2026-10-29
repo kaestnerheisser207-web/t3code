@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { useTranslate } from "../../i18n";
 import { formatAttachmentSize } from "@t3tools/client-runtime/state/attachments";
 import {
   ARCHIVE_ENTRY_MAX_BYTES,
@@ -69,6 +71,7 @@ interface ZipArchive {
 }
 
 interface ZipFailure {
+  readonly localized: (t: TFunction) => { title: string; detail: string };
   readonly title: string;
   readonly detail: string;
   readonly retry: boolean;
@@ -76,16 +79,22 @@ interface ZipFailure {
 
 const SAVE_ZIP_HINT = "Save the ZIP to open it in another app.";
 const TOO_LARGE: ZipFailure = {
+  localized: (t) => ({
+    title: t("zip.tooLarge"),
+    detail: t("zip.browseLimit", { size: formatAttachmentSize(ARCHIVE_MAX_BYTES) }),
+  }),
   title: "Too large to browse here",
   detail: `Browsing works up to ${formatAttachmentSize(ARCHIVE_MAX_BYTES)}. ${SAVE_ZIP_HINT}`,
   retry: false,
 };
 const CANCELLED: ZipFailure = {
+  localized: (t) => ({ title: t("zip.cancelled"), detail: t("zip.cancelledDetail") }),
   title: "Download cancelled",
   detail: "The ZIP wasn't downloaded. Try again to list its files.",
   retry: true,
 };
 const NETWORK: ZipFailure = {
+  localized: (t) => ({ title: t("zip.network"), detail: t("zip.networkDetail") }),
   title: "Couldn't download this ZIP",
   detail: "Check the connection to this environment and try again.",
   retry: true,
@@ -135,6 +144,10 @@ async function openArchive(bytes: ArrayBuffer): Promise<ZipArchive> {
     files = await boundedZip(bytes);
   } catch (cause) {
     throw new ZipFailureError({
+      localized: (t) => ({
+        title: t("zip.browseFailed"),
+        detail: `${errorMessage(cause, t("zip.damaged"))} ${t("zip.saveHint")}`,
+      }),
       title: "Couldn't browse this ZIP",
       detail: `${errorMessage(cause, "It may be incomplete or damaged.")} ${SAVE_ZIP_HINT}`,
       retry: false,
@@ -239,13 +252,16 @@ function ZipTreeRowView(props: {
   readonly onToggle: (path: string) => void;
   readonly onOpen: (entry: ZipEntry) => void;
 }) {
+  const t = useTranslate();
   const { node, depth } = props.row;
   const entry = node.entry;
   const folder = entry ? null : zipFolderLabel(node.label);
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={entry ? entry.path : `${node.path} folder`}
+      accessibilityLabel={
+        entry ? entry.path : t("mobile.dynamic.ZipArchiveView.param-folder", { path: node.path })
+      }
       accessibilityState={entry ? undefined : { expanded: !props.collapsed }}
       onPress={() => (entry ? props.onOpen(entry) : props.onToggle(node.path))}
       className="mx-2 h-11 flex-row items-center gap-1.5 rounded-lg pr-2.5 active:bg-subtle"
@@ -292,6 +308,7 @@ function ZipArchiveHeader(props: {
   readonly onSave: () => void;
   readonly onRemove: (() => void) | null;
 }) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const isAndroid = Platform.OS === "android";
   return (
@@ -330,17 +347,20 @@ function ZipArchiveHeader(props: {
       ) : (
         <Toolbar placement="right">
           {props.onRemove ? (
-            <Toolbar.Menu accessibilityLabel="ZIP actions" icon="ellipsis">
+            <Toolbar.Menu
+              accessibilityLabel={t("mobile.tools.ZipArchiveView.zip-actions")}
+              icon="ellipsis"
+            >
               <Toolbar.MenuAction icon="square.and.arrow.up" onPress={props.onSave}>
-                Save ZIP
+                {t("mobile.tools.ZipArchiveView.save-zip")}
               </Toolbar.MenuAction>
               <Toolbar.MenuAction icon="trash" destructive onPress={props.onRemove}>
-                Remove from draft
+                {t("mobile.tools.ZipArchiveView.remove-from-draft")}
               </Toolbar.MenuAction>
             </Toolbar.Menu>
           ) : (
             <Toolbar.Button
-              accessibilityLabel="Save ZIP"
+              accessibilityLabel={t("mobile.tools.ZipArchiveView.save-zip")}
               icon="square.and.arrow.up"
               onPress={props.onSave}
             />
@@ -357,6 +377,7 @@ function ZipArchiveProgress(props: {
   readonly timeLeft: string | null;
   readonly onCancel: () => void;
 }) {
+  const t = useTranslate();
   const { timeLeft } = props;
   return (
     <View className="flex-1 justify-center gap-3 bg-sheet px-8">
@@ -364,18 +385,25 @@ function ZipArchiveProgress(props: {
         {formatAttachmentSize(props.receivedBytes)}
         {props.totalBytes > 0 ? (
           <Text className="text-xl text-foreground-muted">
-            {` of ${formatAttachmentSize(props.totalBytes)}`}
+            {t("mobile.dynamic.ZipArchiveView.of-param", {
+              value: formatAttachmentSize(props.totalBytes),
+            })}
           </Text>
         ) : null}
       </Text>
       <Progress
         value={props.totalBytes > 0 ? props.receivedBytes / props.totalBytes : undefined}
-        label="ZIP download progress"
+        label={t("mobile.tools.ZipArchiveView.zip-download-progress")}
       />
       <Text className="text-sm text-foreground-muted">
-        {`Downloading the ZIP so its files can be listed.${timeLeft ? ` ${timeLeft} on this connection.` : ""}`}
+        {t(
+          timeLeft
+            ? "mobile.dynamic.ZipArchiveView.downloadingWithTime"
+            : "mobile.dynamic.ZipArchiveView.downloading",
+          { timeLeft: timeLeft ?? "" },
+        )}
       </Text>
-      <Button label="Cancel" onPress={props.onCancel} />
+      <Button label={t("mobile.tools.ZipArchiveView.cancel")} onPress={props.onCancel} />
     </View>
   );
 }
@@ -385,20 +413,25 @@ function ZipArchiveFailure(props: {
   readonly onRetry: () => void;
   readonly onSave: () => void;
 }) {
+  const t = useTranslate();
   return (
     <View className="flex-1 items-center justify-center bg-sheet px-6">
       <EmptyState
         variant="plain"
-        title={props.failure.title}
-        detail={props.failure.detail}
+        title={props.failure.localized(t).title}
+        detail={props.failure.localized(t).detail}
         action={
           <View className="flex-row gap-3">
             {props.failure.retry ? (
-              <Button tone="primary" label="Try again" onPress={props.onRetry} />
+              <Button
+                tone="primary"
+                label={t("mobile.tools.ZipArchiveView.try-again")}
+                onPress={props.onRetry}
+              />
             ) : null}
             <Button
               tone={props.failure.retry ? "secondary" : "primary"}
-              label="Save ZIP"
+              label={t("mobile.tools.ZipArchiveView.save-zip")}
               onPress={props.onSave}
             />
           </View>
@@ -413,6 +446,7 @@ function ZipArchiveList(props: {
   readonly headerInset: number;
   readonly onOpen: (entry: ZipEntry) => void;
 }) {
+  const t = useTranslate();
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set());
   const { archive } = props;
@@ -445,10 +479,10 @@ function ZipArchiveList(props: {
             <View className="h-[38px] flex-row items-center gap-2 rounded-[10px] bg-subtle px-3">
               <SymbolView name="magnifyingglass" size={15} tintColorClassName="accent-icon-muted" />
               <TextInput
-                accessibilityLabel="Filter files in ZIP"
+                accessibilityLabel={t("mobile.tools.ZipArchiveView.filter-files-in-zip")}
                 autoCapitalize="none"
                 autoCorrect={false}
-                placeholder={`Filter ${fileCount} ${fileCount === 1 ? "file" : "files"}`}
+                placeholder={t("mobile.dynamic.ZipArchiveView.filterCount", { count: fileCount })}
                 placeholderTextColorClassName="accent-placeholder"
                 cursorColorClassName="accent-focus"
                 className="min-w-0 flex-1 font-sans text-[15px] text-foreground"
@@ -458,7 +492,7 @@ function ZipArchiveList(props: {
               {query ? (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Clear filter"
+                  accessibilityLabel={t("mobile.tools.ZipArchiveView.clear-filter")}
                   hitSlop={10}
                   onPress={() => setQuery("")}
                 >
@@ -484,12 +518,25 @@ function ZipArchiveList(props: {
           query ? (
             <EmptyState
               variant="plain"
-              title={`No files match “${query.trim()}”`}
-              detail="The filter checks file names and folder paths."
-              action={<Button label="Clear filter" onPress={() => setQuery("")} />}
+              title={t("mobile.dynamic.ZipArchiveView.no-files-match-param", {
+                value: query.trim(),
+              })}
+              detail={t(
+                "mobile.tools.ZipArchiveView.the-filter-checks-file-names-and-folder-paths",
+              )}
+              action={
+                <Button
+                  label={t("mobile.tools.ZipArchiveView.clear-filter")}
+                  onPress={() => setQuery("")}
+                />
+              }
             />
           ) : (
-            <EmptyState variant="plain" title="This ZIP is empty" detail="It has no files." />
+            <EmptyState
+              variant="plain"
+              title={t("mobile.tools.ZipArchiveView.this-zip-is-empty")}
+              detail={t("mobile.tools.ZipArchiveView.it-has-no-files")}
+            />
           )
         }
       />
@@ -618,7 +665,12 @@ type EntryContent =
   | { readonly status: "loading" }
   | { readonly status: "text"; readonly text: string; readonly truncated: boolean }
   | { readonly status: "file"; readonly uri: string }
-  | { readonly status: "failed"; readonly title: string; readonly message: string };
+  | {
+      readonly status: "failed";
+      readonly localized: (t: TFunction) => { title: string; detail: string };
+      readonly title: string;
+      readonly message: string;
+    };
 
 function ZipEntryView(props: {
   readonly archiveName: string;
@@ -628,6 +680,7 @@ function ZipEntryView(props: {
   readonly maxAttachmentBytes: number | undefined;
   readonly onBack: () => void;
 }) {
+  const t = useTranslate();
   const { entry, draftKey, maxAttachmentBytes } = props;
   const { mimeType } = entry;
   const previewKind = filePreviewKind({ name: entry.name, mimeType });
@@ -640,6 +693,10 @@ function ZipEntryView(props: {
     tooBig
       ? {
           status: "failed",
+          localized: (t) => ({
+            title: t("zip.previewLarge"),
+            detail: t("zip.previewLimit", { size: formatAttachmentSize(ARCHIVE_ENTRY_MAX_BYTES) }),
+          }),
           title: "Too big to preview",
           message: `Previews stop at ${formatAttachmentSize(ARCHIVE_ENTRY_MAX_BYTES)}. Save the file to open it in another app.`,
         }
@@ -679,6 +736,10 @@ function ZipEntryView(props: {
         if (!controller.signal.aborted)
           setContent({
             status: "failed",
+            localized: (t) => ({
+              title: t("zip.readFailed"),
+              detail: errorMessage(cause, t("zip.readDetail")),
+            }),
             title: "Couldn't read this file",
             message: errorMessage(cause, "Could not read this file."),
           });
@@ -790,22 +851,27 @@ function ZipEntryView(props: {
         />
       ) : (
         <Toolbar placement="right">
-          <Toolbar.Menu accessibilityLabel="File actions" icon="ellipsis">
+          <Toolbar.Menu
+            accessibilityLabel={t("mobile.tools.ZipArchiveView.file-actions")}
+            icon="ellipsis"
+          >
             {renderedMode ? (
               <Toolbar.MenuAction
                 icon={rendered ? "doc.text" : "eye"}
                 onPress={() => setRendered((value) => !value)}
               >
-                {rendered ? "Show source" : "Show preview"}
+                {rendered
+                  ? t("mobile.dynamic.ZipArchiveView.show-source")
+                  : t("mobile.dynamic.ZipArchiveView.show-preview")}
               </Toolbar.MenuAction>
             ) : null}
             {canAddToChat ? (
               <Toolbar.MenuAction icon="plus.bubble" disabled={busy !== null} onPress={addToChat}>
-                Add to chat
+                {t("mobile.tools.ZipArchiveView.add-to-chat")}
               </Toolbar.MenuAction>
             ) : null}
             <Toolbar.MenuAction icon="square.and.arrow.up" disabled={busy !== null} onPress={save}>
-              Save file
+              {t("mobile.tools.ZipArchiveView.save-file")}
             </Toolbar.MenuAction>
           </Toolbar.Menu>
         </Toolbar>
@@ -814,10 +880,15 @@ function ZipEntryView(props: {
         <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6">
           <EmptyState
             variant="plain"
-            title={content.title}
-            detail={content.message}
+            title={content.localized(t).title}
+            detail={content.localized(t).detail}
             action={
-              <Button tone="primary" label="Save file" loading={busy === "save"} onPress={save} />
+              <Button
+                tone="primary"
+                label={t("mobile.tools.ZipArchiveView.save-file")}
+                loading={busy === "save"}
+                onPress={save}
+              />
             }
           />
         </ScrollView>
@@ -825,8 +896,15 @@ function ZipEntryView(props: {
         // Closing the viewer stays here so Save and Add to chat remain reachable.
         <View className="flex-1 items-center justify-center bg-sheet px-6">
           <EmptyState
-            title={viewerError ? "No preview for this file" : entry.name}
-            detail={viewerError ?? "Open it in the file viewer, save it, or add it to chat."}
+            title={
+              viewerError ? t("mobile.dynamic.ZipArchiveView.no-preview-for-this-file") : entry.name
+            }
+            detail={
+              viewerError ??
+              t(
+                "mobile.dynamic.ZipArchiveView.open-it-in-the-file-viewer-save-it-or-add-it-to-chat",
+              )
+            }
             actionLabel="Open in file viewer"
             onAction={openViewer}
           />

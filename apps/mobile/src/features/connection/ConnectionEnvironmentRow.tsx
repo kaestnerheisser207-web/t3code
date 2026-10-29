@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { ConnectionTraceId } from "./ConnectionTraceId";
 import { SymbolView } from "../../components/ui/AppSymbol";
@@ -25,15 +27,21 @@ import { ConnectionFormField } from "./ConnectionFormField";
 import { ConnectionStatusDot } from "./ConnectionStatusDot";
 import { environmentStatusText } from "./environmentStatusText";
 
-function connectionStatusLabel(environment: ConnectedEnvironmentSummary): string | null {
+function connectionStatusLabel(
+  environment: ConnectedEnvironmentSummary,
+  t: TFunction,
+): string | null {
   if (!environment.isEnabled && environment.connectionState !== "unsupported") {
-    return "Off";
+    return t("settings.extra.off");
   }
-  return environmentStatusText({
-    phase: environment.connectionState,
-    error: environment.connectionError,
-    traceId: environment.connectionErrorTraceId,
-  });
+  return environmentStatusText(
+    {
+      phase: environment.connectionState,
+      error: environment.connectionError,
+      traceId: environment.connectionErrorTraceId,
+    },
+    t,
+  );
 }
 
 export function ConnectionEnvironmentRow(props: {
@@ -49,6 +57,7 @@ export function ConnectionEnvironmentRow(props: {
     updates: { readonly label: string; readonly displayUrl: string },
   ) => Promise<AtomCommandResult<unknown, unknown>>;
 }) {
+  const t = useTranslate();
   const [label, setLabel] = useState(props.environment.environmentLabel);
   const [url, setUrl] = useState(props.environment.displayUrl);
   const serverConfig = useAtomValue(
@@ -64,7 +73,7 @@ export function ConnectionEnvironmentRow(props: {
     presentation,
   );
   const enabled = props.environment.isEnabled && !unsupported;
-  const statusLabel = connectionStatusLabel(props.environment);
+  const statusLabel = connectionStatusLabel(props.environment, t);
   const statusTraceId = enabled ? props.environment.connectionErrorTraceId : null;
   const hasConnectionFailure = enabled && props.environment.connectionError !== null;
   const freeze = enabled
@@ -85,8 +94,8 @@ export function ConnectionEnvironmentRow(props: {
     }
     const error = Cause.squash(result.cause);
     Dialog.alert(
-      "Could not update environment",
-      error instanceof Error ? error.message : "The environment could not be updated.",
+      t("mobile.connection.updateFailed"),
+      error instanceof Error ? error.message : t("mobile.connection.updateDetail"),
     );
   };
 
@@ -98,8 +107,15 @@ export function ConnectionEnvironmentRow(props: {
           accessibilityRole="button"
           accessibilityLabel={
             props.opensDetails
-              ? `Manage ${props.environment.environmentLabel}`
-              : `${props.expanded ? "Collapse" : "Expand"} details for ${props.environment.environmentLabel}`
+              ? t("mobile.dynamic.ConnectionEnvironmentRow.manage-param", {
+                  environmentLabel: props.environment.environmentLabel,
+                })
+              : t(
+                  props.expanded
+                    ? "mobile.dynamic.ConnectionEnvironmentRow.collapseDetails"
+                    : "mobile.dynamic.ConnectionEnvironmentRow.expandDetails",
+                  { environmentLabel: props.environment.environmentLabel },
+                )
           }
           onPress={props.onToggle}
         >
@@ -131,7 +147,9 @@ export function ConnectionEnvironmentRow(props: {
               <Text className="text-xs text-danger-foreground">{diagnosis.headline}</Text>
               {connectionState.attempt > 0 ? (
                 <Text className="text-xs text-foreground-muted">
-                  {`Retrying · attempt ${connectionState.attempt}`}
+                  {t("mobile.dynamic.ConnectionEnvironmentRow.retrying-attempt-param", {
+                    attempt: connectionState.attempt,
+                  })}
                 </Text>
               ) : null}
             </>
@@ -165,7 +183,9 @@ export function ConnectionEnvironmentRow(props: {
         </Pressable>
 
         <ThemedSwitch
-          accessibilityLabel={`Enable ${props.environment.environmentLabel}`}
+          accessibilityLabel={t("mobile.dynamic.ConnectionEnvironmentRow.enable-param", {
+            environmentLabel: props.environment.environmentLabel,
+          })}
           style={{ alignSelf: "center" }}
           disabled={unsupported && !canRetry}
           onValueChange={(next) => props.onSetEnabled(props.environment.environmentId, next)}
@@ -175,8 +195,15 @@ export function ConnectionEnvironmentRow(props: {
           accessibilityRole="button"
           accessibilityLabel={
             props.opensDetails
-              ? `Manage ${props.environment.environmentLabel}`
-              : `${props.expanded ? "Collapse" : "Expand"} details for ${props.environment.environmentLabel}`
+              ? t("mobile.dynamic.ConnectionEnvironmentRow.manage-param", {
+                  environmentLabel: props.environment.environmentLabel,
+                })
+              : t(
+                  props.expanded
+                    ? "mobile.dynamic.ConnectionEnvironmentRow.collapseDetails"
+                    : "mobile.dynamic.ConnectionEnvironmentRow.expandDetails",
+                  { environmentLabel: props.environment.environmentLabel },
+                )
           }
           onPress={props.onToggle}
           style={{
@@ -210,15 +237,17 @@ export function ConnectionEnvironmentRow(props: {
           ) : null}
           {props.environment.isRelayManaged ? (
             <Text className="text-sm text-foreground-muted">
-              Managed by T3 Connect. Tunnel details update automatically.
+              {t(
+                "mobile.connect.ConnectionEnvironmentRow.managed-by-t3-connect-tunnel-details-update-automatically",
+              )}
             </Text>
           ) : (
             <>
               <ConnectionFormField
-                label="Label"
+                label={t("mobile.connect.ConnectionEnvironmentRow.label")}
                 autoCapitalize="words"
                 autoCorrect={false}
-                placeholder="My MacBook"
+                placeholder={t("mobile.connect.ConnectionEnvironmentRow.my-macbook")}
                 value={label}
                 onChangeText={setLabel}
               />
@@ -240,7 +269,7 @@ export function ConnectionEnvironmentRow(props: {
               {props.environment.isRelayManaged ? null : (
                 <View className="flex-1">
                   <Button
-                    label="Save"
+                    label={t("mobile.connect.ConnectionEnvironmentRow.save")}
                     tone="primary"
                     fullWidth
                     onPress={() => {
@@ -250,14 +279,16 @@ export function ConnectionEnvironmentRow(props: {
                 </View>
               )}
               <IconButton
-                accessibilityLabel="Reconnect environment"
+                accessibilityLabel={t(
+                  "mobile.connect.ConnectionEnvironmentRow.reconnect-environment",
+                )}
                 icon="arrow.clockwise"
                 variant="tonal"
                 disabled={!enabled}
                 onPress={() => props.onReconnect(props.environment.environmentId)}
               />
               <IconButton
-                accessibilityLabel="Remove environment"
+                accessibilityLabel={t("mobile.connect.ConnectionEnvironmentRow.remove-environment")}
                 icon="trash"
                 variant="danger"
                 onPress={() => props.onRemove(props.environment.environmentId)}
@@ -277,7 +308,7 @@ export function ConnectionEnvironmentRow(props: {
                     type="monochrome"
                   />
                   <Text className="text-xs font-t3-bold tracking-[0.8px] uppercase text-primary-foreground">
-                    Save
+                    {t("mobile.connect.ConnectionEnvironmentRow.save")}
                   </Text>
                 </Pressable>
               )}

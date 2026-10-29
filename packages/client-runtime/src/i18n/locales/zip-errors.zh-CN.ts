@@ -1,0 +1,16 @@
+export const zipErrorsZhCN = {
+  "zip.saveHint": "将 ZIP 保存后，即可在其他应用中打开。",
+  "zip.tooLarge": "文件过大，无法在此浏览",
+  "zip.browseLimit": "最多可浏览 {{size}}。请保存 ZIP 后在其他应用中打开。",
+  "zip.cancelled": "下载已取消",
+  "zip.cancelledDetail": "该 ZIP 未下载。请重试以列出其文件。",
+  "zip.network": "无法下载此 ZIP",
+  "zip.networkDetail": "请检查与此环境的连接后重试。",
+  "zip.browseFailed": "无法浏览此 ZIP",
+  "zip.damaged": "该文件可能不完整或已损坏。",
+  "zip.previewLarge": "文件过大，无法预览",
+  "zip.previewLimit": "预览上限为 {{size}}。请保存文件后在其他应用中打开。",
+  "zip.readFailed": "无法读取此文件",
+  "zip.readDetail": "无法读取此文件。",
+  "palette.theme.forMode": "适用于{{mode}}模式",
+} as const;

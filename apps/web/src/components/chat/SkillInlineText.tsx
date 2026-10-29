@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ScopedThreadRef, ServerProviderSkill } from "@t3tools/contracts";
 import { formatProviderSkillDisplayName } from "@t3tools/shared/inlineSkills";
 import { Children, cloneElement, isValidElement, type ReactNode } from "react";
@@ -89,6 +90,7 @@ export function SkillChipPopover(props: {
   copyMarkdown?: string | undefined;
   onViewInstructions: (() => void) | undefined;
 }) {
+  const t = useTranslate();
   return (
     <ContextChipPopover
       kind="skill"
@@ -99,10 +101,13 @@ export function SkillChipPopover(props: {
     >
       <div className="space-y-3 p-2 text-sm">
         <p className="font-medium">{props.label}</p>
-        <p>{props.description || "No description is available for this skill."}</p>
+        <p>
+          {props.description ||
+            t("web.dynamic.SkillInlineText.no-description-is-available-for-this-skill")}
+        </p>
         {props.onViewInstructions ? (
           <Button variant="outline" size="sm" onClick={props.onViewInstructions}>
-            View instructions
+            {t("web.ui.SkillInlineText.view-instructions")}
           </Button>
         ) : null}
       </div>

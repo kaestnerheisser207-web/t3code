@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { ExternalLinkIcon, PaperclipIcon } from "lucide-react";
 import { markdownImageSourceFragment } from "@t3tools/client-runtime/markdown-images";
 import {
@@ -37,6 +39,7 @@ function PullRequestHostVideo({
   url: string;
   fetchUrl: string;
 }) {
+  const t = useTranslate();
   const resource: AssetResource = { _tag: SOURCE_CONTROL_MEDIA_ASSET, cwd, url: fetchUrl };
   const assetUrl = useAssetUrlState(environmentId, resource);
   const refreshAssetUrl = useAssetUrlRefresh(environmentId, resource);
@@ -46,7 +49,7 @@ function PullRequestHostVideo({
     <MediaVideoPlayer
       src={src === null ? null : src + markdownImageSourceFragment(url)}
       originalUrl={url}
-      label="Pull request video"
+      label={t("web.ui.PullRequestMarkdown.pull-request-video")}
       className="w-full"
       videoClassName="rounded-lg border border-border/60"
       onRetry={refreshAssetUrl}
@@ -67,6 +70,7 @@ export function PullRequestMarkdown({
   threadRef?: ScopedThreadRef | null;
   className?: string;
 }) {
+  const t = useTranslate();
   const segments = splitPullRequestBody(text);
   const context = useContext(PullRequestMarkdownContext);
   const autolinks = context?.autolinks;
@@ -115,7 +119,7 @@ export function PullRequestMarkdown({
               key={`${segment.id}:${segment.url}`}
               src={segment.url}
               originalUrl={segment.url}
-              label="Pull request video"
+              label={t("web.ui.PullRequestMarkdown.pull-request-video")}
               className="w-full"
               videoClassName="rounded-lg border border-border/60"
             />
@@ -132,7 +136,13 @@ export function PullRequestMarkdown({
           >
             <PaperclipIcon aria-hidden className="size-3.5 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1 truncate">
-              Open attachment on {hostMedia?.definition.label ?? new URL(segment.url).hostname}
+              <Trans
+                t={t}
+                i18nKey="web.rich.PullRequestMarkdown.open-attachment-on-part"
+                components={{
+                  value0: <>{hostMedia?.definition.label ?? new URL(segment.url).hostname}</>,
+                }}
+              />
             </span>
             <ExternalLinkIcon aria-hidden className="size-3 shrink-0 text-muted-foreground" />
           </a>

@@ -61,6 +61,7 @@ import {
 } from "~/state/session";
 import { environmentIdsKey } from "~/state/environmentAtomList";
 import { appAtomRegistry } from "~/rpc/atomRegistry";
+import { readBrowserClientSettings } from "~/clientPersistenceStorage";
 
 const CLIENT_SETTINGS_PERSISTENCE_ERROR_SCOPE = "[CLIENT_SETTINGS]";
 
@@ -263,6 +264,14 @@ function splitPatch(patch: UnifiedSettingsPatch): {
 
 export function getClientSettings(): ClientSettings {
   return getClientSettingsSnapshot();
+}
+
+export async function refreshBrowserLanguagePreference(): Promise<void> {
+  await hydrateClientSettings();
+  const languagePreference = readBrowserClientSettings()?.languagePreference ?? "en";
+  if (getClientSettingsSnapshot().languagePreference !== languagePreference) {
+    replaceClientSettingsSnapshot({ ...getClientSettingsSnapshot(), languagePreference });
+  }
 }
 
 export function isClientSettingsHydrated(): boolean {

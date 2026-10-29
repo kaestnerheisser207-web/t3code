@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAndroidFloatingTabs } from "../settings/appearance/AppearancePreferencesProvider";
 import { WorkspaceNoTabs } from "./WorkspaceNoTabs";
 import { useEnabledNavigationTabs } from "./navigation-tabs";
@@ -23,6 +24,7 @@ import type { WorkspaceTab } from "./workspace-tabs-state";
 const TABS: readonly WorkspaceTab[] = NAVIGATION_TAB_ORDER;
 
 export function WorkspaceRootScreen() {
+  const t = useTranslate();
   const floatingTabsEnabled = useAndroidFloatingTabs();
   const { layout, startNewTask } = useAdaptiveWorkspaceLayout();
   const workspace = useWorkspaceTabs()!;
@@ -61,11 +63,15 @@ export function WorkspaceRootScreen() {
           ) : (
             <>
               <NativeStackScreenOptions options={{ headerShown: false }} />
-              <AndroidScreenHeader title="Pull requests" />
+              <AndroidScreenHeader
+                title={t("mobile.surfaces.WorkspaceRootScreen.android.pull-requests")}
+              />
               <View className="flex-1 items-center justify-center px-10">
                 <EmptyState
-                  title="Select a pull request"
-                  detail="Choose a pull request from the sidebar to review it."
+                  title={t("mobile.surfaces.WorkspaceRootScreen.android.select-a-pull-request")}
+                  detail={t(
+                    "mobile.surfaces.WorkspaceRootScreen.android.choose-a-pull-request-from-the-sidebar-to-review-it",
+                  )}
                   variant="plain"
                 />
               </View>

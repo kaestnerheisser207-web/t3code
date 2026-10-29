@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { Button } from "./ui/Button";
 import * as Dialog from "./ui/Dialog";
 import { useEffect, useEffectEvent } from "react";
@@ -16,6 +17,7 @@ function PdfDocumentPreview(props: {
   readonly source: ResolvedFilePreviewSource;
   readonly onRequestClose: () => void;
 }) {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
   return (
     <Modal
@@ -32,7 +34,11 @@ function PdfDocumentPreview(props: {
           <Text className="flex-1 font-t3-semibold text-foreground" numberOfLines={1}>
             {props.source.name ?? "PDF"}
           </Text>
-          <ControlPill label="Close" variant="pill" onPress={props.onRequestClose} />
+          <ControlPill
+            label={t("mobile.common.FilePreview.close")}
+            variant="pill"
+            onPress={props.onRequestClose}
+          />
         </View>
         <PdfPreview uri={props.source.uri} />
       </View>
@@ -45,6 +51,7 @@ function DocumentPreview(props: {
   readonly onRequestClose: () => void;
   readonly onOpenError?: (error: unknown) => void;
 }) {
+  const t = useTranslate();
   const { uri, name } = props.source;
   const onRequestClose = useEffectEvent(props.onRequestClose);
   const onOpenError = useEffectEvent((error: unknown) => {
@@ -82,12 +89,18 @@ function DocumentPreview(props: {
     <Modal transparent animationType="fade" onRequestClose={props.onRequestClose}>
       <View className="flex-1 items-center justify-center bg-backdrop p-6">
         <View className="w-full max-w-sm gap-4 rounded-2xl bg-sheet-solid p-6">
-          <Text className="font-t3-semibold text-foreground">Opening document…</Text>
+          <Text className="font-t3-semibold text-foreground">
+            {t("mobile.common.FilePreview.opening-document")}
+          </Text>
           <Text className="text-foreground-muted" numberOfLines={2}>
-            {name ?? "Document"}
+            {name ?? t("mobile.dynamic.FilePreview.document")}
           </Text>
           <View className="items-end">
-            <Button label="Cancel" tone="text" onPress={props.onRequestClose} />
+            <Button
+              label={t("mobile.common.FilePreview.cancel")}
+              tone="text"
+              onPress={props.onRequestClose}
+            />
           </View>
         </View>
       </View>

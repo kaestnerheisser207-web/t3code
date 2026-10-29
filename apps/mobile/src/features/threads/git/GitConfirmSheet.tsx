@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n";
 import { resolveDefaultBranchActionDialogCopy } from "@t3tools/client-runtime/state/vcs";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { resolveAutoFeatureBranchName } from "@t3tools/shared/git";
@@ -29,6 +30,7 @@ type GitConfirmSheetProps = StaticScreenProps<{
 }>;
 
 export function GitConfirmSheet(props: GitConfirmSheetProps) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
@@ -56,14 +58,17 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
   const copy = useMemo(
     () =>
       confirmAction
-        ? resolveDefaultBranchActionDialogCopy({
-            action: confirmAction,
-            branchName,
-            includesCommit,
-            terminology,
-          })
+        ? resolveDefaultBranchActionDialogCopy(
+            {
+              action: confirmAction,
+              branchName,
+              includesCommit,
+              terminology,
+            },
+            t,
+          )
         : null,
-    [branchName, confirmAction, includesCommit, terminology],
+    [branchName, confirmAction, includesCommit, terminology, t],
   );
 
   const continuePendingAction = async () => {
@@ -130,7 +135,7 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
       ) : null}
       {Platform.OS === "android" ? (
         <AndroidSheetHeader
-          title="Confirm action"
+          title={t("mobile.threads.GitConfirmSheet.confirm-action")}
           onBack={() => navigation.goBack()}
           hideBottomBorder
         />
@@ -153,14 +158,14 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
           <View className="android:gap-2 android:rounded-[20px] android:bg-card android:p-3 ios:items-center ios:gap-1 ios:px-5 ios:pb-3 ios:pt-4">
             {Platform.OS !== "android" ? (
               <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
-                Confirm
+                {t("mobile.threads.GitConfirmSheet.confirm")}
               </Text>
             ) : null}
             <Text className="android:text-xl android:font-t3-medium ios:text-center ios:text-3xl ios:font-t3-bold">
-              {copy?.title ?? "Run action on default branch?"}
+              {copy?.title ?? t("mobile.dynamic.GitConfirmSheet.run-action-on-default-branch")}
             </Text>
             <Text className="text-foreground-secondary leading-normal android:text-base ios:text-center ios:text-sm ios:font-medium">
-              {copy?.description ?? "Choose how to continue."}
+              {copy?.description ?? t("mobile.dynamic.GitConfirmSheet.choose-how-to-continue")}
             </Text>
           </View>
 
@@ -174,13 +179,13 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
           >
             <SheetActionButton
               icon="arrow.right.circle"
-              label={copy?.continueLabel ?? "Continue"}
+              label={copy?.continueLabel ?? t("mobile.dynamic.GitConfirmSheet.continue")}
               disabled={!canWriteSourceControl}
               onPress={() => void continuePendingAction()}
             />
             <SheetActionButton
               icon="arrow.branch"
-              label="Feature branch & continue"
+              label={t("mobile.threads.GitConfirmSheet.feature-branch-continue")}
               disabled={!canChangeThreadBranch}
               tone="primary"
               onPress={() => void movePendingActionToFeatureBranch()}

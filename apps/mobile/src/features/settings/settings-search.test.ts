@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vite-plus/test";
 
 import { filterSettingsSections } from "./settings-search";
+import { createI18n } from "@t3tools/client-runtime/i18n";
+import { localizeSettingsSections } from "./settingsLabels";
 
 const SECTIONS = [
   { rows: [{ id: "usage", label: "Usage" }] },
@@ -64,5 +66,17 @@ describe("filterSettingsSections", () => {
 
   it("drops sections that start empty", () => {
     expect(filterSettingsSections([{ rows: [] }, ...SECTIONS], "").length).toBe(SECTIONS.length);
+  });
+
+  it("finds a translated page by its Chinese label and original English label", () => {
+    const i18n = createI18n("zh-CN");
+    const sections = localizeSettingsSections(SECTIONS, i18n.getFixedT("zh-CN"));
+    for (const query of ["外观", "Appearance", "中文", "language"]) {
+      expect(
+        filterSettingsSections(sections, query).flatMap((section) =>
+          section.rows.map((row) => row.id),
+        ),
+      ).toContain("SettingsAppearance");
+    }
   });
 });

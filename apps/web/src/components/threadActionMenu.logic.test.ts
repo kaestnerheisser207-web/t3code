@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { describe, expect, it } from "vite-plus/test";
 
 import { buildThreadActionMenuItems, type ThreadActionMenuState } from "./threadActionMenu.logic";
@@ -58,6 +59,37 @@ describe("buildThreadActionMenuItems", () => {
             "delete",
           ];
       expect(items.filter((item) => item.disabled).map((item) => item.id)).toEqual(expected);
+      const translated = buildThreadActionMenuItems(
+        {
+          ...baseState,
+          canOperate: false,
+          isPinned: reversed,
+          isSettled: reversed,
+          isSnoozed: reversed,
+        },
+        createI18n("zh-CN").t,
+      );
+      expect(translated.filter((item) => item.disabled).map((item) => item.id)).toEqual(expected);
+      expect(
+        translated.map((item) => ({
+          id: item.id,
+          children: item.children?.map((child) => ({
+            id: child.id,
+            disabled: child.disabled,
+            checked: child.checked,
+          })),
+        })),
+      ).toEqual(
+        items.map((item) => ({
+          id: item.id,
+          children: item.children?.map((child) => ({
+            id: child.id,
+            disabled: child.disabled,
+            checked: child.checked,
+          })),
+        })),
+      );
+
       expect(
         items.find((item) => item.id === "snooze")?.children?.every((child) => child.disabled) ??
           true,

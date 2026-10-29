@@ -1,3 +1,5 @@
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { RegistryContext, useAtomValue } from "@effect/atom-react";
 import { useNavigation } from "@react-navigation/native";
@@ -31,6 +33,7 @@ export function usePullRequestListActions(
     patch: Partial<EnvironmentPullRequestListEntry>,
   ) => void,
 ) {
+  const t = useTranslate();
   const registry = use(RegistryContext);
   const navigation = useNavigation();
   const selectDetail = useSelectWorkspaceDetail();
@@ -78,7 +81,9 @@ export function usePullRequestListActions(
           !pr.capabilities.reviewers.request ||
           !pr.viewerPermissions.requestReviewers
         )
-          throw new Error(`Review requests aren't available for this ${terminology.singular}.`);
+          throw new Error(
+            t("pr.action.reviewUnavailable", { kind: sourceControlTerm(t, terminology.singular) }),
+          );
         if (Platform.OS === "android") {
           selectDetail(
             { name: "PullRequest", params: params(entry) },
@@ -91,7 +96,9 @@ export function usePullRequestListActions(
         !registry.get(composerPullRequests.runAction.permissionAtom(environmentId)) ||
         !canPerformPullRequestAction(pr, action)
       )
-        throw new Error(`This action isn't available for this ${terminology.singular}.`);
+        throw new Error(
+          t("pr.action.unavailable", { kind: sourceControlTerm(t, terminology.singular) }),
+        );
       const result = await run({ ...target, input: { ...target.input, action } });
       if (result._tag === "Failure") throw squashAtomCommandFailure(result);
       onChanged(
@@ -108,8 +115,8 @@ export function usePullRequestListActions(
     if (AsyncResult.isFailure(result)) {
       const cause = squashAtomCommandFailure(result);
       Dialog.alert(
-        `Couldn't update this ${terminology.singular}`,
-        cause instanceof Error ? cause.message : "Try again.",
+        t("pr.action.updateFailed", { kind: sourceControlTerm(t, terminology.singular) }),
+        cause instanceof Error ? cause.message : t("settings.support.try-again"),
       );
     }
   };
@@ -141,9 +148,10 @@ export function usePullRequestListActions(
     const label = pullRequestActionLabel(
       supported,
       sourceControlClients.get(entry.provider).changeRequest,
+      t,
     );
     Dialog.alert(`${label}?`, `#${entry.number} · ${entry.title}`, [
-      { text: "Cancel", style: "cancel" },
+      { text: t("composer.ui.cancel"), style: "cancel" },
       {
         text: label,
         style: supported === "close" ? "destructive" : "default",
@@ -156,24 +164,24 @@ export function usePullRequestListActions(
     return [
       {
         id: "open",
-        title: `Open ${terminology.singular}`,
+        title: t("pr.action.open", { kind: sourceControlTerm(t, terminology.singular) }),
         image: Platform.OS === "ios" ? "arrow.up.right" : "open_in_new",
       },
       ...(writableEnvironments.has(entry.environmentId) && entry.state === "open"
         ? [
             {
               id: "request-review",
-              title: "Request review",
+              title: t("mobile.review.PullRequestReviewersScreen.request-review"),
               image: Platform.OS === "ios" ? "person.badge.plus" : "person_add",
             },
             {
               id: entry.isDraft ? "ready" : "draft",
-              title: entry.isDraft ? "Mark ready for review" : "Convert to draft",
+              title: entry.isDraft ? t("pr.action.ready") : t("pr.action.draft"),
               image: Platform.OS === "ios" ? "pencil" : "edit",
             },
             {
               id: "close",
-              title: pullRequestActionLabel("close", terminology),
+              title: pullRequestActionLabel("close", terminology, t),
               image: Platform.OS === "ios" ? "xmark" : "close",
               attributes: { destructive: true },
             },
@@ -182,20 +190,24 @@ export function usePullRequestListActions(
           ? [
               {
                 id: "reopen",
-                title: pullRequestActionLabel("reopen", terminology),
+                title: pullRequestActionLabel("reopen", terminology, t),
                 image: Platform.OS === "ios" ? "arrow.clockwise" : "refresh",
               },
             ]
           : []),
       {
         id: "share",
-        title: "Share…",
+        title: t("mobile.review.PullRequestRouteScreen.share"),
         image: Platform.OS === "ios" ? "square.and.arrow.up" : "share",
       },
-      { id: "copy", title: "Copy link", image: Platform.OS === "ios" ? "link" : "link" },
+      {
+        id: "copy",
+        title: t("mobile.review.PullRequestRouteScreen.copy-link"),
+        image: Platform.OS === "ios" ? "link" : "link",
+      },
       {
         id: "provider",
-        title: openOnProviderLabel(entry.provider),
+        title: openOnProviderLabel(entry.provider, t),
         image: Platform.OS === "ios" ? "safari" : "open_in_browser",
       },
     ];

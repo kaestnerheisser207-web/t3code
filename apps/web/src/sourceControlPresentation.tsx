@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { ElementType } from "react";
 import type { SourceControlProviderInfo } from "@t3tools/contracts";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
@@ -38,23 +39,48 @@ export interface SourceControlPresentation {
 function presentDefinition(
   definition: SourceControlDefinition,
   providerName: string,
+  t?: TFunction,
 ): SourceControlPresentation {
+  const terms = definition.changeRequest;
+  const terminology =
+    t && (terms.shortLabel === "PR" || terms.shortLabel === "MR")
+      ? {
+          ...terms,
+          singular: t(
+            terms.shortLabel === "PR"
+              ? "sourceControl.terms.pullRequest"
+              : "sourceControl.terms.mergeRequest",
+          ),
+          plural: t(
+            terms.shortLabel === "PR"
+              ? "sourceControl.terms.pullRequests"
+              : "sourceControl.terms.mergeRequests",
+          ),
+          shortLabelWithArticle: t(
+            terms.shortLabel === "PR" ? "sourceControl.terms.aPr" : "sourceControl.terms.anMr",
+          ),
+        }
+      : terms;
   return {
     definition,
     providerName,
-    terminology: definition.changeRequest,
+    terminology,
     Icon: sourceControlIcon(definition),
   };
 }
 
 export function getSourceControlPresentation(
   provider: SourceControlProviderInfo | null | undefined,
+  t?: TFunction,
 ): SourceControlPresentation {
   const definition = sourceControlClients.get(provider?.kind);
-  return presentDefinition(definition, provider?.name || definition.label);
+  return presentDefinition(definition, provider?.name || definition.label, t);
 }
 
-export function getSourceControlPresentationForKind(kind: string): SourceControlPresentation {
+export function getSourceControlPresentationForKind(
+  kind: string,
+  t?: TFunction,
+): SourceControlPresentation {
   const definition = sourceControlClients.get(kind);
-  return presentDefinition(definition, definition.label);
+  return presentDefinition(definition, definition.label, t);
 }

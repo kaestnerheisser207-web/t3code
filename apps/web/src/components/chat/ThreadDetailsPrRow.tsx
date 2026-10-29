@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { resolvePullRequestDetailChecks } from "@t3tools/client-runtime/pull-request-checks";
 import {
   capitalizeTerm,
@@ -106,6 +108,7 @@ export function ThreadDetailsPrRow({
   onActed?: () => void;
   onStopWatching?: (() => void) | undefined;
 }) {
+  const t = useTranslate();
   const serverConfigs = useServerConfigs();
   const supportsPullRequests = serverConfigs.get(environmentId) !== undefined;
   const repository = sourceControlClients.repositorySelector(project?.repositoryIdentity);
@@ -223,10 +226,13 @@ export function ThreadDetailsPrRow({
   const statePresentation =
     detail === null
       ? null
-      : resolvePullRequestState({
-          state: detail.state,
-          isDraft: detail.isDraft,
-        });
+      : resolvePullRequestState(
+          {
+            state: detail.state,
+            isDraft: detail.isDraft,
+          },
+          t,
+        );
   const icon = statePresentation ? (
     <statePresentation.Icon
       aria-hidden
@@ -293,7 +299,11 @@ export function ThreadDetailsPrRow({
               <div className="flex min-w-0 items-start gap-2 text-destructive">
                 <TriangleAlertIcon aria-hidden className="mt-0.5 size-3 shrink-0 stroke-current" />
                 <div className="min-w-0 flex-1 wrap-break-word">
-                  Merge conflicts with {detail.baseBranch}
+                  <Trans
+                    t={t}
+                    i18nKey="web.rich.ThreadDetailsPrRow.merge-conflicts-with-part"
+                    components={{ value0: <>{detail.baseBranch}</> }}
+                  />
                 </div>
               </div>
             ) : null}
@@ -301,7 +311,9 @@ export function ThreadDetailsPrRow({
               <FileDiffIcon className="size-3 shrink-0 stroke-muted-foreground" />
               <div className="min-w-0 flex items-baseline gap-1 truncate text-foreground/75">
                 {detail.changedFiles.toLocaleString()}{" "}
-                {detail.changedFiles === 1 ? "file" : "files"}
+                {detail.changedFiles === 1
+                  ? t("web.dynamic.ThreadDetailsPrRow.file")
+                  : t("web.dynamic.ThreadDetailsPrRow.files")}
                 <PullRequestDiffStat additions={detail.additions} deletions={detail.deletions} />
               </div>
             </div>
@@ -373,7 +385,9 @@ export function ThreadDetailsPrRow({
               size="sm"
               part={part}
               className="group/watch"
-              aria-label={`Stop watching #${number}`}
+              aria-label={t("web.dynamic.ThreadDetailsPrRow.stop-watching-param", {
+                number: number,
+              })}
               onClick={onStopWatching}
             />
           }
@@ -391,8 +405,9 @@ export function ThreadDetailsPrRow({
           />
         </TooltipTrigger>
         <TooltipPopup side="top">
-          Watching: the agent wakes when checks finish, someone comments, or the branch conflicts.
-          Click to stop.
+          {t(
+            "web.ui.ThreadDetailsPrRow.watching-the-agent-wakes-when-checks-finish-someone-comments-or-the-branch-conflicts-click-to-stop",
+          )}
         </TooltipPopup>
       </Tooltip>
     ) : null;
@@ -486,14 +501,27 @@ export function ThreadDetailsPrRow({
         <AlertDialog open={confirmingMerge} onOpenChange={(open) => setConfirmingMerge(open)}>
           <AlertDialogPopup>
             <AlertDialogHeader>
-              <AlertDialogTitle>Merge {terminology.singular}?</AlertDialogTitle>
+              <AlertDialogTitle>
+                <Trans
+                  t={t}
+                  i18nKey="web.rich.ThreadDetailsPrRow.merge-part"
+                  components={{ value0: <>{terminology.singular}</> }}
+                />
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                This merges #{number} using {selectedMergeMethod}.
+                <Trans
+                  t={t}
+                  i18nKey="web.rich.ThreadDetailsPrRow.this-merges-part-using-part"
+                  components={{
+                    value0: <>{number}</>,
+                    value1: <>{t(`pr.merge.method.${selectedMergeMethod}`)}</>,
+                  }}
+                />
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogClose render={<Button variant="outline" size="sm" />}>
-                Cancel
+                {t("web.ui.ThreadDetailsPrRow.cancel")}
               </AlertDialogClose>
               <Button
                 size="sm"
@@ -503,7 +531,7 @@ export function ThreadDetailsPrRow({
                   void perform("merge", selectedMergeMethod);
                 }}
               >
-                Merge
+                {t("web.ui.ThreadDetailsPrRow.merge")}
               </Button>
             </AlertDialogFooter>
           </AlertDialogPopup>

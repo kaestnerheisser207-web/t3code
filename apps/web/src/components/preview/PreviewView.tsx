@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { useTranslate } from "../../i18n";
 import { scopedThreadKey } from "@t3tools/client-runtime/environment";
 import { settlePromise } from "@t3tools/client-runtime/state/runtime";
 import { previewStreamDownloadUrl } from "@t3tools/client-runtime/preview/server-browser-stream";
@@ -108,8 +110,11 @@ interface Props {
 function previewProfileName(
   profiles: ReadonlyArray<{ readonly id: string; readonly name: string }>,
   profileId: string,
+  t: TFunction,
 ): string {
-  return profiles.find((profile) => profile.id === profileId)?.name ?? "Removed profile";
+  return (
+    profiles.find((profile) => profile.id === profileId)?.name ?? t("browser.extra.removedProfile")
+  );
 }
 
 const localApi = typeof window === "undefined" ? null : ensureLocalApi();
@@ -145,6 +150,7 @@ export function PreviewView({
   visible,
   onSendAnnotation,
 }: Props) {
+  const t = useTranslate();
   const urlInputRef = useRef<HTMLInputElement | null>(null);
   const [pickActive, setPickActive] = useState(false);
   const canSendAnnotation =
@@ -222,7 +228,7 @@ export function PreviewView({
   const browserDefaults = useBrowserDefaults();
   // IPC interprets undefined profile ids as all profiles.
   const activeProfileId = snapshot?.profileId ?? DEFAULT_BROWSER_PROFILE_ID;
-  const activeProfileName = previewProfileName(browserDefaults.profiles, activeProfileId);
+  const activeProfileName = previewProfileName(browserDefaults.profiles, activeProfileId, t);
   const panelRect = useBrowserSurfaceStore((state) =>
     runtimeTabId ? (state.byTabId[runtimeTabId]?.rect ?? null) : null,
   );
@@ -245,7 +251,7 @@ export function PreviewView({
       if (error instanceof BrowserSettingsReadError) {
         toastManager.add({
           type: "error",
-          title: "Unable to open browser",
+          title: t("browser.extra.openFailed"),
           description: error.message,
         });
       }
@@ -289,8 +295,8 @@ export function PreviewView({
       const error = squashAtomCommandFailure(result);
       toastManager.add({
         type: "error",
-        title: "Unable to change the browser tab",
-        description: error instanceof Error ? error.message : "An error occurred.",
+        title: t("browser.extra.tabFailed"),
+        description: error instanceof Error ? error.message : t("menuFeedback.error"),
       });
       return;
     }
@@ -367,7 +373,9 @@ export function PreviewView({
     snapshot,
   );
   const moveLabel =
-    moveTarget === "server" ? `Open in ${environmentLabel}'s browser` : "Open on this computer";
+    moveTarget === "server"
+      ? t("browser.extra.openRemote", { environment: environmentLabel })
+      : t("browser.extra.openLocal");
   const handleMoveTab = async () => {
     if (!moveTarget || !tabId || !snapshot) return;
     const result = await openPreviewSession({
@@ -390,8 +398,8 @@ export function PreviewView({
       const error = squashAtomCommandFailure(result);
       toastManager.add({
         type: "error",
-        title: "Unable to move the browser tab",
-        description: error instanceof Error ? error.message : "An error occurred.",
+        title: t("browser.extra.moveFailed"),
+        description: error instanceof Error ? error.message : t("menuFeedback.error"),
       });
       return;
     }
@@ -459,8 +467,8 @@ export function PreviewView({
     void operation(runtimeTabId).catch((error) => {
       toastManager.add({
         type: "error",
-        title: "Unable to update popped-out preview",
-        description: error instanceof Error ? error.message : "An error occurred.",
+        title: t("browser.extra.popoutFailed"),
+        description: error instanceof Error ? error.message : t("menuFeedback.error"),
       });
     });
   };
@@ -481,8 +489,8 @@ export function PreviewView({
                 toastId,
                 stackedThreadToast({
                   type: "error",
-                  title: "Unable to copy recording path",
-                  description: "Clipboard API unavailable.",
+                  title: t("browser.extra.recordingPathFailed"),
+                  description: t("browser.extra.noClipboard"),
                   actionProps: revealAction,
                 }),
               );
@@ -503,8 +511,8 @@ export function PreviewView({
                   toastId,
                   stackedThreadToast({
                     type: "error",
-                    title: "Unable to copy recording path",
-                    description: error instanceof Error ? error.message : "An error occurred.",
+                    title: t("browser.extra.recordingPathFailed"),
+                    description: error instanceof Error ? error.message : t("menuFeedback.error"),
                     actionProps: revealAction,
                   }),
                 );
@@ -513,7 +521,7 @@ export function PreviewView({
           };
 
           const revealAction = {
-            children: revealInFileExplorerLabel(navigator.platform),
+            children: revealInFileExplorerLabel(navigator.platform, t),
             onClick: () => void bridge.revealArtifact(artifact.path),
           };
           const updateRecordingToast = () => {
@@ -521,11 +529,11 @@ export function PreviewView({
               toastId,
               stackedThreadToast({
                 type: "success",
-                title: "Recording saved",
+                title: t("browser.extra.recordingSaved"),
                 actionProps: revealAction,
                 data: {
                   secondaryActionProps: {
-                    children: pathCopied ? "Copied!" : "Copy path",
+                    children: pathCopied ? t("browser.extra.copied") : t("panels.copyPath"),
                     disabled: pathCopied,
                     onClick: copyPath,
                   },
@@ -538,11 +546,11 @@ export function PreviewView({
           toastId = toastManager.add(
             stackedThreadToast({
               type: "success",
-              title: "Recording saved",
+              title: t("browser.extra.recordingSaved"),
               actionProps: revealAction,
               data: {
                 secondaryActionProps: {
-                  children: "Copy path",
+                  children: t("panels.copyPath"),
                   onClick: copyPath,
                 },
                 secondaryActionVariant: "outline",
@@ -553,8 +561,8 @@ export function PreviewView({
         (error) => {
           toastManager.add({
             type: "error",
-            title: "Unable to stop recording",
-            description: error instanceof Error ? error.message : "An error occurred.",
+            title: t("browser.extra.stopRecordingFailed"),
+            description: error instanceof Error ? error.message : t("menuFeedback.error"),
           });
         },
       );
@@ -562,11 +570,11 @@ export function PreviewView({
     }
     if (record) {
       void startBrowserRecording(runtimeTabId, threadRef, tabId).catch((error) => {
-        const description = error instanceof Error ? error.message : "An error occurred.";
+        const description = error instanceof Error ? error.message : t("menuFeedback.error");
         if (isBrowserRecordingStartCancelledError(error)) return;
         toastManager.add({
           type: "error",
-          title: "Unable to start recording",
+          title: t("browser.extra.startRecordingFailed"),
           description,
         });
       });
@@ -575,7 +583,7 @@ export function PreviewView({
     void bridge.captureScreenshot(runtimeTabId).then(
       (artifact) => {
         const revealAction = {
-          children: revealInFileExplorerLabel(navigator.platform),
+          children: revealInFileExplorerLabel(navigator.platform, t),
           onClick: () => void bridge.revealArtifact(artifact.path),
         };
         let pathCopied = false;
@@ -584,7 +592,7 @@ export function PreviewView({
 
         const updateScreenshotToast = (
           type: "success" | "error" = "success",
-          title = "Screenshot saved",
+          title: string = t("browser.extra.screenshotSaved"),
           description?: string,
         ) => {
           toastManager.update(
@@ -594,7 +602,7 @@ export function PreviewView({
               title,
               description,
               actionProps: {
-                children: imageCopied ? "Copied!" : "Copy image",
+                children: imageCopied ? t("browser.extra.copied") : t("browser.extra.copyImage"),
                 disabled: imageCopied,
                 onClick: copyImage,
               },
@@ -603,7 +611,7 @@ export function PreviewView({
                   {
                     id: "copy-path",
                     props: {
-                      children: pathCopied ? "Copied!" : "Copy path",
+                      children: pathCopied ? t("browser.extra.copied") : t("panels.copyPath"),
                       disabled: pathCopied,
                       onClick: copyPath,
                     },
@@ -622,8 +630,8 @@ export function PreviewView({
           if (!navigator.clipboard?.writeText) {
             updateScreenshotToast(
               "error",
-              "Unable to copy screenshot path",
-              "Clipboard API unavailable.",
+              t("browser.extra.screenshotPathFailed"),
+              t("browser.extra.noClipboard"),
             );
             return;
           }
@@ -640,8 +648,8 @@ export function PreviewView({
             (error) => {
               updateScreenshotToast(
                 "error",
-                "Unable to copy screenshot path",
-                error instanceof Error ? error.message : "An error occurred.",
+                t("browser.extra.screenshotPathFailed"),
+                error instanceof Error ? error.message : t("menuFeedback.error"),
               );
             },
           );
@@ -660,8 +668,8 @@ export function PreviewView({
             (error) => {
               updateScreenshotToast(
                 "error",
-                "Unable to copy screenshot",
-                error instanceof Error ? error.message : "An error occurred.",
+                t("browser.extra.screenshotCopyFailed"),
+                error instanceof Error ? error.message : t("menuFeedback.error"),
               );
             },
           );
@@ -670,9 +678,9 @@ export function PreviewView({
         toastId = toastManager.add(
           stackedThreadToast({
             type: "success",
-            title: "Screenshot saved",
+            title: t("browser.extra.screenshotSaved"),
             actionProps: {
-              children: "Copy image",
+              children: t("browser.extra.copyImage"),
               onClick: copyImage,
             },
             data: {
@@ -680,7 +688,7 @@ export function PreviewView({
                 {
                   id: "copy-path",
                   props: {
-                    children: "Copy path",
+                    children: t("panels.copyPath"),
                     onClick: copyPath,
                   },
                 },
@@ -696,8 +704,8 @@ export function PreviewView({
       (error) => {
         toastManager.add({
           type: "error",
-          title: "Unable to capture screenshot",
-          description: error instanceof Error ? error.message : "An error occurred.",
+          title: t("browser.extra.screenshotFailed"),
+          description: error instanceof Error ? error.message : t("menuFeedback.error"),
         });
       },
     );
@@ -761,8 +769,8 @@ export function PreviewView({
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Could not capture the picked element",
-            description: "The annotation was kept without the screenshot.",
+            title: t("browser.extra.elementCaptureFailed"),
+            description: t("browser.extra.annotationKept"),
           }),
         );
       }
@@ -973,7 +981,7 @@ export function PreviewView({
           ) : (
             <div className="flex h-full items-center justify-center p-8 text-center">
               <p className="max-w-sm text-sm text-muted-foreground">
-                This tab is open in the T3 Code desktop app.
+                {t("web.ui.PreviewView.this-tab-is-open-in-the-t3-code-desktop-app")}
               </p>
             </div>
           )

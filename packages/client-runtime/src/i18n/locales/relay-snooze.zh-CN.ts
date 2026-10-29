@@ -1,0 +1,15 @@
+export const relaySnoozeZhCN = {
+  "relay.stage.checking": "正在检查当前安装",
+  "relay.stage.waiting_for_lock": "正在等待安装程序",
+  "relay.stage.downloading": "正在下载中继客户端",
+  "relay.stage.verifying": "正在校验下载内容",
+  "relay.stage.installing": "正在安装中继客户端",
+  "relay.stage.validating": "正在验证可执行文件",
+  "relay.stage.activating": "正在激活安装",
+  "snooze.custom.date": "日期和时间",
+  "snooze.custom.duration": "时长",
+  "snooze.custom.minutes": "分钟",
+  "snooze.custom.hours": "小时",
+  "snooze.custom.days": "天",
+  "snooze.custom.title": "自定义稍后处理",
+} as const;

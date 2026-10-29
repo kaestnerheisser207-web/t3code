@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import type { SourceControlProviderKind } from "@t3tools/contracts";
 import { ExternalLinkIcon, TriangleAlertIcon } from "lucide-react";
 
@@ -19,6 +21,7 @@ export function PullRequestDiffUnavailableState({
   url: string;
   onRetry: () => void;
 }) {
+  const t = useTranslate();
   const { providerName, terminology } = getSourceControlPresentationForKind(provider);
   const { title, description } = describePullRequestDiffError(
     error,
@@ -38,20 +41,23 @@ export function PullRequestDiffUnavailableState({
       <div className="flex flex-wrap justify-center gap-2">
         <Button size="sm" variant="default" onClick={onRetry}>
           <RefreshIcon />
-          Try again
+          {t("web.ui.PullRequestDiffUnavailableState.try-again")}
         </Button>
         <Button
           size="sm"
           variant="outline"
           render={<a href={url} target="_blank" rel="noopener noreferrer" />}
         >
-          <ExternalLinkIcon aria-hidden />
-          Open on {providerName}
+          <Trans
+            t={t}
+            i18nKey="web.rich.PullRequestDiffUnavailableState.part-open-on-part"
+            components={{ part0: <ExternalLinkIcon aria-hidden />, value1: <>{providerName}</> }}
+          />
         </Button>
       </div>
       <details className="w-full max-w-lg text-xs text-muted-foreground">
         <summary className="mx-auto w-fit cursor-pointer rounded-sm -outline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring">
-          Technical details
+          {t("web.ui.PullRequestDiffUnavailableState.technical-details")}
         </summary>
         <pre className="scrollbar-gutter-both mt-3 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-muted/40 p-3 text-left font-mono text-xs">
           {error}

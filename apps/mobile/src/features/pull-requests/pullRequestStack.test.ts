@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { ProjectId, type PullRequestStack, type ThreadPullRequestLink } from "@t3tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
@@ -56,6 +57,7 @@ describe("mobile stack merge scope", () => {
       { number: 2, headSha: "sha-2" },
     ]);
     expect(scope.reason).toBeNull();
+    expect(pullRequestStackMerge(stack, 2, GITHUB, createI18n("zh-CN").t)).toEqual(scope);
     expect(pullRequestStackMerge(stack, 3, GITHUB).heads).toHaveLength(3);
   });
   it("excludes already merged layers from the expected head revisions", () => {
@@ -87,6 +89,11 @@ describe("mobile stack merge scope", () => {
       ),
     };
     expect(pullRequestStackMerge(draft, 3, GITHUB).reason).toContain("ready for review");
+    const t = createI18n("zh-CN").t;
+    const translated = pullRequestStackMerge(draft, 3, GITHUB, t);
+    expect(translated.reason).toBe(t("pr.stack.draft"));
+    expect(translated.heads).toEqual(pullRequestStackMerge(draft, 3, GITHUB).heads);
+
     expect(pullRequestStackMerge(draft, 1, GITHUB).reason).toBeNull();
   });
   it("blocks missing revisions and a PR removed from the stack", () => {

@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { memo, useRef, useState, type ReactNode, type KeyboardEvent } from "react";
 import { flushSync } from "react-dom";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-react";
@@ -71,6 +73,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
   preview,
   onClose,
 }: ExpandedImageDialogProps) {
+  const t = useTranslate();
   const [imageOffset, setImageOffset] = useState(0);
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   const [accessibilityDetailsSrc, setAccessibilityDetailsSrc] = useState<string | null>(null);
@@ -172,7 +175,13 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
           if (event.target === event.currentTarget) close();
         }}
       >
-        <DialogTitle className="sr-only">Expanded {mediaLabel} preview</DialogTitle>
+        <DialogTitle className="sr-only">
+          <Trans
+            t={t}
+            i18nKey="web.rich.ExpandedImageDialog.expanded-part-preview"
+            components={{ value0: <>{mediaLabel}</> }}
+          />
+        </DialogTitle>
         <Button
           type="button"
           ref={closeButtonRef}
@@ -180,7 +189,9 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
           variant="media-close"
           className="absolute right-0 top-0 z-20"
           onClick={close}
-          aria-label={`Close ${mediaLabel} preview`}
+          aria-label={t("web.dynamic.ExpandedImageDialog.close-param-preview", {
+            mediaLabel: mediaLabel,
+          })}
         >
           <XIcon />
         </Button>
@@ -190,7 +201,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
             size="icon"
             variant="media-navigation"
             className="left-0 top-auto bottom-0 translate-y-0 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2"
-            aria-label="Previous media"
+            aria-label={t("web.ui.ExpandedImageDialog.previous-media")}
             onClick={() => navigateImage(-1)}
           >
             <ChevronLeftIcon className="size-5" />
@@ -211,8 +222,10 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
               <ExpandedMediaFailure>
                 <p>
                   {openOriginalLink
-                    ? "This image could not be loaded."
-                    : "Image unavailable. The file may have been moved or deleted."}
+                    ? t("web.dynamic.ExpandedImageDialog.this-image-could-not-be-loaded")
+                    : t(
+                        "web.dynamic.ExpandedImageDialog.image-unavailable-the-file-may-have-been-moved-or-deleted",
+                      )}
                 </p>
                 {openOriginalLink}
               </ExpandedMediaFailure>
@@ -266,7 +279,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
             size="icon"
             variant="media-navigation"
             className="right-0 top-auto bottom-0 translate-y-0 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2"
-            aria-label="Next media"
+            aria-label={t("web.ui.ExpandedImageDialog.next-media")}
             onClick={() => navigateImage(1)}
           >
             <ChevronRightIcon className="size-5" />

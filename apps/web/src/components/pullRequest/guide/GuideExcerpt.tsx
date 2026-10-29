@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../../i18n";
 import type {
   DiffLineAnnotation,
   FileDiffContentsLoader,
@@ -140,6 +142,7 @@ export function GuideExcerpt({
   loadDiffFiles: FileDiffContentsLoader;
   onOpenFile: (path: string) => void;
 }) {
+  const t = useTranslate();
   // Keep selections outside ExcerptDiff to survive head reloads.
   const [draft, setDraft] = useState<ExcerptDraft | null>(null);
   const slice = excerptSlice(file, excerpt);
@@ -165,16 +168,28 @@ export function GuideExcerpt({
         />
       ) : loading ? (
         <p className="rounded-lg border border-border/60 px-3 py-2 text-xs text-muted-foreground">
-          Loading {excerpt.path}...
+          <Trans
+            t={t}
+            i18nKey="web.rich.GuideExcerpt.loading-part"
+            components={{ value0: <>{excerpt.path}</> }}
+          />
         </p>
       ) : (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2 text-xs text-muted-foreground">
           <span className="min-w-0 truncate">
-            <span className="font-mono text-foreground">{excerpt.path}</span> lines {excerpt.start}-
-            {excerpt.end} are not in the loaded diff.
+            <Trans
+              t={t}
+              i18nKey="web.rich.GuideExcerpt.part-part-part-lines-part-part-are-not-in-the-loaded-diff"
+              components={{
+                part0: <span className="font-mono text-foreground">{null}</span>,
+                value1: <>{excerpt.path}</>,
+                value2: <>{excerpt.start}</>,
+                value3: <>{excerpt.end}</>,
+              }}
+            />
           </span>
           <Button size="xs" variant="outline" onClick={() => onOpenFile(excerpt.path)}>
-            Open in Code
+            {t("web.ui.GuideExcerpt.open-in-code")}
           </Button>
         </div>
       )}
@@ -203,6 +218,7 @@ function ExcerptDiff({
   commenting: ExcerptCommenting | null;
   onOpenFile: (path: string) => void;
 }) {
+  const t = useTranslate();
   const resolvedTheme = useRenderedAppearance();
   const loadExcerptFiles = excerptLoader(excerpt, slice.rows, loadDiffFiles);
 
@@ -324,7 +340,9 @@ function ExcerptDiff({
                 rangeLabel={`${excerpt.path}:${getReviewPositionAnchor(draft.position).line}`}
                 text=""
                 placeholder={
-                  commenting.canComment ? "Add a comment…" : "Ask the agent about these lines…"
+                  commenting.canComment
+                    ? t("web.dynamic.GuideExcerpt.add-a-comment")
+                    : t("web.dynamic.GuideExcerpt.ask-the-agent-about-these-lines")
                 }
                 submitLabel={commenting.canComment ? "Add to review" : "Ask agent"}
                 {...(commenting.canComment && onAskAgent !== null
@@ -356,18 +374,31 @@ function ExcerptDiff({
         )}
         renderHeaderMetadata={() => (
           <span className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="tabular-nums">
-              {excerpt.side === "old" ? "removed code, " : ""}showing {slice.shown} of {slice.total}{" "}
-              diff lines
-            </span>
-            <Button
-              size="icon-xs"
-              variant="ghost-muted"
-              aria-label={`Open ${excerpt.path} in Code`}
-              onClick={() => onOpenFile(excerpt.path)}
-            >
-              <ArrowUpRightIcon aria-hidden />
-            </Button>
+            <Trans
+              t={t}
+              i18nKey="web.rich.GuideExcerpt.part-part-showing-part-of-part-diff-lines-part-part-part-part"
+              components={{
+                part0: <span className="tabular-nums">{null}</span>,
+                value1: (
+                  <>{excerpt.side === "old" ? t("web.dynamic.GuideExcerpt.removed-code") : ""}</>
+                ),
+                value2: <>{slice.shown}</>,
+                value3: <>{slice.total}</>,
+                part4: (
+                  <Button
+                    size="icon-xs"
+                    variant="ghost-muted"
+                    aria-label={t("web.dynamic.GuideExcerpt.open-param-in-code", {
+                      path: excerpt.path,
+                    })}
+                    onClick={() => onOpenFile(excerpt.path)}
+                  >
+                    {null}
+                  </Button>
+                ),
+                part5: <ArrowUpRightIcon aria-hidden />,
+              }}
+            />
           </span>
         )}
       />

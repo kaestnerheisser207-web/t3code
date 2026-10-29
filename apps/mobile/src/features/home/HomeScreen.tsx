@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useActiveNewTask } from "../../state/active-new-task";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { useAndroidControlSizing } from "../../components/ui/useAndroidControlSizing";
@@ -239,6 +240,7 @@ function renderHomeScrollView(props: ScrollViewProps) {
 }
 
 export function HomeScreen(props: HomeScreenProps) {
+  const t = useTranslate();
   const usesNativeWorkspaceColumns = useNativeWorkspaceColumnsSupported();
   const workspace = useWorkspaceTabs();
   const [initialScrollOffset] = useState(() => workspace?.getScrollOffset("threads") ?? 0);
@@ -681,7 +683,7 @@ export function HomeScreen(props: HomeScreenProps) {
               action={
                 Platform.OS === "android" && !props.catalogState.hasReadyEnvironment ? (
                   <FloatingActionButton
-                    label="Add environment"
+                    label={t("mobile.surfaces.HomeScreen.add-environment")}
                     icon="plus"
                     variant="extended"
                     tone="primary"
@@ -724,26 +726,32 @@ export function HomeScreen(props: HomeScreenProps) {
   const v2ListEmpty =
     hasSearchQuery && threadSearch.isPending ? undefined : hasSearchQuery ? (
       <EmptyState
-        title="No results"
-        detail={`No threads matching "${props.searchQuery}".`}
+        title={t("mobile.surfaces.HomeScreen.no-results")}
+        detail={t("mobile.dynamic.HomeScreen.no-threads-matching-param", {
+          searchQuery: props.searchQuery,
+        })}
         variant={Platform.OS === "android" ? "plain" : undefined}
       />
     ) : v2ScopedProjectGroup !== null ? (
       <EmptyState
-        title={`No threads in ${v2ScopedProjectGroup.title}`}
-        detail="Choose another project or create a new task."
+        title={t("mobile.dynamic.HomeScreen.no-threads-in-param", {
+          title: v2ScopedProjectGroup.title,
+        })}
+        detail={t("mobile.surfaces.HomeScreen.choose-another-project-or-create-a-new-task")}
         variant={Platform.OS === "android" ? "plain" : undefined}
       />
     ) : selectedEnvironmentLabel ? (
       <EmptyState
-        title={`No threads in ${selectedEnvironmentLabel}`}
-        detail="Choose another environment or create a new task."
+        title={t("mobile.dynamic.ThreadNavigationSidebar.no-threads-in-param", {
+          title: selectedEnvironmentLabel,
+        })}
+        detail={t("mobile.surfaces.HomeScreen.choose-another-environment-or-create-a-new-task")}
         variant={Platform.OS === "android" ? "plain" : undefined}
       />
     ) : (
       <EmptyState
-        title="No threads yet"
-        detail="Create a task to start a new coding session."
+        title={t("mobile.surfaces.HomeScreen.no-threads-yet")}
+        detail={t("mobile.surfaces.HomeScreen.create-a-task-to-start-a-new-coding-session")}
         variant={Platform.OS === "android" ? "plain" : undefined}
       />
     );

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ToolCallDiffTarget } from "../../diffPanelStore";
 import { AudioPreviewUnmountContext } from "../files/AudioPreview";
 import { ThreadFindTimelineContext } from "./ThreadFindProvider";
@@ -393,6 +394,7 @@ const ConversationTimeline = memo(function ConversationTimeline({
   topFadeEnabled = false,
   historyControls,
 }: MessagesTimelineProps) {
+  const t = useTranslate();
   const listIdentityKey = displayThreadKey ?? routeThreadKey;
   // Snapshot restore positions on identity changes; ongoing scroll writes must not move them.
   // Find open at the opening is part of the snapshot: opening find later
@@ -674,6 +676,7 @@ const ConversationTimeline = memo(function ConversationTimeline({
   );
   const pendingApprovalRequestIds = new Set(pendingApprovalsByRequestId.keys());
   const rawRows = useIncrementalTimelineRows(`${listIdentityKey}\0${workspaceRoot ?? ""}`, {
+    t,
     timelineEntries,
     pendingApprovalRequestIds,
     latestRun,
@@ -1120,11 +1123,14 @@ const ConversationTimeline = memo(function ConversationTimeline({
       <div className="messages-timeline-row-frame">
         <div className="chat-content-lane pt-1 sm:pt-2">
           <TimelineSystemDivider
-            label="Subagent of"
+            label={t("web.remaining.MessagesTimeline.subagent-of")}
             detail={
               parentThreadLink.environmentLabel === undefined
                 ? parentThreadLink.title
-                : `${parentThreadLink.title} on ${parentThreadLink.environmentLabel}`
+                : t("web.dynamic.MessagesTimeline.param-on-param", {
+                    title: parentThreadLink.title,
+                    environmentLabel: parentThreadLink.environmentLabel,
+                  })
             }
             icon={BotIcon}
             {...(parentThreadLink.open === undefined
@@ -1311,7 +1317,9 @@ const ConversationTimeline = memo(function ConversationTimeline({
           className="flex h-full items-center justify-center ps-(--chat-lane-inset-start) pe-(--chat-lane-inset-end)"
           style={{ paddingBottom: emptyPlaceholderInset }}
         >
-          <p className="text-sm text-muted-foreground">Send a message to start the conversation.</p>
+          <p className="text-sm text-muted-foreground">
+            {t("web.ui.MessagesTimeline.send-a-message-to-start-the-conversation")}
+          </p>
         </div>
       </>
     );
@@ -1406,6 +1414,7 @@ const ConversationTimeline = memo(function ConversationTimeline({
 });
 
 function TimelineHistoryControl(props: MessagesTimelineHistoryControls) {
+  const t = useTranslate();
   if (!props.hasMoreHistory && props.error === null) {
     return null;
   }
@@ -1416,13 +1425,15 @@ function TimelineHistoryControl(props: MessagesTimelineHistoryControls) {
           <button
             type="button"
             disabled={props.loading}
-            aria-label="Load earlier turns"
+            aria-label={t("web.ui.MessagesTimeline.load-earlier-turns")}
             onClick={() => props.onLoadEarlier()}
             className="flex w-full cursor-pointer items-center gap-3 py-1.5 text-muted-foreground text-xs hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-default"
           >
             <span aria-hidden="true" className="h-px flex-1 bg-border/70" />
             <span className="shrink-0">
-              {props.loading ? "Loading earlier turns…" : "Load earlier turns"}
+              {props.loading
+                ? t("web.dynamic.MessagesTimeline.loading-earlier-turns")
+                : t("web.dynamic.MessagesTimeline.load-earlier-turns")}
             </span>
             <span aria-hidden="true" className="h-px flex-1 bg-border/70" />
           </button>
@@ -1562,6 +1573,7 @@ function ContextCompactionTimelineRow({
 }: {
   row: Extract<TimelineRow, { kind: "context-compaction" }>;
 }) {
+  const t = useTranslate();
   const label =
     row.title && row.label.startsWith("Context compacted")
       ? row.title + row.label.slice("Context compacted".length)
@@ -1575,7 +1587,8 @@ function ContextCompactionTimelineRow({
       )}
       {row.tokenCounts ? (
         <>
-          {row.title ?? "Context compacted"} {row.tokenCounts.before}
+          {row.title ?? t("web.dynamic.MessagesTimeline.context-compacted")}{" "}
+          {row.tokenCounts.before}
           <ArrowRightIcon aria-hidden="true" className="size-3" />
           {row.tokenCounts.after} tokens
         </>
@@ -1634,6 +1647,7 @@ function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-
 }
 
 function AttemptFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "attempt-fold" }> }) {
+  const t = useTranslate();
   const ctx = use(TimelineRowCtx);
 
   return (
@@ -1650,7 +1664,9 @@ function AttemptFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "at
         icon={row.expanded ? ChevronDown : ChevronRight}
       />
       <span className="text-xs font-medium text-foreground/80">{row.label}</span>
-      <span className="text-2xs text-muted-foreground">Cut off by a steer</span>
+      <span className="text-2xs text-muted-foreground">
+        {t("web.ui.MessagesTimeline.cut-off-by-a-steer")}
+      </span>
     </button>
   );
 }

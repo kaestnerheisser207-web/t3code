@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { ServerConfig } from "@t3tools/contracts";
 import * as Option from "effect/Option";
 
@@ -64,34 +65,42 @@ export function presentConnectionState(
   }
 }
 
-export function connectionStatusText(connection: EnvironmentConnectionPresentation): string {
+export function connectionStatusText(
+  connection: EnvironmentConnectionPresentation,
+  t?: TFunction,
+): string {
   switch (connection.phase) {
     case "available":
-      return "Available";
+      return t?.("connection.available") ?? "Available";
     case "offline":
-      return "Offline";
+      return t?.("connection.offline") ?? "Offline";
     case "connecting":
-      return "Connecting...";
+      return t?.("connection.connecting") ?? "Connecting...";
     case "reconnecting":
       return connection.error
-        ? `Failed to connect. Reconnecting... Reason: ${connection.error}`
-        : "Reconnecting...";
+        ? (t?.("connection.retryReason", { reason: connection.error }) ??
+            `Failed to connect. Reconnecting... Reason: ${connection.error}`)
+        : (t?.("connection.reconnecting") ?? "Reconnecting...");
     case "connected":
-      return "Connected";
+      return t?.("connection.connected") ?? "Connected";
     case "unsupported":
-      return "Client not supported";
+      return t?.("connection.unsupported") ?? "Client not supported";
     case "error":
       return connection.error
-        ? `Connection failed. Reason: ${connection.error}`
-        : "Connection failed";
+        ? (t?.("connection.failureReason", { reason: connection.error }) ??
+            `Connection failed. Reason: ${connection.error}`)
+        : (t?.("connection.failed") ?? "Connection failed");
   }
 }
 
-export function connectionStatusTitle(connection: EnvironmentConnectionPresentation): string {
+export function connectionStatusTitle(
+  connection: EnvironmentConnectionPresentation,
+  t?: TFunction,
+): string {
   if (connection.phase === "reconnecting" && connection.error) {
-    return "Failed to connect. Reconnecting...";
+    return t?.("connection.retryFailed") ?? "Failed to connect. Reconnecting...";
   }
-  return connectionStatusText({ ...connection, error: null });
+  return connectionStatusText({ ...connection, error: null }, t);
 }
 
 /**

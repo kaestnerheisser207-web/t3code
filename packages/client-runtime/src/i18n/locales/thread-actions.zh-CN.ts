@@ -1,0 +1,23 @@
+import type { threadActionsEn } from "./thread-actions.en.ts";
+export const threadActionsZhCN = {
+  "thread.action.archiveFailed": "无法归档会话",
+  "thread.action.unarchiveFailed": "无法取消归档会话",
+  "thread.action.settleFailed": "无法收起会话",
+  "thread.action.unsettleFailed": "无法取消收起会话",
+  "thread.action.deleteFailed": "无法删除会话",
+  "thread.action.noPermission": "此连接无法更改会话。",
+  "thread.action.deleteTitle": "删除会话？",
+  "thread.action.deleteDescription": "“{{thread}}”将被永久删除，包括其终端历史记录。",
+  "thread.action.delete": "删除",
+  "thread.action.renameFailed": "无法重命名会话",
+  "thread.action.renameError": "无法重命名该会话。",
+  "thread.action.renameTitle": "重命名会话",
+  "thread.action.rename": "重命名",
+  "thread.action.undoUnpinFailed": "无法撤销取消置顶",
+  "thread.action.undoSettleFailed": "无法撤销收起",
+  "thread.action.restoreSnoozeFailed": "无法恢复稍后处理",
+  "thread.action.snoozeFailed": "无法将会话设为稍后处理",
+  "thread.action.snoozeError": "无法将该会话设为稍后处理。",
+  "thread.action.undoFailed": "无法撤销会话操作",
+  "thread.action.tryAgain": "请重试。",
+} as const satisfies Record<keyof typeof threadActionsEn, string>;

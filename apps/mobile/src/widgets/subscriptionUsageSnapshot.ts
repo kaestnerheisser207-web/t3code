@@ -8,13 +8,21 @@ import {
 import type { WidgetTheme } from "./widgetTheme";
 
 export interface SubscriptionUsageSnapshot {
+  language?: "en" | "zh-CN";
   theme?: WidgetTheme;
   url?: string;
   checkedAt: number;
   providers: Array<{
     name: string;
     detail: string;
-    windows: Array<{ kind?: string; label: string; remaining: number; reset: string }>;
+    accountCount?: number;
+    windows: Array<{
+      kind?: string;
+      label: string;
+      remaining: number;
+      reset: string;
+      resetAt?: number;
+    }>;
     expiresAt: number;
     totalWindows: number;
   }>;
@@ -93,6 +101,7 @@ function subscriptionUsageProps(
           .sort((a, b) => a.remainingPercent - b.remainingPercent);
         return {
           name,
+          accountCount: pool.accounts.length,
           detail: !fresh
             ? "Open T3 to refresh"
             : pool.accounts.length > 1
@@ -105,6 +114,7 @@ function subscriptionUsageProps(
                 kind: window.kind,
                 label: window.label,
                 remaining: Math.round(window.remainingPercent),
+                ...(window.resets[0] ? { resetAt: window.resets[0].at } : {}),
                 reset: window.resets[0]
                   ? `Next reset ${new Date(window.resets[0].at).toLocaleString(undefined, {
                       month: "short",

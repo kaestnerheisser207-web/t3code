@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   FULL_ACCESS_OVERRIDE_QUESTION,
   fullAccessOverrideExplanation,
@@ -36,6 +37,7 @@ export const TimelinePendingApprovalRow = memo(function TimelinePendingApprovalR
 }: {
   approval: PendingApproval;
 }) {
+  const t = useTranslate();
   const { respondingRequestIds, canOperateThread, onRespondToApproval } = use(TimelineRowCtx);
   const presentation = APPROVAL_PRESENTATION[approval.requestKind];
   const canRespond = approval.responseCapability === "live";
@@ -76,7 +78,7 @@ export const TimelinePendingApprovalRow = memo(function TimelinePendingApprovalR
             <>
               <span className="inline-flex items-center gap-1 text-warning">
                 <ShieldIcon aria-hidden className="size-3 shrink-0" />
-                Waiting for approval
+                {t("composer.ui.waiting-for-approval")}
               </span>
               {onRespondToApproval ? (
                 <>
@@ -97,7 +99,7 @@ export const TimelinePendingApprovalRow = memo(function TimelinePendingApprovalR
             </>
           ) : (
             <span className="text-warning">
-              Provider process is gone. Interrupt or restart the run to respond.
+              {t("composer.ui.provider-process-is-gone-interrupt-or-restart-the-run-to-respond")}
             </span>
           )}
           {approval.fullAccessOverride ? (

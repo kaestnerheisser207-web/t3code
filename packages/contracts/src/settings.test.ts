@@ -189,6 +189,24 @@ describe("resolveIdleCompaction", () => {
   });
 });
 
+describe("ClientSettings language", () => {
+  it("preserves old settings and round-trips a device-only language choice", () => {
+    expect(decodeClientSettings({}).languagePreference).toBe("en");
+    expect(decodeClientSettingsPatch({})).not.toHaveProperty("languagePreference");
+    for (const languagePreference of ["system", "zh-CN", "en"] as const) {
+      const patch = decodeClientSettingsPatch({ languagePreference });
+      const settings = decodeClientSettings({ ...decodeClientSettings({}), ...patch });
+      expect(decodeClientSettings(encodeClientSettings(settings)).languagePreference).toBe(
+        languagePreference,
+      );
+    }
+    expect(() => decodeClientSettingsPatch({ languagePreference: "zh-TW" })).toThrow();
+    expect(decodeServerSettingsPatch({ languagePreference: "zh-CN" })).not.toHaveProperty(
+      "languagePreference",
+    );
+  });
+});
+
 describe("ClientSettings notifications", () => {
   it("requires opt-in when existing settings omit notification preferences", () => {
     expect(decodeClientSettings({}).notificationMode).toBe("off");

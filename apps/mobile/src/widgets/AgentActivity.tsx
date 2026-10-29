@@ -58,6 +58,19 @@ function AgentActivity(
 ): LiveActivityLayout {
   "widget";
 
+  const chinese = environment.locale === "zh-CN";
+  const statusLabels: Record<string, string> = {
+    Connecting: "正在连接",
+    Working: "处理中",
+    Approval: "待批准",
+    Input: "待输入",
+    Waiting: "等待中",
+    Done: "完成",
+    Failed: "失败",
+    "Out of date": "状态已过时",
+  };
+  const statusLabel = (status: string) => (chinese ? (statusLabels[status] ?? status) : status);
+
   // Hierarchical foregrounds inherit system tint and vibrancy.
   type Foreground = Parameters<typeof foregroundStyle>[0];
   const primaryForeground = { type: "hierarchical", style: "primary" } as const;
@@ -127,24 +140,38 @@ function AgentActivity(
       : tint;
 
   const allDone = props.activeCount === 0;
-  const doneLabel = failedRow ? "Failed" : "Done";
-  const outcomeLabel = failedRow ? "Agent work failed" : "Agent work completed";
+  const doneLabel = statusLabel(failedRow ? "Failed" : "Done");
+  const outcomeLabel = chinese
+    ? failedRow
+      ? "编程代理工作失败"
+      : "编程代理工作已完成"
+    : failedRow
+      ? "Agent work failed"
+      : "Agent work completed";
 
   const agentWord = props.activeCount === 1 ? "agent" : "agents";
   const agentsLabel = allDone
     ? outcomeLabel
     : environment.isStale
-      ? "Agent status out of date"
-      : `${props.activeCount} active ${agentWord}`;
+      ? chinese
+        ? "编程代理状态已过时"
+        : "Agent status out of date"
+      : chinese
+        ? `${props.activeCount} 个活跃编程代理`
+        : `${props.activeCount} active ${agentWord}`;
   const attentionSuffix =
     attentionRows.length > 0
-      ? `${attentionRows.length} need${attentionRows.length === 1 ? "s" : ""} attention`
+      ? chinese
+        ? `${attentionRows.length} 项需要关注`
+        : `${attentionRows.length} need${attentionRows.length === 1 ? "s" : ""} attention`
       : "";
   const activeLabel = allDone
     ? doneLabel
     : environment.isStale
-      ? "Out of date"
-      : `${props.activeCount} active`;
+      ? statusLabel("Out of date")
+      : chinese
+        ? `${props.activeCount} 个活跃`
+        : `${props.activeCount} active`;
   const showCompactGlyph = !attentionRow && !failedRow && !allDone && !environment.isStale;
   const summary = attentionSuffix || activeLabel;
 
@@ -216,7 +243,7 @@ function AgentActivity(
           layoutPriority(1),
         ]}
       >
-        {row.status}
+        {statusLabel(row.status)}
       </Text>
     </HStack>
   );
@@ -313,7 +340,7 @@ function AgentActivity(
             </Text>
             <Spacer minLength={6} />
             <Text modifiers={[font({ size: 11 }), foregroundStyle(phaseTint(row0.phase))]}>
-              {row0.status}
+              {statusLabel(row0.status)}
             </Text>
           </HStack>
         ) : null}
@@ -346,10 +373,10 @@ function AgentActivity(
       >
         {attentionRow
           ? attentionRow.phase === "waiting_for_approval"
-            ? "Approval"
-            : "Input"
+            ? statusLabel("Approval")
+            : statusLabel("Input")
           : failedRow
-            ? "Failed"
+            ? statusLabel("Failed")
             : activeLabel}
       </Text>
     ),

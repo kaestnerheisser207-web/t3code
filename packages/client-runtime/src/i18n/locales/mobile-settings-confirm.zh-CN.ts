@@ -1,0 +1,35 @@
+export const mobileSettingsConfirmZhCN = {
+  "settings.extra.carMicrophone": "车载麦克风",
+  "settings.extra.webhookHint":
+    "每个去重键必须包含有效的请求占位符。合并窗口必须为 10 到 3600 之间的整数秒，或留空。",
+  "settings.extra.signInFailed": "无法更新提供方登录状态。",
+  "settings.extra.off": "已关闭",
+  "settings.extra.signedIn": "已登录",
+  "settings.extra.discovering": "正在检测登录方式…",
+  "settings.extra.notInstalled": "未安装",
+  "settings.extra.notSignedIn": "未登录",
+  "settings.extra.signOutTitle": "退出登录？",
+  "settings.extra.signOutDetail":
+    "在 {{environment}} 上共享此登录状态的运行中会话将停止。会话历史会保留。",
+  "settings.extra.cancel": "取消",
+  "settings.extra.signOut": "退出登录",
+  "settings.extra.changeAccount": "切换账号",
+  "settings.extra.docsFailed": "无法打开提供方文档。",
+  "settings.extra.terminalResponse": "终端响应",
+  "settings.extra.callbackUrl": "最终 localhost URL",
+  "settings.extra.signInPageFailed": "无法打开登录页面。",
+  "settings.extra.groupRepository": "按仓库分组",
+  "settings.extra.groupRepositoryHint": "匹配的仓库会显示为同一个项目。",
+  "settings.extra.groupPath": "按仓库路径分组",
+  "settings.extra.groupPathHint": "保持 monorepo 路径相互独立。",
+  "settings.extra.separate": "保持独立",
+  "settings.extra.separateHint": "每个工作区都显示为独立项目。",
+  "settings.extra.clearCacheTitle": "清除 {{environment}} 的缓存？",
+  "settings.extra.clearCacheDetail":
+    "这会删除该环境的离线会话、服务器元数据和缓存的代码分支。已保存的连接和凭据不受影响。",
+  "settings.extra.clearCache": "清除缓存",
+  "settings.extra.clearAllTitle": "清除所有客户端缓存？",
+  "settings.extra.clearAllDetail":
+    "这会删除所有环境的离线数据。连接、凭据、账号数据和应用偏好不受影响。",
+  "settings.extra.clearAll": "清除所有缓存",
+} as const;

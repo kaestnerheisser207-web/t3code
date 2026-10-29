@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { idleCompactionTitle, idleCompactingLabel } from "@t3tools/client-runtime/i18n";
 import { worktreeSetupAgentStarted } from "@t3tools/client-runtime/worktree-setup";
 import { isLiveSubagentTurnItem } from "@t3tools/client-runtime/state/subagentRuntime";
 import * as DateTime from "effect/DateTime";
@@ -1346,6 +1348,7 @@ function deriveTimelineTurnFolds(
 }
 
 export function deriveMessagesTimelineRows(input: {
+  readonly t?: TFunction;
   timelineEntries: ReadonlyArray<TimelineEntry>;
   pendingApprovalRequestIds?: ReadonlySet<RuntimeRequestId>;
   latestRun?: TimelineLatestRun | null;
@@ -1363,6 +1366,7 @@ export function deriveMessagesTimelineRows(input: {
   availableRevertTurnCounts?: ReadonlySet<number> | undefined;
   worktreeSetup?: WorktreeSetupSnapshot | null;
 }): MessagesTimelineRow[] {
+  const t = input.t;
   const timelineEntries = timelineRowEntries(input.timelineEntries);
   const isPendingApproval = (entry: WorkLogEntry) => {
     const item = entry.projectedItem?.item;
@@ -1560,9 +1564,12 @@ export function deriveMessagesTimelineRows(input: {
   const compactionTitle = (runId: RunId | null | undefined, entryId: string) => {
     if (runId == null) return undefined;
     const reason = compactionRuns.get(runId);
-    if (reason !== undefined) return IDLE_COMPACTION_TITLES[reason];
+    if (reason !== undefined)
+      return t ? idleCompactionTitle(reason, t) : IDLE_COMPACTION_TITLES[reason];
     const age = resumeCompactionAgeByEntryId.get(entryId);
-    return age ? `Context compacted after ${age} idle` : undefined;
+    return age
+      ? (t?.("compaction.afterIdle", { age }) ?? `Context compacted after ${age} idle`)
+      : undefined;
   };
   const activeCompactionEntry = timelineEntries.find(
     (entry): entry is Extract<TimelineEntry, { kind: "work" }> =>
@@ -1717,7 +1724,12 @@ export function deriveMessagesTimelineRows(input: {
         ...(failed ? { failed: true } : {}),
         ...(failure ? { failure } : {}),
         createdAt: timelineEntry.createdAt,
-        label: active && reason ? IDLE_COMPACTING_LABELS[reason] : timelineEntry.entry.label,
+        label:
+          active && reason
+            ? t
+              ? idleCompactingLabel(reason, t)
+              : IDLE_COMPACTING_LABELS[reason]
+            : timelineEntry.entry.label,
         tokenCounts:
           compaction?.type === "compaction" ? contextCompactionTokenCounts(compaction) : null,
         active,
@@ -1951,9 +1963,11 @@ export function deriveMessagesTimelineRows(input: {
           createdAt: timelineEntry.createdAt,
           label: pending
             ? reason
-              ? IDLE_COMPACTING_LABELS[reason]
-              : "Compacting context"
-            : "Context compaction",
+              ? t
+                ? idleCompactingLabel(reason, t)
+                : IDLE_COMPACTING_LABELS[reason]
+              : (t?.("thread.compacting") ?? "Compacting context")
+            : (t?.("thread.compaction") ?? "Context compaction"),
           tokenCounts: null,
           active: pending,
         });

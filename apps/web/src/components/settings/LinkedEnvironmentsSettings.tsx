@@ -1,3 +1,6 @@
+import { Trans } from "react-i18next";
+import { runtimeModeText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { linkRequestFailureMessage } from "@t3tools/client-runtime/link-request";
 import {
@@ -23,7 +26,6 @@ import { peerLinkEnvironment, useLinkableMachines } from "~/state/peerLinks";
 import { useEnvironmentQuery } from "~/state/query";
 import { useEnvironmentScope, usePreparedConnection } from "~/state/session";
 import { useAtomCommand } from "~/state/use-atom-command";
-import { accessConfig } from "../auth/ConnectAgentSurface";
 import { ConnectionStatusDot } from "../ConnectionStatusDot";
 import { Button } from "../ui/button";
 import {
@@ -58,9 +60,10 @@ export function LinkedEnvironmentsSettings({
   readonly environmentLabel: string | null;
   readonly isSearchTarget: boolean;
 }) {
+  const t = useTranslate();
   const links = useEnvironmentQuery(peerLinkEnvironment.list({ environmentId, input: {} }));
   const canLink = useAtomValue(peerLinkEnvironment.link.permissionAtom(environmentId));
-  const search = searchableSetting("linked-environments");
+  const search = searchableSetting("linked-environments", t);
   return (
     <SettingsSection
       {...(isSearchTarget ? { id: search.id } : {})}
@@ -68,13 +71,21 @@ export function LinkedEnvironmentsSettings({
       headerAction={canLink ? <LinkEnvironmentAction environmentId={environmentId} /> : null}
     >
       {links.error ? (
-        <SettingsRow title="Could not load linked environments" description={links.error} />
+        <SettingsRow
+          title={t("settings.pages.LinkedEnvironmentsSettings.could-not-load-linked-environments")}
+          description={links.error}
+        />
       ) : !links.data ? (
-        <SettingsRow title="Loading linked environments…" role="status" />
+        <SettingsRow
+          title={t("settings.pages.LinkedEnvironmentsSettings.loading-linked-environments")}
+          role="status"
+        />
       ) : links.data.links.length === 0 ? (
         <SettingsRow
-          title="No linked environments"
-          description="Link another machine running T3 Code, such as a VPS, so agents here can launch and drive threads there."
+          title={t("settings.pages.LinkedEnvironmentsSettings.no-linked-environments")}
+          description={t(
+            "settings.pages.LinkedEnvironmentsSettings.link-another-machine-running-t3-code-such-as-a-vps-so-agents-here-can-launch-and-drive-threads-there",
+          )}
         />
       ) : (
         links.data.links.map((link) => (
@@ -96,16 +107,16 @@ function LinkedEnvironmentRow({
   readonly environmentId: EnvironmentId;
   readonly link: PeerLinkSummary;
 }) {
+  const t = useTranslate();
   const nowMinute = useNowMinute();
   const health = peerLinkHealth(link, DateTime.makeUnsafe(nowMinute));
   const unlink = useAtomCommand(peerLinkEnvironment.unlink, { label: "unlink environment" });
   const canUnlink = useAtomValue(peerLinkEnvironment.unlink.permissionAtom(environmentId));
   const [busy, setBusy] = useState(false);
   const forget = async () => {
-    const confirmed = await (requestConfirmDialog(
-      `Forget ${link.label}? Agents here stop working there. Revoke "T3 Code · …" in ${link.label}'s Connections to end the session there too.`,
-      { variant: "destructive" },
-    ) ?? Promise.resolve(false));
+    const confirmed = await (requestConfirmDialog(t("link.forget", { environment: link.label }), {
+      variant: "destructive",
+    }) ?? Promise.resolve(false));
     if (!confirmed) return;
     setBusy(true);
     const result = await unlink({ environmentId, input: { environmentId: link.environmentId } });
@@ -145,7 +156,7 @@ function LinkedEnvironmentRow({
             <h3 className="text-sm font-medium text-foreground">{link.label}</h3>
           </div>
           <p className="text-xs text-muted-foreground">
-            {accessConfig[link.access].label} · {status}
+            {runtimeModeText(t, link.access).label} · {status}
           </p>
           <p className="truncate text-xs text-muted-foreground/80">{link.urls.join(", ")}</p>
         </div>
@@ -157,7 +168,9 @@ function LinkedEnvironmentRow({
               disabled={busy}
               onClick={() => void forget()}
             >
-              {busy ? "Forgetting…" : "Forget"}
+              {busy
+                ? t("web.dynamic.LinkedEnvironmentsSettings.forgetting")
+                : t("web.dynamic.LinkedEnvironmentsSettings.forget")}
             </Button>
           </div>
         ) : null}
@@ -167,6 +180,7 @@ function LinkedEnvironmentRow({
 }
 
 function LinkEnvironmentAction({ environmentId }: { readonly environmentId: EnvironmentId }) {
+  const t = useTranslate();
   const [open, setOpen] = useState(false);
   const machines = useLinkableMachines(environmentId, open);
   // Null until the user picks; with no other machines known, only an address is left.
@@ -258,16 +272,19 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
         render={
           <Button size="xs" variant="default">
             <PlusIcon className="size-3" />
-            Link
+            {t("settings.pages.LinkedEnvironmentsSettings.link")}
           </Button>
         }
       />
       <DialogPopup className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Link an environment</DialogTitle>
+          <DialogTitle>
+            {t("settings.pages.LinkedEnvironmentsSettings.link-an-environment")}
+          </DialogTitle>
           <DialogDescription>
-            Agents here can then launch, message and wait on threads there. It appears in that
-            environment's Connections, where it can be revoked.
+            {t(
+              "settings.pages.LinkedEnvironmentsSettings.agents-here-can-then-launch-message-and-wait-on-threads-there-it-appears-in-that-environment-s-connections-where-it-can-be-revoked",
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
@@ -290,12 +307,16 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
             ) : null}
             {machine?.linked ? (
               <p className="text-xs text-muted-foreground">
-                Already linked. Linking again renews it with the access you pick.
+                {t(
+                  "settings.pages.LinkedEnvironmentsSettings.already-linked-linking-again-renews-it-with-the-access-you-pick",
+                )}
               </p>
             ) : null}
             {needsAddress ? (
               <label className="block space-y-1.5">
-                <span className="block text-xs font-medium text-foreground">Address</span>
+                <span className="block text-xs font-medium text-foreground">
+                  {t("settings.pages.LinkedEnvironmentsSettings.address")}
+                </span>
                 <Input
                   value={address}
                   onChange={(event) => {
@@ -311,22 +332,29 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
                 />
                 {machine !== null ? (
                   <span className="block text-xs text-muted-foreground">
-                    This app has no address for {machine.label} that another machine can reach.
-                    Enter its https or Tailscale address.
+                    <Trans
+                      t={t}
+                      i18nKey="web.rich.LinkedEnvironmentsSettings.this-app-has-no-address-for-part-that-another-machine-can-reach-enter-its-https-or-tailscale-address"
+                      components={{ value0: <>{machine.label}</> }}
+                    />
                   </span>
                 ) : null}
               </label>
             ) : null}
             {selected === null || canMint ? null : (
               <label className="block space-y-1.5">
-                <span className="block text-xs font-medium text-foreground">Pairing code</span>
+                <span className="block text-xs font-medium text-foreground">
+                  {t("settings.pages.LinkedEnvironmentsSettings.pairing-code")}
+                </span>
                 <Input
                   value={pairingCode}
                   onChange={(event) => setPairingCode(event.target.value)}
                   placeholder={
                     machine === null
-                      ? "From that environment's Connections, or t3 pair there"
-                      : "Paste the code"
+                      ? t(
+                          "web.dynamic.LinkedEnvironmentsSettings.from-that-environment-s-connections-or-t3-pair-there",
+                        )
+                      : t("web.dynamic.LinkedEnvironmentsSettings.paste-the-code")
                   }
                   disabled={busy}
                   autoComplete="one-time-code"
@@ -335,8 +363,11 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
                 />
                 {machine !== null ? (
                   <span className="block text-xs text-muted-foreground">
-                    Create a link on {machine.label}: Settings → Connections → Create link, then
-                    paste its code here.
+                    <Trans
+                      t={t}
+                      i18nKey="web.rich.LinkedEnvironmentsSettings.create-a-link-on-part-settings-connections-create-link-then-paste-its-code-here"
+                      components={{ value0: <>{machine.label}</> }}
+                    />
                   </span>
                 ) : null}
               </label>
@@ -346,10 +377,12 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
         </DialogPanel>
         <DialogFooter variant="bare">
           <DialogClose disabled={busy} render={<Button variant="outline" type="button" />}>
-            Cancel
+            {t("settings.pages.LinkedEnvironmentsSettings.cancel")}
           </DialogClose>
           <Button form={formId} type="submit" disabled={busy || !ready}>
-            {busy ? "Linking…" : "Link"}
+            {busy
+              ? t("web.dynamic.LinkedEnvironmentsSettings.linking")
+              : t("web.dynamic.LinkedEnvironmentsSettings.link")}
           </Button>
         </DialogFooter>
       </DialogPopup>

@@ -223,6 +223,7 @@ const sharingPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
 
 const config: ExpoConfig = {
   name: variant.appName,
+  locales: { en: "./locales/en.json", "zh-Hans": "./locales/zh-CN.json" },
   slug: "t3-code",
   platforms: ["ios", "android"],
   scheme: variant.scheme,
@@ -305,6 +306,10 @@ const config: ExpoConfig = {
     favicon: variant.assets.appIcon,
   },
   plugins: [
+    [
+      "expo-localization",
+      { supportedLocales: { ios: ["en", "zh-Hans"], android: ["en", "zh-CN"] } },
+    ],
     "expo-asset",
     "react-native-pdf-jsi",
     [

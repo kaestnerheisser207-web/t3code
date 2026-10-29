@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useState } from "react";
 import * as Option from "effect/Option";
 import type { SshDeviceHostConfig } from "@t3tools/contracts";
@@ -75,6 +77,7 @@ function DeviceHostEditorForm({
   onSave: (host: SshDeviceHostConfig) => void;
   onClose: () => void;
 }) {
+  const t = useTranslate();
   const [draft, setDraft] = useState(host);
   const [expandedChecks, setExpandedChecks] = useState<{ key: string; open: boolean } | null>(null);
   const { checks, testConnection } = useHostConnectionChecks(targets);
@@ -103,17 +106,34 @@ function DeviceHostEditorForm({
       }}
     >
       <DialogHeader>
-        <DialogTitle>{isNew ? "Add device host" : "Edit device host"}</DialogTitle>
+        <DialogTitle>
+          {isNew
+            ? t("web.dynamic.DeviceHostEditor.add-device-host")
+            : t("web.dynamic.DeviceHostEditor.edit-device-host")}
+        </DialogTitle>
         <DialogDescription>
-          {targets.length === 1
-            ? `Connect from ${targets[0]?.label}.`
-            : `Connect from ${targets.length} selected environments.`}{" "}
-          Hosts on the same machine are skipped.
+          <Trans
+            t={t}
+            i18nKey="web.rich.DeviceHostEditor.part-hosts-on-the-same-machine-are-skipped"
+            components={{
+              value0: (
+                <>
+                  {targets.length === 1
+                    ? t("web.dynamic.DeviceHostEditor.connect-from-param", {
+                        value: targets[0]?.label ?? "",
+                      })
+                    : t("web.dynamic.DeviceHostEditor.connect-from-param-selected-environments", {
+                        length: targets.length,
+                      })}
+                </>
+              ),
+            }}
+          />
         </DialogDescription>
       </DialogHeader>
       <DialogPanel>
         <label className="block space-y-1.5 text-sm">
-          <span>Name</span>
+          <span>{t("settings.pages.DeviceHostEditor.name")}</span>
           <Input
             autoFocus
             required
@@ -123,11 +143,11 @@ function DeviceHostEditorForm({
               const label = event.target.value;
               setDraft((current) => ({ ...current, label }));
             }}
-            placeholder="Mac mini"
+            placeholder={t("settings.pages.DeviceHostEditor.mac-mini")}
           />
         </label>
         <label className="block space-y-1.5 text-sm">
-          <span>SSH target</span>
+          <span>{t("settings.pages.DeviceHostEditor.ssh-target")}</span>
           <Input
             required
             value={draft.target}
@@ -136,17 +156,19 @@ function DeviceHostEditorForm({
               const target = event.target.value;
               setDraft((current) => ({ ...current, target }));
             }}
-            placeholder="user@host or SSH alias"
+            placeholder={t("settings.pages.DeviceHostEditor.user-host-or-ssh-alias")}
           />
         </label>
         <details
           open={host.port !== undefined || host.identityFile !== undefined || undefined}
           className="text-sm"
         >
-          <summary className="cursor-pointer text-muted-foreground">SSH options</summary>
+          <summary className="cursor-pointer text-muted-foreground">
+            {t("settings.pages.DeviceHostEditor.ssh-options")}
+          </summary>
           <div className="mt-3 grid grid-cols-[minmax(0,1fr)_7rem] gap-3">
             <label className="block space-y-1.5">
-              <span>Identity file</span>
+              <span>{t("settings.pages.DeviceHostEditor.identity-file")}</span>
               <Input
                 value={draft.identityFile ?? ""}
                 disabled={busy}
@@ -157,11 +179,11 @@ function DeviceHostEditorForm({
                     return identityFile ? { ...rest, identityFile } : rest;
                   });
                 }}
-                placeholder="SSH config default"
+                placeholder={t("settings.pages.DeviceHostEditor.ssh-config-default")}
               />
             </label>
             <label className="block space-y-1.5">
-              <span>Port</span>
+              <span>{t("settings.pages.DeviceHostEditor.port")}</span>
               <Input
                 type="number"
                 min={1}
@@ -175,12 +197,12 @@ function DeviceHostEditorForm({
                     return port ? { ...rest, port: Number(port) } : rest;
                   });
                 }}
-                placeholder="Default"
+                placeholder={t("settings.pages.DeviceHostEditor.default")}
               />
             </label>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Optional. Resolved separately on each environment.
+            {t("settings.pages.DeviceHostEditor.optional-resolved-separately-on-each-environment")}
           </p>
         </details>
         <Collapsible
@@ -197,7 +219,9 @@ function DeviceHostEditorForm({
               <div className="min-w-0 text-xs [--inline-button-white-space:normal]">
                 <CollapsibleTrigger
                   disabled={!results}
-                  aria-label={`${checkSummary}. Per-machine results`}
+                  aria-label={t("web.dynamic.DeviceHostEditor.param-per-machine-results", {
+                    checkSummary: checkSummary,
+                  })}
                   render={<InlineButton tone="muted" />}
                 >
                   <span role="status" className="text-left">
@@ -220,7 +244,11 @@ function DeviceHostEditorForm({
                 if (Option.isSome(input)) void testConnection(input.value);
               }}
             >
-              {checking ? <Spinner size="xs" /> : null} Test connection
+              <Trans
+                t={t}
+                i18nKey="web.rich.DeviceHostEditor.part-test-connection"
+                components={{ value0: <>{checking ? <Spinner size="xs" /> : null}</> }}
+              />
             </Button>
           </div>
           {results ? (
@@ -239,19 +267,23 @@ function DeviceHostEditorForm({
                       >
                         {result.status === "pending" ? (
                           <>
-                            <Spinner size="xs" /> Checking…
+                            <Spinner size="xs" />
+                            {t("settings.pages.DeviceHostEditor.checking")}
                           </>
                         ) : result.status === "local" ? (
                           <>
-                            <MonitorIcon className="size-3" /> Already available locally
+                            <MonitorIcon className="size-3" />
+                            {t("settings.pages.DeviceHostEditor.already-available-locally")}
                           </>
                         ) : result.status === "failed" ? (
                           <>
-                            <XIcon className="size-3" /> Failed
+                            <XIcon className="size-3" />
+                            {t("settings.pages.DeviceHostEditor.failed")}
                           </>
                         ) : (
                           <>
-                            <CheckIcon className="size-3" /> Connected
+                            <CheckIcon className="size-3" />
+                            {t("settings.pages.DeviceHostEditor.connected")}
                           </>
                         )}
                       </span>
@@ -263,7 +295,9 @@ function DeviceHostEditorForm({
                     ) : null}
                     {result.status === "failed" ? (
                       <details className="mt-1.5 text-muted-foreground">
-                        <summary className="cursor-pointer">Show error</summary>
+                        <summary className="cursor-pointer">
+                          {t("settings.pages.DeviceHostEditor.show-error")}
+                        </summary>
                         <p className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words">
                           {result.error}
                         </p>
@@ -278,10 +312,14 @@ function DeviceHostEditorForm({
       </DialogPanel>
       <DialogFooter>
         <Button type="button" variant="ghost" disabled={busy} onClick={onClose}>
-          Cancel
+          {t("settings.pages.DeviceHostEditor.cancel")}
         </Button>
         <Button type="submit" disabled={busy || checking || !valid || !draft.label.trim()}>
-          {busy ? <Spinner size="xs" /> : null} Save host
+          <Trans
+            t={t}
+            i18nKey="web.rich.DeviceHostEditor.part-save-host"
+            components={{ value0: <>{busy ? <Spinner size="xs" /> : null}</> }}
+          />
         </Button>
       </DialogFooter>
     </form>

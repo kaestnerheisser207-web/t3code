@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Pressable, View } from "react-native";
 
 import { AppText } from "../../components/ui/AppText";
@@ -8,12 +9,21 @@ export function BrowserPreviewButton(props: {
   readonly onPress: () => void;
   readonly compact?: boolean;
 }) {
+  const t = useTranslate();
   const compact = props.compact ?? true;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={props.count === 1 ? "View browser" : `View ${props.count} browser tabs`}
-      accessibilityHint="Watch and control browser tabs open in this thread"
+      accessibilityLabel={
+        props.count === 1
+          ? t("mobile.dynamic.browser-preview-button.view-browser")
+          : t("mobile.dynamic.browser-preview-button.view-param-browser-tabs", {
+              count: props.count,
+            })
+      }
+      accessibilityHint={t(
+        "mobile.tools.browser-preview-button.watch-and-control-browser-tabs-open-in-this-thread",
+      )}
       onPress={props.onPress}
       className={
         compact
@@ -24,7 +34,9 @@ export function BrowserPreviewButton(props: {
       <SymbolView name="globe" size={20} tintColorClassName="accent-icon" type="monochrome" />
       {!compact ? (
         <AppText className="font-t3-medium text-xs text-foreground">
-          {props.count === 1 ? "One tab open" : `${props.count} tabs open`}
+          {props.count === 1
+            ? t("mobile.dynamic.browser-preview-button.one-tab-open")
+            : t("mobile.dynamic.browser-preview-button.param-tabs-open", { count: props.count })}
         </AppText>
       ) : props.count > 1 ? (
         <View className="absolute right-1.5 top-1.5 min-w-4 items-center rounded-full bg-primary px-1">

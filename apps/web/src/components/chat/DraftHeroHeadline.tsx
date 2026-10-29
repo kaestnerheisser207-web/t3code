@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import type { DraftId } from "~/composerDraftStore";
 import { composerDraftHasUserContent, useComposerDraftStore } from "~/composerDraftStore";
 import { resolveEnvironmentMachineKind, type ScopedProjectRef } from "@t3tools/contracts";
@@ -64,6 +66,7 @@ export function DraftHeroHeadline({
   activeProjectRef,
   activeProjectTitle,
 }: DraftHeroHeadlineProps) {
+  const t = useTranslate();
   const projects = useProjects();
   const threads = useThreadShells();
   const { environments } = useEnvironments();
@@ -271,12 +274,12 @@ export function DraftHeroHeadline({
       </Tooltip>
       <ComboboxPopup align="center" className="w-72 overflow-hidden">
         <ComboboxSearchInput
-          aria-label="Search projects"
-          placeholder="Search projects..."
+          aria-label={t("web.ui.DraftHeroHeadline.search-projects")}
+          placeholder={t("web.ui.DraftHeroHeadline.search-projects")}
           value={pickerQuery}
           onChange={(event) => setPickerQuery(event.target.value)}
         />
-        <ComboboxEmpty>No matching projects.</ComboboxEmpty>
+        <ComboboxEmpty>{t("web.ui.DraftHeroHeadline.no-matching-projects")}</ComboboxEmpty>
         <ComboboxList>
           {(item: PickerItem) => {
             const entry = projectEntryByKey.get(item.value);
@@ -335,7 +338,7 @@ export function DraftHeroHeadline({
             />
           }
         >
-          or start without a project
+          {t("web.ui.DraftHeroHeadline.or-start-without-a-project")}
         </TooltipTrigger>
         {noProjectShortcut ? <TooltipPopup side="bottom">{noProjectShortcut}</TooltipPopup> : null}
       </Tooltip>
@@ -362,11 +365,17 @@ export function DraftHeroHeadline({
       ) : (
         <h1 className="w-full text-center font-normal text-2xl text-foreground tracking-tight sm:text-3xl">
           {isScratchDraft ? (
-            <>What should we work on?</>
+            <>{t("web.ui.DraftHeroHeadline.what-should-we-work-on")}</>
           ) : canChooseProject ? (
-            <>{projectSelector} to start</>
+            <>
+              <Trans
+                t={t}
+                i18nKey="web.rich.DraftHeroHeadline.part-to-start"
+                components={{ value0: <>{projectSelector}</> }}
+              />
+            </>
           ) : (
-            <>Add a project to start</>
+            <>{t("web.ui.DraftHeroHeadline.add-a-project-to-start")}</>
           )}
         </h1>
       )}

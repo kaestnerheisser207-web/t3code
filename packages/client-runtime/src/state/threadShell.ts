@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type {
   EnvironmentId,
   OrchestrationV2ShellSnapshot,
@@ -124,9 +125,11 @@ const sameRequests = (
 
 export function childThreadInputsTitle(
   children: ReadonlyArray<Pick<EnvironmentThreadShell, "hasPendingApprovals">>,
+  t?: TFunction,
 ): string {
   const approvals = children.filter((child) => child.hasPendingApprovals).length;
   const need = approvals === 0 ? "input" : approvals === children.length ? "approval" : "you";
+  if (t) return t(`child.${need}`, { count: children.length });
   return children.length === 1
     ? `Subagent needs ${need}`
     : `${children.length} subagents need ${need}`;

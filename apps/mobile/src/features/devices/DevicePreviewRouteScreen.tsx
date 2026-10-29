@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { SheetCloseButton } from "../../components/ui/SheetHeader";
 import { Button } from "../../components/ui/Button";
 import * as Dialog from "../../components/ui/Dialog";
@@ -86,6 +87,7 @@ export function DevicePreviewScreen({
   readonly onMaximize?: (deviceKey: string | null) => void;
   readonly initialDeviceKey?: string;
 }) {
+  const t = useTranslate();
   const embedded = onMaximize !== undefined;
   const insets = useSafeAreaInsets();
   // NativeColumnContent already insets the sides, so only a book fold moves the reveal handle.
@@ -163,7 +165,7 @@ export function DevicePreviewScreen({
       ? [
           {
             id: "check-device-tools",
-            title: "Check device tool versions",
+            title: t("device.menu.checkVersions"),
             icon: "arrow.clockwise" as const,
             onPress: () => {
               void retryHost({ environmentId, input: { inspectOnly: true } });
@@ -173,7 +175,7 @@ export function DevicePreviewScreen({
       : []),
     {
       id: "device-tools",
-      title: "Device tool versions",
+      title: t("device.menu.versions"),
       icon: "info.circle",
       onPress: () =>
         Dialog.alert(
@@ -196,7 +198,7 @@ export function DevicePreviewScreen({
     },
     {
       id: "reload",
-      title: "Reload stream",
+      title: t("device.menu.reload"),
       icon: "arrow.clockwise" as const,
       disabled: !preview || shuttingDown,
       onPress: () => {
@@ -208,7 +210,7 @@ export function DevicePreviewScreen({
       ? [
           {
             id: "back",
-            title: "Back",
+            title: t("device.menu.back"),
             icon: "arrow.left",
             disabled: !inputConnected,
             onPress: () => streamRef.current?.back(),
@@ -217,7 +219,7 @@ export function DevicePreviewScreen({
       : []),
     {
       id: "app-switcher",
-      title: "App switcher",
+      title: t("device.menu.switcher"),
       icon: "square.on.square",
       disabled: !inputConnected,
       onPress: () => streamRef.current?.appSwitcher(),
@@ -226,7 +228,7 @@ export function DevicePreviewScreen({
       ? [
           {
             id: "rotate",
-            title: "Rotate device",
+            title: t("device.menu.rotate"),
             icon: "arrow.clockwise" as const,
             disabled: !inputConnected,
             onPress: () => streamRef.current?.rotate(),
@@ -247,7 +249,7 @@ export function DevicePreviewScreen({
       ? [
           {
             id: "devices",
-            title: "Devices",
+            title: t("device.menu.devices"),
             inline: true,
             items: previews.map((device) => ({
               id: device.key,
@@ -269,12 +271,15 @@ export function DevicePreviewScreen({
           className="flex-row items-center gap-1 px-2 pb-2"
           style={{ paddingTop: Math.max(insets.top, 8) }}
         >
-          <SheetCloseButton accessibilityLabel="Close device preview" onClose={onClose} />
+          <SheetCloseButton
+            accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.close-device-preview")}
+            onClose={onClose}
+          />
           <AppText numberOfLines={1} className="min-w-0 flex-1 font-t3-medium text-sm">
-            {preview?.name ?? "Devices"}
+            {preview?.name ?? t("mobile.dynamic.DevicePreviewRouteScreen.devices")}
           </AppText>
           <ControlPill
-            accessibilityLabel="Maximize device"
+            accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.maximize-device")}
             icon="arrow.up.left.and.arrow.down.right"
             onPress={() => onMaximize(preview?.key ?? null)}
           />
@@ -296,7 +301,11 @@ export function DevicePreviewScreen({
                 {state.error}
               </AppText>
               <View className="items-center">
-                <Button label="Retry" tone="secondary" onPress={state.refresh} />
+                <Button
+                  label={t("mobile.tools.DevicePreviewRouteScreen.retry")}
+                  tone="secondary"
+                  onPress={state.refresh}
+                />
               </View>
             </>
           ) : focused && foreground ? (
@@ -310,7 +319,7 @@ export function DevicePreviewScreen({
           style={{ paddingBottom: Math.max(insets.bottom, 8) }}
         >
           <ControlPill
-            accessibilityLabel="Home"
+            accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.home")}
             icon="house"
             disabled={!inputConnected}
             onPress={pressHome}
@@ -326,19 +335,22 @@ export function DevicePreviewScreen({
         >
           {inputConnected ? (
             <Pressable
-              accessibilityLabel="Hide device controls"
+              accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.hide-device-controls")}
               className="absolute inset-0 bg-black/30"
               onPress={() => setControlsVisible(false)}
             />
           ) : null}
           <View className="px-3" style={{ paddingTop: Math.max(insets.top, 12) }}>
             <GlassSurface className="flex-row items-center gap-1 p-1">
-              <SheetCloseButton accessibilityLabel="Close device preview" onClose={onClose} />
+              <SheetCloseButton
+                accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.close-device-preview")}
+                onClose={onClose}
+              />
               <AppText numberOfLines={1} className="flex-1 text-center font-t3-medium text-base">
-                {preview?.name ?? "Devices"}
+                {preview?.name ?? t("mobile.dynamic.DevicePreviewRouteScreen.devices")}
               </AppText>
               <ControlPill
-                accessibilityLabel="Home"
+                accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.home")}
                 icon="house"
                 disabled={!inputConnected}
                 onPress={pressHome}
@@ -350,8 +362,10 @@ export function DevicePreviewScreen({
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Show device controls"
-          accessibilityHint="Shaking the phone also shows them"
+          accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.show-device-controls")}
+          accessibilityHint={t(
+            "mobile.tools.DevicePreviewRouteScreen.shaking-the-phone-also-shows-them",
+          )}
           hitSlop={12}
           className="absolute h-11 w-16 items-center justify-center self-center"
           style={{
@@ -368,18 +382,19 @@ export function DevicePreviewScreen({
 }
 
 function DeviceOptionsMenu({ items }: { readonly items: ReadonlyArray<AppBarMenuItem> }) {
+  const t = useTranslate();
   return (
     <Menu
       actions={androidHeaderMenuActions(items)}
       isAnchoredToRight
-      title="Device options"
+      title={t("mobile.tools.DevicePreviewRouteScreen.device-options")}
       onPressAction={({ nativeEvent }) => {
         const action = findHeaderMenuAction(items, nativeEvent.event);
         if (action && !action.disabled) action.onPress();
       }}
     >
       <Pressable
-        accessibilityLabel="Device options"
+        accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.device-options")}
         accessibilityRole="button"
         className="size-11 items-center justify-center rounded-full bg-subtle"
       >
@@ -400,6 +415,7 @@ function OpenDevicePreview({
   readonly streamRef: RefObject<DeviceStreamRef | null>;
   readonly onInputConnected: (connected: boolean) => Promise<void>;
 }) {
+  const t = useTranslate();
   const { session } = preview;
   const { themeVariables } = useAppearancePreferences();
   const [viewer] = useState(uuidv4);
@@ -430,13 +446,19 @@ function OpenDevicePreview({
             {error}
           </AppText>
           <View className="items-center">
-            <Button label="Retry" tone="secondary" onPress={refresh} />
+            <Button
+              label={t("mobile.tools.DevicePreviewRouteScreen.retry")}
+              tone="secondary"
+              onPress={refresh}
+            />
           </View>
         </>
       ) : (
         <>
           <AppActivityIndicator color={themeVariables["--color-icon"]} />
-          <AppText className="text-sm text-foreground-muted">Connecting to device...</AppText>
+          <AppText className="text-sm text-foreground-muted">
+            {t("mobile.tools.DevicePreviewRouteScreen.connecting-to-device")}
+          </AppText>
         </>
       )}
     </View>

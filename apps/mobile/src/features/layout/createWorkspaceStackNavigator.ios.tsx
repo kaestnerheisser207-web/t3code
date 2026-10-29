@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   createNavigatorFactory,
   NavigationContext,
@@ -164,6 +165,7 @@ function ColumnScreen(props: {
 function WorkspaceColumns(
   props: ViewProps & { readonly primary: Route; readonly detail: Route[] },
 ) {
+  const t = useTranslate();
   const {
     layout,
     panes,
@@ -453,7 +455,9 @@ function WorkspaceColumns(
                       pointerEvents="box-none"
                     >
                       <WorkspacePaneDivider
-                        accessibilityLabel="Resize inspector"
+                        accessibilityLabel={t(
+                          "mobile.surfaces.createWorkspaceStackNavigator.ios.resize-inspector",
+                        )}
                         currentWidth={inspectorWidth}
                         resizeDirection={-1}
                         onResizeStart={() => {

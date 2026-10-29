@@ -1,3 +1,6 @@
+import type { TFunction } from "i18next";
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { T3CHAT_PLAN_TUNNEL_LIMITS, type RelayT3ChatLink } from "@t3tools/contracts/relay";
 import { MessageSquareIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -12,30 +15,36 @@ import {
 } from "./ClerkUserProfilePage";
 import { useT3ChatLink } from "./useT3ChatLink";
 
-const upgradeLink = (
+const upgradeLink = (t: TFunction) => (
   <a className="underline" href={T3CHAT_SUBSCRIPTION_URL} target="_blank" rel="noopener noreferrer">
-    Upgrade on T3 Chat
+    {t("ui.finish.upgrade")}
   </a>
 );
 
-function planLabel(link: RelayT3ChatLink): ReactNode {
+function planLabel(link: RelayT3ChatLink, t: TFunction): ReactNode {
   switch (link.plan) {
     case "premier":
-      return `Premier · up to ${T3CHAT_PLAN_TUNNEL_LIMITS.premier} tunnels`;
+      return t("ui.finish.premier", { count: T3CHAT_PLAN_TUNNEL_LIMITS.premier });
     case "pro":
       return (
-        <>
-          Pro · up to {T3CHAT_PLAN_TUNNEL_LIMITS.pro} tunnels. {upgradeLink} to Premier for{" "}
-          {T3CHAT_PLAN_TUNNEL_LIMITS.premier}.
-        </>
+        <Trans
+          t={t}
+          i18nKey="ui.finish.pro"
+          values={{
+            pro: T3CHAT_PLAN_TUNNEL_LIMITS.pro,
+            premier: T3CHAT_PLAN_TUNNEL_LIMITS.premier,
+          }}
+          components={{ upgrade: upgradeLink(t) }}
+        />
       );
     case "free":
-      return <>{upgradeLink} for more tunnels</>;
+      return <Trans t={t} i18nKey="ui.finish.free" components={{ upgrade: upgradeLink(t) }} />;
   }
 }
 
 /** Links a T3 Chat account so paid subscribers get more tunnels. */
 export function T3ChatUserProfilePage() {
+  const t = useTranslate();
   const { linkState, pending, linkUrl, link: handleLink, unlink: handleUnlink } = useT3ChatLink();
   const usage = useManagedTunnelUsage();
 
@@ -44,8 +53,11 @@ export function T3ChatUserProfilePage() {
 
   return (
     <ClerkUserProfilePage
-      title="T3 Chat"
-      description={`Link a paid T3 Chat account for more T3 Connect tunnels: up to ${T3CHAT_PLAN_TUNNEL_LIMITS.pro} with Pro, ${T3CHAT_PLAN_TUNNEL_LIMITS.premier} with Premier.`}
+      title={t("web.ui.T3ChatUserProfilePage.t3-chat")}
+      description={t(
+        "web.dynamic.T3ChatUserProfilePage.link-a-paid-t3-chat-account-for-more-t3-connect-tunnels-up-to-param-with-pro-param-with-premier",
+        { pro: T3CHAT_PLAN_TUNNEL_LIMITS.pro, premier: T3CHAT_PLAN_TUNNEL_LIMITS.premier },
+      )}
       action={
         <ClerkUserProfileRefreshButton
           disabled={pending !== null}
@@ -56,12 +68,16 @@ export function T3ChatUserProfilePage() {
     >
       {linkState.error ? (
         <div className="border-t py-3 text-xs" role="alert">
-          <p className="font-medium text-destructive-foreground">Could not load T3 Chat link</p>
+          <p className="font-medium text-destructive-foreground">
+            {t("web.ui.T3ChatUserProfilePage.could-not-load-t3-chat-link")}
+          </p>
           <p className="mt-0.5 text-muted-foreground">{linkState.error}</p>
         </div>
       ) : data === null ? null : !data.available ? (
         <p className="border-t py-4 text-xs text-muted-foreground">
-          This T3 Connect server does not support T3 Chat linking.
+          {t(
+            "web.ui.T3ChatUserProfilePage.this-t3-connect-server-does-not-support-t3-chat-linking",
+          )}
         </p>
       ) : (
         <ul className="border-t">
@@ -69,26 +85,32 @@ export function T3ChatUserProfilePage() {
             <div className="flex items-start gap-4">
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-sm leading-4.5 font-medium text-foreground">
-                  {link ? link.email : "Not linked"}
+                  {link ? link.email : t("web.dynamic.T3ChatUserProfilePage.not-linked")}
                 </h3>
                 <p className="mt-1 text-xs leading-4.5 text-muted-foreground">
                   {link ? (
-                    planLabel(link)
+                    planLabel(link, t)
                   ) : linkUrl ? (
                     <>
-                      Confirm on{" "}
-                      <a
-                        className="underline"
-                        href={linkUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        t3.chat
-                      </a>
-                      , then select Refresh.
+                      <Trans
+                        t={t}
+                        i18nKey="web.rich.T3ChatUserProfilePage.confirm-on-part-t3-chat-part-then-select-refresh"
+                        components={{
+                          part0: (
+                            <a
+                              className="underline"
+                              href={linkUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {null}
+                            </a>
+                          ),
+                        }}
+                      />
                     </>
                   ) : (
-                    "You confirm the link on t3.chat."
+                    t("web.dynamic.T3ChatUserProfilePage.you-confirm-the-link-on-t3-chat")
                   )}
                 </p>
               </div>
@@ -99,11 +121,15 @@ export function T3ChatUserProfilePage() {
                   disabled={pending !== null}
                   onClick={() => void handleUnlink()}
                 >
-                  {pending === "unlink" ? "Unlinking…" : "Unlink"}
+                  {pending === "unlink"
+                    ? t("web.dynamic.T3ChatUserProfilePage.unlinking")
+                    : t("web.dynamic.T3ChatUserProfilePage.unlink")}
                 </Button>
               ) : (
                 <Button size="sm" disabled={pending !== null} onClick={() => void handleLink()}>
-                  {pending === "link" ? "Opening…" : "Link T3 Chat"}
+                  {pending === "link"
+                    ? t("web.dynamic.T3ChatUserProfilePage.opening")
+                    : t("web.dynamic.T3ChatUserProfilePage.link-t3-chat")}
                 </Button>
               )}
             </div>

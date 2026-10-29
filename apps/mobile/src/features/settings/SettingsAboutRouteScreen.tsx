@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import Constants from "expo-constants";
@@ -20,10 +21,11 @@ import { SettingsSection } from "./components/SettingsSection";
 import { SettingsScreen } from "./components/SettingsScreen";
 
 export function SettingsAboutRouteScreen() {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
 
   return (
-    <SettingsScreen title="About">
+    <SettingsScreen title={t("mobile.settings.SettingsAboutRouteScreen.about")}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
@@ -38,6 +40,7 @@ export function SettingsAboutRouteScreen() {
 }
 
 function AppSettingsSection() {
+  const t = useTranslate();
   const [checkState, setCheckState] = useState<{
     readonly state: AppUpdateCheckState;
     // "Up to date" is a confirmation that fades back to idle.
@@ -108,7 +111,9 @@ function AppSettingsSection() {
         type="monochrome"
         weight="regular"
       />
-      <Text className="flex-1 text-lg text-foreground">Version</Text>
+      <Text className="flex-1 text-lg text-foreground">
+        {t("mobile.settings.SettingsAboutRouteScreen.version")}
+      </Text>
       <View className="items-end">
         <Text className="text-lg text-foreground-muted">{versionLabel}</Text>
         {statusLabel ? (
@@ -119,18 +124,32 @@ function AppSettingsSection() {
   );
 
   return (
-    <SettingsSection title="App">
-      <SettingsRow icon="internaldrive" label="Client Storage" target="SettingsClientStorage" />
-      <SettingsRow icon="stethoscope" label="Diagnostics" target="SettingsDiagnostics" />
+    <SettingsSection title={t("mobile.settings.SettingsAboutRouteScreen.app")}>
+      <SettingsRow
+        icon="internaldrive"
+        label={t("mobile.settings.SettingsAboutRouteScreen.client-storage")}
+        target="SettingsClientStorage"
+      />
+      <SettingsRow
+        icon="stethoscope"
+        label={t("mobile.settings.SettingsAboutRouteScreen.diagnostics")}
+        target="SettingsDiagnostics"
+      />
       <SettingsRow
         icon="doc.on.doc"
-        label="Open source licenses"
+        label={t("mobile.settings.SettingsAboutRouteScreen.open-source-licenses")}
         target="SettingsOpenSourceLicenses"
       />
-      <SettingsRow icon="doc.text" label="Legal" fullScreenTarget="SettingsLegal" />
+      <SettingsRow
+        icon="doc.text"
+        label={t("mobile.settings.SettingsAboutRouteScreen.legal")}
+        fullScreenTarget="SettingsLegal"
+      />
       {updateCheckAvailable ? (
         <Pressable
-          accessibilityLabel={`Version ${versionLabel}`}
+          accessibilityLabel={t("mobile.dynamic.SettingsAboutRouteScreen.version-param", {
+            versionLabel: versionLabel,
+          })}
           accessibilityRole="text"
           disabled={busy}
           onPress={handleVersionPress}

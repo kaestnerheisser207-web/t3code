@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../i18n";
 import {
   createPreviewFramePainter,
   createPreviewStreamClient,
@@ -145,6 +147,7 @@ export function ServerBrowserSurface(props: {
   readonly pdfUrl?: string | null;
   readonly ref?: Ref<ServerBrowserHandle>;
 }) {
+  const t = useTranslate();
   const {
     environmentId,
     threadId,
@@ -722,7 +725,9 @@ export function ServerBrowserSurface(props: {
               send({ type: control.controller === "you" ? "releaseControl" : "takeControl" })
             }
           >
-            {control.controller === "you" ? "Release control" : "Take control"}
+            {control.controller === "you"
+              ? t("web.dynamic.ServerBrowserSurface.release-control")
+              : t("web.dynamic.ServerBrowserSurface.take-control")}
           </Button>
         ) : null}
       </div>
@@ -731,7 +736,7 @@ export function ServerBrowserSurface(props: {
           <embed
             src={pdfUrl}
             type="application/pdf"
-            title="PDF document"
+            title={t("web.remaining.ServerBrowserSurface.pdf-document")}
             className="absolute inset-0 z-10 size-full border-0"
           />
         ) : null}
@@ -754,7 +759,7 @@ export function ServerBrowserSurface(props: {
         {/* Pin top-left to avoid focus scrolling; 16px prevents iOS focus zoom. */}
         <textarea
           ref={inputRef}
-          aria-label="Browser page"
+          aria-label={t("web.remaining.ServerBrowserSurface.browser-page")}
           aria-description="Press Shift+Escape to leave the browser page."
           autoCapitalize="off"
           autoComplete="off"
@@ -785,10 +790,22 @@ export function ServerBrowserSurface(props: {
           <div
             className="absolute inset-x-2 top-2 z-10 flex flex-col gap-2 rounded-lg border border-border bg-background p-3 shadow-lg"
             role="dialog"
-            aria-label="Choose files for the page"
+            aria-label={t("web.remaining.ServerBrowserSurface.choose-files-for-the-page")}
           >
             <p className="text-sm">
-              The page asks for {fileChooser.multiple ? "files" : "a file"}.
+              <Trans
+                t={t}
+                i18nKey="web.rich.ServerBrowserSurface.the-page-asks-for-part"
+                components={{
+                  value0: (
+                    <>
+                      {fileChooser.multiple
+                        ? t("web.dynamic.ServerBrowserSurface.files")
+                        : t("web.dynamic.ServerBrowserSurface.a-file")}
+                    </>
+                  ),
+                }}
+              />
             </p>
             <input
               ref={fileInputRef}
@@ -804,10 +821,22 @@ export function ServerBrowserSurface(props: {
             />
             <div className="flex justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => answerFileChooser([])}>
-                Cancel
+                {t("web.remaining.ServerBrowserSurface.cancel")}
               </Button>
               <Button size="sm" onClick={() => fileInputRef.current?.click()}>
-                Choose {fileChooser.multiple ? "files" : "file"}
+                <Trans
+                  t={t}
+                  i18nKey="web.rich.ServerBrowserSurface.choose-part"
+                  components={{
+                    value0: (
+                      <>
+                        {fileChooser.multiple
+                          ? t("web.dynamic.ServerBrowserSurface.files")
+                          : t("web.dynamic.ServerBrowserSurface.file")}
+                      </>
+                    ),
+                  }}
+                />
               </Button>
             </div>
           </div>
@@ -816,14 +845,14 @@ export function ServerBrowserSurface(props: {
           <div
             className="absolute inset-x-2 top-2 z-10 flex flex-col gap-2 rounded-lg border border-border bg-background p-3 shadow-lg"
             role="dialog"
-            aria-label="Browser dialog"
+            aria-label={t("web.remaining.ServerBrowserSurface.browser-dialog")}
           >
             <p className="break-words text-sm">{control.dialog.message}</p>
             {control.controller === "you" ? (
               <>
                 {control.dialog.type === "prompt" ? (
                   <Input
-                    aria-label="Dialog response"
+                    aria-label={t("web.remaining.ServerBrowserSurface.dialog-response")}
                     value={promptText}
                     onChange={(event) => setPromptText(event.target.value)}
                   />
@@ -834,7 +863,7 @@ export function ServerBrowserSurface(props: {
                     size="sm"
                     onClick={() => send({ type: "dialog", accept: false })}
                   >
-                    Dismiss
+                    {t("web.remaining.ServerBrowserSurface.dismiss")}
                   </Button>
                   <Button
                     size="sm"
@@ -846,12 +875,14 @@ export function ServerBrowserSurface(props: {
                       })
                     }
                   >
-                    Accept
+                    {t("web.remaining.ServerBrowserSurface.accept")}
                   </Button>
                 </div>
               </>
             ) : (
-              <p className="text-xs text-muted-foreground">Take control to respond.</p>
+              <p className="text-xs text-muted-foreground">
+                {t("web.remaining.ServerBrowserSurface.take-control-to-respond")}
+              </p>
             )}
           </div>
         ) : null}
@@ -863,7 +894,7 @@ export function ServerBrowserSurface(props: {
           </p>
           <CommandBlock command={hostSetup.command} className="w-full max-w-md text-left" />
           <Button variant="outline" size="sm" onClick={() => setHostSetup(null)}>
-            Try again
+            {t("web.remaining.ServerBrowserSurface.try-again")}
           </Button>
         </div>
       ) : null}
@@ -871,7 +902,7 @@ export function ServerBrowserSurface(props: {
         // The page can be invisible beneath an empty or unreachable state; reconnect must remain reachable.
         <div className="visible absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-background p-3 text-center">
           <p role="alert" className="text-xs text-muted-foreground">
-            Browser connection was refused.
+            {t("web.remaining.ServerBrowserSurface.browser-connection-was-refused")}
           </p>
           <Button
             variant="outline"
@@ -882,7 +913,7 @@ export function ServerBrowserSurface(props: {
               refreshPreviewStreamAccess(environmentId);
             }}
           >
-            Reconnect
+            {t("web.remaining.ServerBrowserSurface.reconnect")}
           </Button>
         </div>
       ) : null}

@@ -1,3 +1,5 @@
+import { useTranslate } from "../../i18n";
+import { Trans, useTranslation } from "react-i18next";
 import { InlineAudioPreview } from "../files/InlineAudioPreview";
 import { filePreviewKind } from "@t3tools/shared/filePreview";
 import { findRevealRef } from "./markdownFindContext";
@@ -145,6 +147,7 @@ export function UserMessageRow({ row }: { row: Extract<TimelineRow, { kind: "mes
 
 /** Automation prompts are long, repeated runbooks; a folded bubble keeps them out of the way. */
 function AutomationMessageRow({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
+  const t = useTranslate();
   const ctx = use(TimelineRowCtx);
   const [expanded, setExpanded] = useState(false);
   const revealRef = findRevealRef(() => setExpanded(true));
@@ -172,10 +175,10 @@ function AutomationMessageRow({ row }: { row: Extract<TimelineRow, { kind: "mess
           expanded && "w-full",
         )}
       >
-        <MessageAuthorHeading>Automation</MessageAuthorHeading>
+        <MessageAuthorHeading>{t("web.ui.TimelineUserMessageRow.automation")}</MessageAuthorHeading>
         <FoldedMessageHeader
           icon={CalendarClockIcon}
-          label="Automation"
+          label={t("web.ui.TimelineUserMessageRow.automation")}
           summary={summary}
           expanded={expanded}
           onToggle={() => setExpanded((value) => !value)}
@@ -202,7 +205,7 @@ function AutomationMessageRow({ row }: { row: Extract<TimelineRow, { kind: "mess
                 search={{ environmentId: ctx.activeThreadEnvironmentId, taskId: scheduledTaskId }}
                 className="rounded-sm text-xs text-muted-foreground hover:underline focus-visible:outline-2 focus-visible:outline-ring"
               >
-                Open automation
+                {t("web.ui.TimelineUserMessageRow.open-automation")}
               </Link>
             ) : null}
             <TimelineRowTimestamp
@@ -218,7 +221,7 @@ function AutomationMessageRow({ row }: { row: Extract<TimelineRow, { kind: "mess
               {promptLink !== null && (
                 <MessageCopyButton
                   text={promptLink}
-                  label="Copy prompt link"
+                  label={t("web.ui.TimelineUserMessageRow.copy-prompt-link")}
                   icon={LinkIconNode}
                   variant="ghost"
                 />
@@ -289,6 +292,8 @@ function UserMessageProjectedStatus({ row }: { row: Extract<TimelineRow, { kind:
 }
 
 function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
+  const t = useTranslate();
+  const { i18n: dateI18n } = useTranslation();
   const ctx = use(TimelineRowCtx);
   const { onImageExpand, onFileOpen } = ctx;
   const senderThreadId = row.message.senderThreadId;
@@ -452,7 +457,7 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
           className="me-1 text-2xs text-muted-foreground/70"
           data-user-message-attribution="t3code"
         >
-          Sent by T3 Code
+          {t("web.ui.TimelineUserMessageRow.sent-by-t3-code")}
         </p>
       ) : null}
       {/* The row's heading already names the guest for screen readers. */}
@@ -479,8 +484,10 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
           {folded
             ? senderLabel
             : userMessage.guestName === undefined
-              ? "You"
-              : `${userMessage.guestName} (guest)`}
+              ? t("web.dynamic.TimelineUserMessageRow.you")
+              : t("web.dynamic.TimelineUserMessageRow.param-guest", {
+                  guestName: userMessage.guestName,
+                })}
         </MessageAuthorHeading>
         {folded ? (
           <FoldedMessageHeader
@@ -517,7 +524,9 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
                       <button
                         type="button"
                         className="block h-full w-full cursor-zoom-in"
-                        aria-label={`Preview ${image.name}`}
+                        aria-label={t("web.dynamic.TimelineUserMessageRow.preview-param", {
+                          name: image.name,
+                        })}
                         onClick={() => {
                           const preview = buildExpandedImagePreview(regularImages, image.id);
                           if (!preview) return;
@@ -587,7 +596,9 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
                       <div key={file.id} className="flex min-w-0 items-center gap-1">
                         <button
                           type="button"
-                          aria-label={`Preview ${file.name}`}
+                          aria-label={t("web.dynamic.TimelineUserMessageRow.preview-param", {
+                            name: file.name,
+                          })}
                           onClick={() => ctx.onFileOpen(file)}
                           className="focus-visible:ring-ring/70 flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-1 text-left text-sm hover:underline focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none"
                         >
@@ -600,14 +611,22 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
                               <Button
                                 size="icon-xs"
                                 variant="ghost-muted"
-                                aria-label={`Download ${file.name}`}
+                                aria-label={t("web.dynamic.TimelineUserMessageRow.download-param", {
+                                  name: file.name,
+                                })}
                                 onClick={() => ctx.onFileDownload(file)}
                               />
                             }
                           >
                             <DownloadIcon />
                           </TooltipTrigger>
-                          <TooltipPopup side="top">Download {file.name}</TooltipPopup>
+                          <TooltipPopup side="top">
+                            <Trans
+                              t={t}
+                              i18nKey="web.rich.TimelineUserMessageRow.download-part"
+                              components={{ value0: <>{file.name}</> }}
+                            />
+                          </TooltipPopup>
                         </Tooltip>
                       </div>
                     );
@@ -649,15 +668,24 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
           <div className="flex shrink-0 items-center gap-2">
             {folded && senderThreadId ? (
               <InlineButton onClick={() => ctx.onOpenThread(senderThreadId)} tone="muted">
-                Open thread
+                {t("web.ui.TimelineUserMessageRow.open-thread")}
               </InlineButton>
             ) : null}
             <Tooltip>
               <TooltipTrigger render={<p className="text-muted-foreground text-xs tabular-nums" />}>
-                {formatDayAwareTimestamp(row.message.createdAt, ctx.timestampFormat)}
+                {formatDayAwareTimestamp(
+                  row.message.createdAt,
+                  ctx.timestampFormat,
+                  undefined,
+                  dateI18n.resolvedLanguage,
+                )}
               </TooltipTrigger>
               <TooltipPopup>
-                {formatChatTimestampTooltip(row.message.createdAt, ctx.timestampFormat)}
+                {formatChatTimestampTooltip(
+                  row.message.createdAt,
+                  ctx.timestampFormat,
+                  dateI18n.resolvedLanguage,
+                )}
               </TooltipPopup>
             </Tooltip>
             <div className="flex items-center gap-0.5">
@@ -680,7 +708,7 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
               {promptLink !== null && (
                 <MessageCopyButton
                   text={promptLink}
-                  label="Copy prompt link"
+                  label={t("web.ui.TimelineUserMessageRow.copy-prompt-link")}
                   icon={LinkIconNode}
                   variant="ghost"
                 />
@@ -698,6 +726,7 @@ function UserMessageIntentMarker({
 }: {
   readonly intent: "steer" | "promoted_queued_to_steer";
 }) {
+  const t = useTranslate();
   return (
     <Tooltip>
       <TooltipTrigger
@@ -709,12 +738,14 @@ function UserMessageIntentMarker({
         }
       >
         <Redo2Icon aria-hidden="true" className="size-3" />
-        Steer
+        {t("web.ui.TimelineUserMessageRow.steer")}
       </TooltipTrigger>
       <TooltipPopup side="top">
         {intent === "promoted_queued_to_steer"
-          ? "Originally queued, then promoted to steer the active turn"
-          : "Steered the active turn"}
+          ? t(
+              "web.dynamic.TimelineUserMessageRow.originally-queued-then-promoted-to-steer-the-active-turn",
+            )
+          : t("web.dynamic.TimelineUserMessageRow.steered-the-active-turn")}
       </TooltipPopup>
     </Tooltip>
   );
@@ -727,6 +758,7 @@ function RevertUserMessageButton({
   turnCount: number;
   messageId: MessageId;
 }) {
+  const t = useTranslate();
   const ctx = use(TimelineRowCtx);
   const activity = use(TimelineRowActivityCtx);
 
@@ -740,13 +772,13 @@ function RevertUserMessageButton({
             variant="ghost"
             disabled={activity.isRevertingCheckpoint || activity.isWorking}
             onClick={() => ctx.onRevertToTurnCount(turnCount, messageId)}
-            aria-label="Edit from here"
+            aria-label={t("web.ui.TimelineUserMessageRow.edit-from-here")}
           />
         }
       >
         <Undo2Icon className="size-3" />
       </TooltipTrigger>
-      <TooltipPopup side="top">Edit from here</TooltipPopup>
+      <TooltipPopup side="top">{t("web.ui.TimelineUserMessageRow.edit-from-here")}</TooltipPopup>
     </Tooltip>
   );
 }
@@ -762,6 +794,7 @@ const CollapsibleUserMessageBody = memo(function CollapsibleUserMessageBody(prop
   markdownCwd: string | undefined;
   collapsible?: boolean;
 }) {
+  const t = useTranslate();
   const [expanded, setExpanded] = useState(false);
   const revealForFind = () => setExpanded(true);
   const revealRef = findRevealRef(revealForFind);
@@ -812,7 +845,9 @@ const CollapsibleUserMessageBody = memo(function CollapsibleUserMessageBody(prop
               onClick={() => setExpanded((value) => !value)}
               className="-ml-1"
             >
-              {expanded ? "Show less" : "Show full message"}
+              {expanded
+                ? t("web.dynamic.TimelineUserMessageRow.show-less")
+                : t("web.dynamic.TimelineUserMessageRow.show-full-message")}
             </Button>
           ) : null}
         </div>

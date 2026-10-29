@@ -16,6 +16,7 @@ import {
   linkRequestInitialMachine,
   rankMachinesByHint,
 } from "./linkRequest.ts";
+import { createI18n } from "./i18n/index.ts";
 
 const item = {
   id: TurnItemId.make("turn-item:link-request:1"),
@@ -36,6 +37,18 @@ describe("linkRequestDisplay", () => {
   });
 
   it("shows why a link failed, and never offers the actions outside the asking thread", () => {
+    const chinese = createI18n("zh-CN");
+    expect(
+      linkRequestDisplay(
+        { ...asked, linkStatus: "failed", failure: "Pairing code expired." },
+        "local",
+        accessLabel,
+        chinese.t,
+      ),
+    ).toMatchObject({ outcome: "failed", label: "无法关联：Pairing code expired." });
+    expect(
+      linkRequestDisplay({ ...asked, linkStatus: "pending" }, "inherited", accessLabel, chinese.t),
+    ).toMatchObject({ kind: "pending-elsewhere" });
     expect(
       linkRequestDisplay(
         { ...asked, linkStatus: "failed", failure: "Pairing code expired." },

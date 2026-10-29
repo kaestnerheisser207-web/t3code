@@ -1,3 +1,5 @@
+import { LanguageProvider } from "./i18n";
+import { LanguageSync, useLanguageReady } from "./LanguageSync";
 import { installPermissionUpdateNotice } from "./features/connection/permissionUpdateNotice";
 import { installComposerAttachmentUploads } from "./state/composer-attachment-uploads";
 import { installThreadOutboxDelivery } from "./state/threadOutboxDelivery";
@@ -196,12 +198,13 @@ disposeOnFoundationReplace(typeof module === "undefined" ? undefined : module.ho
 });
 
 function SplashScreenCoordinator() {
+  const languageReady = useLanguageReady();
   const { isReady } = useAppearancePreferences();
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- hides the native splash screen once appearance preferences have loaded
   useEffect(() => {
-    if (isReady) void SplashScreen.hide();
-  }, [isReady]);
+    if (isReady && languageReady) void SplashScreen.hide();
+  }, [isReady, languageReady]);
 
   return null;
 }
@@ -209,11 +212,14 @@ function SplashScreenCoordinator() {
 export default function App() {
   return (
     <RegistryContext.Provider value={appAtomRegistry}>
-      <CloudAuthProvider>
-        <AppearancePreferencesProvider>
-          <AppContent />
-        </AppearancePreferencesProvider>
-      </CloudAuthProvider>
+      <LanguageProvider>
+        <LanguageSync />
+        <CloudAuthProvider>
+          <AppearancePreferencesProvider>
+            <AppContent />
+          </AppearancePreferencesProvider>
+        </CloudAuthProvider>
+      </LanguageProvider>
     </RegistryContext.Provider>
   );
 }

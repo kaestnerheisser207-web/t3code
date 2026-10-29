@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { SegmentedControl } from "../../components/ui/SegmentedControl";
 import {
   BasicAlertDialog,
@@ -59,6 +60,7 @@ function systemUses24HourClock() {
 }
 
 export function CustomSnoozeSheet(props: Props) {
+  const t = useTranslate();
   const { themeAppearance, themeVariables: colors } = useAppearancePreferences();
   const [is24Hour, setIs24Hour] = useState(systemUses24HourClock);
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- subscribes to AppState to re-read the native 24-hour clock setting when the app resumes
@@ -142,7 +144,9 @@ export function CustomSnoozeSheet(props: Props) {
                 verticalArrangement={{ spacedBy: 16 }}
                 modifiers={[fillMaxWidth(), padding(24, 24, 24, 16)]}
               >
-                <Text style={titleTypography}>Custom snooze</Text>
+                <Text style={titleTypography}>
+                  {t("mobile.threads.CustomSnoozeSheet.android.custom-snooze")}
+                </Text>
                 <RNHostView matchContents={{ vertical: true }} modifiers={[fillMaxWidth()]}>
                   <SegmentedControl
                     variant="card"
@@ -256,13 +260,17 @@ export function CustomSnoozeSheet(props: Props) {
                     onClick={props.onClose}
                     colors={{ contentColor: colors["--color-foreground"] }}
                   >
-                    <Text style={bodyTypography}>Cancel</Text>
+                    <Text style={bodyTypography}>
+                      {t("mobile.threads.CustomSnoozeSheet.android.cancel")}
+                    </Text>
                   </TextButton>
                   <TextButton
                     onClick={submit}
                     colors={{ contentColor: colors["--color-foreground"] }}
                   >
-                    <Text style={bodyTypography}>Snooze</Text>
+                    <Text style={bodyTypography}>
+                      {t("mobile.threads.CustomSnoozeSheet.android.snooze")}
+                    </Text>
                   </TextButton>
                 </Row>
               </Column>

@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import {
   latestRootProviderFailure,
   latestUnheldRun,
@@ -311,8 +312,16 @@ function joinWithAnd(parts: ReadonlyArray<string>): string {
   return `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
 }
 
+const BACKGROUND_KEYS = {
+  subagent: ["background.subagent", "background.subagents"],
+  command: ["background.command", "background.commands"],
+  monitor: ["background.monitor", "background.monitors"],
+  background_task: ["background.task", "background.tasks"],
+} as const;
+
 export function presentPendingBackgroundWork(
   tasks: ReadonlyArray<OrchestrationV2PendingBackgroundTask>,
+  t?: TFunction,
 ): PendingBackgroundWorkPresentation | null {
   if (tasks.length === 0) return null;
   const waiting = backgroundWorkHoldsCompletion(tasks);
@@ -328,7 +337,7 @@ export function presentPendingBackgroundWork(
         kind: task.kind,
         label:
           label === undefined || label.length === 0
-            ? BACKGROUND_WORK_KINDS[task.kind].singular
+            ? (t?.(BACKGROUND_KEYS[task.kind][0]) ?? BACKGROUND_WORK_KINDS[task.kind].singular)
             : label,
         childThreadId: task.kind === "subagent" ? task.childThreadId : undefined,
       };
@@ -340,8 +349,27 @@ export function presentPendingBackgroundWork(
     );
   const [only] = items;
   if (items.length === 1 && only !== undefined) {
-    const noun = BACKGROUND_WORK_KINDS[only.kind].singular;
-    const named = only.label !== noun;
+    const noun = t?.(BACKGROUND_KEYS[only.kind][0]) ?? BACKGROUND_WORK_KINDS[only.kind].singular;
+    const description = tasks[0]?.description?.trim();
+    const named = Boolean(
+      description && (only.kind !== "subagent" || formatSubagentDisplayTitle(description).trim()),
+    );
+    if (t) {
+      const title =
+        waiting && named && only.kind === "monitor"
+          ? only.label
+          : t(
+              waiting
+                ? named
+                  ? "background.waitingNamed"
+                  : "background.waitingUnnamed"
+                : named
+                  ? "background.runningNamed"
+                  : "background.runningUnnamed",
+              { kind: noun, label: only.label },
+            );
+      return { title, items, waiting };
+    }
     const title = waiting
       ? named
         ? `${only.kind === "monitor" ? "" : `Waiting on ${noun} `}${only.label}`
@@ -355,9 +383,22 @@ export function presentPendingBackgroundWork(
   for (const item of items) counts.set(item.kind, (counts.get(item.kind) ?? 0) + 1);
   const groups = Array.from(counts, ([kind, count]) => {
     const { singular, plural } = BACKGROUND_WORK_KINDS[kind];
-    return `${count} ${count === 1 ? singular : plural}`;
+    return (
+      t?.(BACKGROUND_KEYS[kind][1], { count }) ?? `${count} ${count === 1 ? singular : plural}`
+    );
   });
-  return { title: `${waiting ? "Waiting on" : "Running"} ${joinWithAnd(groups)}`, items, waiting };
+  const title = t
+    ? t(waiting ? "background.waitingGroup" : "background.runningGroup", {
+        tasks:
+          groups.length < 2
+            ? groups.join("")
+            : t("background.listPair", {
+                head: groups.slice(0, -1).join(t("background.listSeparator")),
+                tail: groups.at(-1) ?? "",
+              }),
+      })
+    : `${waiting ? "Waiting on" : "Running"} ${joinWithAnd(groups)}`;
+  return { title, items, waiting };
 }
 
 export interface ProviderGoalPresentation {
@@ -376,6 +417,15 @@ const PROVIDER_GOAL_TITLES: Record<OrchestrationV2ProviderGoal["status"], string
   complete: "Goal complete",
 };
 
+const PROVIDER_GOAL_KEYS = {
+  active: "goal.active",
+  paused: "goal.paused",
+  blocked: "goal.blocked",
+  usage_limited: "goal.usageLimited",
+  budget_limited: "goal.budgetLimited",
+  complete: "goal.complete",
+} as const;
+
 function formatGoalTokens(tokens: number): string {
   if (tokens < 1_000) return `${tokens}`;
   if (tokens < 1_000_000) return `${Math.round(tokens / 1_000)}k`;
@@ -385,6 +435,7 @@ function formatGoalTokens(tokens: number): string {
 export function presentProviderGoal(
   goal: OrchestrationV2ProviderGoal,
   working: boolean,
+  t?: TFunction,
 ): ProviderGoalPresentation {
   const usage: Array<string> = [];
   if (goal.tokensUsed !== undefined && goal.tokensUsed > 0) {
@@ -398,10 +449,15 @@ export function presentProviderGoal(
     usage.push(formatDuration(goal.timeUsedSeconds * 1_000));
   }
   if (goal.checks !== undefined && goal.checks > 0) {
-    usage.push(`${goal.checks} ${goal.checks === 1 ? "check" : "checks"}`);
+    usage.push(
+      t?.("goal.checks", { count: goal.checks }) ??
+        `${goal.checks} ${goal.checks === 1 ? "check" : "checks"}`,
+    );
   }
   return {
-    title: goal.status === "active" && !working ? "Goal set" : PROVIDER_GOAL_TITLES[goal.status],
+    title:
+      t?.(goal.status === "active" && !working ? "goal.set" : PROVIDER_GOAL_KEYS[goal.status]) ??
+      (goal.status === "active" && !working ? "Goal set" : PROVIDER_GOAL_TITLES[goal.status]),
     objective: goal.objective,
     usage: usage.length === 0 ? null : usage.join(" · "),
     canResume: goal.status !== "active" && goal.status !== "complete",

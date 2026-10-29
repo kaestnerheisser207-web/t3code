@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { useTranslate } from "../../i18n";
 import type { DesktopBridge, DesktopUpdateState } from "@t3tools/contracts";
 import { TriangleAlertIcon } from "lucide-react";
 import { type ComponentProps, useId, useRef, useState } from "react";
@@ -115,6 +117,7 @@ export function SidebarUpdateArchitectureWarning() {
 }
 
 function SidebarUpdateArchitectureWarningContent() {
+  const t = useTranslate();
   const state = useDesktopUpdateState();
   const visible = shouldShowArm64IntelBuildWarning(state);
   const description = state && visible ? getArm64IntelBuildWarningDescription(state) : null;
@@ -124,7 +127,7 @@ function SidebarUpdateArchitectureWarningContent() {
   return (
     <Alert variant="warning">
       <TriangleAlertIcon />
-      <AlertTitle>Intel build on Apple Silicon</AlertTitle>
+      <AlertTitle>{t("web.ui.SidebarUpdatePill.intel-build-on-apple-silicon")}</AlertTitle>
       <AlertDescription>{description}</AlertDescription>
     </Alert>
   );
@@ -140,11 +143,12 @@ async function downloadLocalUpdate(
     notifyDownloaded,
     reportError = toastUpdateError,
   }: { readonly notifyDownloaded: boolean; readonly reportError?: ReportLocalUpdateError },
+  t?: TFunction,
 ): Promise<boolean> {
   try {
     const result = await bridge.downloadUpdate();
     if (result.completed && notifyDownloaded) {
-      showDesktopUpdateDownloadedToast(bridge, result.state);
+      showDesktopUpdateDownloadedToast(bridge, result.state, t);
     }
     const actionError = shouldToastDesktopUpdateActionResult(result)
       ? getDesktopUpdateActionError(result)
@@ -163,11 +167,12 @@ async function downloadLocalUpdate(
 async function installLocalUpdate(
   bridge: DesktopBridge,
   reportError: ReportLocalUpdateError = toastUpdateError,
+  t?: TFunction,
 ): Promise<boolean> {
   try {
     const result = await bridge.installUpdate();
     if (!result.accepted) {
-      showDesktopUpdateDownloadedToast(bridge, result.state);
+      showDesktopUpdateDownloadedToast(bridge, result.state, t);
       return false;
     }
     const actionError = shouldToastDesktopUpdateActionResult(result)
@@ -190,6 +195,7 @@ export function SidebarUpdatePill() {
 }
 
 function SidebarUpdateControl() {
+  const t = useTranslate();
   const state = useDesktopUpdateState();
   const [isActionPending, setIsActionPending] = useState(false);
   const [isConfirmingEverything, setIsConfirmingEverything] = useState(false);
@@ -282,7 +288,7 @@ function SidebarUpdateControl() {
     setIsActionPending(true);
 
     if (action === "download") {
-      void downloadLocalUpdate(bridge, { notifyDownloaded: true }).finally(() =>
+      void downloadLocalUpdate(bridge, { notifyDownloaded: true }, t).finally(() =>
         setIsActionPending(false),
       );
       return;
@@ -309,7 +315,7 @@ function SidebarUpdateControl() {
         setIsActionPending(false);
         return;
       }
-      void installLocalUpdate(bridge).finally(() => setIsActionPending(false));
+      void installLocalUpdate(bridge, undefined, t).finally(() => setIsActionPending(false));
       return;
     }
 
@@ -351,11 +357,11 @@ function SidebarUpdateControl() {
         ...(bridge && action === "download"
           ? {
               downloadLocal: (reportError) =>
-                downloadLocalUpdate(bridge, { notifyDownloaded: false, reportError }),
+                downloadLocalUpdate(bridge, { notifyDownloaded: false, reportError }, t),
             }
           : {}),
         ...(bridge && action !== "none"
-          ? { installLocal: (reportError) => installLocalUpdate(bridge, reportError) }
+          ? { installLocal: (reportError) => installLocalUpdate(bridge, reportError, t) }
           : {}),
       }),
     );
@@ -427,7 +433,7 @@ function SidebarUpdateControl() {
                     failures: [],
                     restarting: [],
                   });
-                  if (!(await installLocalUpdate(window.desktopBridge!))) {
+                  if (!(await installLocalUpdate(window.desktopBridge!, undefined, t))) {
                     clearSavedUpdateEverythingResult();
                   }
                 },
@@ -541,7 +547,7 @@ function SidebarUpdateControl() {
         {showReleaseNotesPopover && state ? (
           <PopoverPopup
             align="center"
-            aria-label="Nightly update release notes"
+            aria-label={t("web.ui.SidebarUpdatePill.nightly-update-release-notes")}
             initialFocus={false}
             onKeyDownCapture={(event) => {
               if (

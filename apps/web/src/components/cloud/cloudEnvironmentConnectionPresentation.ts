@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import {
   connectionStatusText,
   type EnvironmentConnectionPresentation,
@@ -11,48 +12,49 @@ export interface SavedCloudEnvironmentConnectionPresentation {
 
 export function presentSavedCloudEnvironmentConnection(
   connection: EnvironmentConnectionPresentation,
+  t?: TFunction,
 ): SavedCloudEnvironmentConnectionPresentation {
   switch (connection.phase) {
     case "connected":
       return {
-        buttonLabel: "Connected",
-        statusText: connectionStatusText(connection),
+        buttonLabel: t?.("connection.connected") ?? "Connected",
+        statusText: connectionStatusText(connection, t),
         tone: "connected",
       };
     case "connecting":
       return {
-        buttonLabel: "Connecting…",
-        statusText: connectionStatusText(connection),
+        buttonLabel: t?.("connection.connecting") ?? "Connecting…",
+        statusText: connectionStatusText(connection, t),
         tone: "connecting",
       };
     case "reconnecting":
       return {
-        buttonLabel: "Reconnecting…",
-        statusText: connectionStatusText(connection),
+        buttonLabel: t?.("connection.reconnecting") ?? "Reconnecting…",
+        statusText: connectionStatusText(connection, t),
         tone: "connecting",
       };
     case "unsupported":
       return {
-        buttonLabel: "Client not supported",
-        statusText: connectionStatusText(connection),
+        buttonLabel: t?.("connection.unsupported") ?? "Client not supported",
+        statusText: connectionStatusText(connection, t),
         tone: "idle",
       };
     case "error":
       return {
-        buttonLabel: "Connection failed",
-        statusText: connectionStatusText(connection),
+        buttonLabel: t?.("connection.failed") ?? "Connection failed",
+        statusText: connectionStatusText(connection, t),
         tone: "error",
       };
     case "offline":
       return {
-        buttonLabel: "Offline",
-        statusText: connectionStatusText(connection),
+        buttonLabel: t?.("connection.offline") ?? "Offline",
+        statusText: connectionStatusText(connection, t),
         tone: "idle",
       };
     case "available":
       return {
-        buttonLabel: "Not connected",
-        statusText: connectionStatusText(connection),
+        buttonLabel: t?.("web.dynamic.LinkMachineSelect.not-connected") ?? "Not connected",
+        statusText: connectionStatusText(connection, t),
         tone: "idle",
       };
   }

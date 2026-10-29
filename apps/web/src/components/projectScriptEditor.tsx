@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../i18n";
 import {
   AuthOrchestrationOperateScope,
   AuthSettingsWriteScope,
@@ -54,13 +56,15 @@ import { Popover, PopoverPopup, PopoverTrigger } from "./ui/popover";
 import { Switch } from "./ui/switch";
 import { Textarea } from "./ui/textarea";
 
-const SCRIPT_ICONS: Array<{ id: ProjectScriptIcon; label: string }> = [
-  { id: "play", label: "Play" },
-  { id: "test", label: "Test" },
-  { id: "lint", label: "Lint" },
-  { id: "configure", label: "Configure" },
-  { id: "build", label: "Build" },
-  { id: "debug", label: "Debug" },
+const scriptIcons = (
+  t: ReturnType<typeof useTranslate>,
+): Array<{ id: ProjectScriptIcon; label: string }> => [
+  { id: "play", label: t("script.icon.play") },
+  { id: "test", label: t("script.icon.test") },
+  { id: "lint", label: t("script.icon.lint") },
+  { id: "configure", label: t("script.icon.configure") },
+  { id: "build", label: t("script.icon.build") },
+  { id: "debug", label: t("script.icon.debug") },
 ];
 
 export function ScriptIcon({
@@ -151,6 +155,7 @@ export function ProjectScriptEditorDialog({
   onDelete: (scriptId: string) => void;
   onClose: () => void;
 }) {
+  const t = useTranslate();
   const canEditActions = useEnvironmentScope(environmentId, editScope);
   // Scope errors by request so late saves cannot overwrite a newer request's error.
   const [errorState, setErrorState] = useState<{
@@ -211,11 +216,21 @@ export function ProjectScriptEditorDialog({
       <AlertDialog open={deleteConfirmOpen && canEditActions} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogPopup>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete action "{deleteName}"?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>
+              <Trans
+                t={t}
+                i18nKey="web.rich.projectScriptEditor.delete-action-part"
+                components={{ value0: <>{deleteName}</> }}
+              />
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("web.ui.projectScriptEditor.this-action-cannot-be-undone")}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {t("web.ui.projectScriptEditor.cancel")}
+            </AlertDialogClose>
             <Button
               variant="destructive"
               disabled={!canEditActions}
@@ -230,7 +245,7 @@ export function ProjectScriptEditorDialog({
                 onDelete(request.scriptId);
               }}
             >
-              Delete action
+              {t("web.ui.projectScriptEditor.delete-action")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogPopup>
@@ -263,6 +278,7 @@ function ProjectScriptEditorForm({
   onRequestDelete: (name: string) => void;
   onClose: () => void;
 }) {
+  const t = useTranslate();
   const canEditActions = useEnvironmentScope(environmentId, editScope);
   const canWriteSettings = useEnvironmentScope(environmentId, AuthSettingsWriteScope);
   const formId = React.useId();
@@ -400,16 +416,22 @@ function ProjectScriptEditorForm({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{isEditing ? "Edit Action" : "Add Action"}</DialogTitle>
+        <DialogTitle>
+          {isEditing
+            ? t("web.dynamic.projectScriptEditor.edit-action")
+            : t("web.dynamic.projectScriptEditor.add-action")}
+        </DialogTitle>
         <DialogDescription>
-          Actions are project-scoped commands you can run from the top bar or keybindings.
+          {t(
+            "web.ui.projectScriptEditor.actions-are-project-scoped-commands-you-can-run-from-the-top-bar-or-keybindings",
+          )}
         </DialogDescription>
       </DialogHeader>
       <DialogPanel>
         <form id={formId} onSubmit={submit}>
           <fieldset className="space-y-4" disabled={isSaving || !canEditActions}>
             <div className="space-y-1.5">
-              <Label htmlFor="script-name">Name</Label>
+              <Label htmlFor="script-name">{t("web.ui.projectScriptEditor.name")}</Label>
               <div className="flex items-center gap-2">
                 <Popover onOpenChange={setIconPickerOpen} open={iconPickerOpen}>
                   <PopoverTrigger
@@ -418,7 +440,7 @@ function ProjectScriptEditorForm({
                         type="button"
                         variant="outline"
                         className="size-9 shrink-0"
-                        aria-label="Choose icon"
+                        aria-label={t("web.ui.projectScriptEditor.choose-icon")}
                       />
                     }
                   >
@@ -426,7 +448,7 @@ function ProjectScriptEditorForm({
                   </PopoverTrigger>
                   <PopoverPopup align="start">
                     <div className="grid grid-cols-3 gap-2">
-                      {SCRIPT_ICONS.map((entry) => {
+                      {scriptIcons(t).map((entry) => {
                         const isSelected = entry.id === icon;
                         return (
                           <button
@@ -453,29 +475,34 @@ function ProjectScriptEditorForm({
                 <Input
                   id="script-name"
                   autoFocus
-                  placeholder="Test"
+                  placeholder={t("web.ui.projectScriptEditor.test")}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="script-keybinding">Keybinding</Label>
+              <Label htmlFor="script-keybinding">
+                {t("web.ui.projectScriptEditor.keybinding")}
+              </Label>
               <Input
                 disabled={!canWriteSettings}
                 id="script-keybinding"
-                placeholder="Press shortcut"
+                placeholder={t("web.ui.projectScriptEditor.press-shortcut")}
                 value={keybinding}
                 readOnly
                 onKeyDown={captureKeybinding}
               />
               <p className="text-xs text-muted-foreground">
-                Press a shortcut. Use <code>Backspace</code> to clear. Shortcuts are
-                environment-wide. Projects using the same action share its shortcut.
+                <Trans
+                  t={t}
+                  i18nKey="web.rich.projectScriptEditor.press-a-shortcut-use-part-to-clear-shortcuts-are-environment-wide-projects-using-the-same-action-share-its-shortcut"
+                  components={{ part0: <code>Backspace</code> }}
+                />
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="script-command">Command</Label>
+              <Label htmlFor="script-command">{t("web.ui.projectScriptEditor.command")}</Label>
               <Textarea
                 id="script-command"
                 placeholder="bun test"
@@ -484,7 +511,9 @@ function ProjectScriptEditorForm({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="script-preview-url">Preview URL (optional)</Label>
+              <Label htmlFor="script-preview-url">
+                {t("web.ui.projectScriptEditor.preview-url-optional")}
+              </Label>
               <Input
                 id="script-preview-url"
                 placeholder="http://localhost:5173"
@@ -492,11 +521,13 @@ function ProjectScriptEditorForm({
                 onChange={(event) => setPreviewUrl(event.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Open this URL in the in-app preview when this action runs.
+                {t(
+                  "web.ui.projectScriptEditor.open-this-url-in-the-in-app-preview-when-this-action-runs",
+                )}
               </p>
             </div>
             <label className="flex items-center justify-between gap-3 rounded-md border border-border/70 px-3 py-2 text-sm dark:border-transparent dark:bg-white/[0.035]">
-              <span>Run automatically on worktree creation</span>
+              <span>{t("web.ui.projectScriptEditor.run-automatically-on-worktree-creation")}</span>
               <Switch
                 checked={runOnWorktreeCreate}
                 onCheckedChange={(checked) => setRunOnWorktreeCreate(Boolean(checked))}
@@ -507,7 +538,9 @@ function ProjectScriptEditorForm({
                 runOnWorktreeCreate ? "" : "opacity-60"
               }`}
             >
-              <span>Wait for it to finish before the agent starts</span>
+              <span>
+                {t("web.ui.projectScriptEditor.wait-for-it-to-finish-before-the-agent-starts")}
+              </span>
               <Switch
                 checked={waitForSetup}
                 disabled={!runOnWorktreeCreate}
@@ -515,7 +548,11 @@ function ProjectScriptEditorForm({
               />
             </label>
             <label className="flex items-center justify-between gap-3 rounded-md border border-border/70 px-3 py-2 text-sm dark:border-transparent dark:bg-white/[0.035]">
-              <span>Run in the thread's worktree when the thread settles</span>
+              <span>
+                {t(
+                  "web.ui.projectScriptEditor.run-in-the-thread-s-worktree-when-the-thread-settles",
+                )}
+              </span>
               <Switch
                 checked={runOnSettle}
                 onCheckedChange={(checked) => setRunOnSettle(Boolean(checked))}
@@ -526,7 +563,9 @@ function ProjectScriptEditorForm({
                 previewUrl.trim().length === 0 ? "opacity-60" : ""
               }`}
             >
-              <span>Open preview automatically when this action runs</span>
+              <span>
+                {t("web.ui.projectScriptEditor.open-preview-automatically-when-this-action-runs")}
+              </span>
               <Switch
                 checked={autoOpenPreview}
                 disabled={previewUrl.trim().length === 0}
@@ -546,14 +585,18 @@ function ProjectScriptEditorForm({
             disabled={isSaving || !canEditActions}
             onClick={() => onRequestDelete(name)}
           >
-            Delete
+            {t("web.ui.projectScriptEditor.delete")}
           </Button>
         )}
         <Button type="button" variant="outline" onClick={close}>
-          Cancel
+          {t("web.ui.projectScriptEditor.cancel")}
         </Button>
         <Button form={formId} type="submit" disabled={isSaving || !canEditActions}>
-          {isSaving ? "Saving…" : isEditing ? "Save changes" : "Save action"}
+          {isSaving
+            ? t("web.dynamic.projectScriptEditor.saving")
+            : isEditing
+              ? t("web.dynamic.projectScriptEditor.save-changes")
+              : t("web.dynamic.projectScriptEditor.save-action")}
         </Button>
       </DialogFooter>
     </>

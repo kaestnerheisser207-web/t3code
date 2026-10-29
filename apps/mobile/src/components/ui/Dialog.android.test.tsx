@@ -41,6 +41,7 @@ vi.mock("../../features/settings/appearance/useScaledTextRole", () => ({
 vi.mock("../../lib/mobileTheme", () => ({ themeColorWithContrast: () => "#ffffff" }));
 
 import * as Dialog from "./Dialog.android";
+import { LanguageProvider, mobileI18n } from "../../i18n";
 
 const roots: Root[] = [];
 
@@ -50,7 +51,13 @@ function mountHost() {
   document.body.append(container);
   const root = createRoot(container);
   roots.push(root);
-  act(() => root.render(<Dialog.Host />));
+  act(() =>
+    root.render(
+      <LanguageProvider>
+        <Dialog.Host />
+      </LanguageProvider>,
+    ),
+  );
   return { root, container };
 }
 
@@ -101,4 +108,26 @@ it("ignores a late action from a dialog that a newer one replaced", () => {
 
   expect(olderAction).toHaveBeenCalledOnce();
   expect(container.textContent).toContain("Newer");
+});
+
+it("updates default actions with the language while preserving custom actions", async () => {
+  await mobileI18n.changeLanguage("en");
+  const { container } = mountHost();
+  const onCancel = vi.fn();
+  const onConfirm = vi.fn();
+  try {
+    act(() => Dialog.confirm({ title: "Confirm", confirmText: "Keep", onCancel, onConfirm }));
+    await act(() => mobileI18n.changeLanguage("zh-CN"));
+    expect(container.querySelector("button")?.textContent).toBe("取消");
+    expect(container.querySelectorAll("button")[1]?.textContent).toBe("Keep");
+    act(() => container.querySelector<HTMLButtonElement>("button")!.click());
+    expect(onCancel).toHaveBeenCalledOnce();
+    expect(onConfirm).not.toHaveBeenCalled();
+    act(() => Dialog.alert("Notice"));
+    expect(container.querySelector("button")?.textContent).toBe("确定");
+    await act(() => mobileI18n.changeLanguage("en"));
+    expect(container.querySelector("button")?.textContent).toBe("OK");
+  } finally {
+    await act(() => mobileI18n.changeLanguage("en"));
+  }
 });

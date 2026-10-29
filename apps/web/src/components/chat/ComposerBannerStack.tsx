@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { InfoIcon } from "lucide-react";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
@@ -58,6 +59,7 @@ export function NoticeText({
   readonly className: string;
   readonly detailsLabel: string;
 }) {
+  const t = useTranslate();
   const textRef = useRef<HTMLSpanElement>(null);
   const detailsRef = useRef<HTMLButtonElement>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -110,7 +112,7 @@ export function NoticeText({
             <InfoIcon />
           </PopoverTrigger>
           <PopoverPopup
-            aria-label="Notice details"
+            aria-label={t("web.ui.ComposerBannerStack.notice-details")}
             tooltipStyle
             side="top"
             className="max-w-[min(30rem,calc(100vw-2rem))] whitespace-normal wrap-anywhere [--inline-button-text-align:start] [--inline-button-white-space:normal] [&_[data-slot=inline-button]]:max-w-full"
@@ -126,6 +128,7 @@ export function NoticeText({
 }
 
 function NoticeCard({ item }: { readonly item: ComposerBannerStackItem }) {
+  const t = useTranslate();
   return (
     <ComposerBanner.Root
       role={item.variant === "error" || item.variant === "warning" ? "alert" : undefined}
@@ -166,7 +169,9 @@ function NoticeCard({ item }: { readonly item: ComposerBannerStackItem }) {
             {item.actions}
             {item.onDismiss ? (
               <ComposerBanner.Dismiss
-                aria-label={item.dismissLabel ?? "Dismiss warning"}
+                aria-label={
+                  item.dismissLabel ?? t("web.dynamic.ComposerBannerStack.dismiss-warning")
+                }
                 onClick={item.onDismiss}
               />
             ) : null}

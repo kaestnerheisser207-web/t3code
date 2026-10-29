@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ScopedThreadRef } from "@t3tools/contracts";
 import {
   pullRequestLinkProject,
@@ -63,6 +64,7 @@ function LinkPullRequestDialog({
   projectId,
   onOpenChange,
 }: LinkPullRequestDialogProps) {
+  const t = useTranslate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [reference, setReference] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -123,16 +125,17 @@ function LinkPullRequestDialog({
     <Dialog open={open} onOpenChange={(next) => (pending ? undefined : onOpenChange(next))}>
       <DialogPopup className="max-w-xl" initialFocus={inputRef}>
         <DialogHeader>
-          <DialogTitle>Link pull request</DialogTitle>
+          <DialogTitle>{t("web.ui.LinkPullRequestDialog.link-pull-request")}</DialogTitle>
           <DialogDescription>
-            Attach a pull request to this thread by its URL, or by its number for this thread's
-            repository.
+            {t(
+              "web.ui.LinkPullRequestDialog.attach-a-pull-request-to-this-thread-by-its-url-or-by-its-number-for-this-thread-s-repository",
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
           <Input
             ref={inputRef}
-            placeholder="Pull request URL or #42"
+            placeholder={t("web.ui.LinkPullRequestDialog.pull-request-url-or-42")}
             value={reference}
             onChange={(event) => {
               setDirty(true);
@@ -161,7 +164,7 @@ function LinkPullRequestDialog({
             onClick={() => onOpenChange(false)}
             disabled={pending}
           >
-            Cancel
+            {t("web.ui.LinkPullRequestDialog.cancel")}
           </Button>
           <Button
             type="button"
@@ -169,7 +172,9 @@ function LinkPullRequestDialog({
             onClick={() => void submit()}
             disabled={pending || resolved === null || "error" in resolved}
           >
-            {pending ? "Linking..." : "Link"}
+            {pending
+              ? t("web.dynamic.LinkPullRequestDialog.linking")
+              : t("web.dynamic.LinkPullRequestDialog.link")}
           </Button>
         </DialogFooter>
       </DialogPopup>

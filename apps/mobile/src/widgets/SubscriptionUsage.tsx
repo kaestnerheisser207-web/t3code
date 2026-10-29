@@ -30,6 +30,37 @@ function SubscriptionUsage(
   },
 ) {
   "widget";
+
+  const chinese = (widgetEnvironment.locale ?? props.language) === "zh-CN";
+  const locale = chinese ? "zh-CN" : "en";
+  const details: Record<string, string> = {
+    "Open T3 to connect": "打开 T3 以连接",
+    "Open T3 to refresh": "打开 T3 以刷新",
+    "No limits available": "暂无配额信息",
+    "Subscription remaining": "订阅剩余额度",
+    "Tap to connect in T3": "点按以在 T3 中连接",
+  };
+  const detailText = (value: string, accountCount?: number) =>
+    !chinese
+      ? value
+      : accountCount && accountCount > 1 && value.endsWith("accounts · pooled")
+        ? `${accountCount} 个账户 · 汇总`
+        : (details[value] ?? value);
+  const windowLabel = (value: string) =>
+    chinese ? (value === "Session" ? "会话配额" : value === "Weekly" ? "每周配额" : value) : value;
+  const resetText = (window: { reset: string; resetAt?: number }) =>
+    window.resetAt !== undefined
+      ? `${chinese ? "下次重置" : "Next reset"} ${new Date(window.resetAt).toLocaleString(locale, {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: new Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions().hour12,
+        })}`
+      : chinese && window.reset === "Reset time unavailable"
+        ? "重置时间不可用"
+        : window.reset;
+
   // The extension evaluates this function without the app's module scope.
   const family = widgetEnvironment.widgetFamily;
   // Gallery snapshots can render an old timeline entry after it has expired.
@@ -90,10 +121,15 @@ function SubscriptionUsage(
               ].slice(0, limit)
             : windows.slice(0, limit);
     const detail = stale
-      ? "Open T3 to refresh"
+      ? detailText("Open T3 to refresh")
       : period !== "auto" && windows.length === 0 && provider.windows.length > 0
-        ? `No ${period} limit reported`
-        : provider.detail;
+        ? chinese
+          ? `未报告${period === "session" ? "会话" : "每周"}配额上限`
+          : `No ${period} limit reported`
+        : detailText(
+            provider.detail,
+            "accountCount" in provider ? provider.accountCount : undefined,
+          );
     const barModifiers = [
       progressViewStyle("linear"),
       frame({ height: 4 }),
@@ -109,7 +145,7 @@ function SubscriptionUsage(
             accessibilityElement("ignore"),
             accessibilityLabel(
               tightest
-                ? `${provider.name}, ${tightest.label}, ${tightest.remaining} percent remaining. ${tightest.reset}. ${provider.detail}.`
+                ? `${provider.name}, ${windowLabel(tightest.label)}, ${tightest.remaining}${chinese ? "% 剩余。" : " percent remaining."} ${resetText(tightest)}. ${detail}.`
                 : `${provider.name}. ${detail}.`,
             ),
           ]}
@@ -123,7 +159,7 @@ function SubscriptionUsage(
               ]}
             >
               {provider.name}
-              {tightest ? ` · ${tightest.label}` : ""}
+              {tightest ? ` · ${windowLabel(tightest.label)}` : ""}
             </Text>
             <Spacer />
             <Text
@@ -135,10 +171,14 @@ function SubscriptionUsage(
               ]}
             >
               {tightest
-                ? `${tightest.remaining}% left`
+                ? chinese
+                  ? `剩余 ${tightest.remaining}%`
+                  : `${tightest.remaining}% left`
                 : period !== "auto" && !stale && provider.windows.length > 0
                   ? "N/A"
-                  : "Open T3"}
+                  : chinese
+                    ? "打开 T3"
+                    : "Open T3"}
             </Text>
           </HStack>
           {tightest ? (
@@ -170,18 +210,22 @@ function SubscriptionUsage(
           <Text
             modifiers={[font({ textStyle: "caption2" }), foregroundStyle(secondary), lineLimit(1)]}
           >
-            {detail === "Subscription remaining" ? " " : detail}
+            {!stale &&
+            !(period !== "auto" && windows.length === 0 && provider.windows.length > 0) &&
+            provider.detail === "Subscription remaining"
+              ? " "
+              : detail}
           </Text>
         ) : null}
         {shown.map((window) => (
           <VStack
-            key={window.label}
+            key={windowLabel(window.label)}
             alignment="leading"
             spacing={dense ? 1 : 2}
             modifiers={[
               accessibilityElement("ignore"),
               accessibilityLabel(
-                `${provider.name}, ${window.label}, ${window.remaining} percent remaining. ${window.reset}. ${provider.detail}.`,
+                `${provider.name}, ${windowLabel(window.label)}, ${window.remaining}${chinese ? "% 剩余。" : " percent remaining."} ${resetText(window)}. ${detail}.`,
               ),
             ]}
           >
@@ -193,7 +237,7 @@ function SubscriptionUsage(
                   lineLimit(1),
                 ]}
               >
-                {window.label}
+                {windowLabel(window.label)}
               </Text>
               <Spacer />
               <Text
@@ -212,13 +256,13 @@ function SubscriptionUsage(
                   ),
                 ]}
               >
-                {window.remaining}% left
+                {chinese ? `剩余 ${window.remaining}%` : `${window.remaining}% left`}
               </Text>
             </HStack>
             <ProgressView value={window.remaining / 100} modifiers={barModifiers} />
             {!compact ? (
               <Text modifiers={[font({ size: 10 }), foregroundStyle(secondary), lineLimit(1)]}>
-                {window.reset}
+                {resetText(window)}
               </Text>
             ) : null}
           </VStack>
@@ -270,8 +314,8 @@ function SubscriptionUsage(
           modifiers={[font({ textStyle: "caption2" }), foregroundStyle(secondary), lineLimit(1)]}
         >
           {props.checkedAt
-            ? `As of ${new Date(props.checkedAt).toLocaleString(undefined, { hour: "numeric", minute: "2-digit", month: "short", day: "numeric" })}`
-            : "Tap to connect in T3"}
+            ? `${chinese ? "截至" : "As of"} ${new Date(props.checkedAt).toLocaleString(locale, { hour: "numeric", minute: "2-digit", month: "short", day: "numeric", hour12: new Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions().hour12 })}`
+            : detailText("Tap to connect in T3")}
         </Text>
       ) : null}
     </VStack>

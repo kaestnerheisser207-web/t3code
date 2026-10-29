@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { AssistantCitation } from "@t3tools/contracts";
 import {
   assistantCitationLabel,
@@ -50,6 +51,7 @@ export function AssistantCitationChip({
     onRestoreFocus?: () => void;
   };
 }) {
+  const t = useTranslate();
   const navigate = useNavigate();
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
   const commentPopupRef = useRef<HTMLDivElement>(null);
@@ -127,7 +129,9 @@ export function AssistantCitationChip({
     <Link
       {...sourceLinkProps}
       className="inline-flex min-w-0 items-center gap-[0.2em] self-baseline text-inherit no-underline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-current rounded-sm"
-      aria-label={`View cited assistant text: ${label}`}
+      aria-label={t("web.dynamic.AssistantCitationChip.view-cited-assistant-text-param", {
+        label: label,
+      })}
     >
       <QuoteIcon aria-hidden="true" />
       <ContextChipLabel className="max-w-[16em]">{label}</ContextChipLabel>
@@ -148,7 +152,7 @@ export function AssistantCitationChip({
             render={<Button variant="outline" size="sm" render={<Link {...sourceLinkProps} />} />}
           >
             <ArrowUpRightIcon aria-hidden="true" />
-            Go to source
+            {t("web.ui.AssistantCitationChip.go-to-source")}
           </PopoverClose>
         </div>
       </ContextChipPopover>
@@ -174,7 +178,11 @@ export function AssistantCitationChip({
           }}
         >
           <PopoverTrigger
-            aria-label={citation.comment ? "Edit citation comment" : "Add comment to citation"}
+            aria-label={
+              citation.comment
+                ? t("web.dynamic.AssistantCitationChip.edit-citation-comment")
+                : t("web.dynamic.AssistantCitationChip.add-comment-to-citation")
+            }
             data-citation-comment-trigger="true"
             render={<ContextChipAction />}
           >
@@ -205,7 +213,7 @@ export function AssistantCitationChip({
                   : undefined
               }
               ref={commentPopupRef}
-              aria-label="Edit citation comment"
+              aria-label={t("web.ui.AssistantCitationChip.edit-citation-comment")}
               width="md"
               padding="compact"
               onPointerDown={(event) => event.stopPropagation()}

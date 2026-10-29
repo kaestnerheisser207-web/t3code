@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { DownloadIcon, CopyIcon, CheckIcon } from "lucide-react";
 import { useCopyToClipboard } from "~/hooks/useCopyToClipboard";
 import { Spinner } from "~/components/ui/spinner";
@@ -174,6 +176,7 @@ function WorkspaceImagePreview(props: {
   readonly alt: string;
   readonly workspaceMutationId: string | null;
 }) {
+  const t = useTranslate();
   const resource = workspaceAssetResource({
     kind:
       mediaFileReference(props.absolutePath, props.workspaceRoot).relativePath !== undefined
@@ -202,7 +205,7 @@ function WorkspaceImagePreview(props: {
     return (
       <MediaActions source={actionsSource}>
         <div className="flex min-h-0 flex-1 items-center justify-center px-6 text-center text-xs leading-relaxed text-destructive">
-          Unable to load workspace image.
+          {t("web.ui.FilePreviewPanel.unable-to-load-workspace-image")}
         </div>
       </MediaActions>
     );
@@ -230,6 +233,7 @@ function WorkspaceBrowserPreview(props: {
   readonly title: string;
   readonly workspaceMutationId: string | null;
 }) {
+  const t = useTranslate();
   const resource = workspaceAssetResource({
     kind: "workspace-file",
     threadRef: props.threadRef,
@@ -246,7 +250,7 @@ function WorkspaceBrowserPreview(props: {
   if (assetUrl._tag === "Failure") {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center px-6 text-center text-xs leading-relaxed text-destructive">
-        Unable to load file preview.
+        {t("web.ui.FilePreviewPanel.unable-to-load-file-preview")}
       </div>
     );
   }
@@ -992,6 +996,7 @@ export default function FilePreviewPanel({
   selectedFilePending,
   workspaceMutationId,
 }: FilePreviewPanelProps) {
+  const t = useTranslate();
   const relativePath =
     attachment === undefined ? resolveFilePreviewPath(requestedPath, cwd) : requestedPath;
   const draft = typeof composerDraftTarget === "string";
@@ -1218,13 +1223,14 @@ export default function FilePreviewPanel({
       return (
         <div className="flex min-h-0 flex-1 items-center justify-center gap-2 text-sm text-muted-foreground">
           <Spinner className="size-4" />
-          Checking file access...
+          {t("web.ui.FilePreviewPanel.checking-file-access")}
         </div>
       );
     }
     return (
       <div className="p-4 text-sm text-muted-foreground">
-        {fileAccess.error ?? "This connection cannot read host files."}
+        {fileAccess.error ??
+          t("web.dynamic.FilePreviewPanel.this-connection-cannot-read-host-files")}
       </div>
     );
   }
@@ -1289,7 +1295,11 @@ export default function FilePreviewPanel({
           ) : null}
           {showsRawText ? (
             <FileSurfaceAction
-              label={wordWrap ? "Disable word wrap" : "Enable word wrap"}
+              label={
+                wordWrap
+                  ? t("web.dynamic.FilePreviewPanel.disable-word-wrap")
+                  : t("web.dynamic.FilePreviewPanel.enable-word-wrap")
+              }
               pressed={wordWrap}
               onPress={() => updateClientSettings({ wordWrap: !wordWrap })}
             >
@@ -1297,13 +1307,20 @@ export default function FilePreviewPanel({
             </FileSurfaceAction>
           ) : null}
           {canOpenInBrowser ? (
-            <FileSurfaceAction label="Open file in preview browser" onPress={handleOpenInBrowser}>
+            <FileSurfaceAction
+              label={t("web.ui.FilePreviewPanel.open-file-in-preview-browser")}
+              onPress={handleOpenInBrowser}
+            >
               <Globe2 className="size-3.5" />
             </FileSurfaceAction>
           ) : null}
           {!isHostFile && previewPath !== null ? (
             <FileSurfaceAction
-              label={explorerOpen ? "Hide file explorer" : "Show file explorer"}
+              label={
+                explorerOpen
+                  ? t("web.dynamic.FilePreviewPanel.hide-file-explorer")
+                  : t("web.dynamic.FilePreviewPanel.show-file-explorer")
+              }
               pressed={explorerOpen}
               onPress={toggleExplorer}
             >
@@ -1314,7 +1331,9 @@ export default function FilePreviewPanel({
       ) : null}
       {relativePath && !attachment && !isHostFile && !canWriteFiles && !fileAccess.isPending ? (
         <div className="shrink-0 border-b px-3 py-1.5 text-2xs text-muted-foreground">
-          Read-only connection. Unsaved edits are kept until write access returns.
+          {t(
+            "web.ui.FilePreviewPanel.read-only-connection-unsaved-edits-are-kept-until-write-access-returns",
+          )}
         </div>
       ) : null}
       {previewPath &&
@@ -1324,7 +1343,11 @@ export default function FilePreviewPanel({
       file.data?.truncated &&
       (draft || isMarkdown || isMermaid || isHtml) ? (
         <div className="shrink-0 border-b border-warning/20 bg-warning-surface px-3 py-1.5 text-2xs text-warning-foreground">
-          Preview limited to the first 1 MB of a {file.data.byteLength.toLocaleString()} byte file.
+          <Trans
+            t={t}
+            i18nKey="web.rich.FilePreviewPanel.preview-limited-to-the-first-1-mb-of-a-part-byte-file"
+            components={{ value0: <>{file.data.byteLength.toLocaleString()}</> }}
+          />
         </div>
       ) : null}
       <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -1437,19 +1460,32 @@ export default function FilePreviewPanel({
                 </p>
                 {attemptedPath ? (
                   <p className="text-muted-foreground">
-                    Attempted path
-                    <code className="block break-all font-mono text-foreground select-all">
-                      {attemptedPath}
-                    </code>
+                    <Trans
+                      t={t}
+                      i18nKey="web.rich.FilePreviewPanel.attempted-path-part"
+                      components={{
+                        part0: (
+                          <code className="block break-all font-mono text-foreground select-all">
+                            {attemptedPath}
+                          </code>
+                        ),
+                      }}
+                    />
                   </p>
                 ) : null}
                 {!isHostFile ? (
                   <p className="text-muted-foreground">
-                    Workspace folder:{" "}
-                    <code className="break-all font-mono select-all">
-                      {file.readError?.cwd ?? cwd}
-                    </code>
-                    . Check the link's path or locate the file in Files.
+                    <Trans
+                      t={t}
+                      i18nKey="web.rich.FilePreviewPanel.workspace-folder-part-check-the-link-s-path-or-locate-the-file-in-files"
+                      components={{
+                        part0: (
+                          <code className="break-all font-mono select-all">
+                            {file.readError?.cwd ?? cwd}
+                          </code>
+                        ),
+                      }}
+                    />
                   </p>
                 ) : null}
               </div>
@@ -1558,6 +1594,7 @@ export function WorkspaceLargeTextPreview(props: {
   revealLine: number | null;
   revealRequestId: number;
 }) {
+  const t = useTranslate();
   const resource = {
     _tag: "media-file",
     threadId: props.threadRef.threadId,
@@ -1603,14 +1640,24 @@ export function WorkspaceLargeTextPreview(props: {
       />
     );
   if (assetUrl._tag !== "Success" || loaded === null)
-    return <div className="p-6 text-xs text-muted-foreground">Loading…</div>;
+    return (
+      <div className="p-6 text-xs text-muted-foreground">
+        {t("web.ui.FilePreviewPanel.loading")}
+      </div>
+    );
   const src = `${loaded.url}${loaded.url.includes("?") ? "&" : "?"}revision=${encodeURIComponent(loaded.revision)}`;
   return (
     <>
       <div className={FILE_SURFACE_SUBHEADER_CLASS}>
-        <span className="min-w-0 flex-1 text-xs text-muted-foreground">Full file</span>
+        <span className="min-w-0 flex-1 text-xs text-muted-foreground">
+          {t("web.ui.FilePreviewPanel.full-file")}
+        </span>
         <FileSurfaceAction
-          label={isCopied ? "Copied" : "Copy contents"}
+          label={
+            isCopied
+              ? t("web.dynamic.FilePreviewPanel.copied")
+              : t("web.dynamic.FilePreviewPanel.copy-contents")
+          }
           onPress={() => {
             const copy = copyContents.current;
             if (!copy) return;
@@ -1622,7 +1669,11 @@ export function WorkspaceLargeTextPreview(props: {
           {isCopied ? <CheckIcon className="size-3.5" /> : <CopyIcon className="size-3.5" />}
         </FileSurfaceAction>
         <FileSurfaceAction
-          label={saving ? "Preparing file…" : "Save file"}
+          label={
+            saving
+              ? t("web.dynamic.FilePreviewPanel.preparing-file")
+              : t("web.dynamic.FilePreviewPanel.save-file")
+          }
           disabled={saving}
           onPress={() => {
             setSaving(true);
@@ -1645,7 +1696,13 @@ export function WorkspaceLargeTextPreview(props: {
           <DownloadIcon className="size-3.5" />
         </FileSurfaceAction>
       </div>
-      <Suspense fallback={<div className="p-6 text-xs text-muted-foreground">Loading…</div>}>
+      <Suspense
+        fallback={
+          <div className="p-6 text-xs text-muted-foreground">
+            {t("web.ui.FilePreviewPanel.loading")}
+          </div>
+        }
+      >
         <LargeTextViewer
           key={`${src}:${revision}`}
           name={props.name}

@@ -1,3 +1,5 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
+import { I18nextProvider, initReactI18next } from "react-i18next";
 import { describe, expect, it, vi } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
 
@@ -110,4 +112,40 @@ describe("ThemeEditorPanel", () => {
     await page.viewport(1280, 900);
     await expect.poll(() => (panel.element() as HTMLElement).style.left).toBe("700px");
   });
+});
+
+it("updates color labels and searches Chinese names while retaining English aliases", async () => {
+  const i18n = createI18n("en", [initReactI18next]);
+  // Tailwind is absent in this harness, so the switch needs its click target size.
+  const style = document.head.appendChild(document.createElement("style"));
+  style.textContent = '[data-slot="switch"]{display:inline-block;width:36px;height:20px}';
+  using _style = { [Symbol.dispose]: () => style.remove() };
+
+  await page.viewport(1280, 900);
+  await using screen = await render(
+    <I18nextProvider i18n={i18n}>
+      <ThemeEditorPanel
+        open
+        onOpenChange={() => {}}
+        onSaved={() => true}
+        editingTheme={null}
+        initialAppearance="dark"
+        restoreTheme={() => {}}
+      />
+    </I18nextProvider>,
+  );
+  await expect
+    .element(screen.getByRole("switch", { name: /Use advanced theme colors/ }))
+    .toBeVisible();
+  await screen.getByRole("switch", { name: /Use advanced theme colors/ }).click();
+  await expect.element(screen.getByText("Sidebar background", { exact: true })).toBeVisible();
+  await i18n.changeLanguage("zh-CN");
+  const filter = screen.getByRole("textbox", {
+    name: i18n.t("settings.pages.ThemeEditorPanel.filter-colors"),
+  });
+  await filter.fill("侧边栏");
+  await expect.element(screen.getByText("侧边栏背景", { exact: true })).toBeVisible();
+  await expect.element(screen.getByText("终端背景", { exact: true })).not.toBeInTheDocument();
+  await filter.fill("sidebar");
+  await expect.element(screen.getByText("侧边栏背景", { exact: true })).toBeVisible();
 });

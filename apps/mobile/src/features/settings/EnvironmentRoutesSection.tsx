@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import * as Dialog from "../../components/ui/Dialog";
 import { useAtomValue } from "@effect/atom-react";
@@ -53,6 +54,7 @@ export function EnvironmentRoutesSection({
   readonly connected: boolean;
   readonly onAddRoute: () => void;
 }) {
+  const t = useTranslate();
   const entry = useAtomValue(environmentCatalog.catalogValueAtom).entries.get(environmentId);
   const prepared = useAtomValue(environmentSession.preparedConnectionValueAtom(environmentId));
   const sessionResult = useAtomValue(environmentSession.sessionStateAtom(environmentId));
@@ -128,11 +130,15 @@ export function EnvironmentRoutesSection({
 
   return (
     <SettingsSection
-      title="Routes"
+      title={t("mobile.settings.EnvironmentRoutesSection.routes")}
       trailing={
         routes.length > 1 ? (
           <Button
-            label={editing ? "Done" : "Edit"}
+            label={
+              editing
+                ? t("mobile.dynamic.EnvironmentRoutesSection.done")
+                : t("mobile.dynamic.EnvironmentRoutesSection.edit")
+            }
             tone="text"
             onPress={() => setEditing((value) => !value)}
           />
@@ -141,7 +147,7 @@ export function EnvironmentRoutesSection({
     >
       <SettingsActionRow
         icon="checkmark.circle"
-        label="Your permissions"
+        label={t("mobile.settings.EnvironmentRoutesSection.your-permissions")}
         onPress={() => setPermissionsOpen((open) => !open)}
       />
       {permissionsOpen ? (
@@ -152,19 +158,24 @@ export function EnvironmentRoutesSection({
           session?.authenticated ? (
             <>
               <Text className="text-sm text-foreground-muted">
-                Applies to the route marked In use. Other routes may have different permissions and
-                have not been checked.
+                {t(
+                  "mobile.settings.EnvironmentRoutesSection.applies-to-the-route-marked-in-use-other-routes-may-have-different-permissions-and-have-not-been-checked",
+                )}
               </Text>
               {AUTH_SCOPE_OPTIONS.map(({ scope, title }) => (
                 <Text key={scope} className="text-sm text-foreground">
-                  {title}: {sessionGrantsScope(session, scope) ? "Allowed" : "Not granted"}
+                  {title}:{" "}
+                  {sessionGrantsScope(session, scope)
+                    ? t("mobile.dynamic.EnvironmentRoutesSection.allowed")
+                    : t("mobile.dynamic.EnvironmentRoutesSection.not-granted")}
                 </Text>
               ))}
             </>
           ) : (
             <Text className="text-sm text-foreground-muted">
-              Permissions not checked. Connect to this environment to view this session’s
-              permissions.
+              {t(
+                "mobile.settings.EnvironmentRoutesSection.permissions-not-checked-connect-to-this-environment-to-view-this-session-s-permissions",
+              )}
             </Text>
           )}
         </View>
@@ -210,7 +221,11 @@ export function EnvironmentRoutesSection({
           />
         );
       })}
-      <SettingsActionRow icon="plus" label="Add route" onPress={onAddRoute} />
+      <SettingsActionRow
+        icon="plus"
+        label={t("mobile.settings.EnvironmentRoutesSection.add-route")}
+        onPress={onAddRoute}
+      />
     </SettingsSection>
   );
 }
@@ -230,6 +245,7 @@ function RouteRow(props: {
   readonly onStep: (direction: "up" | "down") => void;
   readonly onRemove: (() => void) | undefined;
 }) {
+  const t = useTranslate();
   const { route, lifted, offset } = props;
   const label = connectionRouteLabel(route);
   const address = connectionRouteAddress(route);
@@ -252,7 +268,9 @@ function RouteRow(props: {
       {props.editing && props.onRemove ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Remove ${label} route`}
+          accessibilityLabel={t("mobile.dynamic.EnvironmentRoutesSection.remove-param-route", {
+            label: label,
+          })}
           hitSlop={8}
           onPress={props.onRemove}
           className="active:opacity-70"
@@ -297,12 +315,20 @@ function RouteRow(props: {
               {label}
             </Text>
             {props.inUse ? (
-              <StatusPill {...connectionTone("connected")} label="In use" size="compact" />
+              <StatusPill
+                {...connectionTone("connected")}
+                label={t("mobile.settings.EnvironmentRoutesSection.in-use")}
+                size="compact"
+              />
             ) : null}
           </View>
           {address !== null ? (
             <Text numberOfLines={1} className="text-sm text-foreground-muted">
-              {isLearned(route) ? `${address} · found automatically` : address}
+              {isLearned(route)
+                ? t("mobile.dynamic.EnvironmentRoutesSection.param-found-automatically", {
+                    address: address,
+                  })
+                : address}
             </Text>
           ) : null}
         </View>

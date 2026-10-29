@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useEffect, useState, type ReactNode } from "react";
 import { View } from "react-native";
 
@@ -14,6 +15,7 @@ function InspectorContentPane(props: {
   readonly resetKeys: readonly [string | null, string | null];
   readonly visible: boolean;
 }) {
+  const t = useTranslate();
   if (!props.mounted) {
     return null;
   }
@@ -35,7 +37,12 @@ function InspectorContentPane(props: {
         resetKeys={props.resetKeys}
         renderFallback={(fallback) => (
           <NativeInspectorContent>
-            <RenderFailureView {...fallback} title="The inspector couldn't be displayed" />
+            <RenderFailureView
+              {...fallback}
+              title={t(
+                "mobile.threads.thread-inspector-content-stack.the-inspector-couldn-t-be-displayed",
+              )}
+            />
           </NativeInspectorContent>
         )}
       >

@@ -1,7 +1,13 @@
 // @effect-diagnostics globalDate:off -- A fixed instant keeps calendar-window assertions deterministic.
 import { describe, expect, it, vi } from "vite-plus/test";
 
-import { formatHourShort, makeWindow } from "./usageFormat.ts";
+import {
+  formatDayShort,
+  formatHourShort,
+  formatRelativeHourShort,
+  formatUsd,
+  makeWindow,
+} from "./usageFormat.ts";
 
 describe("hourly usage formatting", () => {
   it("keeps requested zones separate when formatting repeated calls", () => {
@@ -15,6 +21,16 @@ describe("hourly usage formatting", () => {
     }
     expect(() => formatHourShort(instant, "Etc/Unknown")).toThrow(RangeError);
     expect(formatHourShort("invalid", "UTC")).toBe("invalid");
+    expect(formatHourShort(instant, "UTC", true, "zh-CN")).toContain("下午");
+    expect(formatHourShort(instant, "UTC", false, "zh-CN")).toBe("12:00");
+    expect(formatHourShort(instant, "UTC", true, "en-US")).toBe("12 PM");
+    expect(formatDayShort("2026-08-11", "zh-CN")).toBe("8月11日");
+    expect(formatDayShort("2026-08-11", "en-US")).toBe("Aug 11");
+    expect(formatUsd(1234.5, "zh-CN")).toBe("US$1,234.50");
+    expect(formatUsd(1234.5, "en-US")).toBe("$1,234.50");
+    expect(
+      formatRelativeHourShort(instant, "2026-08-12T12:00:00Z", "UTC", true, "zh-CN"),
+    ).toContain("昨天");
   });
 
   it("disambiguates repeated hours during a fall-back transition", () => {
@@ -26,6 +42,9 @@ describe("hourly usage formatting", () => {
     expect(formatHourShort("2026-11-01T06:37:00.000Z", "America/New_York", false)).toBe(
       "01:00 EST",
     );
+    expect(
+      formatHourShort("2026-11-01T05:37:00.000Z", "America/New_York", false, "zh-CN"),
+    ).not.toBe(formatHourShort("2026-11-01T06:37:00.000Z", "America/New_York", false, "zh-CN"));
   });
 
   it("builds an exact minute-aligned 24-hour request", () => {

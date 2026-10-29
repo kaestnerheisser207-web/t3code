@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { RegistryContext, useAtomMount, useAtomValue } from "@effect/atom-react";
 import {
@@ -51,6 +53,7 @@ function WindowRow(props: {
   readonly color: string | null;
   readonly now: number;
 }) {
+  const t = useTranslate();
   const { window, now } = props;
   const remaining = remainingPercent(window);
   const timeLeft = paceRemainingPercent(window, now);
@@ -87,7 +90,11 @@ function WindowRow(props: {
       <View className="flex-row items-baseline justify-between gap-3">
         <Text className="text-sm text-foreground">{window.label}</Text>
         <Text className="text-sm font-t3-medium tabular-nums text-foreground">
-          {remaining}% left
+          <Trans
+            t={t}
+            i18nKey="mobile.rich.UsageLimitsSection.part-left"
+            components={{ value0: <>{remaining}</> }}
+          />
         </Text>
       </View>
       <View
@@ -133,6 +140,7 @@ function WindowRow(props: {
 }
 
 function AccountInstanceLabel({ value }: { readonly value: string }) {
+  const t = useTranslate();
   const [revealed, setRevealed] = useState(false);
   if (!value.includes("@")) {
     return (
@@ -145,7 +153,11 @@ function AccountInstanceLabel({ value }: { readonly value: string }) {
     <Pressable
       className="shrink active:opacity-60"
       accessibilityRole="button"
-      accessibilityLabel={revealed ? "Hide account label" : "Reveal account label"}
+      accessibilityLabel={
+        revealed
+          ? t("mobile.dynamic.UsageLimitsSection.hide-account-label")
+          : t("mobile.dynamic.UsageLimitsSection.reveal-account-label")
+      }
       onPress={() => setRevealed((current) => !current)}
     >
       <Text className="text-xs text-foreground-tertiary" numberOfLines={1}>
@@ -167,6 +179,7 @@ export function AccountLimits(props: {
   readonly trailing?: ReactNode;
   readonly footer?: ReactNode;
 }) {
+  const t = useTranslate();
   const { limits, now, dense = false } = props;
   const color = useBarColor(props.driver);
   if (!limits) return null;
@@ -209,7 +222,9 @@ export function AccountLimits(props: {
           className="min-h-11 justify-center"
           onPress={() => void Linking.openURL(externalUsage.url).catch(() => undefined)}
         >
-          <Text className="text-sm font-t3-medium text-primary">Manage usage</Text>
+          <Text className="text-sm font-t3-medium text-primary">
+            {t("mobile.review.UsageLimitsSection.manage-usage")}
+          </Text>
         </Pressable>
       ) : null}
       {props.footer}
@@ -231,6 +246,7 @@ export function ResetCredits(props: {
   readonly now: number;
   readonly dense?: boolean;
 }) {
+  const t = useTranslate();
   const { environmentId, input, credits, now, dense = false } = props;
   const canManageProviders = useEnvironmentScope(environmentId, AuthProvidersManageScope);
   const consume = useAtomCommand(serverEnvironment.consumeResetCredit, {
@@ -301,13 +317,15 @@ export function ResetCredits(props: {
                 : "text-sm font-t3-medium text-foreground"
             }
           >
-            {busy ? "Using…" : "Use reset"}
+            {busy
+              ? t("mobile.dynamic.UsageLimitsSection.using")
+              : t("mobile.dynamic.UsageLimitsSection.use-reset")}
           </Text>
         </Pressable>
       ) : null}
       {!canManageProviders ? (
         <Text className="text-xs text-foreground-tertiary">
-          This connection cannot manage provider accounts.
+          {t("mobile.review.UsageLimitsSection.this-connection-cannot-manage-provider-accounts")}
         </Text>
       ) : null}
       {status ? <Text className="text-sm text-foreground">{status}</Text> : null}

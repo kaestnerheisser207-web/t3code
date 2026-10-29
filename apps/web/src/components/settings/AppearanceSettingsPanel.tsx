@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import {
@@ -77,6 +78,7 @@ const CHAT_WIDTH_LABELS: Record<ChatWidth, string> = {
 };
 
 export function AppearanceSettingsPanel() {
+  const t = useTranslate();
   const {
     appearanceMode,
     refreshTheme,
@@ -122,7 +124,12 @@ export function AppearanceSettingsPanel() {
 
   return (
     <SettingsPageContainer>
-      <SettingsSection id="appearance" title="Colors & themes" variant="plain" hideTitle>
+      <SettingsSection
+        id="appearance"
+        title={t("settings.pages.AppearanceSettingsPanel.colors-themes")}
+        variant="plain"
+        hideTitle
+      >
         <div id={searchableSetting("theme").id}>
           <ThemeLibrary
             appearanceMode={appearanceMode}
@@ -140,10 +147,15 @@ export function AppearanceSettingsPanel() {
         </div>
       </SettingsSection>
 
-      <SettingsSection id="appearance-interface" title="Interface">
+      <SettingsSection
+        id="appearance-interface"
+        title={t("settings.pages.AppearanceSettingsPanel.interface")}
+      >
         <SettingsRow
           {...searchableSetting("setting-appearance-contrast")}
-          description="Adjust the contrast of colors and borders across the interface."
+          description={t(
+            "settings.pages.AppearanceSettingsPanel.adjust-the-contrast-of-colors-and-borders-across-the-interface",
+          )}
           resetAction={
             settings.appearanceContrast !== DEFAULT_UNIFIED_SETTINGS.appearanceContrast ? (
               <SettingResetButton
@@ -165,7 +177,7 @@ export function AppearanceSettingsPanel() {
                 {settings.appearanceContrast}%
               </output>
               <input
-                aria-label="Contrast"
+                aria-label={t("settings.pages.AppearanceSettingsPanel.contrast")}
                 className="settings-slider min-w-0 flex-1"
                 id="appearance-contrast"
                 max={MAX_APPEARANCE_CONTRAST}
@@ -191,11 +203,13 @@ export function AppearanceSettingsPanel() {
 
         <SettingsRow
           {...searchableSetting("setting-glass-opacity")}
-          description="Higher values make menus, dialogs, and the composer more solid."
+          description={t(
+            "settings.pages.AppearanceSettingsPanel.higher-values-make-menus-dialogs-and-the-composer-more-solid",
+          )}
           resetAction={
             settings.glassOpacity !== DEFAULT_UNIFIED_SETTINGS.glassOpacity ? (
               <SettingResetButton
-                label="glass opacity"
+                label={t("settings.pages.AppearanceSettingsPanel.glass-opacity")}
                 onClick={() =>
                   updateSettings({ glassOpacity: DEFAULT_UNIFIED_SETTINGS.glassOpacity })
                 }
@@ -211,7 +225,7 @@ export function AppearanceSettingsPanel() {
                 {settings.glassOpacity}%
               </output>
               <input
-                aria-label="Glass opacity"
+                aria-label={t("settings.pages.AppearanceSettingsPanel.glass-opacity")}
                 className="settings-slider min-w-0 flex-1"
                 id="glass-opacity"
                 max={MAX_GLASS_OPACITY}
@@ -237,11 +251,13 @@ export function AppearanceSettingsPanel() {
 
         <SettingsRow
           {...searchableSetting("chat-width")}
-          description="Set how wide messages and the composer can grow on large screens."
+          description={t(
+            "settings.pages.AppearanceSettingsPanel.set-how-wide-messages-and-the-composer-can-grow-on-large-screens",
+          )}
           resetAction={
             settings.chatWidth !== DEFAULT_UNIFIED_SETTINGS.chatWidth ? (
               <SettingResetButton
-                label="chat width"
+                label={t("settings.pages.AppearanceSettingsPanel.chat-width")}
                 onClick={() => updateSettings({ chatWidth: DEFAULT_UNIFIED_SETTINGS.chatWidth })}
               />
             ) : null
@@ -255,13 +271,23 @@ export function AppearanceSettingsPanel() {
                     updateSettings({ chatWidth: value });
                 }}
               >
-                <SelectTrigger size="sm" className="w-full min-w-0" aria-label="Chat width">
+                <SelectTrigger
+                  size="sm"
+                  className="w-full min-w-0"
+                  aria-label={t("settings.pages.AppearanceSettingsPanel.chat-width")}
+                >
                   <SelectValue>{CHAT_WIDTH_LABELS[settings.chatWidth]}</SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
-                  <SelectItem value="comfortable">Comfortable (default)</SelectItem>
-                  <SelectItem value="wide">Wide</SelectItem>
-                  <SelectItem value="full">Full</SelectItem>
+                  <SelectItem value="comfortable">
+                    {t("settings.pages.AppearanceSettingsPanel.comfortable-default")}
+                  </SelectItem>
+                  <SelectItem value="wide">
+                    {t("settings.pages.AppearanceSettingsPanel.wide")}
+                  </SelectItem>
+                  <SelectItem value="full">
+                    {t("settings.pages.AppearanceSettingsPanel.full")}
+                  </SelectItem>
                 </SelectPopup>
               </Select>
             </div>
@@ -269,11 +295,13 @@ export function AppearanceSettingsPanel() {
         />
         <SettingsRow
           {...searchableSetting("math-rendering")}
-          description="Typeset LaTeX math, such as $x^2$ or \[x^2\], in messages and Markdown previews. The composer keeps TeX source editable."
+          description={t(
+            "settings.pages.AppearanceSettingsPanel.typeset-latex-math-such-as-x-2-or-x-2-in-messages-and-markdown-previews-the-composer-keeps-tex-source-editable",
+          )}
           resetAction={
             settings.mathRenderingEnabled !== DEFAULT_UNIFIED_SETTINGS.mathRenderingEnabled ? (
               <SettingResetButton
-                label="math rendering"
+                label={t("settings.pages.AppearanceSettingsPanel.math-rendering")}
                 onClick={() =>
                   updateSettings({
                     mathRenderingEnabled: DEFAULT_UNIFIED_SETTINGS.mathRenderingEnabled,
@@ -288,7 +316,7 @@ export function AppearanceSettingsPanel() {
               onCheckedChange={(checked) =>
                 updateSettings({ mathRenderingEnabled: Boolean(checked) })
               }
-              aria-label="Render math"
+              aria-label={t("settings.pages.AppearanceSettingsPanel.render-math")}
             />
           }
         />
@@ -303,7 +331,9 @@ export function AppearanceSettingsPanel() {
         >
           <SettingsRow
             {...searchableSetting("panel-animations")}
-            description="Set how fast panels open and close."
+            description={t(
+              "settings.pages.AppearanceSettingsPanel.set-how-fast-panels-open-and-close",
+            )}
             control={
               <div className="grid w-full grid-cols-[5rem_minmax(0,1fr)] items-center gap-3 sm:w-auto sm:grid-cols-[7rem_13rem] sm:gap-4">
                 <PanelAnimationsPreview durationMs={settings.panelAnimationDurationMs} />
@@ -315,7 +345,9 @@ export function AppearanceSettingsPanel() {
                     {settings.panelAnimationDurationMs} ms
                   </output>
                   <input
-                    aria-label="Panel animation duration"
+                    aria-label={t(
+                      "settings.pages.AppearanceSettingsPanel.panel-animation-duration",
+                    )}
                     className="settings-slider min-w-0 flex-1"
                     id="panel-animation-duration"
                     max={MAX_PANEL_ANIMATION_DURATION_MS}
@@ -342,7 +374,7 @@ export function AppearanceSettingsPanel() {
               settings.panelAnimationDurationMs !==
               DEFAULT_UNIFIED_SETTINGS.panelAnimationDurationMs ? (
                 <SettingResetButton
-                  label="panel animations"
+                  label={t("settings.pages.AppearanceSettingsPanel.panel-animations")}
                   onClick={() =>
                     updateSettings({
                       panelAnimationDurationMs: DEFAULT_UNIFIED_SETTINGS.panelAnimationDurationMs,
@@ -356,13 +388,17 @@ export function AppearanceSettingsPanel() {
             {...searchableSetting("environment-identification")}
             description={
               environmentStageVariant
-                ? "Choose how Dev and Nightly environments are identified."
-                : "Show Dev or Nightly artwork in the sidebar header."
+                ? t(
+                    "web.dynamic.AppearanceSettingsPanel.choose-how-dev-and-nightly-environments-are-identified",
+                  )
+                : t(
+                    "web.dynamic.AppearanceSettingsPanel.show-dev-or-nightly-artwork-in-the-sidebar-header",
+                  )
             }
             resetAction={
               settings.environmentIdentificationMode !== DEFAULT_ENVIRONMENT_IDENTIFICATION_MODE ? (
                 <SettingResetButton
-                  label="environment identification"
+                  label={t("settings.pages.AppearanceSettingsPanel.environment-identification")}
                   onClick={() =>
                     updateSettings({
                       environmentIdentificationMode: DEFAULT_ENVIRONMENT_IDENTIFICATION_MODE,
@@ -384,7 +420,9 @@ export function AppearanceSettingsPanel() {
                 <SelectTrigger
                   size="sm"
                   className="w-full sm:w-40"
-                  aria-label="Environment identification"
+                  aria-label={t(
+                    "settings.pages.AppearanceSettingsPanel.environment-identification",
+                  )}
                 >
                   <SelectValue>{environmentIdentificationLabel}</SelectValue>
                 </SelectTrigger>
@@ -400,12 +438,14 @@ export function AppearanceSettingsPanel() {
           />
           <SettingsRow
             {...searchableSetting("composer-context")}
-            description="Keep branch and worktree controls below the composer after a thread starts."
+            description={t(
+              "settings.pages.AppearanceSettingsPanel.keep-branch-and-worktree-controls-below-the-composer-after-a-thread-starts",
+            )}
             resetAction={
               settings.persistComposerContextStrip !==
               DEFAULT_UNIFIED_SETTINGS.persistComposerContextStrip ? (
                 <SettingResetButton
-                  label="composer context"
+                  label={t("settings.pages.AppearanceSettingsPanel.composer-context")}
                   onClick={() =>
                     updateSettings({
                       persistComposerContextStrip:
@@ -421,7 +461,9 @@ export function AppearanceSettingsPanel() {
                 onCheckedChange={(checked) =>
                   updateSettings({ persistComposerContextStrip: Boolean(checked) })
                 }
-                aria-label="Keep composer context visible in active threads"
+                aria-label={t(
+                  "settings.pages.AppearanceSettingsPanel.keep-composer-context-visible-in-active-threads",
+                )}
               />
             }
           />

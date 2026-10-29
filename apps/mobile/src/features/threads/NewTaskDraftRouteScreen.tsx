@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import {
   CommonActions,
@@ -88,6 +89,7 @@ const idleBranchCheckoutAtom = Atom.make(AsyncResult.initial<BranchCheckoutResul
 );
 
 export function NewTaskDraftRouteScreen({ route }: StaticScreenProps<NewTaskDraftRouteParams>) {
+  const t = useTranslate();
   const currentRoute = useRoute();
   const params = route.params ?? {};
   const draftId = Array.isArray(params.draftId) ? params.draftId[0] : params.draftId;
@@ -200,7 +202,9 @@ export function NewTaskDraftRouteScreen({ route }: StaticScreenProps<NewTaskDraf
         <ThreadScreenFallback>
           <NativeStackScreenOptions options={{ title: "New thread" }} />
           <View className="flex-1 items-center justify-center bg-screen">
-            <Text className="text-foreground">Switching branch...</Text>
+            <Text className="text-foreground">
+              {t("mobile.threads.NewTaskDraftRouteScreen.switching-branch")}
+            </Text>
           </View>
         </ThreadScreenFallback>
       ) : (

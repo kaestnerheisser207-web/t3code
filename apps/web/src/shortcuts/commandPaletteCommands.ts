@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import type { AnyRouter } from "@tanstack/react-router";
 
 import {
@@ -6,7 +7,7 @@ import {
   useCommandPaletteStore,
 } from "../commandPaletteStore";
 import { overlayModeForCommand } from "../components/CommandPalette.logic";
-import { APPEARANCE_OPTIONS, notifyThemeSaveFailure } from "../components/CommandPaletteThemeItems";
+import { notifyThemeSaveFailure } from "../components/CommandPaletteThemeItems";
 import { toggleThemeEditorForTheme } from "../components/settings/themeEditorStore";
 import { toastManager } from "../components/ui/toast";
 import { getThemeSnapshot, setAppearanceMode } from "../hooks/useTheme";
@@ -68,12 +69,14 @@ export function installCommandPaletteCommands(
         const nextMode =
           appearanceMode === "system" ? "light" : appearanceMode === "light" ? "dark" : "system";
         if (!setAppearanceMode(nextMode)) {
-          notifyThemeSaveFailure();
+          notifyThemeSaveFailure(webI18n.t);
           return;
         }
         toastManager.add({
           id: "appearance-cycle",
-          title: `Appearance: ${APPEARANCE_OPTIONS.find((option) => option.mode === nextMode)?.label}`,
+          title: webI18n.t("mobile.appearance.modeLabel", {
+            mode: webI18n.t(`mobile.appearance.${nextMode}`),
+          }),
           timeout: 1500,
         });
       },

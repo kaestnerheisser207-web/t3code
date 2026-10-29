@@ -1,3 +1,4 @@
+import { desktopI18n } from "../i18n.ts";
 import { assert, describe, it } from "@effect/vitest";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as Effect from "effect/Effect";
@@ -267,6 +268,19 @@ describe("BrowserSession", () => {
       assert.isFalse(checkClipboard("https://blocked.test"));
       assert.isTrue(checkClipboard("https://allowed.test"));
       assert.strictEqual(showMessageBox.mock.calls.length, 2);
+      yield* Effect.promise(() => desktopI18n.changeLanguage("zh-CN"));
+      try {
+        showMessageBox.mockReturnValueOnce(1);
+        assert.isFalse(yield* readClipboard("https://chinese.test/"));
+        const prompt = showMessageBox.mock.calls.at(-1)?.[0];
+        assert.deepStrictEqual(prompt?.buttons, ["允许", "阻止"]);
+        assert.strictEqual(prompt?.defaultId, 1);
+        assert.include(prompt?.message ?? "", "https://chinese.test");
+        assert.isFalse(checkClipboard("https://chinese.test"));
+        assert.isTrue(checkClipboard("https://allowed.test"));
+      } finally {
+        yield* Effect.promise(() => desktopI18n.changeLanguage("en"));
+      }
     }).pipe(Effect.provide(layer)),
   );
 

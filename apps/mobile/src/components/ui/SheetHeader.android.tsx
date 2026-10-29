@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { View } from "react-native";
 
 import { AndroidScreenHeader } from "./AndroidScreenHeader";
@@ -6,10 +7,16 @@ import { IconButton } from "./IconButton";
 import type { SheetCloseButtonProps, SheetHeaderProps } from "./SheetHeader.types";
 
 export function SheetCloseButton(props: SheetCloseButtonProps) {
+  const t = useTranslate();
   return (
     <IconButton
       icon="xmark"
-      accessibilityLabel={props.accessibilityLabel ?? (props.onCancel ? "Cancel" : "Close")}
+      accessibilityLabel={
+        props.accessibilityLabel ??
+        (props.onCancel
+          ? t("mobile.dynamic.SheetHeader.android.cancel")
+          : t("mobile.dynamic.SheetHeader.android.close"))
+      }
       disabled={props.disabled}
       tintColorClassName="accent-header-foreground"
       onPress={props.onCancel ?? props.onClose}

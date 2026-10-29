@@ -86,7 +86,27 @@ internal fun activityPhase(data: Map<String, String>, rows: List<ActivityRow>): 
     else -> rows.firstOrNull()?.let { ActivityPhase.forStatus(it.status) }
   }
 
-internal class ActivityPresentation(data: Map<String, String>, private val active: Boolean) {
+internal class ActivityPresentation(
+  data: Map<String, String>,
+  private val active: Boolean,
+  private val labels: Map<String, String> = emptyMap()
+) {
+  private fun text(key: String, fallback: String, count: Any? = null) =
+    (labels["activity.$key"] ?: fallback).let { if (count == null) it else it.replace("{{count}}", count.toString()) }
+
+  private fun phaseText(value: String) = when (value) {
+    "Connecting" -> text("connecting", value)
+    "Working" -> text("working", value)
+    "Approval" -> text("approval", value)
+    "Approve" -> text("approve", value)
+    "Input" -> text("input", value)
+    "Answer" -> text("answer", value)
+    "Waiting" -> text("waiting", value)
+    "Done" -> text("done", value)
+    "Failed" -> text("failed", value)
+    "Open" -> text("open", value)
+    else -> value
+  }
   private val rows = activityRows(data)
   private val hero = rows.firstOrNull()
   val phase = activityPhase(data, rows)
@@ -104,25 +124,25 @@ internal class ActivityPresentation(data: Map<String, String>, private val activ
 
   val summary = when {
     hero == null -> data["activity_title"]?.takeIf { it.isNotBlank() }?.take(120)
-      ?: "Agent activity"
+      ?: text("title", "Agent activity")
     rows.size == 1 -> hero.title
-    attentionCount == 1 -> "1 needs you"
-    attentionCount > 1 -> "$attentionCount need you"
-    activeCount > 0 && failedCount > 0 -> "$failedCount failed"
-    activeCount > 0 -> "$activeCount working"
-    failedCount > 0 -> "Finished, $failedCount failed"
-    else -> "All finished"
+    attentionCount == 1 -> text("needsYou_one", "1 needs you", 1)
+    attentionCount > 1 -> text("needsYou_other", "$attentionCount need you", attentionCount)
+    activeCount > 0 && failedCount > 0 -> text("failedCount", "$failedCount failed", failedCount)
+    activeCount > 0 -> text("workingCount", "$activeCount working", activeCount)
+    failedCount > 0 -> text("finishedFailed", "Finished, $failedCount failed", failedCount)
+    else -> text("allFinished", "All finished")
   }
 
   val chip = when {
     !active -> null
-    phase == null -> data["activity_chip"]?.takeIf { it.isNotBlank() }?.take(7) ?: "Active"
+    phase == null -> data["activity_chip"]?.takeIf { it.isNotBlank() }?.take(7) ?: text("active", "Active")
     phase == ActivityPhase.RUNNING && activeCount > 1 ->
-      "${if (activeCount > 9) "9+" else activeCount} live"
-    else -> phase.chip
+      text("liveCount", "${if (activeCount > 9) "9+" else activeCount} live", if (activeCount > 9) "9+" else activeCount)
+    else -> phaseText(phase.chip)
   }
 
-  val action = if (active) phase?.action ?: "Open" else null
+  val action = if (active) phaseText(phase?.action ?: "Open") else null
 
   fun applyTo(builder: NotificationCompat.Builder, context: Context) {
     val tint = phase?.let { ContextCompat.getColor(context, it.color) }
@@ -137,7 +157,7 @@ internal class ActivityPresentation(data: Map<String, String>, private val activ
       builder.setSubText(
         listOfNotNull(
           hero!!.project.takeIf { singleProject && it.isNotBlank() },
-          if (activeCount > 0) "$activeCount active" else "$threadCount threads"
+          if (activeCount > 0) text("activeCount", "$activeCount active", activeCount) else text(if (threadCount == 1) "threadCount_one" else "threadCount_other", "$threadCount threads", threadCount)
         ).joinToString(" · ")
       )
     }
@@ -165,7 +185,7 @@ internal class ActivityPresentation(data: Map<String, String>, private val activ
     SpannableStringBuilder().apply {
       val status = ActivityPhase.forStatus(row.status)
       val color = ContextCompat.getColor(context, status?.color ?: R.color.agent_activity_waiting)
-      append(tinted(row.status, color, bold = true))
+      append(tinted(phaseText(row.status), color, bold = true))
       append(" ").append(row.title)
       // Promoted cards drop text color, so the separator has to do the work of the dimming.
       if (trailing.isNotBlank()) {

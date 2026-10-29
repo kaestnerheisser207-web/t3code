@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { isDraftThreadRoute } from "./thread-route-state";
 import * as Dialog from "../../components/ui/Dialog";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
@@ -149,6 +150,7 @@ function NewTaskHeader(props: {
 }
 
 export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRouteParams | undefined>) {
+  const t = useTranslate();
   const projects = useProjects();
   const [searchText, setSearchText] = useState("");
   const { projectScopes, selectedEnvironmentId, setProject } = useNewTaskFlow();
@@ -336,8 +338,8 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
               <View collapsable={false} className="overflow-hidden rounded-[28px] bg-grouped-card">
                 <NavigationRow
                   className="bg-grouped-card"
-                  title="No project"
-                  subtitle="Start a task without a project"
+                  title={t("mobile.threads.NewTaskRouteScreen.no-project")}
+                  subtitle={t("mobile.threads.NewTaskRouteScreen.start-a-task-without-a-project")}
                   onPress={() => void startScratch()}
                   leading={
                     <SymbolView
@@ -353,7 +355,7 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
               <View collapsable={false} className="overflow-hidden rounded-[24px] bg-grouped-card">
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="No project"
+                  accessibilityLabel={t("mobile.threads.NewTaskRouteScreen.no-project")}
                   onPress={() => void startScratch()}
                   className="flex-row items-center gap-3 bg-grouped-card px-4 py-3.5"
                 >
@@ -366,9 +368,11 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
                     />
                   </View>
                   <View className="min-w-0 flex-1">
-                    <Text className="text-base font-t3-bold leading-snug">No project</Text>
+                    <Text className="text-base font-t3-bold leading-snug">
+                      {t("mobile.threads.NewTaskRouteScreen.no-project")}
+                    </Text>
                     <Text className="text-xs leading-snug text-foreground-muted" numberOfLines={1}>
-                      Start a task without a project
+                      {t("mobile.threads.NewTaskRouteScreen.start-a-task-without-a-project")}
                     </Text>
                   </View>
                   <SymbolView
@@ -401,7 +405,11 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
               {Platform.OS === "android" ? (
                 <>
                   <Button
-                    label={catalogState.hasReadyEnvironment ? "Add new project" : "Add environment"}
+                    label={
+                      catalogState.hasReadyEnvironment
+                        ? t("mobile.dynamic.NewTaskRouteScreen.add-new-project")
+                        : t("mobile.dynamic.NewTaskRouteScreen.add-environment")
+                    }
                     tone="primary"
                     onPress={() =>
                       catalogState.hasReadyEnvironment
@@ -411,7 +419,7 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
                   />
                   {canStartScratch ? (
                     <Button
-                      label="Start without a project"
+                      label={t("mobile.threads.NewTaskRouteScreen.start-without-a-project")}
                       tone="secondary"
                       onPress={() => void startScratch()}
                     />
@@ -420,7 +428,7 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
               ) : !catalogState.hasReadyEnvironment ? (
                 <View className="mt-1">
                   <Button
-                    label="Add environment"
+                    label={t("mobile.threads.NewTaskRouteScreen.add-environment")}
                     tone="primary"
                     onPress={() => navigation.navigate("ConnectionsNew")}
                   />
@@ -429,14 +437,14 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
                 <>
                   <View className="mt-1">
                     <Button
-                      label="Add new project"
+                      label={t("mobile.threads.NewTaskRouteScreen.add-new-project")}
                       tone="primary"
                       onPress={() => navigation.dispatch(StackActions.push("AddProject"))}
                     />
                   </View>
                   {canStartScratch ? (
                     <Button
-                      label="Start without a project"
+                      label={t("mobile.threads.NewTaskRouteScreen.start-without-a-project")}
                       tone="secondary"
                       onPress={() => void startScratch()}
                     />
@@ -447,10 +455,12 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
           ) : visibleScopes.length === 0 ? (
             <View className="items-center gap-2 px-6 py-8">
               <Text className="text-center text-lg font-t3-bold text-foreground">
-                No matching projects
+                {t("mobile.threads.NewTaskRouteScreen.no-matching-projects")}
               </Text>
               <Text className="text-center text-sm leading-normal text-foreground-muted">
-                Try a different project name or workspace path.
+                {t(
+                  "mobile.threads.NewTaskRouteScreen.try-a-different-project-name-or-workspace-path",
+                )}
               </Text>
             </View>
           ) : (
@@ -477,7 +487,9 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
                       title={scope.title}
                       subtitle={
                         hasMultipleProjects
-                          ? `${scope.projects.length} workspaces`
+                          ? t("mobile.dynamic.NewTaskRouteScreen.param-workspaces", {
+                              length: scope.projects.length,
+                            })
                           : selectionTarget.workspaceRoot
                       }
                       subtitleNumberOfLines={1}
@@ -529,7 +541,9 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
                           numberOfLines={1}
                         >
                           {hasMultipleProjects
-                            ? `${scope.projects.length} workspaces`
+                            ? t("mobile.dynamic.NewTaskRouteScreen.param-workspaces", {
+                                length: scope.projects.length,
+                              })
                             : selectionTarget.workspaceRoot}
                         </Text>
                       </View>

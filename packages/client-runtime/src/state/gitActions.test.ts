@@ -1,3 +1,4 @@
+import { createI18n } from "../i18n/index.ts";
 import { SourceControlProviderKind, type VcsStatusResult } from "@t3tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -76,6 +77,24 @@ describe("git action copy", () => {
         hasOriginRemote: true,
       }),
     ).toBe("No local commits to include in an MR.");
+    const t = createI18n("zh-CN").t;
+    for (const current of [
+      status({ ...gitLab, aheadCount: 1 }),
+      status({ ...gitLab, behindCount: 1 }),
+      status({ ...gitLab, hasWorkingTreeChanges: true }),
+      status({ ...gitLab, aheadCount: 1, behindCount: 1 }),
+    ]) {
+      const original = resolveQuickAction(current, false);
+      const translated = resolveQuickAction(current, false, false, true, t);
+      expect({
+        kind: translated.kind,
+        action: translated.action,
+        disabled: translated.disabled,
+      }).toEqual({ kind: original.kind, action: original.action, disabled: original.disabled });
+    }
+    expect(resolveQuickAction(status({ ...gitLab, pr: openPr }), false, false, true, t).label).toBe(
+      "查看 MR",
+    );
   });
 
   it("names the host's change request in the default-branch dialog", () => {
@@ -92,5 +111,16 @@ describe("git action copy", () => {
         terminology: sourceControlClients.get("gitlab").changeRequest,
       }).continueLabel,
     ).toBe("Commit, push & create MR");
+    const translated = resolveDefaultBranchActionDialogCopy(
+      {
+        ...input,
+        branchName: "Main/{{raw}}",
+        terminology: sourceControlClients.get("gitlab").changeRequest,
+      },
+      createI18n("zh-CN").t,
+    );
+    expect(translated.description).toContain("Main/{{raw}}");
+    expect(translated.description).toContain("一个 MR");
+    expect(translated.continueLabel).toBe("提交、推送并创建 MR");
   });
 });

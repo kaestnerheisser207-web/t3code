@@ -1,6 +1,7 @@
 import { DEFAULT_SERVER_SETTINGS, EnvironmentId, ProjectId } from "@t3tools/contracts";
 import { resolveProjectSettings } from "@t3tools/shared/projectSettings";
 import { describe, expect, it } from "vite-plus/test";
+import { createI18n } from "@t3tools/client-runtime/i18n";
 
 import { settingInheritanceLayers } from "./SettingInheritance";
 
@@ -43,5 +44,22 @@ describe("settingInheritanceLayers", () => {
       ["Inherits", false],
       ["Current checkout", false],
     ]);
+    const chinese = settingInheritanceLayers(
+      {
+        environmentId,
+        label: "Laptop",
+        projectId,
+        ...resolveProjectSettings(settings, projectId, null, file),
+      },
+      settings,
+      "defaultThreadEnvMode",
+      createI18n("zh-CN").t,
+    );
+    expect(chinese.map((layer) => [layer.key, layer.effective, layer.set])).toEqual(
+      fromEnvironment.map((layer) => [layer.key, layer.effective, layer.set]),
+    );
+    expect(chinese[1]?.label).toBe("Laptop");
+    expect(chinese[1]?.value).toBe("当前检出目录");
+    expect(chinese[2]?.label).toBe("t3.json");
   });
 });

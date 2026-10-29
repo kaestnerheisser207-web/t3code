@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useAtomValue } from "@effect/atom-react";
 import { Atom } from "effect/reactivity";
 import * as Linking from "expo-linking";
@@ -20,6 +21,8 @@ const snapshotAtom = Atom.make((get) =>
 ).pipe(Atom.withEquality((a, b) => JSON.stringify(a) === JSON.stringify(b)));
 
 export function SubscriptionUsageCoordinator() {
+  const { i18n } = useTranslation();
+  const language = i18n.resolvedLanguage === "zh-CN" ? "zh-CN" : "en";
   const {
     themeMode,
     themeAppearance,
@@ -36,6 +39,7 @@ export function SubscriptionUsageCoordinator() {
       .then(() =>
         publishSubscriptionUsage({
           ...snapshot,
+          language,
           theme: createWidgetTheme(themeMode, themeVariablesByAppearance),
         }),
       )
@@ -46,6 +50,7 @@ export function SubscriptionUsageCoordinator() {
     catalog.isReady,
     appearanceReady,
     snapshot,
+    language,
     themeMode,
     themeVariablesByAppearance,
     // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Android stores resolved colors; System appearance changes must republish them.

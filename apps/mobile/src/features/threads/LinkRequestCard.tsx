@@ -1,3 +1,6 @@
+import { Trans } from "react-i18next";
+import { runtimeModeText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { pipe } from "effect/Function";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -53,8 +56,6 @@ const ACCESS_CHOICES: ReadonlyArray<{
   },
   ...RUNTIME_MODE_CHOICES.map((choice) => ({ ...choice, access: choice.mode })),
 ];
-const accessLabel = (access: AuthMcpClientAccess) =>
-  ACCESS_CHOICES.find((choice) => choice.access === access)?.label ?? access;
 
 const LINK_SYMBOL: AppSymbolName = { ios: "link", android: "desktop_windows" };
 
@@ -75,9 +76,15 @@ export function LinkRequestCard(props: {
   readonly projectedItem: OrchestrationV2ProjectedTurnItem;
   readonly iconColor: ColorValue;
 }) {
+  const t = useTranslate();
   const { item, visibility } = props.projectedItem;
   if (item.type !== "link_request") return null;
-  const display = linkRequestDisplay(item, visibility, accessLabel);
+  const display = linkRequestDisplay(
+    item,
+    visibility,
+    (access) => runtimeModeText(t, access).label,
+    t,
+  );
   if (display.kind === "pending") {
     return <PendingLinkRequest environmentId={props.environmentId} item={item} />;
   }
@@ -103,6 +110,7 @@ function PendingLinkRequest(props: {
   readonly environmentId: EnvironmentId;
   readonly item: LinkRequestItem;
 }) {
+  const t = useTranslate();
   const { item } = props;
   const [open, setOpen] = useState(false);
   const [declining, setDeclining] = useState(false);
@@ -135,8 +143,10 @@ function PendingLinkRequest(props: {
       <View className="gap-1">
         <Text className="font-t3-bold text-base text-foreground">
           {picksMachine(item)
-            ? "Link a machine to this environment"
-            : `Link ${target} to this environment`}
+            ? t("mobile.dynamic.LinkRequestCard.link-a-machine-to-this-environment")
+            : t("mobile.dynamic.LinkRequestCard.link-param-to-this-environment", {
+                target: target,
+              })}
         </Text>
         {item.reason.trim() ? (
           <Text className="font-sans text-sm leading-5 text-foreground-muted">{item.reason}</Text>
@@ -159,7 +169,11 @@ function PendingLinkRequest(props: {
       {canAnswer ? (
         <>
           <Button
-            label={picksMachine(item) ? "Choose machine…" : "Review link…"}
+            label={
+              picksMachine(item)
+                ? t("mobile.dynamic.LinkRequestCard.choose-machine")
+                : t("mobile.dynamic.LinkRequestCard.review-link")
+            }
             disabled={declining}
             onPress={() => setOpen(true)}
             tone="primary"
@@ -174,13 +188,17 @@ function PendingLinkRequest(props: {
               className="px-1 py-1 active:opacity-60 disabled:opacity-50"
               onPress={() => void decline()}
             >
-              <Text className="font-sans text-xs text-foreground-muted">Decline</Text>
+              <Text className="font-sans text-xs text-foreground-muted">
+                {t("mobile.threads.LinkRequestCard.decline")}
+              </Text>
             </Pressable>
           </View>
         </>
       ) : (
         <Text className="font-sans text-xs text-foreground-muted">
-          Only a session that manages access here can answer this.
+          {t(
+            "mobile.threads.LinkRequestCard.only-a-session-that-manages-access-here-can-answer-this",
+          )}
         </Text>
       )}
       {open ? (
@@ -230,6 +248,7 @@ function LinkRequestSheet(props: {
   readonly item: LinkRequestItem;
   readonly onClose: () => void;
 }) {
+  const t = useTranslate();
   const { item } = props;
   const insets = useSafeAreaInsets();
   const pickMachine = picksMachine(item);
@@ -333,11 +352,14 @@ function LinkRequestSheet(props: {
       >
         <View className="gap-1">
           <Text className="font-t3-bold text-lg text-foreground">
-            {pickMachine ? "Link a machine" : `Link ${targetName}`}
+            {pickMachine
+              ? t("mobile.dynamic.LinkRequestCard.link-a-machine")
+              : t("mobile.dynamic.LinkRequestCard.link-param", { targetName: targetName })}
           </Text>
           <Text className="font-sans text-sm leading-5 text-foreground-muted">
-            Agents here can then launch, message and wait on threads there. It appears in that
-            machine's Connections, where it can be revoked.
+            {t(
+              "mobile.threads.LinkRequestCard.agents-here-can-then-launch-message-and-wait-on-threads-there-it-appears-in-that-machine-s-connections-where-it-can-be-revoked",
+            )}
           </Text>
           {!pickMachine && item.url !== undefined ? (
             <Text className="font-sans text-xs text-foreground-muted" numberOfLines={1}>
@@ -346,7 +368,7 @@ function LinkRequestSheet(props: {
           ) : null}
         </View>
         {pickMachine ? (
-          <SettingsSection title="Machine">
+          <SettingsSection title={t("mobile.threads.LinkRequestCard.machine")}>
             {machines.map((machine, index) => (
               <MachineRow
                 key={machine.environmentId}
@@ -361,8 +383,10 @@ function LinkRequestSheet(props: {
               />
             ))}
             <SettingsChoiceRow
-              label="Another address…"
-              description="Link a machine this app does not know, by its https or Tailscale address."
+              label={t("mobile.threads.LinkRequestCard.another-address")}
+              description={t(
+                "mobile.threads.LinkRequestCard.link-a-machine-this-app-does-not-know-by-its-https-or-tailscale-address",
+              )}
               selected={selected === ANOTHER_ADDRESS}
               separated={machines.length > 0}
               disabled={busy}
@@ -376,7 +400,7 @@ function LinkRequestSheet(props: {
         {needsAddress && !(item.url !== undefined && item.environmentId === undefined) ? (
           <View className="gap-2">
             <TextInput
-              accessibilityLabel="Address"
+              accessibilityLabel={t("mobile.threads.LinkRequestCard.address")}
               placeholder="https://machine.tailnet.ts.net"
               value={address}
               onChangeText={setAddress}
@@ -388,24 +412,30 @@ function LinkRequestSheet(props: {
             />
             {target.kind === "machine" ? (
               <Text className="font-sans text-xs text-foreground-muted">
-                This app has no address for {target.label} that another machine can reach. Enter its
-                https or Tailscale address.
+                <Trans
+                  t={t}
+                  i18nKey="mobile.rich.LinkRequestCard.this-app-has-no-address-for-part-that-another-machine-can-reach-enter-its-https-or-tailscale-address"
+                  components={{ value0: <>{target.label}</> }}
+                />
               </Text>
             ) : null}
           </View>
         ) : null}
         {useExisting ? (
           <Text className="font-sans text-sm leading-5 text-foreground-muted">
-            This environment is already linked to {targetName}. The agent can use that link as it
-            is; change its access in Settings → Connections.
+            <Trans
+              t={t}
+              i18nKey="mobile.rich.LinkRequestCard.this-environment-is-already-linked-to-part-the-agent-can-use-that-link-as-it-is-change-its-access-in-settings-connections"
+              components={{ value0: <>{targetName}</> }}
+            />
           </Text>
         ) : target.kind === "none" ? null : (
           <>
             {canMint ? null : (
               <View className="gap-2">
                 <TextInput
-                  accessibilityLabel="Pairing code"
-                  placeholder="Paste the code"
+                  accessibilityLabel={t("mobile.threads.LinkRequestCard.pairing-code")}
+                  placeholder={t("mobile.threads.LinkRequestCard.paste-the-code")}
                   value={pairingCode}
                   onChangeText={setPairingCode}
                   editable={!busy}
@@ -416,17 +446,22 @@ function LinkRequestSheet(props: {
                   spellCheck={false}
                 />
                 <Text className="font-sans text-xs text-foreground-muted">
-                  Create a link on {targetName}: Settings → Connections → Create link, then paste
-                  its code here.
+                  <Trans
+                    t={t}
+                    i18nKey="mobile.rich.LinkRequestCard.create-a-link-on-part-settings-connections-create-link-then-paste-its-code-here"
+                    components={{ value0: <>{targetName}</> }}
+                  />
                 </Text>
               </View>
             )}
-            <SettingsSection title="What agents here may do there">
+            <SettingsSection
+              title={t("mobile.threads.LinkRequestCard.what-agents-here-may-do-there")}
+            >
               {ACCESS_CHOICES.map((choice, index) => (
                 <SettingsChoiceRow
                   key={choice.access}
-                  label={choice.label}
-                  description={choice.description}
+                  label={runtimeModeText(t, choice.access).label}
+                  description={runtimeModeText(t, choice.access).description}
                   selected={choice.access === access}
                   separated={index > 0}
                   disabled={busy}
@@ -435,8 +470,9 @@ function LinkRequestSheet(props: {
               ))}
             </SettingsSection>
             <Text className="font-sans text-xs text-foreground-muted">
-              An agent here never gets more there than its own mode here either. Threads it starts
-              there cannot change that environment's own threads, projects or settings.
+              {t(
+                "mobile.threads.LinkRequestCard.an-agent-here-never-gets-more-there-than-its-own-mode-here-either-threads-it-starts-there-cannot-change-that-environment-s-own-threads-projects-or-settings",
+              )}
             </Text>
           </>
         )}
@@ -450,13 +486,25 @@ function LinkRequestSheet(props: {
           </Text>
         ) : null}
         <Button
-          label={busy ? "Linking…" : useExisting ? "Use this link" : "Link"}
+          label={
+            busy
+              ? t("mobile.dynamic.LinkRequestCard.linking")
+              : useExisting
+                ? t("mobile.dynamic.LinkRequestCard.use-this-link")
+                : t("mobile.dynamic.LinkRequestCard.link")
+          }
           disabled={busy || !ready}
           onPress={() => void submit()}
           tone="primary"
           fullWidth
         />
-        <Button label="Cancel" tone="secondary" disabled={busy} onPress={props.onClose} fullWidth />
+        <Button
+          label={t("mobile.threads.LinkRequestCard.cancel")}
+          tone="secondary"
+          disabled={busy}
+          onPress={props.onClose}
+          fullWidth
+        />
       </ScrollView>
     </Modal>
   );

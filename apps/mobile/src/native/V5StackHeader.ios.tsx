@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import type {
   NativeStackHeaderItem,
   NativeStackHeaderItemMenu,
@@ -155,6 +156,7 @@ export function V5StackHeader(props: {
   /** The workspace's compose action, shown as its own group in this column's bar. */
   readonly onCompose?: () => void;
 }) {
+  const t = useTranslate();
   const { options } = props;
   const theme = useMobileNavigationTheme();
   const nativeMetrics = useNativeLayoutMetrics();
@@ -343,7 +345,11 @@ export function V5StackHeader(props: {
                 hideWhenScrolling={false}
                 allowToolbarIntegration={searchOptions?.allowToolbarIntegration ?? true}
                 placement={bottomSearch ? "integrated" : (searchOptions?.placement ?? "automatic")}
-                placeholder={mailSearch?.placeholder ?? searchOptions?.placeholder ?? "Search"}
+                placeholder={
+                  mailSearch?.placeholder ??
+                  searchOptions?.placeholder ??
+                  t("mobile.dynamic.V5StackHeader.ios.search")
+                }
                 onFocus={(event) => {
                   searchOptions?.onFocus?.(event);
                 }}

@@ -9,6 +9,9 @@ public final class T3KeyboardCommandsModule: Module {
       Prop("enabledCommands") { (view: T3KeyboardCommandsView, commands: [String]) in
         view.setEnabledCommands(commands)
       }
+      Prop("labels") { (view: T3KeyboardCommandsView, labels: [String: String]) in
+        view.labels = labels
+      }
       Events("onCommand")
     }
   }
@@ -17,6 +20,9 @@ public final class T3KeyboardCommandsModule: Module {
 public final class T3KeyboardCommandsView: ExpoView {
   let onCommand = EventDispatcher()
   private var enabledCommands = Set<String>()
+  var labels: [String: String] = [:] {
+    didSet { if labels != oldValue { setEnabledCommands(Array(enabledCommands)) } }
+  }
   private let shortcutInputView = UIView(frame: .zero)
 
   public override var canBecomeFirstResponder: Bool { true }
@@ -36,27 +42,27 @@ public final class T3KeyboardCommandsView: ExpoView {
   public override var keyCommands: [UIKeyCommand]? {
     let isPad = UIDevice.current.userInterfaceIdiom == .pad
     var commands = [
-      enabledCommand("newTask", input: "n", modifiers: .command, action: #selector(newTask), title: "New Task"),
-      enabledCommand("focusSearch", input: "f", modifiers: .command, action: #selector(focusSearch), title: "Find"),
+      enabledCommand("newTask", input: "n", modifiers: .command, action: #selector(newTask), title: labels["newTask"] ?? "New Task"),
+      enabledCommand("focusSearch", input: "f", modifiers: .command, action: #selector(focusSearch), title: labels["find"] ?? "Find"),
       isPad
-        ? enabledCommand("commandPalette", input: "k", modifiers: .command, action: #selector(openCommandPalette), title: "Command Palette")
-        : enabledCommand("focusSearch", input: "k", modifiers: .command, action: #selector(focusSearch), title: "Focus Search"),
-      enabledCommand("paletteNext", input: UIKeyCommand.inputDownArrow, modifiers: [], action: #selector(paletteNext), title: "Next Result"),
-      enabledCommand("palettePrevious", input: UIKeyCommand.inputUpArrow, modifiers: [], action: #selector(palettePrevious), title: "Previous Result"),
-      enabledCommand("paletteDismiss", input: UIKeyCommand.inputEscape, modifiers: [], action: #selector(paletteDismiss), title: "Close Command Palette"),
-      enabledCommand("back", input: "[", modifiers: .command, action: #selector(goBack), title: "Back"),
-      enabledCommand("files", input: "f", modifiers: [.command, .shift], action: #selector(openFiles), title: "Open Files"),
-      enabledCommand("terminal", input: "t", modifiers: [.command, .shift], action: #selector(openTerminal), title: "Open Terminal"),
-      enabledCommand("review", input: "r", modifiers: [.command, .shift], action: #selector(openReview), title: "Open Review"),
+        ? enabledCommand("commandPalette", input: "k", modifiers: .command, action: #selector(openCommandPalette), title: labels["commandPalette"] ?? "Command Palette")
+        : enabledCommand("focusSearch", input: "k", modifiers: .command, action: #selector(focusSearch), title: labels["focusSearch"] ?? "Focus Search"),
+      enabledCommand("paletteNext", input: UIKeyCommand.inputDownArrow, modifiers: [], action: #selector(paletteNext), title: labels["nextResult"] ?? "Next Result"),
+      enabledCommand("palettePrevious", input: UIKeyCommand.inputUpArrow, modifiers: [], action: #selector(palettePrevious), title: labels["previousResult"] ?? "Previous Result"),
+      enabledCommand("paletteDismiss", input: UIKeyCommand.inputEscape, modifiers: [], action: #selector(paletteDismiss), title: labels["closeCommandPalette"] ?? "Close Command Palette"),
+      enabledCommand("back", input: "[", modifiers: .command, action: #selector(goBack), title: labels["back"] ?? "Back"),
+      enabledCommand("files", input: "f", modifiers: [.command, .shift], action: #selector(openFiles), title: labels["openFiles"] ?? "Open Files"),
+      enabledCommand("terminal", input: "t", modifiers: [.command, .shift], action: #selector(openTerminal), title: labels["openTerminal"] ?? "Open Terminal"),
+      enabledCommand("review", input: "r", modifiers: [.command, .shift], action: #selector(openReview), title: labels["openReview"] ?? "Open Review"),
       enabledCommand(
         "copyThreadReference",
         input: "c",
         modifiers: [.command, .shift],
         action: #selector(copyThreadReference),
-        title: "Copy PR Link or Thread"
+        title: labels["copyLink"] ?? "Copy PR Link or Thread"
       ),
-      enabledCommand("toggleSidebar", input: "\\", modifiers: .command, action: #selector(handleToggleSidebar), title: "Toggle Sidebar"),
-      enabledCommand("cycleHost", input: "h", modifiers: [.command, .shift], action: #selector(cycleHost), title: "Next Machine"),
+      enabledCommand("toggleSidebar", input: "\\", modifiers: .command, action: #selector(handleToggleSidebar), title: labels["toggleSidebar"] ?? "Toggle Sidebar"),
+      enabledCommand("cycleHost", input: "h", modifiers: [.command, .shift], action: #selector(cycleHost), title: labels["nextMachine"] ?? "Next Machine"),
     ].compactMap { $0 }
     if isPad {
       commands += (1...9).compactMap { index in
@@ -65,7 +71,7 @@ public final class T3KeyboardCommandsView: ExpoView {
           input: String(index),
           modifiers: .command,
           action: #selector(jumpToThread(_:)),
-          title: "Go to Thread \(index)"
+          title: labels["thread.jump.\(index)"] ?? "Go to Thread \(index)"
         )
       }
     }

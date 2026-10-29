@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { ThreadId, type WorktreeSetupSnapshot } from "@t3tools/contracts";
 import {
   CheckpointRef,
@@ -4196,4 +4197,50 @@ describe("shouldCollapseUserMessage", () => {
     expect(shouldCollapseUserMessage(`${citation} Can you expand on this?`)).toBe(false);
     expect(shouldCollapseUserMessage(`${citation} ${"More text. ".repeat(60)}`)).toBe(true);
   });
+});
+
+it("invalidates compaction labels on a language change while preserving unchanged rows", () => {
+  const fixture = makeStreamingTimelineFixture();
+  const [history0, history1, history2, user, , assistant] = fixture.visibleTurnItems;
+  if (user?.item.type !== "user_message" || assistant?.item.type !== "assistant_message")
+    throw new Error("Expected live fixture items");
+  const input = {
+    timelineEntries: deriveTimelineEntriesFromVisibleTurnItems({
+      visibleTurnItems: [
+        history0!,
+        history1!,
+        history2!,
+        { ...user, item: { ...user.item, text: "/compact", idleCompaction: "beforeCacheExpires" } },
+        {
+          ...assistant,
+          item: { ...assistant.item, type: "compaction", driver: null, beforeTokenCount: 899_000 },
+        },
+      ],
+      optimisticMessages: [],
+    }),
+    isWorking: true,
+    runningRunId: fixture.runId,
+    latestRun: {
+      runId: fixture.runId,
+      status: "running" as const,
+      startedAt: fixture.time(5),
+      completedAt: null,
+    },
+    activeTurnStartedAt: fixture.time(5),
+    turnDiffSummaries: [],
+    supportsConversationRollback: false,
+  };
+  const en = createI18n("en").getFixedT("en");
+  const zh = createI18n("zh-CN").getFixedT("zh-CN");
+  const previous = deriveMessagesTimelineRowsWithState({ ...input, t: en });
+  const next = deriveMessagesTimelineRowsWithState({ ...input, t: zh }, previous);
+  const before = previous.rows.find((row) => row.kind === "context-compaction");
+  const after = next.rows.find((row) => row.kind === "context-compaction");
+  expect(before?.label).toBe(en("compaction.beforeCache"));
+  expect(after?.label).toBe(zh("compaction.beforeCache"));
+  expect(after?.id).toBe(before?.id);
+  const stable = computeStableMessagesTimelineRows(previous.rows, { result: [], byId: new Map() });
+  const translated = computeStableMessagesTimelineRows(next.rows, stable);
+  expect(translated.result[0]).toBe(stable.result[0]);
+  expect(translated.result.find((row) => row.kind === "context-compaction")).not.toBe(before);
 });

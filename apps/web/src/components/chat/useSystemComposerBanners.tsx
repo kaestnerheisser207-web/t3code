@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useStableCallback } from "../../hooks/useStableCallback";
 import { type EnvironmentId } from "@t3tools/contracts";
 import { type EnvironmentConnectionPresentation } from "@t3tools/client-runtime/connection";
@@ -56,6 +57,7 @@ interface SystemComposerBannersInput {
  * a server update, and auto-balanced machines that need one.
  */
 export function useSystemComposerBanners(input: SystemComposerBannersInput) {
+  const t = useTranslate();
   const {
     activeEnvironment,
     activeEnvironmentUnavailable,
@@ -90,8 +92,8 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
       toastManager.add(
         stackedThreadToast({
           type: "error",
-          title: "Could not reconnect environment",
-          description: error instanceof Error ? error.message : "Failed to reconnect.",
+          title: t("banners.reconnectFailed"),
+          description: error instanceof Error ? error.message : t("banners.reconnectDetail"),
         }),
       );
     }
@@ -118,8 +120,8 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Could not disconnect server",
-            description: error instanceof Error ? error.message : "Failed to disconnect.",
+            title: t("banners.disconnectFailed"),
+            description: error instanceof Error ? error.message : t("banners.disconnectDetail"),
           }),
         );
       }
@@ -159,14 +161,16 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
           size="xs"
           variant="ghost"
           disabled={disconnectingEnvironment}
-          title="Hide this server's threads. Switch it on again in Environments."
+          title={t(
+            "web.remaining.useSystemComposerBanners.hide-this-server-s-threads-switch-it-on-again-in-environments",
+          )}
           onClick={() =>
             void handleDisconnectActiveEnvironmentStable(
               activeEnvironmentUnavailableState.environmentId,
             )
           }
         >
-          Disconnect server
+          {t("web.remaining.useSystemComposerBanners.disconnect-server")}
         </Button>
       ) : undefined;
     const environmentReconnecting =
@@ -185,7 +189,9 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
         variant: unavailableConnection.phase === "error" ? "error" : "warning",
         group: "environment",
         icon: <WifiOffIcon />,
-        title: `${activeEnvironmentUnavailableState.label} is ${environmentReconnecting ? "reconnecting" : "offline"}`,
+        title: t(environmentReconnecting ? "banners.reconnecting" : "banners.offline", {
+          environment: activeEnvironmentUnavailableState.label,
+        }),
         description: activeEnvironment ? (
           <ConnectionDiagnosisHeadline environment={activeEnvironment} />
         ) : undefined,
@@ -201,7 +207,7 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
                   )
                 }
               >
-                Reconnect
+                {t("web.ui.DeviceStreamView.reconnect")}
               </Button>
             ) : null}
             {disconnectAction}
@@ -223,11 +229,13 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
         variant: updateFailed ? "error" : "default",
         group: "environment",
         icon: <ComposerServerUpdateIcon status={serverUpdateState.status} />,
-        title: `${updateFailed ? "Could not update" : "Updating"} ${versionMismatchServerLabel}`,
+        title: t(updateFailed ? "banners.updateFailed" : "banners.updating", {
+          environment: versionMismatchServerLabel,
+        }),
         description:
           serverUpdateState.status === "failed"
             ? serverUpdateState.message
-            : serverUpdateStageLabel(serverUpdateState.stage),
+            : serverUpdateStageLabel(serverUpdateState.stage, t),
         actions: !updateFailed ? (
           disconnectAction
         ) : !versionMismatch ||
@@ -240,7 +248,7 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
             installation={versionMismatchInstallation}
             desktopAppUpdate={versionMismatchDesktopAppUpdate}
             targetVersion={versionMismatch.clientVersion}
-            label="Retry"
+            label={t("web.ui.MermaidDiagram.retry")}
             variant="ghost"
           />
         ),

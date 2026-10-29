@@ -10,6 +10,7 @@ import { useWorkspaceSurface } from "../../workspace/useWorkspaceSurface";
 import { useDeviceType } from "../../../native/native-layout-metrics";
 import { useCompactWorkspaceTabs } from "../../workspace/useSystemWorkspaceTabBar";
 import { useAdaptiveWorkspaceLayout } from "../../layout/adaptive-workspace-context";
+import { useSettingsPageTitle } from "../useSettingsPageTitle";
 import {
   ScreenScrollViewBottomInset,
   ScreenScrollViewSurface,
@@ -25,6 +26,7 @@ export function SettingsScreen(
   },
 ) {
   const navigation = useNavigation();
+  const title = useSettingsPageTitle(props.title);
   const route = useRoute();
   const workspace = useWorkspaceTabs();
   const surface = useWorkspaceSurface();
@@ -44,7 +46,7 @@ export function SettingsScreen(
   return (
     <View collapsable={false} className={`flex-1 ${surfaceClassName}`}>
       <AppBar
-        title={props.title}
+        title={title}
         actions={props.actions}
         search={props.search}
         trailing={Platform.OS === "android" ? props.trailing : undefined}

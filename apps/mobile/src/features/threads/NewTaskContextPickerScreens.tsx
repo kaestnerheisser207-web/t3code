@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { NativeScrollView } from "../../native/NativeScrollViewMarker";
 import { SearchField } from "../../components/ui/SearchField";
 import { Button } from "../../components/ui/Button";
@@ -66,6 +68,7 @@ function EnvironmentPickerRow(props: {
   isLast: boolean;
   onPress: () => void;
 }) {
+  const t = useTranslate();
   const [expanded, setExpanded] = useState(false);
   const { presentation } = useEnvironmentPresentation(props.environmentId);
   const { diagnosis, state } = useConnectionDiagnosis(props.environmentId, presentation);
@@ -73,7 +76,9 @@ function EnvironmentPickerRow(props: {
   const connection = presentation?.connection;
   const status =
     diagnosis?.headline ??
-    (connection ? environmentStatusText({ ...connection, error: null }) : "Offline");
+    (connection
+      ? environmentStatusText({ ...connection, error: null }, t)
+      : t("connection.offline"));
   return (
     <View className={cn("bg-grouped-card", !props.isLast && "border-b border-border-subtle")}>
       <View className="flex-row items-center">
@@ -107,7 +112,12 @@ function EnvironmentPickerRow(props: {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${expanded ? "Hide" : "Show"} connection details for ${props.title}`}
+          accessibilityLabel={t(
+            expanded
+              ? "mobile.dynamic.NewTaskContextPickerScreens.expandedConnectionYes"
+              : "mobile.dynamic.NewTaskContextPickerScreens.expandedConnectionNo",
+            { title: props.title },
+          )}
           accessibilityState={{ expanded }}
           onPress={() => setExpanded(!expanded)}
           className="min-h-11 min-w-11 items-center justify-center active:opacity-65"
@@ -128,12 +138,16 @@ function EnvironmentPickerRow(props: {
           )}
           {state.retryAt ? (
             <Text className="text-sm text-foreground-muted">
-              Next reconnect at {new Date(state.retryAt).toLocaleTimeString()}
+              <Trans
+                t={t}
+                i18nKey="mobile.rich.NewTaskContextPickerScreens.next-reconnect-at-part"
+                components={{ value0: <>{new Date(state.retryAt).toLocaleTimeString()}</> }}
+              />
             </Text>
           ) : null}
           {connection?.phase !== "connected" ? (
             <Button
-              label="Reconnect now"
+              label={t("mobile.threads.NewTaskContextPickerScreens.reconnect-now")}
               onPress={() => onReconnectEnvironment(props.environmentId)}
             />
           ) : null}
@@ -183,6 +197,7 @@ function PickerSurface(props: { readonly children: ReactNode }) {
 }
 
 export function NewTaskEnvironmentPickerRouteScreen() {
+  const t = useTranslate();
   const flow = useNewTaskFlow();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -196,7 +211,7 @@ export function NewTaskEnvironmentPickerRouteScreen() {
       />
       {Platform.OS === "android" ? (
         <AndroidScreenHeader
-          title="Environment"
+          title={t("mobile.threads.NewTaskContextPickerScreens.environment")}
           hideBottomBorder
           onBack={() => navigation.goBack()}
         />
@@ -236,6 +251,7 @@ export function NewTaskEnvironmentPickerRouteScreen() {
 }
 
 export function NewTaskBranchPickerRouteScreen() {
+  const t = useTranslate();
   const flow = useNewTaskFlow();
   const canWriteSourceControl = useEnvironmentScope(
     flow.selectedProject?.environmentId ?? null,
@@ -318,7 +334,11 @@ export function NewTaskBranchPickerRouteScreen() {
 
   return (
     <BranchPickerScreen
-      title={flow.workspaceMode === "worktree" ? "Base branch" : "Branch"}
+      title={
+        flow.workspaceMode === "worktree"
+          ? t("mobile.dynamic.NewTaskContextPickerScreens.base-branch")
+          : t("mobile.dynamic.NewTaskContextPickerScreens.branch")
+      }
       project={flow.selectedProject}
       branches={filterNewTaskBranches(branchState.refs, branchQuery)}
       selectedBranchName={
@@ -369,6 +389,7 @@ export function BranchPickerScreen(props: {
     readonly onChangeStartFromOrigin: (value: boolean) => void;
   };
 }) {
+  const t = useTranslate();
   const searchRef = useRef<import("react-native").TextInputInstance>(null);
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -410,7 +431,7 @@ export function BranchPickerScreen(props: {
     >
       <ToggleRow
         onValueChange={props.worktree.onChangeStartFromOrigin}
-        title="Start from remote"
+        title={t("mobile.threads.NewTaskContextPickerScreens.start-from-remote")}
         value={props.worktree.startFromOrigin}
       />
     </View>
@@ -437,16 +458,20 @@ export function BranchPickerScreen(props: {
           {props.loading ? <AppActivityIndicator /> : null}
           <Text className="text-center text-sm text-foreground-muted">
             {props.loading
-              ? "Loading branches…"
+              ? t("mobile.dynamic.NewTaskContextPickerScreens.loading-branches")
               : props.error
                 ? props.error
                 : props.query
-                  ? "No matching branches"
-                  : "No branches available"}
+                  ? t("mobile.dynamic.NewTaskContextPickerScreens.no-matching-branches")
+                  : t("mobile.dynamic.NewTaskContextPickerScreens.no-branches-available")}
           </Text>
           {!props.loading && props.error ? (
             <View className="self-center">
-              <Button label="Try again" tone="secondary" onPress={props.onRefresh} />
+              <Button
+                label={t("mobile.threads.NewTaskContextPickerScreens.try-again")}
+                tone="secondary"
+                onPress={props.onRefresh}
+              />
             </View>
           ) : null}
         </View>
@@ -494,10 +519,10 @@ export function BranchPickerScreen(props: {
           <SearchField
             inputRef={searchRef}
             autoFocus={false}
-            accessibilityLabel="Find a branch"
+            accessibilityLabel={t("mobile.threads.NewTaskContextPickerScreens.find-a-branch")}
             clearAccessibilityLabel="Clear branch search"
             onChangeText={props.onQueryChange}
-            placeholder="Find a branch"
+            placeholder={t("mobile.threads.NewTaskContextPickerScreens.find-a-branch")}
             value={props.query}
           />
         </View>

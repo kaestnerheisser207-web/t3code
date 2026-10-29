@@ -1,3 +1,6 @@
+import type { TFunction } from "i18next";
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { Toolbar } from "../../components/ui/Toolbar";
 import * as Dialog from "../../components/ui/Dialog";
 import { useOpenPullRequest } from "../../native/useOpenPullRequest";
@@ -43,25 +46,25 @@ function compactMenuBranchLabel(branch: string): string {
   return truncateMiddle(branch, 24);
 }
 
-function compactMenuStatus(gitStatus: VcsStatusResult | null): string {
+function compactMenuStatus(gitStatus: VcsStatusResult | null, t: TFunction): string {
   if (!gitStatus) {
-    return "Checking status";
+    return t("mobile.git.checking");
   }
   if (!gitStatus.isRepo) {
-    return "Not a repo";
+    return t("mobile.git.notRepo");
   }
 
   const parts: string[] = [];
   if (gitStatus.hasWorkingTreeChanges) {
-    parts.push(`${gitStatus.workingTree.files.length} changed`);
+    parts.push(t("git.shared.changed", { count: gitStatus.workingTree.files.length }));
   } else if (gitStatus.aheadCount === 0 && gitStatus.behindCount === 0) {
-    parts.push("Clean");
+    parts.push(t("mobile.git.clean"));
   }
   if (gitStatus.aheadCount > 0) {
-    parts.push(`${gitStatus.aheadCount} ahead`);
+    parts.push(t("git.shared.ahead", { count: gitStatus.aheadCount }));
   }
   if (gitStatus.behindCount > 0) {
-    parts.push(`${gitStatus.behindCount} behind`);
+    parts.push(t("git.shared.behind", { count: gitStatus.behindCount }));
   }
   if (gitStatus.pr?.state === "open") {
     const { shortLabel } = sourceControlClients.get(
@@ -118,6 +121,7 @@ type ThreadGitControlsProps = ThreadGitMenuProps & {
 };
 
 function useThreadGitControlModel(props: ThreadGitMenuProps) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const openPullRequest = useOpenPullRequest();
   const environmentId = props.environmentId;
@@ -128,7 +132,7 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
   const threadId = props.threadId;
   const { gitStatus, gitOperationLabel, onPull, onRunAction } = props;
 
-  const currentBranchLabel = gitStatus?.refName ?? props.currentBranch ?? "Detached HEAD";
+  const currentBranchLabel = gitStatus?.refName ?? props.currentBranch ?? t("mobile.git.detached");
   const busy = gitOperationLabel !== null;
   const isRepo = gitStatus?.isRepo ?? true;
   const hasPrimaryRemote = gitStatus?.hasPrimaryRemote ?? false;
@@ -137,24 +141,24 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
   const quickAction = (() => {
     if (!isRepo) {
       return {
-        label: "Git unavailable",
+        label: t("mobile.git.unavailable"),
         disabled: true,
         kind: "show_hint" as const,
-        hint: "This workspace is not a git repository.",
+        hint: t("mobile.git.notRepoHint"),
       };
     }
-    const action = resolveQuickAction(gitStatus, busy, isDefaultRef, hasPrimaryRemote);
+    const action = resolveQuickAction(gitStatus, busy, isDefaultRef, hasPrimaryRemote, t);
     return !canWriteSourceControl && (action.kind === "run_pull" || action.kind === "run_action")
       ? {
           ...action,
           disabled: true,
-          hint: "This connection cannot change source control.",
+          hint: t("web.git.this-connection-cannot-change-source-control"),
         }
       : action;
   })();
 
   const quickActionHint = quickAction.disabled
-    ? (quickAction.hint ?? "This action is unavailable.")
+    ? (quickAction.hint ?? t("mobile.git.actionUnavailable"))
     : null;
 
   const quickActionIcon: QuickActionIcon = (() => {
@@ -174,11 +178,17 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
     ).changeRequest;
     const prUrl = gitStatus?.pr?.state === "open" ? gitStatus.pr.url : null;
     if (!prUrl) {
-      Dialog.alert(`No open ${shortLabel}`, `This branch does not have an open ${singular}.`);
+      Dialog.alert(
+        t("mobile.git.noRequest", { shortLabel }),
+        t("mobile.git.noRequestDetail", { kind: sourceControlTerm(t, singular) }),
+      );
       return;
     }
     if (!(await openPullRequest(prUrl))) {
-      Dialog.alert(`Unable to open ${shortLabel}`, `The ${singular} could not be opened.`);
+      Dialog.alert(
+        t("mobile.git.openFailed", { shortLabel }),
+        t("mobile.git.openFailedDetail", { kind: sourceControlTerm(t, singular) }),
+      );
     }
   };
 
@@ -199,10 +209,7 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
       requiresDefaultBranchConfirmation(input.action, isDefaultRef)
     ) {
       if (props.hasThread === false) {
-        Dialog.alert(
-          "Choose a feature branch",
-          "Switch branches before publishing changes from this draft.",
-        );
+        Dialog.alert(t("mobile.git.featureBranch"), t("mobile.git.featureBranchHint"));
         return;
       }
       navigation.navigate("GitConfirm", {
@@ -276,15 +283,16 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
 }
 
 function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGitHeaderActionItems {
+  const t = useTranslate();
   const model = useThreadGitControlModel(props);
 
   return {
     terminal: {
-      accessibilityLabel: "Open terminal",
+      accessibilityLabel: t("native.openTerminal"),
       disabled: !props.canOpenTerminal,
       icon: { name: "terminal", type: "sfSymbol" },
       identifier: "thread-right-terminal",
-      label: "Terminal",
+      label: t("panels.terminal"),
       menu: {
         items: [
           ...props.projectScripts.map((script) => ({
@@ -298,10 +306,10 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
           ...(props.projectScripts.length === 0
             ? [
                 {
-                  description: "This project has no saved scripts yet",
+                  description: t("mobile.git.noScriptsHint"),
                   disabled: true,
                   icon: { name: "play", type: "sfSymbol" as const },
-                  label: "No project scripts",
+                  label: t("mobile.git.noScripts"),
                   onPress: () => {},
                   type: "action" as const,
                 },
@@ -323,40 +331,40 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
             type: "action" as const,
           })),
           {
-            description: "Start another shell for this thread",
+            description: t("mobile.git.newShellHint"),
             disabled: !props.canOperateTerminal,
             icon: { name: "plus", type: "sfSymbol" },
-            label: "Open new terminal",
+            label: t("mobile.git.newTerminal"),
             onPress: props.onOpenNewTerminal,
             type: "action",
           },
         ],
-        title: "Terminal",
+        title: t("panels.terminal"),
       },
       sharesBackground: true,
       type: "menu",
       variant: "plain",
     },
     files: {
-      accessibilityLabel: "Open files",
+      accessibilityLabel: t("native.openFiles"),
       disabled: !props.canOpenFiles,
       icon: { name: "folder", type: "sfSymbol" },
       identifier: "thread-right-files",
-      label: "Files",
+      label: t("panels.files"),
       onPress: model.openFiles,
       sharesBackground: true,
       type: "button",
       variant: "plain",
     },
     git: {
-      accessibilityLabel: "Git actions",
+      accessibilityLabel: t("mobile.git.actions"),
       icon: { name: "point.topleft.down.curvedto.point.bottomright.up", type: "sfSymbol" },
       identifier: "thread-right-git",
       label: "Git",
       menu: {
         items: [
           {
-            description: compactMenuStatus(props.gitStatus),
+            description: compactMenuStatus(props.gitStatus, t),
             disabled: true,
             icon: {
               name: "point.topleft.down.curvedto.point.bottomright.up",
@@ -377,20 +385,20 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
           {
             description:
               props.hasThread === false
-                ? "Available after the first message"
-                : "Turn diffs and worktree changes",
+                ? t("mobile.git.afterFirstMessage")
+                : t("mobile.git.reviewHint"),
             disabled: !model.isRepo || props.hasThread === false,
             icon: { name: "text.bubble", type: "sfSymbol" },
-            label: "Review changes",
+            label: t("mobile.git.review"),
             onPress: model.openReview,
             type: "action",
           },
           ...(props.onMergeBack
             ? [
                 {
-                  description: "Bring this thread's latest turn into its source",
+                  description: t("mobile.git.mergeBackHint"),
                   icon: { name: PullRequestGlyph.merged, type: "sfSymbol" as const },
-                  label: "Merge back to source",
+                  label: t("mobile.git.mergeBack"),
                   onPress: props.onMergeBack,
                   type: "action" as const,
                 },
@@ -399,11 +407,11 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
           {
             description:
               props.hasThread === false
-                ? "Available after the first message"
-                : "Commit, files, branches",
+                ? t("mobile.git.afterFirstMessage")
+                : t("mobile.git.moreHint"),
             disabled: props.hasThread === false,
             icon: { name: "ellipsis", type: "sfSymbol" },
-            label: "More",
+            label: t("chat.dynamic.more"),
             onPress: model.openGitInspector,
             type: "action",
           },
@@ -428,6 +436,7 @@ export function useThreadGitCenterHeaderItems(props: ThreadGitControlsProps): He
 }
 
 export function ThreadGitControls(props: ThreadGitControlsProps) {
+  const t = useTranslate();
   const model = useThreadGitControlModel(props);
   const showActionControls = props.showActionControls ?? true;
 
@@ -447,7 +456,7 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
       ) : null}
       {showActionControls ? (
         <Toolbar.Menu
-          accessibilityLabel="Open terminal"
+          accessibilityLabel={t("mobile.threads.ThreadGitControls.open-terminal")}
           icon="terminal"
           disabled={!props.canOpenTerminal}
           separateBackground
@@ -469,9 +478,11 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
               icon="play"
               disabled
               onPress={() => {}}
-              subtitle="This project has no saved scripts yet"
+              subtitle={t("mobile.threads.ThreadGitControls.this-project-has-no-saved-scripts-yet")}
             >
-              <Toolbar.Label>No project scripts</Toolbar.Label>
+              <Toolbar.Label>
+                {t("mobile.threads.ThreadGitControls.no-project-scripts")}
+              </Toolbar.Label>
             </Toolbar.MenuAction>
           )}
           {props.terminalSessions.map((session) => (
@@ -496,22 +507,22 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
             icon="plus"
             disabled={!props.canOperateTerminal}
             onPress={props.onOpenNewTerminal}
-            subtitle="Start another shell for this thread"
+            subtitle={t("mobile.threads.ThreadGitControls.start-another-shell-for-this-thread")}
           >
-            <Toolbar.Label>Open new terminal</Toolbar.Label>
+            <Toolbar.Label>{t("mobile.threads.ThreadGitControls.open-new-terminal")}</Toolbar.Label>
           </Toolbar.MenuAction>
         </Toolbar.Menu>
       ) : null}
       {showActionControls && props.showDirectFileControl ? (
         <Toolbar.Button
-          accessibilityLabel="Open files"
+          accessibilityLabel={t("mobile.threads.ThreadGitControls.open-files")}
           disabled={!props.canOpenFiles}
           icon="folder"
           onPress={model.openFiles}
           separateBackground
         />
       ) : null}
-      {showActionControls ? createNativeHeaderMenu(threadGitMenuDefinition(props, model)) : null}
+      {showActionControls ? createNativeHeaderMenu(threadGitMenuDefinition(props, model, t)) : null}
     </Toolbar>
   );
 }
@@ -523,15 +534,17 @@ export function ThreadGitMenu(props: ThreadGitMenuProps) {
 
 /** Returns menu data because native toolbars serialize direct items rather than rendering component children. */
 export function useThreadGitMenuDefinition(props: ThreadGitMenuProps): AppBarMenu | null {
-  return threadGitMenuDefinition(props, useThreadGitControlModel(props));
+  const t = useTranslate();
+  return threadGitMenuDefinition(props, useThreadGitControlModel(props), t);
 }
 
 function threadGitMenuDefinition(
   props: ThreadGitMenuProps,
   model: ReturnType<typeof useThreadGitControlModel>,
+  t: TFunction,
 ): AppBarMenu {
   return {
-    title: "Git controls",
+    title: t("mobile.git.controls"),
     icon: "point.topleft.down.curvedto.point.bottomright.up",
     separateBackground: false,
     items: [
@@ -540,7 +553,7 @@ function threadGitMenuDefinition(
         title: compactMenuBranchLabel(model.currentBranchLabel),
         icon: "point.topleft.down.curvedto.point.bottomright.up",
         disabled: true,
-        subtitle: compactMenuStatus(props.gitStatus),
+        subtitle: compactMenuStatus(props.gitStatus, t),
         onPress: () => {},
       },
       {
@@ -555,24 +568,22 @@ function threadGitMenuDefinition(
       },
       {
         id: "git-review",
-        title: "Review changes",
+        title: t("mobile.git.review"),
         icon: "text.bubble",
         disabled: !model.isRepo || props.hasThread === false,
         subtitle:
           props.hasThread === false
-            ? "Available after the first message"
-            : "Turn diffs and worktree changes",
+            ? t("mobile.git.afterFirstMessage")
+            : t("mobile.git.reviewHint"),
         onPress: model.openReview,
       },
       {
         id: "git-more",
-        title: "More",
+        title: t("chat.dynamic.more"),
         icon: "ellipsis",
         disabled: props.hasThread === false,
         subtitle:
-          props.hasThread === false
-            ? "Available after the first message"
-            : "Commit, files, branches",
+          props.hasThread === false ? t("mobile.git.afterFirstMessage") : t("mobile.git.moreHint"),
         onPress: model.openGitInspector,
       },
     ],

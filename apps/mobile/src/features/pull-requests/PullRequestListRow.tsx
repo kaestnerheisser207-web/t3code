@@ -1,3 +1,5 @@
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import {
   capitalizeTerm,
   sourceControlClients,
@@ -43,6 +45,7 @@ export const PullRequestListRow = memo(
     readonly getActions: (item: EnvironmentPullRequestListEntry) => MenuProps["actions"];
     readonly onAction: (item: EnvironmentPullRequestListEntry, action: string) => void;
   }) {
+    const t = useTranslate();
     const { item } = props;
     const foreground = props.selected
       ? selectedThreadRowColors.foregroundClassName
@@ -59,9 +62,9 @@ export const PullRequestListRow = memo(
       : props.sidebar
         ? "text-drawer-foreground-muted"
         : "text-foreground-tertiary";
-    const status = pullRequestStatus(item);
-    const conflict = pullRequestConflict(item);
-    const review = pullRequestListReviewStatus(item);
+    const status = pullRequestStatus(item, t);
+    const conflict = pullRequestConflict(item, t);
+    const review = pullRequestListReviewStatus(item, t);
     const checks = item.checksState ? pullRequestChecksStatus(item.checksState) : null;
     return (
       <View style={props.sidebar ? THREAD_LIST_V2_SIDEBAR_ROW_CONTAINER_STYLE : undefined}>
@@ -74,8 +77,52 @@ export const PullRequestListRow = memo(
           <Pressable
             accessibilityRole="button"
             accessibilityState={{ selected: props.selected, busy: props.busy }}
-            accessibilityLabel={`${capitalizeTerm(sourceControlClients.get(item.provider).changeRequest.singular)} ${item.number}, ${item.title}, ${status.label}${conflict ? `, ${conflict.label.toLowerCase()}` : ""}, by ${item.author?.login ?? "unknown author"}${review ? `, ${review.accessibleLabel}` : ""}${item.checksState ? `, checks ${item.checksState}` : ""}${item.stack ? `, stack ${item.stack.position} of ${item.stack.size}` : ""}${item.labels.length ? `, ${item.labels.map((label) => label.name).join(", ")}` : ""}, ${item.additions} additions, ${item.deletions} deletions`}
-            accessibilityHint="Double tap to open. Touch and hold for quick actions."
+            accessibilityLabel={[
+              t("pr.accessibility.identity", {
+                kind: capitalizeTerm(
+                  sourceControlTerm(
+                    t,
+                    sourceControlClients.get(item.provider).changeRequest.singular,
+                  ),
+                ),
+                number: item.number,
+                title: item.title,
+                state: status.label,
+                author:
+                  item.author?.login ?? t("mobile.dynamic.PullRequestTimeline.unknown-author"),
+              }),
+              conflict?.label ?? null,
+              review?.accessibleLabel ?? null,
+              item.checksState
+                ? t("pr.accessibility.checks", {
+                    state: t(
+                      item.checksState === "passing"
+                        ? "pr.filters.passing"
+                        : item.checksState === "failing"
+                          ? "pr.filters.failing"
+                          : "pr.status.pending",
+                    ),
+                  })
+                : null,
+              item.stack
+                ? t("pr.accessibility.stack", {
+                    position: item.stack.position,
+                    size: item.stack.size,
+                  })
+                : null,
+              item.labels.length
+                ? item.labels.map((label) => label.name).join(t("usage.accessibility.separator"))
+                : null,
+              t("pr.accessibility.changes", {
+                additions: item.additions,
+                deletions: item.deletions,
+              }),
+            ]
+              .filter((part) => part !== null)
+              .join(t("usage.accessibility.separator"))}
+            accessibilityHint={t(
+              "mobile.review.PullRequestListRow.double-tap-to-open-touch-and-hold-for-quick-actions",
+            )}
             onPress={() => props.onSelect(item)}
             disabled={props.busy}
             style={props.sidebar ? THREAD_LIST_V2_SIDEBAR_ROW_STYLE : undefined}
@@ -132,7 +179,7 @@ export const PullRequestListRow = memo(
                   </View>
                 ) : null}
                 <Text className={cn("text-2xs tabular-nums", tertiaryForeground)}>
-                  {relativeTime(item.updatedAt)}
+                  {relativeTime(item.updatedAt, t)}
                 </Text>
               </View>
               <Text
@@ -176,7 +223,12 @@ export const PullRequestListRow = memo(
                   ) : null}
                 </View>
                 {checks ? (
-                  <View className="shrink-0" accessibilityLabel={`Checks ${item.checksState}`}>
+                  <View
+                    className="shrink-0"
+                    accessibilityLabel={t("mobile.dynamic.PullRequestListRow.checks-param", {
+                      checksState: item.checksState ?? "",
+                    })}
+                  >
                     <SymbolView name={checks.icon} size={13} tintColorClassName={checks.tint} />
                   </View>
                 ) : null}

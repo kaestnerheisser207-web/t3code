@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { NativeThemeHost } from "./NativeThemeHost.android";
 import {
   AlertDialog,
@@ -68,13 +69,9 @@ function getPresented() {
 }
 
 export function alert(...[title, message, buttons, options]: Parameters<typeof Alert.alert>): void {
-  const actions = buttons?.length ? buttons.slice(0, 3) : [{ text: "OK" }];
-  const normalized = actions.map((action, index) =>
-    index === actions.length - 1 ? { ...action, text: action.text || "OK" } : action,
-  );
   submitRequest({
     kind: "alert",
-    request: { title, message, buttons: normalized, options },
+    request: { title, message, buttons: buttons?.slice(0, 3), options },
   });
 }
 
@@ -87,6 +84,7 @@ export function prompt(request: TextInputDialogRequest): void {
 }
 
 export function Host() {
+  const t = useTranslate();
   const presented = useSyncExternalStore(subscribe, getPresented, getPresented);
 
   const handleCancel = () => {
@@ -115,7 +113,12 @@ export function Host() {
           message: presented.request.message ?? undefined,
           confirmText: "",
         }}
-        alertActions={presented.request.buttons ?? [{ text: "OK" }]}
+        alertActions={(presented.request.buttons?.length ? presented.request.buttons : [{}]).map(
+          (action, index, actions) =>
+            index === actions.length - 1
+              ? { ...action, text: action.text || t("common.ok") }
+              : action,
+        )}
         dismissable={presented.request.options?.cancelable ?? false}
         onAlertAction={(action) => {
           dismiss(presented.id);
@@ -142,6 +145,7 @@ export function Host() {
 }
 
 function DialogPresentation(props: DialogPresentationProps) {
+  const t = useTranslate();
   const { themeVariables: colors } = useAppearancePreferences();
   const titleTypography = useScaledTextRole("title");
   const bodyTypography = useScaledTextRole("footnote");
@@ -153,7 +157,7 @@ function DialogPresentation(props: DialogPresentationProps) {
     props.onConfirm(value);
   };
   const actions = props.alertActions ?? [
-    { text: props.request.cancelText ?? "Cancel", onPress: props.onCancel },
+    { text: props.request.cancelText ?? t("common.cancel"), onPress: props.onCancel },
     {
       text: props.request.confirmText,
       style: props.request.destructive ? ("destructive" as const) : ("default" as const),

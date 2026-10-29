@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { AuthProvidersManageScope } from "@t3tools/contracts";
 import { readEnvironmentScope, useEnvironmentScope } from "../../state/session";
 import { useAtomValue } from "@effect/atom-react";
@@ -36,6 +37,7 @@ export function AddCodexAccountDialog({
     | undefined;
   readonly renderSetup: (instanceId: ProviderInstanceId, provider: ServerProvider) => ReactNode;
 }) {
+  const t = useTranslate();
   const canManageProviders = useEnvironmentScope(environmentId, AuthProvidersManageScope);
   const settings = useEnvironmentSettings(environmentId);
   const providers = useAtomValue(serverEnvironment.providersValueAtom(environmentId));
@@ -93,15 +95,22 @@ export function AddCodexAccountDialog({
     >
       <WizardPopup size="wide">
         <WizardHeader
-          title={instanceId ? displayName : "Add ChatGPT account"}
-          description="Each account has its own Codex instance and sign-in. Choose the other account on the sign-in page."
+          title={
+            instanceId ? displayName : t("web.dynamic.AddCodexAccountDialog.add-chatgpt-account")
+          }
+          description={t(
+            "settings.pages.AddCodexAccountDialog.each-account-has-its-own-codex-instance-and-sign-in-choose-the-other-account-on-the-sign-in-page",
+          )}
         />
         <WizardPanel>
           {instanceId ? (
             provider?.setup ? (
               renderSetup(instanceId, provider)
             ) : (
-              <SettingsRow title="Codex runtime" description="Preparing managed setup." />
+              <SettingsRow
+                title={t("settings.pages.AddCodexAccountDialog.codex-runtime")}
+                description={t("settings.pages.AddCodexAccountDialog.preparing-managed-setup")}
+              />
             )
           ) : (
             <form
@@ -113,15 +122,17 @@ export function AddCodexAccountDialog({
               }}
             >
               <SettingsRow
-                title="Account name"
-                description="Shown in the provider list and model picker."
+                title={t("settings.pages.AddCodexAccountDialog.account-name")}
+                description={t(
+                  "settings.pages.AddCodexAccountDialog.shown-in-the-provider-list-and-model-picker",
+                )}
                 control={
                   <Input
-                    aria-label="Account name"
+                    aria-label={t("settings.pages.AddCodexAccountDialog.account-name")}
                     value={name}
                     disabled={pending}
                     onChange={(event) => setName(event.target.value)}
-                    placeholder="e.g. Personal or Work"
+                    placeholder={t("settings.pages.AddCodexAccountDialog.e-g-personal-or-work")}
                   />
                 }
               />
@@ -132,19 +143,21 @@ export function AddCodexAccountDialog({
         <WizardFooter>
           {instanceId ? (
             <Button variant="outline" onClick={onClose}>
-              Finish later
+              {t("settings.pages.AddCodexAccountDialog.finish-later")}
             </Button>
           ) : (
             <>
               <Button variant="outline" disabled={pending} onClick={onClose}>
-                Cancel
+                {t("settings.pages.AddCodexAccountDialog.cancel")}
               </Button>
               <Button
                 type="submit"
                 form="add-codex-account"
                 disabled={pending || !name.trim() || !canManageProviders}
               >
-                {pending ? "Adding account…" : "Continue"}
+                {pending
+                  ? t("web.dynamic.AddCodexAccountDialog.adding-account")
+                  : t("web.dynamic.AddCodexAccountDialog.continue")}
               </Button>
             </>
           )}

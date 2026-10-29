@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import * as Application from "expo-application";
@@ -69,6 +70,7 @@ function appIdentity() {
 }
 
 export function SettingsDiagnosticsRouteScreen() {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
   const state = useCrashLogState();
   const [copied, setCopied] = useState(false);
@@ -82,7 +84,7 @@ export function SettingsDiagnosticsRouteScreen() {
   };
 
   return (
-    <SettingsScreen title="Diagnostics">
+    <SettingsScreen title={t("mobile.surfaces.SettingsDiagnosticsRouteScreen.diagnostics")}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentInset={{ bottom: Math.max(insets.bottom, 18) }}
@@ -92,23 +94,31 @@ export function SettingsDiagnosticsRouteScreen() {
       >
         {crashReportingAvailable ? <CrashReportsSetting /> : null}
 
-        <SettingsSection title="Startup crashes">
+        <SettingsSection
+          title={t("mobile.surfaces.SettingsDiagnosticsRouteScreen.startup-crashes")}
+        >
           {state.status === "loading" ? (
             <View className="items-center gap-3 px-6 py-8">
               <AppActivityIndicator />
-              <Text className="text-center text-sm text-foreground-muted">Reading crash log…</Text>
+              <Text className="text-center text-sm text-foreground-muted">
+                {t("mobile.surfaces.SettingsDiagnosticsRouteScreen.reading-crash-log")}
+              </Text>
             </View>
           ) : state.status === "unavailable" ? (
             <EmptyState
               icon="exclamationmark.triangle"
-              title="Crash log unavailable"
-              detail="Startup crash records are only kept in store and TestFlight builds."
+              title={t("mobile.surfaces.SettingsDiagnosticsRouteScreen.crash-log-unavailable")}
+              detail={t(
+                "mobile.surfaces.SettingsDiagnosticsRouteScreen.startup-crash-records-are-only-kept-in-store-and-testflight-builds",
+              )}
             />
           ) : records.length === 0 ? (
             <EmptyState
               icon="checkmark.circle"
-              title="No startup crashes"
-              detail="Nothing has taken the app down during launch in the last 7 days."
+              title={t("mobile.surfaces.SettingsDiagnosticsRouteScreen.no-startup-crashes")}
+              detail={t(
+                "mobile.surfaces.SettingsDiagnosticsRouteScreen.nothing-has-taken-the-app-down-during-launch-in-the-last-7-days",
+              )}
             />
           ) : (
             records.map((record, index) => (
@@ -118,18 +128,22 @@ export function SettingsDiagnosticsRouteScreen() {
         </SettingsSection>
 
         <View className="gap-3">
-          <SettingsSection title="Actions">
+          <SettingsSection title={t("mobile.surfaces.SettingsDiagnosticsRouteScreen.actions")}>
             <SettingsActionRow
               icon={copied ? "checkmark" : "doc.on.doc"}
-              label={copied ? "Copied" : "Copy crash report"}
+              label={
+                copied
+                  ? t("mobile.dynamic.SettingsDiagnosticsRouteScreen.copied")
+                  : t("mobile.dynamic.SettingsDiagnosticsRouteScreen.copy-crash-report")
+              }
               disabled={state.status !== "ready"}
               onPress={() => void copyReport()}
             />
           </SettingsSection>
           <Text className="px-2 text-sm leading-normal text-foreground-muted">
-            Paste the report into a GitHub issue. It contains the app version, the JavaScript error
-            message, and the component stack. Error messages can quote values from the app, so read
-            it over before sharing.
+            {t(
+              "mobile.surfaces.SettingsDiagnosticsRouteScreen.paste-the-report-into-a-github-issue-it-contains-the-app-version-the-javascript-error-message-and-the-component-stack-error-messages-can-quote-values-from-the-app-so-read-it-over-before-sharing",
+            )}
           </Text>
         </View>
       </ScrollView>
@@ -138,6 +152,7 @@ export function SettingsDiagnosticsRouteScreen() {
 }
 
 function CrashReportsSetting() {
+  const t = useTranslate();
   const preferences = useAtomValue(mobilePreferencesAtom);
   const savePreferences = useAtomSet(updateMobilePreferencesAtom, { mode: "promiseExit" });
   // One change at a time, so a slow save never turns sending back on after a later opt-out.
@@ -167,19 +182,19 @@ function CrashReportsSetting() {
 
   return (
     <View className="gap-3">
-      <SettingsSection title="Crash reports">
+      <SettingsSection title={t("mobile.surfaces.SettingsDiagnosticsRouteScreen.crash-reports")}>
         <SettingsSwitchRow
           icon="tray.and.arrow.up"
-          label="Send crash reports"
+          label={t("mobile.surfaces.SettingsDiagnosticsRouteScreen.send-crash-reports")}
           disabled={!ready || saving}
           value={enabled}
           onValueChange={change}
         />
       </SettingsSection>
       <Text className="px-2 text-sm leading-normal text-foreground-muted">
-        When the app crashes or hits an error, it sends the error message, the stack trace, the app
-        version, and the device model and OS version to the T3 Code team. Each launch also sends
-        startup timings. Reports carry a random ID for this install.
+        {t(
+          "mobile.surfaces.SettingsDiagnosticsRouteScreen.when-the-app-crashes-or-hits-an-error-it-sends-the-error-message-the-stack-trace-the-app-version-and-the-device-model-and-os-version-to-the-t3-code-team-each-launch-also-sends-startup-timings-reports-carry-a-random-id-for-this-install",
+        )}
       </Text>
     </View>
   );

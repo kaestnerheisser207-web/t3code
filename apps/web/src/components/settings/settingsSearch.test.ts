@@ -6,6 +6,8 @@ import {
 } from "@t3tools/contracts";
 import { UNKNOWN_SOURCE_CONTROL_CLIENT } from "@t3tools/client-runtime/source-control-clients";
 import * as Schema from "effect/Schema";
+import { createI18n } from "@t3tools/client-runtime/i18n";
+import { localizeSettingsSearchItems } from "./settingsTranslations";
 
 import {
   filterAvailableSettingsSearchItems,
@@ -58,6 +60,16 @@ describe("searchSettings", () => {
     expect(searchSettings("sharing", ITEMS).map((item) => item.id)).toEqual(["network-access"]);
     expect(searchSettings("claude", ITEMS).map((item) => item.id)).toEqual(["providers"]);
     expect(searchSettings("long lines", ITEMS).map((item) => item.id)).toEqual(["word-wrap"]);
+    const i18n = createI18n("zh-CN");
+    const localized = localizeSettingsSearchItems(SETTINGS_SEARCH_ITEMS, i18n.getFixedT("zh-CN"));
+    expect(searchSettings("界面语言", localized)[0]?.id).toBe("interface-language");
+    expect(searchSettings("Interface language", localized)[0]?.id).toBe("interface-language");
+    expect(searchSettings("中文", localized)[0]?.to).toBe("/settings/general");
+    expect(
+      searchSettings("常规", localizeSettingsSearchItems(ITEMS, i18n.getFixedT("zh-CN"))).map(
+        (item) => item.id,
+      ),
+    ).toContain("word-wrap");
   });
 
   it("matches normalized title substrings", () => {

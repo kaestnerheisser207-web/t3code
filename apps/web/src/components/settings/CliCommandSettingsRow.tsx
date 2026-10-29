@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useState } from "react";
 
 import {
@@ -12,6 +13,7 @@ import { SettingsRow } from "./settingsLayout";
 import { searchableSetting } from "./settingsSearch";
 
 export function CliCommandSettingsRow() {
+  const t = useTranslate();
   const bridge = getDesktopCliCommandBridge();
   const query = useEnvironmentQuery(bridge ? desktopCliCommandStateAtom : null);
   const state = query.data;
@@ -55,7 +57,9 @@ export function CliCommandSettingsRow() {
           disabled={pending || query.isPending}
           onClick={() => change(installed ? "uninstall" : "install")}
         >
-          {installed ? "Remove" : "Install"}
+          {installed
+            ? t("web.dynamic.CliCommandSettingsRow.remove")
+            : t("web.dynamic.CliCommandSettingsRow.install")}
         </Button>
       }
     />

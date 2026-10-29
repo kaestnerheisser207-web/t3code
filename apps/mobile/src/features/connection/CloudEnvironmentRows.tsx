@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { ConnectionTraceId } from "./ConnectionTraceId";
@@ -68,6 +69,7 @@ function ConnectedOnlyCloudEnvironmentRows(props: CloudEnvironmentRowsProps) {
 function CloudEnvironmentRowsContent(
   props: CloudEnvironmentRowsProps & { readonly discoveryAvailable?: boolean },
 ) {
+  const t = useTranslate();
   const controller = useConnectionController();
   const discoveryAvailable = props.discoveryAvailable ?? true;
   const availableCloudEnvironments = discoveryAvailable
@@ -137,13 +139,13 @@ function CloudEnvironmentRowsContent(
         <View collapsable={false} className="items-center gap-3 rounded-[24px] bg-grouped-card p-6">
           <AppActivityIndicator colorClassName={"accent-icon"} />
           <Text className="text-center text-sm leading-normal text-foreground-muted">
-            Loading linked cloud environments.
+            {t("mobile.connect.CloudEnvironmentRows.loading-linked-cloud-environments")}
           </Text>
         </View>
       ) : controller.relayDiscovery.error ? null : (
         <View collapsable={false} className="rounded-[24px] bg-grouped-card p-5">
           <Text className="text-sm leading-normal text-foreground-muted">
-            No additional linked cloud environments.
+            {t("mobile.connect.CloudEnvironmentRows.no-additional-linked-cloud-environments")}
           </Text>
         </View>
       )}
@@ -153,14 +155,14 @@ function CloudEnvironmentRowsContent(
       !controller.relayDiscovery.isRefreshing ? (
         <View collapsable={false} className="gap-3 rounded-[24px] bg-grouped-card p-5">
           <Text className="text-base font-t3-bold text-foreground">
-            Could not load T3 Connect environments
+            {t("mobile.connect.CloudEnvironmentRows.could-not-load-t3-connect-environments")}
           </Text>
           <Text className="text-sm text-foreground-muted">{controller.relayDiscovery.error}</Text>
           {controller.relayDiscovery.errorTraceId ? (
             <CopyTraceIdButton traceId={controller.relayDiscovery.errorTraceId} />
           ) : null}
           <Button
-            label="Try again"
+            label={t("mobile.connect.CloudEnvironmentRows.try-again")}
             tone="secondary"
             onPress={() => {
               void controller.refreshRelayEnvironments();
@@ -278,16 +280,20 @@ function CloudEnvironmentRowShell(props: {
   readonly statusText?: string;
   readonly value: boolean;
 }) {
+  const t = useTranslate();
   const isRetrying =
     props.connectionState === "connecting" || props.connectionState === "reconnecting";
   const shouldPulse = isRetrying;
   const statusText =
     props.statusText ??
-    environmentStatusText({
-      phase: props.connectionState,
-      error: props.connectionError,
-      traceId: props.connectionErrorTraceId,
-    });
+    environmentStatusText(
+      {
+        phase: props.connectionState,
+        error: props.connectionError,
+        traceId: props.connectionErrorTraceId,
+      },
+      t,
+    );
   const statusClassName =
     props.connectionError && props.connectionState !== "unsupported"
       ? "text-danger-foreground"
@@ -321,13 +327,19 @@ function CloudEnvironmentRowShell(props: {
     <View collapsable={false} className="flex-row items-center gap-3 bg-grouped-card px-4 py-3.5">
       <ContentContainer
         className="min-w-0 flex-1 gap-0.5"
-        accessibilityHint={props.onRemove ? "Long press to remove from this device" : undefined}
+        accessibilityHint={
+          props.onRemove
+            ? t("mobile.dynamic.CloudEnvironmentRows.long-press-to-remove-from-this-device")
+            : undefined
+        }
         accessibilityRole={props.onOpen ? "button" : undefined}
         accessibilityLabel={
           props.onOpen
-            ? `Manage ${props.label}`
+            ? t("mobile.dynamic.CloudEnvironmentRows.manage-param", { label: props.label })
             : props.onRemove
-              ? `Remove ${props.label} from this device`
+              ? t("mobile.dynamic.CloudEnvironmentRows.remove-param-from-this-device", {
+                  label: props.label,
+                })
               : undefined
         }
         onPress={props.onOpen}
@@ -394,7 +406,9 @@ function CloudEnvironmentRowShell(props: {
         </StatusContainer>
       </ContentContainer>
       <ThemedSwitch
-        accessibilityLabel={`Enable ${props.label}`}
+        accessibilityLabel={t("mobile.dynamic.CloudEnvironmentRows.enable-param", {
+          label: props.label,
+        })}
         style={{ alignSelf: "center" }}
         disabled={props.disabled}
         onValueChange={props.onValueChange}
@@ -405,12 +419,18 @@ function CloudEnvironmentRowShell(props: {
           accessibilityRole={props.onOpen ? "button" : undefined}
           accessibilityLabel={
             props.onOpen
-              ? `Manage ${props.label}`
+              ? t("mobile.dynamic.CloudEnvironmentRows.manage-param", { label: props.label })
               : props.onRemove
-                ? `Remove ${props.label} from this device`
+                ? t("mobile.dynamic.CloudEnvironmentRows.remove-param-from-this-device", {
+                    label: props.label,
+                  })
                 : undefined
           }
-          accessibilityHint={props.onRemove ? "Long press to remove from this device" : undefined}
+          accessibilityHint={
+            props.onRemove
+              ? t("mobile.dynamic.CloudEnvironmentRows.long-press-to-remove-from-this-device")
+              : undefined
+          }
           onPress={props.onOpen}
           onLongPress={props.onRemove}
           style={{
@@ -429,9 +449,10 @@ function CloudEnvironmentRowShell(props: {
 }
 
 function CopyTraceIdButton(props: { readonly traceId: string }) {
+  const t = useTranslate();
   return (
     <Button
-      label="Copy trace ID"
+      label={t("mobile.connect.CloudEnvironmentRows.copy-trace-id")}
       tone="secondary"
       onPress={() => {
         copyTextWithHaptic(props.traceId, { target: "connection-trace-id" });

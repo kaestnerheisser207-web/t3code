@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type {
   PullRequestActivity,
   PullRequestCheck,
@@ -43,92 +44,140 @@ const STATES = {
   { label: string; icon: AppSymbolName; tint: string; text: string; background: string }
 >;
 
-export function pullRequestStatus(pr: Pick<PullRequestListEntry, "state" | "isDraft">) {
-  return STATES[pr.isDraft && pr.state === "open" ? "draft" : pr.state];
+export function pullRequestStatus(
+  pr: Pick<PullRequestListEntry, "state" | "isDraft">,
+  t?: TFunction,
+) {
+  const key = pr.isDraft && pr.state === "open" ? "draft" : pr.state;
+  const presentation = STATES[key];
+  return t
+    ? { ...presentation, label: t(key === "draft" ? "pr.status.draft" : `pr.filters.${key}`) }
+    : presentation;
 }
 
-export function pullRequestConflict(pr: {
-  readonly state: PullRequestListEntry["state"];
-  readonly isDraft: boolean;
-  readonly mergeability?: PullRequestMergeability | undefined;
-  readonly baseBranch?: string | undefined;
-}) {
+export function pullRequestConflict(
+  pr: {
+    readonly state: PullRequestListEntry["state"];
+    readonly isDraft: boolean;
+    readonly mergeability?: PullRequestMergeability | undefined;
+    readonly baseBranch?: string | undefined;
+  },
+  t?: TFunction,
+) {
   if (pr.state !== "open" || pr.isDraft || pr.mergeability !== "conflicting") return null;
-  return { label: pr.baseBranch ? `Conflicts with ${pr.baseBranch}` : "Has conflicts" };
+  return {
+    label: pr.baseBranch
+      ? (t?.("pr.status.conflictsWith", { branch: pr.baseBranch }) ??
+        `Conflicts with ${pr.baseBranch}`)
+      : (t?.("pr.status.conflicts") ?? "Has conflicts"),
+  };
 }
 
-export function checkStatus(check: PullRequestCheck) {
+export function checkStatus(check: PullRequestCheck, t?: TFunction) {
   switch (check.status) {
     case "success":
       return {
-        label: "Passed",
+        label: t?.("pr.status.passed") ?? "Passed",
         icon: "checkmark.circle",
         tint: "accent-adaptive-emerald-600-400",
       } as const;
     case "failure":
       return {
-        label: "Failed",
+        label: t?.("pr.status.failed") ?? "Failed",
         icon: "exclamationmark.circle",
         tint: "accent-danger-foreground",
       } as const;
     case "action-required":
       return {
-        label: "Action required",
+        label: t?.("pr.status.actionRequired") ?? "Action required",
         icon: "exclamationmark.circle",
         tint: "accent-warning-foreground",
       } as const;
     case "pending":
-      return { label: "Pending", icon: "clock", tint: "accent-warning-foreground" } as const;
+      return {
+        label: t?.("pr.status.pending") ?? "Pending",
+        icon: "clock",
+        tint: "accent-warning-foreground",
+      } as const;
     case "cancelled":
-      return { label: "Cancelled", icon: "minus", tint: "accent-icon-muted" } as const;
+      return {
+        label: t?.("pr.status.cancelled") ?? "Cancelled",
+        icon: "minus",
+        tint: "accent-icon-muted",
+      } as const;
     case "skipped":
-      return { label: "Skipped", icon: "slash.circle", tint: "accent-icon-muted" } as const;
+      return {
+        label: t?.("pr.status.skipped") ?? "Skipped",
+        icon: "slash.circle",
+        tint: "accent-icon-muted",
+      } as const;
     case "neutral":
-      return { label: "Neutral", icon: "minus", tint: "accent-icon-muted" } as const;
+      return {
+        label: t?.("pr.status.neutral") ?? "Neutral",
+        icon: "minus",
+        tint: "accent-icon-muted",
+      } as const;
   }
 }
 
-export function pullRequestChecksSummary(pr: Pick<PullRequestDetail, "checks">) {
+export function pullRequestChecksSummary(pr: Pick<PullRequestDetail, "checks">, t?: TFunction) {
   const failed = pr.checks.filter((check) => check.status === "failure").length;
   const required = pr.checks.filter((check) => check.status === "action-required").length;
   const pending = pr.checks.filter((check) => check.status === "pending").length;
   const passed = pr.checks.filter((check) => check.status === "success").length;
-  const count = pr.checks.length ? `${passed} of ${pr.checks.length}` : undefined;
+  const count = pr.checks.length
+    ? (t?.("pr.status.fraction", { passed, total: pr.checks.length }) ??
+      `${passed} of ${pr.checks.length}`)
+    : undefined;
   if (failed)
     return {
-      label: `${failed} ${failed === 1 ? "check" : "checks"} failing`,
-      title: `${failed} ${failed === 1 ? "check" : "checks"} failing`,
+      label:
+        t?.("pr.status.failing", { count: failed }) ??
+        `${failed} ${failed === 1 ? "check" : "checks"} failing`,
+      title:
+        t?.("pr.status.failing", { count: failed }) ??
+        `${failed} ${failed === 1 ? "check" : "checks"} failing`,
       count,
       icon: "exclamationmark.circle",
       tint: "accent-danger-foreground",
     } as const;
   if (required)
     return {
-      label: `${required} need attention`,
-      title: "Checks need attention",
-      count: `${required} awaiting action`,
+      label: t?.("pr.status.attention", { count: required }) ?? `${required} need attention`,
+      title: t?.("pr.status.checksAttention") ?? "Checks need attention",
+      count: t?.("pr.status.awaitingAction", { count: required }) ?? `${required} awaiting action`,
       icon: "exclamationmark.circle",
       tint: "accent-warning-foreground",
     } as const;
   if (pending)
     return {
-      label: `${pending} pending`,
-      title: "Checks running",
-      count: `${pending} pending`,
+      label: t?.("pr.status.pendingCount", { count: pending }) ?? `${pending} pending`,
+      title: t?.("pr.status.running") ?? "Checks running",
+      count: t?.("pr.status.pendingCount", { count: pending }) ?? `${pending} pending`,
       icon: "clock",
       tint: "accent-warning-foreground",
     } as const;
   if (passed)
     return {
-      label: `${passed} of ${pr.checks.length} passed`,
-      title: passed === pr.checks.length ? "All checks passed" : "Checks completed",
+      label:
+        t?.("pr.status.passedCount", { passed, total: pr.checks.length }) ??
+        `${passed} of ${pr.checks.length} passed`,
+      title:
+        passed === pr.checks.length
+          ? (t?.("pr.status.allPassed") ?? "All checks passed")
+          : (t?.("pr.status.completed") ?? "Checks completed"),
       count,
       icon: "checkmark.circle",
       tint: "accent-adaptive-emerald-600-400",
     } as const;
   return {
-    label: pr.checks.length ? `${pr.checks.length} completed` : "No checks reported",
-    title: pr.checks.length ? "Checks completed" : "No checks reported",
+    label: pr.checks.length
+      ? (t?.("pr.status.completedCount", { count: pr.checks.length }) ??
+        `${pr.checks.length} completed`)
+      : (t?.("pr.status.noChecks") ?? "No checks reported"),
+    title: pr.checks.length
+      ? (t?.("pr.status.completed") ?? "Checks completed")
+      : (t?.("pr.status.noChecks") ?? "No checks reported"),
     count,
     icon: "minus",
     tint: "accent-icon-muted",
@@ -138,6 +187,7 @@ export function pullRequestChecksSummary(pr: Pick<PullRequestDetail, "checks">) 
 export function pullRequestReviewSummary(
   pr: Pick<PullRequestDetail, "reviewers">,
   activity: Pick<PullRequestActivity, "comments" | "commits"> | null,
+  t?: TFunction,
 ) {
   const latest = new Map<string, PullRequestActivity["comments"][number]>();
   const comments = new Map<string, PullRequestActivity["comments"][number]>();
@@ -170,8 +220,10 @@ export function pullRequestReviewSummary(
   );
   if (requested.length)
     return {
-      title: "Changes requested",
-      count: `${requested.length} ${requested.length === 1 ? "reviewer" : "reviewers"}`,
+      title: t?.("pr.filters.changesRequested") ?? "Changes requested",
+      count:
+        t?.("pr.status.reviewers", { count: requested.length }) ??
+        `${requested.length} ${requested.length === 1 ? "reviewer" : "reviewers"}`,
       icon: "xmark.circle.fill",
       tint: "accent-danger-foreground",
       reviews,
@@ -180,9 +232,11 @@ export function pullRequestReviewSummary(
     return {
       title:
         approved.length === 1 && approved[0]?.author
-          ? `Approved by ${approved[0].author.login}`
-          : "Reviews approved",
-      count: `${approved.length} approved`,
+          ? (t?.("pr.status.approvedBy", { login: approved[0].author.login }) ??
+            `Approved by ${approved[0].author.login}`)
+          : (t?.("pr.status.reviewsApproved") ?? "Reviews approved"),
+      count:
+        t?.("pr.status.approvedCount", { count: approved.length }) ?? `${approved.length} approved`,
       icon: "checkmark.circle",
       tint: "accent-adaptive-emerald-600-400",
       reviews,
@@ -190,15 +244,22 @@ export function pullRequestReviewSummary(
   const commented = reviews.filter((review) => review.reviewState === "COMMENTED");
   if (commented.length && !pr.reviewers.length)
     return {
-      title: "Reviews",
-      count: `${commented.length} commented`,
+      title: t?.("pr.filters.reviews") ?? "Reviews",
+      count:
+        t?.("pr.status.commentedCount", { count: commented.length }) ??
+        `${commented.length} commented`,
       icon: "bubble.left",
       tint: "accent-icon-muted",
       reviews,
     } as const;
   return {
-    title: pr.reviewers.length ? "Awaiting review" : "Request a review",
-    count: pr.reviewers.length ? `${pr.reviewers.length} requested` : "None assigned",
+    title: pr.reviewers.length
+      ? (t?.("pr.status.awaitingReview") ?? "Awaiting review")
+      : (t?.("pr.status.requestReview") ?? "Request a review"),
+    count: pr.reviewers.length
+      ? (t?.("pr.status.requestedCount", { count: pr.reviewers.length }) ??
+        `${pr.reviewers.length} requested`)
+      : (t?.("pr.status.noneAssigned") ?? "None assigned"),
     icon: "person.2",
     tint: "accent-icon-muted",
     reviews,
@@ -207,11 +268,19 @@ export function pullRequestReviewSummary(
 
 export function pullRequestBranchSummary(
   pr: Pick<PullRequestDetail, "mergeability" | "baseComparison" | "behindBy" | "baseBranch">,
+  t?: TFunction,
 ) {
-  if (pr.mergeability === "conflicting") return "Has conflicts";
-  if (pr.baseComparison === "behind") return `${pr.behindBy ?? ""} behind ${pr.baseBranch}`.trim();
-  if (pr.baseComparison === "up-to-date") return "Up to date";
-  return pr.mergeability === "mergeable" ? "No conflicts" : "Not reported";
+  if (pr.mergeability === "conflicting") return t?.("pr.status.conflicts") ?? "Has conflicts";
+  if (pr.baseComparison === "behind")
+    return t
+      ? pr.behindBy == null
+        ? t("pr.status.behindUnknown", { branch: pr.baseBranch })
+        : t("pr.status.behind", { count: pr.behindBy, branch: pr.baseBranch })
+      : `${pr.behindBy ?? ""} behind ${pr.baseBranch}`.trim();
+  if (pr.baseComparison === "up-to-date") return t?.("pr.status.upToDate") ?? "Up to date";
+  return pr.mergeability === "mergeable"
+    ? (t?.("pr.status.noConflicts") ?? "No conflicts")
+    : (t?.("pr.status.notReported") ?? "Not reported");
 }
 
 export function pullRequestChecksStatus(state: PullRequestChecksState) {

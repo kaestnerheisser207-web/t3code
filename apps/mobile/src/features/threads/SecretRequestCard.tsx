@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { pipe } from "effect/Function";
 import {
   SECRET_REQUEST_DEFAULT_PLACEHOLDER,
@@ -62,6 +63,7 @@ function PendingSecretRequestForm(props: {
   readonly item: SecretRequestItem;
   readonly iconColor: ColorValue;
 }) {
+  const t = useTranslate();
   const { item } = props;
   const answer = useAtomCommand(serverEnvironment.answerSecretRequest, {
     label: "answer secret request",
@@ -130,7 +132,7 @@ function PendingSecretRequestForm(props: {
         </Text>
       ) : null}
       <Button
-        label="Save securely"
+        label={t("mobile.threads.SecretRequestCard.save-securely")}
         tone="primary"
         fullWidth
         disabled={submitting || secret.trim().length === 0}
@@ -149,7 +151,7 @@ function PendingSecretRequestForm(props: {
           </Text>
         </View>
         <Button
-          label="Decline"
+          label={t("mobile.threads.SecretRequestCard.decline")}
           tone="text"
           disabled={submitting}
           onPress={() => void send({ type: "decline" })}

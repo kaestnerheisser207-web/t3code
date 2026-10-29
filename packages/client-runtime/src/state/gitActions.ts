@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { sourceControlTerm } from "../i18n/sourceControlTerm.ts";
 import type {
   GitRunStackedActionInput,
   GitStackedAction,
@@ -53,6 +55,7 @@ export function buildMenuItems(
   gitStatus: VcsStatusResult | null,
   isBusy: boolean,
   hasOriginRemote = true,
+  t?: TFunction,
 ): GitActionMenuItem[] {
   if (!gitStatus) return [];
   const terminology = changeRequestTerminologyFor(gitStatus);
@@ -82,7 +85,7 @@ export function buildMenuItems(
   return [
     {
       id: "commit",
-      label: "Commit",
+      label: t?.("git.labels.commit") ?? "Commit",
       disabled: !canCommit,
       icon: "commit",
       kind: "open_dialog",
@@ -90,7 +93,7 @@ export function buildMenuItems(
     },
     {
       id: "push",
-      label: "Push",
+      label: t?.("git.labels.push") ?? "Push",
       disabled: !canPush,
       icon: "push",
       kind: "open_dialog",
@@ -99,14 +102,18 @@ export function buildMenuItems(
     hasOpenPr
       ? {
           id: "pr",
-          label: `View ${terminology.shortLabel}`,
+          label:
+            t?.("git.shared.view", { shortLabel: terminology.shortLabel }) ??
+            `View ${terminology.shortLabel}`,
           disabled: !canOpenPr,
           icon: "pr",
           kind: "open_pr",
         }
       : {
           id: "pr",
-          label: `Create ${terminology.shortLabel}`,
+          label:
+            t?.("git.labels.create", { shortLabel: terminology.shortLabel }) ??
+            `Create ${terminology.shortLabel}`,
           disabled: !canCreatePr,
           icon: "pr",
           kind: "open_dialog",
@@ -120,17 +127,23 @@ export function resolveQuickAction(
   isBusy: boolean,
   isDefaultBranch = false,
   hasOriginRemote = true,
+  t?: TFunction,
 ): GitQuickAction {
   if (isBusy) {
-    return { label: "Commit", disabled: true, kind: "show_hint", hint: "Git action in progress." };
+    return {
+      label: t?.("git.labels.commit") ?? "Commit",
+      disabled: true,
+      kind: "show_hint",
+      hint: t?.("git.unavailable.busy") ?? "Git action in progress.",
+    };
   }
 
   if (!gitStatus) {
     return {
-      label: "Commit",
+      label: t?.("git.labels.commit") ?? "Commit",
       disabled: true,
       kind: "show_hint",
-      hint: "Git status is unavailable.",
+      hint: t?.("git.unavailable.status") ?? "Git status is unavailable.",
     };
   }
 
@@ -144,22 +157,38 @@ export function resolveQuickAction(
 
   if (!hasBranch) {
     return {
-      label: "Commit",
+      label: t?.("git.labels.commit") ?? "Commit",
       disabled: true,
       kind: "show_hint",
-      hint: `Create and checkout a branch before pushing or opening ${terminology.shortLabelWithArticle}.`,
+      hint:
+        t?.("git.shared.branchBeforeRequest", {
+          request: sourceControlTerm(t, terminology.shortLabelWithArticle),
+        }) ??
+        `Create and checkout a branch before pushing or opening ${terminology.shortLabelWithArticle}.`,
     };
   }
 
   if (hasChanges) {
     if (!gitStatus.hasUpstream && !hasOriginRemote) {
-      return { label: "Commit", disabled: false, kind: "run_action", action: "commit" };
+      return {
+        label: t?.("git.labels.commit") ?? "Commit",
+        disabled: false,
+        kind: "run_action",
+        action: "commit",
+      };
     }
     if (hasOpenPr || isDefaultBranch) {
-      return { label: "Commit & push", disabled: false, kind: "run_action", action: "commit_push" };
+      return {
+        label: t?.("git.labels.commitPush") ?? "Commit & push",
+        disabled: false,
+        kind: "run_action",
+        action: "commit_push",
+      };
     }
     return {
-      label: `Commit, push & ${terminology.shortLabel}`,
+      label:
+        t?.("git.shared.commitPushRequest", { shortLabel: terminology.shortLabel }) ??
+        `Commit, push & ${terminology.shortLabel}`,
       disabled: false,
       kind: "run_action",
       action: "commit_push_pr",
@@ -169,36 +198,54 @@ export function resolveQuickAction(
   if (!gitStatus.hasUpstream) {
     if (!hasOriginRemote) {
       if (hasOpenPr && !isAhead) {
-        return { label: `View ${terminology.shortLabel}`, disabled: false, kind: "open_pr" };
+        return {
+          label:
+            t?.("git.shared.view", { shortLabel: terminology.shortLabel }) ??
+            `View ${terminology.shortLabel}`,
+          disabled: false,
+          kind: "open_pr",
+        };
       }
       return {
-        label: "Push",
+        label: t?.("git.labels.push") ?? "Push",
         disabled: true,
         kind: "show_hint",
-        hint: `Add an "origin" remote before pushing or creating ${terminology.shortLabelWithArticle}.`,
+        hint:
+          t?.("git.shared.remoteBeforeRequest", {
+            request: sourceControlTerm(t, terminology.shortLabelWithArticle),
+          }) ??
+          `Add an "origin" remote before pushing or creating ${terminology.shortLabelWithArticle}.`,
       };
     }
     if (!isAhead) {
       if (hasOpenPr) {
-        return { label: `View ${terminology.shortLabel}`, disabled: false, kind: "open_pr" };
+        return {
+          label:
+            t?.("git.shared.view", { shortLabel: terminology.shortLabel }) ??
+            `View ${terminology.shortLabel}`,
+          disabled: false,
+          kind: "open_pr",
+        };
       }
       return {
-        label: "Push",
+        label: t?.("git.labels.push") ?? "Push",
         disabled: true,
         kind: "show_hint",
-        hint: "No local commits to push.",
+        hint: t?.("git.unavailable.noCommitsPush") ?? "No local commits to push.",
       };
     }
     if (hasOpenPr || isDefaultBranch) {
       return {
-        label: "Push",
+        label: t?.("git.labels.push") ?? "Push",
         disabled: false,
         kind: "run_action",
         action: isDefaultBranch ? "commit_push" : "push",
       };
     }
     return {
-      label: `Push & create ${terminology.shortLabel}`,
+      label:
+        t?.("git.labels.pushCreate", { shortLabel: terminology.shortLabel }) ??
+        `Push & create ${terminology.shortLabel}`,
       disabled: false,
       kind: "run_action",
       action: "create_pr",
@@ -207,16 +254,16 @@ export function resolveQuickAction(
 
   if (isDiverged) {
     return {
-      label: "Sync branch",
+      label: t?.("git.shared.sync") ?? "Sync branch",
       disabled: true,
       kind: "show_hint",
-      hint: "Branch has diverged from upstream. Rebase/merge first.",
+      hint: t?.("git.labels.diverged") ?? "Branch has diverged from upstream. Rebase/merge first.",
     };
   }
 
   if (isBehind) {
     return {
-      label: "Pull",
+      label: t?.("git.labels.pull") ?? "Pull",
       disabled: false,
       kind: "run_pull",
     };
@@ -225,14 +272,16 @@ export function resolveQuickAction(
   if (isAhead) {
     if (hasOpenPr || isDefaultBranch) {
       return {
-        label: "Push",
+        label: t?.("git.labels.push") ?? "Push",
         disabled: false,
         kind: "run_action",
         action: isDefaultBranch ? "commit_push" : "push",
       };
     }
     return {
-      label: `Push & create ${terminology.shortLabel}`,
+      label:
+        t?.("git.labels.pushCreate", { shortLabel: terminology.shortLabel }) ??
+        `Push & create ${terminology.shortLabel}`,
       disabled: false,
       kind: "run_action",
       action: "create_pr",
@@ -240,27 +289,36 @@ export function resolveQuickAction(
   }
 
   if (hasOpenPr && gitStatus.hasUpstream) {
-    return { label: `View ${terminology.shortLabel}`, disabled: false, kind: "open_pr" };
+    return {
+      label:
+        t?.("git.shared.view", { shortLabel: terminology.shortLabel }) ??
+        `View ${terminology.shortLabel}`,
+      disabled: false,
+      kind: "open_pr",
+    };
   }
 
   return {
-    label: "Commit",
+    label: t?.("git.labels.commit") ?? "Commit",
     disabled: true,
     kind: "show_hint",
-    hint: "Branch is up to date. No action needed.",
+    hint: t?.("git.labels.upToDate") ?? "Branch is up to date. No action needed.",
   };
 }
 
-export function getGitActionDisabledReason(input: {
-  item: GitActionMenuItem;
-  gitStatus: VcsStatusResult | null;
-  isBusy: boolean;
-  hasOriginRemote: boolean;
-}): string | null {
+export function getGitActionDisabledReason(
+  input: {
+    item: GitActionMenuItem;
+    gitStatus: VcsStatusResult | null;
+    isBusy: boolean;
+    hasOriginRemote: boolean;
+  },
+  t?: TFunction,
+): string | null {
   const { item, gitStatus, isBusy, hasOriginRemote } = input;
   if (!item.disabled) return null;
-  if (isBusy) return "Git action in progress.";
-  if (!gitStatus) return "Git status is unavailable.";
+  if (isBusy) return t?.("git.unavailable.busy") ?? "Git action in progress.";
+  if (!gitStatus) return t?.("git.unavailable.status") ?? "Git status is unavailable.";
 
   const hasBranch = gitStatus.refName !== null;
   const hasChanges = gitStatus.hasWorkingTreeChanges;
@@ -271,46 +329,74 @@ export function getGitActionDisabledReason(input: {
 
   if (item.id === "commit") {
     if (!hasChanges) {
-      return "Worktree is clean. Make changes before committing.";
+      return t?.("git.unavailable.clean") ?? "Worktree is clean. Make changes before committing.";
     }
-    return "Commit is currently unavailable.";
+    return t?.("git.unavailable.commit") ?? "Commit is currently unavailable.";
   }
 
   if (item.id === "push") {
     if (!hasBranch) {
-      return "Detached HEAD: checkout a branch before pushing.";
+      return (
+        t?.("git.unavailable.detachedPush") ?? "Detached HEAD: checkout a branch before pushing."
+      );
     }
     if (hasChanges) {
-      return "Commit or stash local changes before pushing.";
+      return t?.("git.unavailable.changesPush") ?? "Commit or stash local changes before pushing.";
     }
     if (isBehind) {
-      return "Branch is behind upstream. Pull/rebase before pushing.";
+      return (
+        t?.("git.unavailable.behindPush") ??
+        "Branch is behind upstream. Pull/rebase before pushing."
+      );
     }
     if (!gitStatus.hasUpstream && !hasOriginRemote) {
-      return 'Add an "origin" remote before pushing.';
+      return t?.("git.unavailable.remotePush") ?? 'Add an "origin" remote before pushing.';
     }
     if (!isAhead) {
-      return "No local commits to push.";
+      return t?.("git.unavailable.noCommitsPush") ?? "No local commits to push.";
     }
-    return "Push is currently unavailable.";
+    return t?.("git.unavailable.push") ?? "Push is currently unavailable.";
   }
 
   if (hasOpenPr) {
-    return `View ${terminology.shortLabel} is currently unavailable.`;
+    return (
+      t?.("git.shared.viewUnavailable", { shortLabel: terminology.shortLabel }) ??
+      `View ${terminology.shortLabel} is currently unavailable.`
+    );
   }
   if (!hasBranch) {
-    return `Detached HEAD: checkout a branch before creating ${terminology.shortLabelWithArticle}.`;
+    return (
+      t?.("git.shared.detachedRequest", {
+        request: sourceControlTerm(t, terminology.shortLabelWithArticle),
+      }) ?? `Detached HEAD: checkout a branch before creating ${terminology.shortLabelWithArticle}.`
+    );
   }
   if (!gitStatus.hasUpstream && !hasOriginRemote) {
-    return `Add an "origin" remote before creating ${terminology.shortLabelWithArticle}.`;
+    return (
+      t?.("git.shared.remoteRequest", {
+        request: sourceControlTerm(t, terminology.shortLabelWithArticle),
+      }) ?? `Add an "origin" remote before creating ${terminology.shortLabelWithArticle}.`
+    );
   }
   if ((gitStatus.aheadOfDefaultCount ?? gitStatus.aheadCount) <= 0) {
-    return `No local commits to include in ${terminology.shortLabelWithArticle}.`;
+    return (
+      t?.("git.shared.emptyRequest", {
+        request: sourceControlTerm(t, terminology.shortLabelWithArticle),
+      }) ?? `No local commits to include in ${terminology.shortLabelWithArticle}.`
+    );
   }
   if (isBehind) {
-    return `Branch is behind upstream. Pull/rebase before creating ${terminology.shortLabelWithArticle}.`;
+    return (
+      t?.("git.shared.behindRequest", {
+        request: sourceControlTerm(t, terminology.shortLabelWithArticle),
+      }) ??
+      `Branch is behind upstream. Pull/rebase before creating ${terminology.shortLabelWithArticle}.`
+    );
   }
-  return `Create ${terminology.shortLabel} is currently unavailable.`;
+  return (
+    t?.("git.shared.createUnavailable", { shortLabel: terminology.shortLabel }) ??
+    `Create ${terminology.shortLabel} is currently unavailable.`
+  );
 }
 
 export function requiresDefaultBranchConfirmation(
@@ -326,14 +412,57 @@ export function requiresDefaultBranchConfirmation(
   );
 }
 
-export function resolveDefaultBranchActionDialogCopy(input: {
-  action: DefaultBranchConfirmableAction;
-  branchName: string;
-  includesCommit: boolean;
-  terminology: ChangeRequestTerminology;
-}): DefaultBranchActionDialogCopy {
+export function resolveDefaultBranchActionDialogCopy(
+  input: {
+    action: DefaultBranchConfirmableAction;
+    branchName: string;
+    includesCommit: boolean;
+    terminology: ChangeRequestTerminology;
+  },
+  t?: TFunction,
+): DefaultBranchActionDialogCopy {
   const branchLabel = input.branchName;
   const { shortLabel, shortLabelWithArticle } = input.terminology;
+  if (t) {
+    const values = {
+      branch: branchLabel,
+      shortLabel,
+      request: sourceControlTerm(t, shortLabelWithArticle),
+    };
+    const pushOnly = input.action === "push" || input.action === "commit_push";
+    return {
+      title: t(
+        pushOnly
+          ? input.includesCommit
+            ? "git.shared.defaultCommitPushTitle"
+            : "git.shared.defaultPushTitle"
+          : input.includesCommit
+            ? "git.shared.defaultCommitCreateTitle"
+            : "git.shared.defaultPushCreateTitle",
+        values,
+      ),
+      description: t(
+        pushOnly
+          ? input.includesCommit
+            ? "git.shared.defaultCommitPushDescription"
+            : "git.shared.defaultPushDescription"
+          : input.includesCommit
+            ? "git.shared.defaultCommitCreateDescription"
+            : "git.shared.defaultPushCreateDescription",
+        values,
+      ),
+      continueLabel: t(
+        pushOnly
+          ? input.includesCommit
+            ? "git.shared.commitPushTo"
+            : "git.shared.pushTo"
+          : input.includesCommit
+            ? "git.shared.commitCreate"
+            : "git.labels.pushCreate",
+        values,
+      ),
+    };
+  }
   const suffix = ` on "${branchLabel}". You can continue on this branch or create a feature branch and run the same action there.`;
 
   if (input.action === "push" || input.action === "commit_push") {

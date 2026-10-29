@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { DevicePlatform, EnvironmentId } from "@t3tools/contracts";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult, Atom } from "effect/reactivity";
@@ -94,6 +95,7 @@ export function DeviceStreamView(props: {
   /** Lets a parent read this view's own stream state, such as its screen size. */
   readonly viewId?: string;
 }) {
+  const t = useTranslate();
   const model = deviceModel(props.platform, props.deviceName ?? "");
   const isDuo = model?.id === "iphone-duo";
   const [presentation, setPresentation] = useState<"phone" | "flat">("phone");
@@ -304,7 +306,9 @@ export function DeviceStreamView(props: {
         )}
         tabIndex={0}
         role="application"
-        aria-label={`${props.platform === "ios" ? "iOS Simulator" : "Android Emulator"} screen`}
+        aria-label={t("web.dynamic.DeviceStreamView.param-screen", {
+          value: props.platform === "ios" ? "iOS Simulator" : "Android Emulator",
+        })}
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget) return;
           if (event.metaKey && !["r", "R"].includes(event.key)) return;
@@ -432,7 +436,7 @@ export function DeviceStreamView(props: {
               size="xs"
               aria-pressed={!!showPhone}
               disabled={!!phoneUnavailableReason}
-              title={phoneUnavailableReason ?? "Show 3D phone"}
+              title={phoneUnavailableReason ?? t("web.dynamic.DeviceStreamView.show-3d-phone")}
               onClick={() => setPresentation("phone")}
             >
               3D
@@ -443,14 +447,16 @@ export function DeviceStreamView(props: {
               aria-pressed={!showPhone}
               onClick={() => setPresentation("flat")}
             >
-              Flat
+              {t("web.ui.DeviceStreamView.flat")}
             </Button>
           </div>
         ) : null}
         {status === "streaming" && !inputState.connected ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-2">
             <span className="rounded-md bg-background/85 px-2 py-1 text-xs text-muted-foreground">
-              Input disconnected{inputState.detail ? ` (${inputState.detail})` : ""}, reconnecting…
+              {inputState.detail
+                ? t("ui.finish.inputDisconnectedReason", { reason: inputState.detail })
+                : t("ui.finish.inputDisconnected")}
             </span>
           </div>
         ) : null}
@@ -458,7 +464,7 @@ export function DeviceStreamView(props: {
           // Shown only once the device has been silent for two seconds.
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-2 transition-opacity delay-2000 duration-0 starting:opacity-0">
             <span className="rounded-md bg-background/85 px-2 py-1 text-xs text-muted-foreground">
-              Waiting for device video…
+              {t("web.ui.DeviceStreamView.waiting-for-device-video")}
             </span>
           </div>
         ) : null}
@@ -481,7 +487,7 @@ export function DeviceStreamView(props: {
                     session?.reconnect();
                   }}
                 >
-                  Reconnect
+                  {t("web.ui.DeviceStreamView.reconnect")}
                 </Button>
               ) : null}
             </DeviceLoadingView>

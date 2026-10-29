@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import { AuthSettingsWriteScope, type ServerSettingsPatch } from "@t3tools/contracts";
 import { useEnvironmentsWithScope } from "../../state/session";
@@ -23,10 +24,11 @@ import { useSettingsEnvironmentFilter } from "./settings-environment-filter";
 import { resolveMobileSettingsTargets, uniformMobileSetting } from "./settings-scoped-server";
 
 export function SettingsLabsRouteScreen() {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
 
   return (
-    <SettingsScreen title="Labs">
+    <SettingsScreen title={t("mobile.settings.ThreadSettingsSections.labs")}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
@@ -51,6 +53,7 @@ export function AutoSettleSettingsRows(props: {
   readonly write: (patch: ServerSettingsPatch) => void;
   readonly pending: boolean;
 }) {
+  const t = useTranslate();
   const { selectedTargets, projectGroups, selectedProjectKey } = useSettingsEnvironmentFilter();
   const selectedProject = projectGroups.find((group) => group.key === selectedProjectKey);
   const writableEnvironments = useEnvironmentsWithScope(selectedTargets, AuthSettingsWriteScope);
@@ -103,34 +106,34 @@ export function AutoSettleSettingsRows(props: {
   return (
     <View className="gap-6">
       {!projectSelected ? (
-        <SettingsSection title="Usage limits">
+        <SettingsSection title={t("mobile.settings.ThreadSettingsSections.usage-limits")}>
           <SettingsSwitchRow
             icon="clock"
-            label="Resume after usage limits"
+            label={t("mobile.settings.ThreadSettingsSections.resume-after-usage-limits")}
             value={uniformMobileSetting(displayTargets, "autoResumeLimitedThreads")}
             disabled={disabled}
             onValueChange={(value) => writeToAll({ autoResumeLimitedThreads: value })}
           />
           <SettingsSwitchRow
             icon="clock"
-            label="Snooze until limits reset"
+            label={t("mobile.settings.ThreadSettingsSections.snooze-until-limits-reset")}
             value={uniformMobileSetting(displayTargets, "snoozeLimitedThreads")}
             disabled={disabled}
             onValueChange={(value) => writeToAll({ snoozeLimitedThreads: value })}
           />
         </SettingsSection>
       ) : null}
-      <SettingsSection title="Auto-settle">
+      <SettingsSection title={t("mobile.settings.ThreadSettingsSections.auto-settle")}>
         <SettingsSwitchRow
           icon="arrow.triangle.branch"
-          label="Auto-settle merged threads"
+          label={t("mobile.settings.ThreadSettingsSections.auto-settle-merged-threads")}
           value={referenceSettings.sidebarAutoSettleOnMerge}
           disabled={disabled}
           onValueChange={(value) => writeToAll({ sidebarAutoSettleOnMerge: value })}
         />
         <SettingsSwitchRow
           icon="clock"
-          label="Auto-settle inactive threads"
+          label={t("mobile.settings.ThreadSettingsSections.auto-settle-inactive-threads")}
           value={afterDays !== null}
           disabled={disabled}
           onValueChange={(value) =>
@@ -140,7 +143,9 @@ export function AutoSettleSettingsRows(props: {
         {afterDays !== null ? (
           <View className="flex-row items-center gap-4 px-4 py-4 android:min-h-14 android:py-3">
             <View className="w-[22px] android:w-6" />
-            <Text className="flex-1 text-foreground text-lg android:text-base">Inactive days</Text>
+            <Text className="flex-1 text-foreground text-lg android:text-base">
+              {t("mobile.settings.ThreadSettingsSections.inactive-days")}
+            </Text>
             <AutoSettleDaysField
               value={afterDays}
               disabled={disabled}
@@ -150,14 +155,16 @@ export function AutoSettleSettingsRows(props: {
         ) : null}
       </SettingsSection>
       {!props.pending && mismatches.length > 0 ? (
-        <SettingsSection title="Across environments">
+        <SettingsSection title={t("mobile.settings.ThreadSettingsSections.across-environments")}>
           <View className="gap-3 p-4">
-            <Text className="text-base text-foreground">Auto-settle defaults differ</Text>
+            <Text className="text-base text-foreground">
+              {t("mobile.settings.ThreadSettingsSections.auto-settle-defaults-differ")}
+            </Text>
             <Text className="text-sm text-foreground-muted">
               {mismatches.map((mismatch) => mismatch.label).join(", ")}
             </Text>
             <Button
-              label="Apply auto-settle defaults"
+              label={t("mobile.settings.ThreadSettingsSections.apply-auto-settle-defaults")}
               tone="secondary"
               disabled={disabled}
               onPress={() => writeToAll(autoSettlePatch)}
@@ -170,6 +177,7 @@ export function AutoSettleSettingsRows(props: {
 }
 
 export function WorkingSectionSettings() {
+  const t = useTranslate();
   const savePreferences = useAtomSet(updateMobilePreferencesAtom);
   const preferences = useAtomValue(mobilePreferencesAtom);
   const workingShelfEnabled =
@@ -177,35 +185,38 @@ export function WorkingSectionSettings() {
 
   return (
     <View className="gap-3">
-      <SettingsSection title="Sidebar">
+      <SettingsSection title={t("mobile.settings.ThreadSettingsSections.sidebar")}>
         <SettingsSwitchRow
           icon="bolt.circle"
-          label="Working section"
+          label={t("mobile.settings.ThreadSettingsSections.working-section")}
           value={workingShelfEnabled}
           onValueChange={(value) => savePreferences({ workingShelfEnabled: value })}
         />
       </SettingsSection>
       <Text className="px-2 text-sm text-foreground-muted">
-        Fold working and monitoring threads into a Working section. They return to the top of the
-        list when they need you. While this is on, active threads are ordered by time and cannot be
-        moved.
+        {t(
+          "mobile.settings.ThreadSettingsSections.fold-working-and-monitoring-threads-into-a-working-section-they-return-to-the-top-of-the-list-when-they-need-you-while-this-is-on-active-threads-are-ordered-by-time-and-cannot-be-moved",
+        )}
       </Text>
     </View>
   );
 }
 
 export function NewThreadSettingsSection() {
+  const t = useTranslate();
   const savePreferences = useAtomSet(updateMobilePreferencesAtom);
   const preferences = useAtomValue(mobilePreferencesAtom);
   const useLastProject =
     AsyncResult.isSuccess(preferences) && preferences.value.useLastProjectForNewThreads !== false;
 
   return (
-    <SettingsSection title="New threads">
+    <SettingsSection title={t("mobile.settings.ThreadSettingsSections.new-threads")}>
       <SettingsSwitchRow
         icon="square.and.pencil"
-        label="Use last project"
-        subtitle="Start new threads in the last project you used on this device."
+        label={t("mobile.settings.ThreadSettingsSections.use-last-project")}
+        subtitle={t(
+          "mobile.settings.ThreadSettingsSections.start-new-threads-in-the-last-project-you-used-on-this-device",
+        )}
         value={useLastProject}
         onValueChange={(value) => savePreferences({ useLastProjectForNewThreads: value })}
       />
@@ -215,6 +226,7 @@ export function NewThreadSettingsSection() {
 
 /** Per machine, since each machine's own setting decides whether it links and answers links. */
 function BetaSettingsSection() {
+  const t = useTranslate();
   const { environments } = useEnvironments();
   const supported = environments.filter(
     (environment) =>
@@ -229,7 +241,7 @@ function BetaSettingsSection() {
   if (supported.length === 0) return null;
   return (
     <View className="gap-3">
-      <SettingsSection title="Beta: Linked environments">
+      <SettingsSection title={t("mobile.settings.ThreadSettingsSections.beta-linked-environments")}>
         {supported.map((environment) => (
           <SettingsSwitchRow
             key={environment.environmentId}
@@ -247,14 +259,16 @@ function BetaSettingsSection() {
         ))}
       </SettingsSection>
       <Text className="px-2 text-sm text-foreground-muted">
-        Let agents on a machine work on your other machines, and theirs on it. Turn it on for each
-        machine. While it is off, nothing new starts over a link; tasks already running finish.
+        {t(
+          "mobile.settings.ThreadSettingsSections.let-agents-on-a-machine-work-on-your-other-machines-and-theirs-on-it-turn-it-on-for-each-machine-while-it-is-off-nothing-new-starts-over-a-link-tasks-already-running-finish",
+        )}
       </Text>
     </View>
   );
 }
 
 function LegacySettingsSection() {
+  const t = useTranslate();
   const savePreferences = useAtomSet(updateMobilePreferencesAtom);
   const preferences = useAtomValue(mobilePreferencesAtom);
   const planModeEnabled =
@@ -262,17 +276,18 @@ function LegacySettingsSection() {
 
   return (
     <View className="gap-3">
-      <SettingsSection title="Legacy">
+      <SettingsSection title={t("mobile.settings.ThreadSettingsSections.legacy")}>
         <SettingsSwitchRow
           icon="hammer"
-          label="Plan Mode"
+          label={t("mobile.settings.ThreadSettingsSections.plan-mode")}
           value={planModeEnabled}
           onValueChange={(value) => savePreferences({ planModeEnabled: value })}
         />
       </SettingsSection>
       <Text className="px-2 text-sm text-foreground-muted">
-        Opt into retired interfaces kept for compatibility. Plan Mode restores the Build/Plan
-        control; otherwise every task runs in Build mode.
+        {t(
+          "mobile.settings.ThreadSettingsSections.opt-into-retired-interfaces-kept-for-compatibility-plan-mode-restores-the-build-plan-control-otherwise-every-task-runs-in-build-mode",
+        )}
       </Text>
     </View>
   );

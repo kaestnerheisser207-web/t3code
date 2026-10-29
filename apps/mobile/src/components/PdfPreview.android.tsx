@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { useAtomRefresh, useAtomValue } from "@effect/atom-react";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
@@ -40,6 +41,7 @@ const preparedPdfAtom = Atom.family((uri: string) =>
 );
 
 export function PdfPreview(props: { readonly uri: string }) {
+  const t = useTranslate();
   const atom = preparedPdfAtom(props.uri);
   const prepared = useAtomValue(atom);
   const refresh = useAtomRefresh(atom);
@@ -57,9 +59,15 @@ export function PdfPreview(props: { readonly uri: string }) {
   if (error) {
     return (
       <View className="flex-1 gap-4 bg-card">
-        <FilePreviewNotice title="Could not load PDF">{error}</FilePreviewNotice>
+        <FilePreviewNotice title={t("mobile.common.PdfPreview.android.could-not-load-pdf")}>
+          {error}
+        </FilePreviewNotice>
         <View className="items-center">
-          <ControlPill label="Try again" variant="pill" onPress={refresh} />
+          <ControlPill
+            label={t("mobile.common.PdfPreview.android.try-again")}
+            variant="pill"
+            onPress={refresh}
+          />
         </View>
       </View>
     );

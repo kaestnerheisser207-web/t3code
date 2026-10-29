@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ReactNode } from "react";
 import { View } from "react-native";
 import { AndroidHeaderIconButton } from "../../components/ui/AndroidScreenHeader";
@@ -22,13 +23,14 @@ export function WorkspaceListToolbarRow(props: {
   /** Stays trailing while searching, so it never moves and still narrows the results. */
   readonly filter: ReactNode;
 }) {
+  const t = useTranslate();
   const { height } = useToolbarLayout();
   return (
     <View className="flex-row items-center gap-1" style={{ minHeight: height }}>
       {props.searching ? (
         <>
           <AndroidHeaderIconButton
-            accessibilityLabel="Close search"
+            accessibilityLabel={t("mobile.surfaces.WorkspaceListToolbarRow.close-search")}
             icon="arrow.left"
             onPress={props.onCloseSearch}
           />

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { AppActivityIndicator } from "./AppActivityIndicator";
 import { Column, Row, Text as NativeText, RNHostView } from "@expo/ui/jetpack-compose";
 import { weight } from "@expo/ui/jetpack-compose/modifiers";
@@ -48,6 +49,7 @@ export function AndroidScreenHeader(props: {
   /** One row with the subtitle after the title, for screens short on height. */
   readonly compact?: boolean;
 }) {
+  const t = useTranslate();
   const { colors } = useControlTheme();
   const titleTypography = useScaledTextRole("title");
   const subtitleTypography = useScaledTextRole("label");
@@ -82,7 +84,7 @@ export function AndroidScreenHeader(props: {
             <View collapsable={false} className="flex-row items-center">
               {props.onBack ? (
                 <IconButton
-                  accessibilityLabel="Navigate up"
+                  accessibilityLabel={t("mobile.common.AndroidScreenHeader.navigate-up")}
                   icon="arrow.left"
                   tintColorClassName="accent-header-foreground"
                   onPress={props.onBack}
@@ -190,7 +192,7 @@ export function AndroidScreenHeader(props: {
                 >
                   {(open) => (
                     <IconButton
-                      accessibilityLabel="More actions"
+                      accessibilityLabel={t("mobile.common.AndroidScreenHeader.more-actions")}
                       icon="ellipsis"
                       tintColorClassName="accent-header-foreground"
                       onPress={open}

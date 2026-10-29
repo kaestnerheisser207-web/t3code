@@ -1,3 +1,4 @@
+import { createI18n } from "../i18n/index.ts";
 import {
   RelayEnvironmentEndpointUnavailableError,
   type RelayProtectedError,
@@ -73,6 +74,20 @@ describe("presentConnectionDiagnosis", () => {
     expect(diagnosis?.headline).toBe("This device can't reach Mac mini's tunnel");
     expect(diagnosis?.hops).toHaveLength(4);
     expect(diagnosis?.steps.join(" ")).not.toContain("On Mac mini");
+    const translated = presentConnectionDiagnosis(
+      { hostLabel: "Mac mini", state: backoff(failure), via: "direct" },
+      createI18n("zh-CN").t,
+    );
+    expect(translated?.headline).toBe("此设备无法连接到 Mac mini 的隧道");
+    expect(translated?.hops.map(({ hop, result }) => ({ hop, result }))).toEqual(
+      diagnosis?.hops.map(({ hop, result }) => ({ hop, result })),
+    );
+    expect(translated?.facts.map(([, value]) => value)).toEqual(
+      diagnosis?.facts.map(([, value]) => value),
+    );
+    expect(translated?.moreInfoUrl).toBe(diagnosis?.moreInfoUrl);
+    expect(translated?.steps.join(" ")).toContain("此设备");
+    expect(translated?.steps.join(" ")).not.toContain("在 Mac mini 上");
   });
 
   it("stops at T3 Connect when this device cannot reach the relay", () => {

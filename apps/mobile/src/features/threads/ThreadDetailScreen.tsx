@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useOpenThreadInspector } from "./thread-inspector-navigation";
 import { useSidebarWorkspaceTabs } from "../workspace/useSystemWorkspaceTabBar";
 import { useWorkspaceTabs } from "../workspace/WorkspaceTabsContext";
@@ -352,6 +353,7 @@ export function ThreadDetailScreen(props: ThreadDetailScreenProps) {
 }
 
 function ThreadDetailBody(props: ThreadDetailScreenProps) {
+  const t = useTranslate();
   const usesNativeWorkspaceColumns = useNativeWorkspaceColumnsSupported();
   const { layout } = useAdaptiveWorkspaceLayout();
   const deviceType = useDeviceType();
@@ -601,13 +603,14 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
     if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
       const error = squashAtomCommandFailure(result);
       Dialog.alert(
-        "Could not update thread",
-        error instanceof Error ? error.message : "Try again.",
+        t("mobile.threadStatus.updateFailed"),
+        error instanceof Error ? error.message : t("mobile.threadStatus.retry"),
       );
     }
   };
   const pendingBackgroundWork = presentPendingBackgroundWork(
     props.selectedThread.pendingBackgroundTasks,
+    t,
   );
   const floatingStatus = ((): FloatingWorkingStatus | null => {
     const connectionStatus = connectionFloatingStatus({
@@ -639,7 +642,7 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
     if (childInput && contentPresentationKind === "ready") {
       return {
         kind: "child-input",
-        label: childThreadInputsTitle(childThreadInputs),
+        label: childThreadInputsTitle(childThreadInputs, t),
         accessibilityLabel: `Open ${childInput.hasPendingApprovals ? "approval" : "question"} from ${childInput.title}`,
         onPress: () => {
           Keyboard.dismiss();
@@ -669,8 +672,8 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
           });
         },
         action: {
-          label: statusPending ? "Stopping..." : "Stop",
-          accessibilityLabel: "Stop background work",
+          label: t(statusPending ? "background.stopping" : "background.stop"),
+          accessibilityLabel: t("mobile.threadStatus.stopBackground"),
           disabled: !props.canOperateThread || statusPending,
           onPress: () => void runStatusAction("stop"),
         },
@@ -680,11 +683,17 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
       const state = snoozed ? "snoozed" : settled ? "settled" : "woke";
       const label =
         snoozed && snoozedUntil !== null
-          ? `Snoozed, wakes in ${snoozeWakeLabel(snoozedUntil, { now: lifecycleNow })}`
+          ? t("mobile.threadStatus.snoozed", {
+              time: snoozeWakeLabel(snoozedUntil, { now: lifecycleNow, t }),
+            })
           : settled
-            ? "Settled"
-            : "Woke from snooze";
-      const actionLabel = snoozed ? "Wake now" : settled ? "Un-settle" : "Dismiss";
+            ? t("mobile.threadStatus.settled")
+            : t("mobile.threadStatus.woke");
+      const actionLabel = snoozed
+        ? t("mobile.threadStatus.wake")
+        : settled
+          ? t("mobile.threadStatus.unsettle")
+          : t("mobile.threadStatus.dismiss");
       return {
         kind: "lifecycle",
         state,
@@ -692,10 +701,10 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
         action: {
           label: statusPending
             ? snoozed
-              ? "Waking..."
+              ? t("mobile.threadStatus.waking")
               : settled
-                ? "Un-settling..."
-                : "Dismissing..."
+                ? t("mobile.threadStatus.unsettling")
+                : t("mobile.threadStatus.dismissing")
             : actionLabel,
           accessibilityLabel: actionLabel,
           disabled: !props.canOperateThread || statusPending,
@@ -704,7 +713,7 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
       };
     }
     if (props.selectedThread.goal !== null && contentPresentationKind === "ready") {
-      const goal = presentProviderGoal(props.selectedThread.goal, false);
+      const goal = presentProviderGoal(props.selectedThread.goal, false, t);
       return {
         kind: "goal",
         label: goal.title,
@@ -1107,8 +1116,8 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
             if (feedbackTarget?.supportsFeedback) {
               if (hasAttachmentsOrContext) {
                 Dialog.alert(
-                  "Approval feedback",
-                  "Send approval feedback without attachments or added context.",
+                  t("mobile.threadStatus.feedback"),
+                  t("mobile.threadStatus.feedbackHint"),
                 );
                 return false;
               }
@@ -1178,8 +1187,8 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
     if (AsyncResult.isFailure(edited)) {
       const error = squashAtomCommandFailure(edited);
       Dialog.alert(
-        "Could not edit message",
-        error instanceof Error ? error.message : "Please try again.",
+        t("mobile.threadStatus.editFailed"),
+        error instanceof Error ? error.message : t("mobile.threadStatus.retryPlease"),
       );
       return;
     }
@@ -1284,7 +1293,9 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
             renderFallback={(fallback) => (
               <RenderFailureView
                 {...fallback}
-                title="The conversation couldn't be displayed"
+                title={t(
+                  "mobile.threads.ThreadDetailScreen.the-conversation-couldn-t-be-displayed",
+                )}
                 bottomInset={estimatedOverlayHeight}
               />
             )}
@@ -1579,9 +1590,13 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
                         placeholder={
                           props.activePendingApproval
                             ? props.activePendingApproval.supportsFeedback
-                              ? "Send feedback to decline this request"
-                              : "Send a message to decline and redirect the agent"
-                            : "Ask anything"
+                              ? t(
+                                  "mobile.dynamic.ThreadDetailScreen.send-feedback-to-decline-this-request",
+                                )
+                              : t(
+                                  "mobile.dynamic.ThreadDetailScreen.send-a-message-to-decline-and-redirect-the-agent",
+                                )
+                            : t("mobile.dynamic.ThreadDetailScreen.ask-anything")
                         }
                         contentMaxWidth={contentMaxWidth}
                         draftControls={props.draftMode?.controls}

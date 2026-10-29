@@ -43,6 +43,13 @@ describe("filterCommandPaletteItems", () => {
       "mac:one",
     ]);
     expect(keys(filterCommandPaletteItems(items, "keyboard short", [], NOW))).toEqual(["siva:one"]);
+    const localized = [item("settings", "设置", "action", ["Open settings", "偏好 设置 配置"])];
+    expect(keys(filterCommandPaletteItems(localized, "配置", [], NOW))).toEqual(["settings"]);
+    expect(keys(filterCommandPaletteItems(localized, "open settings", [], NOW))).toEqual([
+      "settings",
+    ]);
+    const chineseMatch = filterCommandPaletteItems(localized, "设置", [], NOW)[0];
+    expect(chineseMatch?.titleRanges).toEqual([{ start: 0, end: 2 }]);
   });
 
   it("lists message matches after the other results, once, except in actions-only mode", () => {

@@ -17,8 +17,12 @@ import * as DateTime from "effect/DateTime";
 import { usageLimitBlockedRun } from "@t3tools/shared/orchestrationV2ThreadError";
 import { describe, expect, it } from "vite-plus/test";
 
+import { createI18n } from "../i18n/index.ts";
+
 import { v2Projection } from "./orchestrationV2TestFixtures.ts";
 import {
+  presentProviderGoal,
+  presentPendingBackgroundWork,
   deriveReportedModelSelection,
   deriveLatestThreadRun,
   deriveProviderSubagentStatus,
@@ -392,4 +396,62 @@ describe("provider-reported model selection", () => {
       }),
     ).toBeNull();
   });
+});
+
+it("keeps goal controls and user content stable across language changes", async () => {
+  const i18n = createI18n("en");
+  const goal = {
+    objective: "Build /goal-demo",
+    status: "active" as const,
+    checks: 2,
+    tokensUsed: 1200,
+  };
+  const english = presentProviderGoal(goal, false, i18n.t);
+  expect(english.title).toBe("Goal set");
+  expect(english.canResume).toBe(false);
+  await i18n.changeLanguage("zh-CN");
+  const chinese = presentProviderGoal(goal, false, i18n.t);
+  expect(chinese.title).toBe(i18n.t("goal.set"));
+  expect(chinese.objective).toBe(goal.objective);
+  expect(chinese.usage).toBe(`1k tokens · ${i18n.t("goal.checks", { count: 2 })}`);
+  expect(chinese.canResume).toBe(english.canResume);
+  expect(presentProviderGoal({ ...goal, status: "paused" }, false, i18n.t).canResume).toBe(true);
+  expect(presentProviderGoal({ ...goal, status: "complete" }, false, i18n.t).canResume).toBe(false);
+});
+
+it("localizes background summaries without changing task identities or waiting behavior", async () => {
+  const i18n = createI18n("en");
+  const tasks = [
+    { taskId: "cmd-1", kind: "command" as const, description: "command", awaited: true as const },
+  ];
+  const english = presentPendingBackgroundWork(tasks, i18n.t);
+  await i18n.changeLanguage("zh-CN");
+  const chinese = presentPendingBackgroundWork(tasks, i18n.t);
+  expect(chinese?.items).toEqual(english?.items);
+  expect(chinese?.waiting).toBe(true);
+  expect(chinese?.title).toBe(
+    i18n.t("background.waitingNamed", { kind: i18n.t("background.command"), label: "command" }),
+  );
+  const grouped = presentPendingBackgroundWork(
+    [...tasks, { taskId: "cmd-2", kind: "command" }],
+    i18n.t,
+  );
+  expect(grouped?.title).toBe(
+    i18n.t("background.waitingGroup", { tasks: i18n.t("background.commands", { count: 2 }) }),
+  );
+  const mixed = presentPendingBackgroundWork(
+    [
+      ...tasks,
+      { taskId: "monitor", kind: "monitor", description: "git status" },
+      { taskId: "agent", kind: "subagent", childThreadId: ThreadId.make("child") },
+    ],
+    i18n.t,
+  );
+  expect(mixed?.items.map((item) => item.taskId)).toEqual(["agent", "cmd-1", "monitor"]);
+  expect(mixed?.items[0]?.childThreadId).toBe("child");
+  expect(mixed?.title).toBe("等待 1 个子代理、1 个命令 和 1 个监控任务");
+  expect(presentPendingBackgroundWork([], i18n.t)).toBeNull();
+  expect(presentPendingBackgroundWork([{ taskId: "idle", kind: "command" }], i18n.t)?.waiting).toBe(
+    false,
+  );
 });

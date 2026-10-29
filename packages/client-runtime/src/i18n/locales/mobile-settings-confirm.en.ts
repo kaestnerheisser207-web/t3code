@@ -1,0 +1,35 @@
+export const mobileSettingsConfirmEn = {
+  "settings.extra.carMicrophone": "The car’s microphone",
+  "settings.extra.webhookHint":
+    "Each dedupe key must contain a valid request placeholder. The coalesce window must be whole seconds from 10 to 3600, or blank.",
+  "settings.extra.signInFailed": "Could not update provider sign-in.",
+  "settings.extra.off": "Turned off",
+  "settings.extra.signedIn": "Signed in",
+  "settings.extra.discovering": "Discovering sign-in methods…",
+  "settings.extra.notInstalled": "Not installed",
+  "settings.extra.notSignedIn": "Not signed in",
+  "settings.extra.signOutTitle": "Sign out?",
+  "settings.extra.signOutDetail":
+    "Running threads sharing this sign-in on {{environment}} will stop. Thread history is kept.",
+  "settings.extra.cancel": "Cancel",
+  "settings.extra.signOut": "Sign out",
+  "settings.extra.changeAccount": "Change account",
+  "settings.extra.docsFailed": "Could not open the provider docs.",
+  "settings.extra.terminalResponse": "Terminal response",
+  "settings.extra.callbackUrl": "Final localhost URL",
+  "settings.extra.signInPageFailed": "Could not open the sign-in page.",
+  "settings.extra.groupRepository": "Group by repository",
+  "settings.extra.groupRepositoryHint": "Matching repositories appear as one project.",
+  "settings.extra.groupPath": "Group by repository path",
+  "settings.extra.groupPathHint": "Keep monorepo paths separate.",
+  "settings.extra.separate": "Keep separate",
+  "settings.extra.separateHint": "Show every workspace as its own project.",
+  "settings.extra.clearCacheTitle": "Clear cache for {{environment}}?",
+  "settings.extra.clearCacheDetail":
+    "This removes offline threads, server metadata, and cached branches for this environment. The saved connection and credentials stay intact.",
+  "settings.extra.clearCache": "Clear Cache",
+  "settings.extra.clearAllTitle": "Clear all client caches?",
+  "settings.extra.clearAllDetail":
+    "This removes offline data for every environment. Connections, credentials, account data, and app preferences stay intact.",
+  "settings.extra.clearAll": "Clear All Caches",
+} as const;

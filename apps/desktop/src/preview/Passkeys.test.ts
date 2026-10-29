@@ -1,3 +1,4 @@
+import { desktopI18n } from "../i18n.ts";
 import { assert, describe, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -343,6 +344,21 @@ describe("PreviewPasskeys", () => {
 
       electron.showMessageBox.mockResolvedValueOnce({ response: 2 });
       assert.isUndefined(yield* select([alice, bob]));
+      yield* Effect.promise(() => desktopI18n.changeLanguage("zh-CN"));
+      try {
+        electron.showMessageBox.mockResolvedValueOnce({ response: 2 });
+        assert.isUndefined(yield* select([alice, bob]));
+        const prompt = electron.showMessageBox.mock.calls.at(-1)?.[0];
+        assert.deepStrictEqual(prompt.buttons, [
+          "alice@example.com",
+          "Bob (bob@example.com)",
+          "取消",
+        ]);
+        assert.strictEqual(prompt.cancelId, 2);
+        assert.strictEqual(prompt.defaultId, 0);
+      } finally {
+        yield* Effect.promise(() => desktopI18n.changeLanguage("en"));
+      }
     }).pipe(Effect.provide(layerFor({}))),
   );
 });

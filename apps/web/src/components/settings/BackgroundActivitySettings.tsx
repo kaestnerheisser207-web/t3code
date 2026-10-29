@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useScopedSettingsWriteAllowed } from "./useScopedSettings";
 import { SettingsIcon } from "lucide-react";
 import { useState } from "react";
@@ -101,6 +102,7 @@ function BackgroundActivityAdvancedDialog({
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslate();
   const canWriteSettings = useScopedSettingsWriteAllowed();
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
@@ -123,9 +125,13 @@ function BackgroundActivityAdvancedDialog({
     <Dialog open={open && canWriteSettings} onOpenChange={onOpenChange}>
       <DialogPopup className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Background Activity</DialogTitle>
+          <DialogTitle>
+            {t("settings.pages.BackgroundActivitySettings.background-activity")}
+          </DialogTitle>
           <DialogDescription>
-            Tune the shared power policy and the background intervals that feed it.
+            {t(
+              "settings.pages.BackgroundActivitySettings.tune-the-shared-power-policy-and-the-background-intervals-that-feed-it",
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
@@ -135,9 +141,13 @@ function BackgroundActivityAdvancedDialog({
           >
             <div className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1">
-                <div className="text-sm font-medium">Shared policy</div>
+                <div className="text-sm font-medium">
+                  {t("settings.pages.BackgroundActivitySettings.shared-policy")}
+                </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  Controls whether background work may run after a subscribed interval fires.
+                  {t(
+                    "settings.pages.BackgroundActivitySettings.controls-whether-background-work-may-run-after-a-subscribed-interval-fires",
+                  )}
                 </p>
               </div>
               <Select
@@ -157,7 +167,9 @@ function BackgroundActivityAdvancedDialog({
                 <SelectTrigger
                   size="sm"
                   className="w-full sm:w-40"
-                  aria-label="Shared background policy"
+                  aria-label={t(
+                    "settings.pages.BackgroundActivitySettings.shared-background-policy",
+                  )}
                 >
                   <SelectValue>{BACKGROUND_ACTIVITY_PROFILE_LABELS[activeProfile]}</SelectValue>
                 </SelectTrigger>
@@ -178,10 +190,12 @@ function BackgroundActivityAdvancedDialog({
             <div className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1">
                 <div className="text-sm font-medium">
-                  {searchableSetting("git-fetch-interval").title}
+                  {searchableSetting("git-fetch-interval", t).title}
                 </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  Refresh remote branch status in the background.
+                  {t(
+                    "settings.pages.BackgroundActivitySettings.refresh-remote-branch-status-in-the-background",
+                  )}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
@@ -206,9 +220,21 @@ function BackgroundActivityAdvancedDialog({
                   }
                 >
                   <NumberFieldGroup>
-                    <NumberFieldDecrement aria-label="Decrease Git fetch interval" />
-                    <NumberFieldInput aria-label="Git fetch interval in seconds" />
-                    <NumberFieldIncrement aria-label="Increase Git fetch interval" />
+                    <NumberFieldDecrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.decrease-git-fetch-interval",
+                      )}
+                    />
+                    <NumberFieldInput
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.git-fetch-interval-in-seconds",
+                      )}
+                    />
+                    <NumberFieldIncrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.increase-git-fetch-interval",
+                      )}
+                    />
                   </NumberFieldGroup>
                 </NumberField>
                 <span className="text-xs text-muted-foreground">seconds</span>
@@ -217,10 +243,13 @@ function BackgroundActivityAdvancedDialog({
 
             <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1">
-                <div className="text-sm font-medium">Provider health interval</div>
+                <div className="text-sm font-medium">
+                  {t("settings.pages.BackgroundActivitySettings.provider-health-interval")}
+                </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  Refresh provider availability, versions, and auth state. Model catalog updates
-                  follow Provider update checks.
+                  {t(
+                    "settings.pages.BackgroundActivitySettings.refresh-provider-availability-versions-and-auth-state-model-catalog-updates-follow-provider-update-checks",
+                  )}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
@@ -245,9 +274,21 @@ function BackgroundActivityAdvancedDialog({
                   }
                 >
                   <NumberFieldGroup>
-                    <NumberFieldDecrement aria-label="Decrease provider health interval" />
-                    <NumberFieldInput aria-label="Provider health interval in seconds" />
-                    <NumberFieldIncrement aria-label="Increase provider health interval" />
+                    <NumberFieldDecrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.decrease-provider-health-interval",
+                      )}
+                    />
+                    <NumberFieldInput
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.provider-health-interval-in-seconds",
+                      )}
+                    />
+                    <NumberFieldIncrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.increase-provider-health-interval",
+                      )}
+                    />
                   </NumberFieldGroup>
                 </NumberField>
                 <span className="text-xs text-muted-foreground">seconds</span>
@@ -256,9 +297,13 @@ function BackgroundActivityAdvancedDialog({
 
             <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1">
-                <div className="text-sm font-medium">Host power monitor</div>
+                <div className="text-sm font-medium">
+                  {t("settings.pages.BackgroundActivitySettings.host-power-monitor")}
+                </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  Poll host power state while clients are active.
+                  {t(
+                    "settings.pages.BackgroundActivitySettings.poll-host-power-state-while-clients-are-active",
+                  )}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
@@ -283,9 +328,21 @@ function BackgroundActivityAdvancedDialog({
                   }
                 >
                   <NumberFieldGroup>
-                    <NumberFieldDecrement aria-label="Decrease active host power interval" />
-                    <NumberFieldInput aria-label="Active host power interval in seconds" />
-                    <NumberFieldIncrement aria-label="Increase active host power interval" />
+                    <NumberFieldDecrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.decrease-active-host-power-interval",
+                      )}
+                    />
+                    <NumberFieldInput
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.active-host-power-interval-in-seconds",
+                      )}
+                    />
+                    <NumberFieldIncrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.increase-active-host-power-interval",
+                      )}
+                    />
                   </NumberFieldGroup>
                 </NumberField>
                 <span className="text-xs text-muted-foreground">seconds</span>
@@ -294,9 +351,13 @@ function BackgroundActivityAdvancedDialog({
 
             <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1">
-                <div className="text-sm font-medium">Idle host monitor</div>
+                <div className="text-sm font-medium">
+                  {t("settings.pages.BackgroundActivitySettings.idle-host-monitor")}
+                </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  Poll host power state when no foreground client is active.
+                  {t(
+                    "settings.pages.BackgroundActivitySettings.poll-host-power-state-when-no-foreground-client-is-active",
+                  )}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
@@ -321,9 +382,21 @@ function BackgroundActivityAdvancedDialog({
                   }
                 >
                   <NumberFieldGroup>
-                    <NumberFieldDecrement aria-label="Decrease idle host power interval" />
-                    <NumberFieldInput aria-label="Idle host power interval in seconds" />
-                    <NumberFieldIncrement aria-label="Increase idle host power interval" />
+                    <NumberFieldDecrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.decrease-idle-host-power-interval",
+                      )}
+                    />
+                    <NumberFieldInput
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.idle-host-power-interval-in-seconds",
+                      )}
+                    />
+                    <NumberFieldIncrement
+                      aria-label={t(
+                        "settings.pages.BackgroundActivitySettings.increase-idle-host-power-interval",
+                      )}
+                    />
                   </NumberFieldGroup>
                 </NumberField>
                 <span className="text-xs text-muted-foreground">seconds</span>
@@ -363,9 +436,11 @@ function BackgroundActivityAdvancedDialog({
             disabled={!canWriteSettings}
             onClick={() => updateSettings(resetBackgroundActivitySettings())}
           >
-            Reset all
+            {t("settings.pages.BackgroundActivitySettings.reset-all")}
           </Button>
-          <Button onClick={() => onOpenChange(false)}>Done</Button>
+          <Button onClick={() => onOpenChange(false)}>
+            {t("settings.pages.BackgroundActivitySettings.done")}
+          </Button>
         </DialogFooter>
       </DialogPopup>
     </Dialog>
@@ -373,6 +448,7 @@ function BackgroundActivityAdvancedDialog({
 }
 
 export function BackgroundActivitySettingsRow() {
+  const t = useTranslate();
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
   const { scope, environment } = useSettingsScope();
@@ -401,10 +477,11 @@ export function BackgroundActivitySettingsRow() {
       id={searchableSetting("background-activity").id}
       title={
         <span className="inline-flex items-center gap-1.5">
-          {searchableSetting("background-activity").title}
+          {searchableSetting("background-activity", t).title}
           <PolicyTooltip>
-            This shared policy gates background work such as Git refreshes and provider health
-            probes after their individual intervals elapse.
+            {t(
+              "settings.pages.BackgroundActivitySettings.this-shared-policy-gates-background-work-such-as-git-refreshes-and-provider-health-probes-after-their-individual-intervals-elapse",
+            )}
           </PolicyTooltip>
         </span>
       }
@@ -412,7 +489,7 @@ export function BackgroundActivitySettingsRow() {
       resetAction={
         canResetBackgroundActivity ? (
           <SettingResetButton
-            label="background activity"
+            label={t("settings.pages.BackgroundActivitySettings.background-activity")}
             onClick={() => updateSettings(resetBackgroundActivitySettings())}
           />
         ) : null
@@ -434,7 +511,9 @@ export function BackgroundActivitySettingsRow() {
             <SelectTrigger
               size="sm"
               className="w-full sm:w-40"
-              aria-label="Background activity profile"
+              aria-label={t(
+                "settings.pages.BackgroundActivitySettings.background-activity-profile",
+              )}
             >
               <SelectValue>
                 {(value: BackgroundActivityProfileOption | null) =>
@@ -455,7 +534,9 @@ export function BackgroundActivitySettingsRow() {
               <SelectItem hideIndicator value="advanced" disabled={!isEnvironmentScope}>
                 {isEnvironmentScope
                   ? BACKGROUND_ACTIVITY_PROFILE_OPTION_LABELS.advanced
-                  : `${BACKGROUND_ACTIVITY_PROFILE_OPTION_LABELS.advanced} (one environment)`}
+                  : t("web.dynamic.BackgroundActivitySettings.param-one-environment", {
+                      advanced: BACKGROUND_ACTIVITY_PROFILE_OPTION_LABELS.advanced,
+                    })}
               </SelectItem>
             </SelectPopup>
           </Select>
@@ -466,14 +547,18 @@ export function BackgroundActivitySettingsRow() {
                   <Button
                     size="icon-sm"
                     variant="outline"
-                    aria-label="Configure advanced background activity"
+                    aria-label={t(
+                      "settings.pages.BackgroundActivitySettings.configure-advanced-background-activity",
+                    )}
                     onClick={() => setBackgroundActivityDialogOpen(true)}
                   >
                     <SettingsIcon className="size-4" />
                   </Button>
                 }
               />
-              <TooltipPopup side="top">Configure background activity</TooltipPopup>
+              <TooltipPopup side="top">
+                {t("settings.pages.BackgroundActivitySettings.configure-background-activity")}
+              </TooltipPopup>
             </Tooltip>
           ) : null}
           <BackgroundActivityAdvancedDialog

@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 /* oxlint-disable react/no-array-index-key -- Spreadsheet rows and columns retain their source positions. */
 import { formatAttachmentSize } from "@t3tools/client-runtime/state/attachments";
 import type { OfficePreviewKind } from "@t3tools/shared/filePreview";
@@ -68,6 +70,7 @@ function ExtendedOfficeViewer(props: {
   readonly kind: OfficePreviewKind;
   readonly sizeBytes?: number;
 }) {
+  const t = useTranslate();
   const [error, setError] = useState<string | null>(null);
   const [sheetPages, setSheetPages] = useState(new Map<string, string[][]>());
   const pendingPages = useRef(new Set<string>());
@@ -160,9 +163,13 @@ function ExtendedOfficeViewer(props: {
         role="alert"
         className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 px-6 text-center"
       >
-        <p className="text-sm font-medium">No preview for this file</p>
+        <p className="text-sm font-medium">{t("web.ui.OfficeViewer.no-preview-for-this-file")}</p>
         <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-          {error} Save it or open it in another app.
+          <Trans
+            t={t}
+            i18nKey="web.rich.OfficeViewer.part-save-it-or-open-it-in-another-app"
+            components={{ value0: <>{error}</> }}
+          />
         </p>
       </div>
     );
@@ -185,7 +192,7 @@ function ExtendedOfficeViewer(props: {
       {count > 0 ? (
         <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border/60 px-3 text-xs">
           <FileSurfaceAction
-            label={`Previous ${navigation}`}
+            label={t("web.dynamic.OfficeViewer.previous-param", { navigation: navigation })}
             disabled={page === 0}
             onPress={() => selectPage(page - 1)}
           >
@@ -199,7 +206,7 @@ function ExtendedOfficeViewer(props: {
                   if (value !== null) selectPage(value);
                 }}
               >
-                <SelectTrigger aria-label="Sheet" size="xs">
+                <SelectTrigger aria-label={t("web.ui.OfficeViewer.sheet")} size="xs">
                   <SelectValue>{sheet?.name}</SelectValue>
                 </SelectTrigger>
                 <SelectPopup>
@@ -219,7 +226,7 @@ function ExtendedOfficeViewer(props: {
                   if (value !== null) selectPage(value);
                 }}
               >
-                <SelectTrigger aria-label="Chapter" size="xs">
+                <SelectTrigger aria-label={t("web.ui.OfficeViewer.chapter")} size="xs">
                   <SelectValue>{documentPage?.title}</SelectValue>
                 </SelectTrigger>
                 <SelectPopup>
@@ -233,11 +240,25 @@ function ExtendedOfficeViewer(props: {
             </div>
           ) : (
             <span className="flex-1 text-center tabular-nums" aria-live="polite">
-              {navigation === "slide" ? "Slide" : "Page"} {page + 1} of {count}
+              <Trans
+                t={t}
+                i18nKey="web.rich.OfficeViewer.part-part-of-part"
+                components={{
+                  value0: (
+                    <>
+                      {navigation === "slide"
+                        ? t("web.dynamic.OfficeViewer.slide")
+                        : t("web.dynamic.OfficeViewer.page")}
+                    </>
+                  ),
+                  value1: <>{page + 1}</>,
+                  value2: <>{count}</>,
+                }}
+              />
             </span>
           )}
           <FileSurfaceAction
-            label={`Next ${navigation}`}
+            label={t("web.dynamic.OfficeViewer.next-param", { navigation: navigation })}
             disabled={page + 1 === count}
             onPress={() => selectPage(page + 1)}
           >
@@ -250,10 +271,14 @@ function ExtendedOfficeViewer(props: {
           className="flex min-h-10 shrink-0 flex-wrap items-center gap-x-1 border-b border-border/60 px-3 py-2 text-xs text-muted-foreground tabular-nums"
           role="status"
         >
-          Sheet {page + 1} of {count} · {sheet.rowCount.toLocaleString()} rows ·{" "}
-          {sheet.columns.toLocaleString()} columns
+          {t("files.preview.sheet", {
+            page: page + 1,
+            total: count,
+            rows: sheet.rowCount.toLocaleString(),
+            columns: sheet.columns.toLocaleString(),
+          })}
           {fileSize !== undefined
-            ? ` · ${fileSize === 0 ? "0 bytes" : formatAttachmentSize(fileSize)}`
+            ? ` · ${fileSize === 0 ? t("files.preview.bytes", { count: 0 }) : formatAttachmentSize(fileSize)}`
             : ""}
         </div>
       ) : null}
@@ -261,29 +286,37 @@ function ExtendedOfficeViewer(props: {
         <>
           {props.kind !== "epub" ? (
             <FileSurfaceNotice>
-              Text and images. Layout and embedded objects may differ from the original.
+              {t(
+                "web.ui.OfficeViewer.text-and-images-layout-and-embedded-objects-may-differ-from-the-original",
+              )}
             </FileSurfaceNotice>
           ) : null}
           <Suspense fallback={<FileSurfaceLoading />}>
             <DocumentPages
               html={documentPage.html}
               name={`${props.name}: ${documentPage.title}`}
-              details={`${documentDetails}${fileSize !== undefined ? ` · ${fileSize === 0 ? "0 bytes" : formatAttachmentSize(fileSize)}` : ""}`}
+              details={`${documentDetails}${fileSize !== undefined ? ` · ${fileSize === 0 ? t("files.preview.bytes", { count: 0 }) : formatAttachmentSize(fileSize)}` : ""}`}
             />
           </Suspense>
         </>
       ) : sheet ? (
         <>
           <FileSurfaceNotice>
-            Cell values only. Charts, images, and formatting are not shown.
+            {t(
+              "web.remaining.OfficeViewer.cell-values-only-charts-images-and-formatting-are-not-shown",
+            )}
             {sheet.truncated
               ? props.kind === "ods"
-                ? " Limited to 500 rows and 50 columns."
-                : " Preview limited to 250,000 rows, 1,024 columns, and bounded cell text."
+                ? t("web.dynamic.OfficeViewer.limited-to-500-rows-and-50-columns")
+                : t(
+                    "web.dynamic.OfficeViewer.preview-limited-to-250-000-rows-1-024-columns-and-bounded-cell-text",
+                  )
               : ""}
           </FileSurfaceNotice>
           {sheet.rowCount === 0 ? (
-            <p className="p-6 text-xs text-muted-foreground">This sheet is empty.</p>
+            <p className="p-6 text-xs text-muted-foreground">
+              {t("web.ui.OfficeViewer.this-sheet-is-empty")}
+            </p>
           ) : (
             <VirtualTablePreview
               key={page}

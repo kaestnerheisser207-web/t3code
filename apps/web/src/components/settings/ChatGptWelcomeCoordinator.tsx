@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { usesChatGptSharing } from "@t3tools/shared/usageLimits";
 import { useState } from "react";
@@ -27,6 +29,7 @@ function readAcknowledgedProfiles(): string[] {
 }
 
 export function ChatGptWelcomeCoordinator() {
+  const t = useTranslate();
   const presentations = useAtomValue(environmentPresentations.presentationsAtom);
   const providersByEnvironment = useAtomValue(environmentPresentations.providersByEnvironmentAtom);
   const [acknowledged, setAcknowledged] = useState(readAcknowledgedProfiles);
@@ -64,18 +67,30 @@ export function ChatGptWelcomeCoordinator() {
       <DialogPopup>
         <DialogHeader>
           <OpenAI className="mb-2 size-8" aria-hidden="true" />
-          <DialogTitle>Your ChatGPT plan is connected</DialogTitle>
+          <DialogTitle>
+            {t("settings.pages.ChatGptWelcomeCoordinator.your-chatgpt-plan-is-connected")}
+          </DialogTitle>
           <DialogDescription>
-            Eligible usage in T3 Code uses your ChatGPT plan. Manage your shared usage and any
-            credit settings in ChatGPT.
+            {t(
+              "settings.pages.ChatGptWelcomeCoordinator.eligible-usage-in-t3-code-uses-your-chatgpt-plan-manage-your-shared-usage-and-any-credit-settings-in-chatgpt",
+            )}
           </DialogDescription>
           <p className="text-xs text-muted-foreground">
-            {next?.providerName} on {next?.environmentLabel}
+            <Trans
+              t={t}
+              i18nKey="web.rich.ChatGptWelcomeCoordinator.part-on-part"
+              components={{
+                value0: <>{next?.providerName}</>,
+                value1: <>{next?.environmentLabel}</>,
+              }}
+            />
           </p>
         </DialogHeader>
         <DialogFooter>
           <ChatGptUsageButton />
-          <Button onClick={dismiss}>Continue</Button>
+          <Button onClick={dismiss}>
+            {t("settings.pages.ChatGptWelcomeCoordinator.continue")}
+          </Button>
         </DialogFooter>
       </DialogPopup>
     </Dialog>

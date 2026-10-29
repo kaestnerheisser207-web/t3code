@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { TerminalIcon } from "lucide-react";
 
 import type { ContextPresentationCapability } from "../contextPresentationRegistry";
@@ -14,6 +15,7 @@ interface TerminalContextInlineChipProps {
 }
 
 export function TerminalContextInlineChip(props: TerminalContextInlineChipProps) {
+  const t = useTranslate();
   const { label, terminalLabel, lineStart, lineEnd, text, detailsMode, expired = false } = props;
 
   if (!expired && text.length > 0 && detailsMode === "popover") {
@@ -31,12 +33,17 @@ export function TerminalContextInlineChip(props: TerminalContextInlineChipProps)
               {terminalLabel}
             </span>
             <span className="ml-auto shrink-0 text-secondary-label text-xs">
-              {lineStart === lineEnd ? `Line ${lineStart}` : `Lines ${lineStart}–${lineEnd}`}
+              {lineStart === lineEnd
+                ? t("web.dynamic.TerminalContextInlineChip.line-param", { lineStart: lineStart })
+                : t("web.dynamic.TerminalContextInlineChip.lines-param-param", {
+                    lineStart: lineStart,
+                    lineEnd: lineEnd,
+                  })}
             </span>
           </div>
           <pre
             className="max-h-80 overflow-auto whitespace-pre bg-muted p-3 font-mono text-foreground text-xs leading-relaxed outline-none [tab-size:4] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-            aria-label="Captured terminal output"
+            aria-label={t("web.ui.TerminalContextInlineChip.captured-terminal-output")}
             tabIndex={0}
           >
             {text}
@@ -52,7 +59,10 @@ export function TerminalContextInlineChip(props: TerminalContextInlineChipProps)
       {...(expired ? { state: "invalid" as const } : {})}
       icon={<TerminalIcon />}
       label={label}
-      aria-label={`Terminal excerpt, ${label}${expired ? ", expired" : ""}`}
+      aria-label={t("web.dynamic.TerminalContextInlineChip.terminal-excerpt-paramparam", {
+        label: label,
+        value: expired ? ", expired" : "",
+      })}
       data-terminal-context-expired={expired ? "true" : undefined}
       tooltip={
         expired

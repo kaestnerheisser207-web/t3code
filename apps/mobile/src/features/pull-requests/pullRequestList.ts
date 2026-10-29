@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { parsePullRequestQuery } from "@t3tools/client-runtime/pull-request-query";
 import {
   ProjectId,
@@ -435,32 +436,33 @@ export function filterPullRequestList<
 
 export function pullRequestListReviewStatus(
   entry: Pick<PullRequestListEntry, "reviewDecision" | "viewerReviewRequested">,
+  t?: TFunction,
 ) {
   if (entry.reviewDecision === "changes-requested")
     return {
-      label: "Changes",
-      accessibleLabel: "Changes requested",
+      label: t?.("pr.actions.changes") ?? "Changes",
+      accessibleLabel: t?.("pr.filters.changesRequested") ?? "Changes requested",
       icon: "person.fill.xmark",
       tint: "accent-danger-foreground",
     } as const;
   if (entry.reviewDecision === "approved")
     return {
-      label: "Approved",
-      accessibleLabel: "Reviews approved",
+      label: t?.("pr.filters.approved") ?? "Approved",
+      accessibleLabel: t?.("pr.status.reviewsApproved") ?? "Reviews approved",
       icon: "person.fill.checkmark",
       tint: "accent-adaptive-emerald-600-400",
     } as const;
   if (entry.viewerReviewRequested)
     return {
-      label: "Your review",
-      accessibleLabel: "Your review requested",
+      label: t?.("pr.filters.yourReview") ?? "Your review",
+      accessibleLabel: t?.("pr.status.yourReviewRequested") ?? "Your review requested",
       icon: "person.badge.clock",
       tint: "accent-warning-foreground",
     } as const;
   if (entry.reviewDecision === "review-required")
     return {
-      label: "Review",
-      accessibleLabel: "Review required",
+      label: t?.("pr.status.review") ?? "Review",
+      accessibleLabel: t?.("pr.filters.reviewRequired") ?? "Review required",
       icon: "person.badge.clock",
       tint: "accent-icon-muted",
     } as const;

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ProjectScript, ResolvedKeybindingsConfig } from "@t3tools/contracts";
 import { SettingsIcon } from "lucide-react";
 import { shortcutLabelForCommand } from "../../keybindings";
@@ -17,10 +18,11 @@ export function ProjectActionsList({
   disabled: boolean;
   onEdit: (script: ProjectScript) => void;
 }) {
+  const t = useTranslate();
   if (scripts.length === 0)
     return (
       <p className="px-3 py-2 text-base text-muted-foreground sm:px-4 sm:text-sm">
-        No actions configured.
+        {t("settings.pages.ProjectActionsList.no-actions-configured")}
       </p>
     );
   return scripts.map((script) => {
@@ -40,12 +42,12 @@ export function ProjectActionsList({
             ) : null}
             {script.runOnSettle ? (
               <span className="shrink-0 rounded-sm border border-border/60 px-1.5 py-px text-2xs font-normal text-muted-foreground">
-                on settle
+                {t("settings.pages.ProjectActionsList.on-settle")}
               </span>
             ) : null}
             {script.previewUrl ? (
               <span className="shrink-0 rounded-sm border border-border/60 px-1.5 py-px text-2xs font-normal text-muted-foreground max-sm:hidden">
-                preview · desktop only
+                {t("settings.pages.ProjectActionsList.preview-desktop-only")}
               </span>
             ) : null}
           </span>
@@ -60,7 +62,7 @@ export function ProjectActionsList({
               <Button
                 size="icon-xs"
                 variant="ghost-muted"
-                aria-label={`Edit ${script.name}`}
+                aria-label={t("web.dynamic.ProjectActionsList.edit-param", { name: script.name })}
                 disabled={disabled}
                 onClick={() => onEdit(script)}
               >

@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { Tooltip, TooltipTrigger, TooltipPopup } from "../ui/tooltip";
 import type {
   EnvironmentId,
@@ -55,6 +57,7 @@ export function PullRequestStackMenu({
   onSelect?: ((reference: PullRequestRef) => void) | undefined;
   onActed: () => void;
 }) {
+  const t = useTranslate();
   const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<"merge" | "update-branch" | null>(null);
   const [pending, setPending] = useState(false);
@@ -139,7 +142,10 @@ export function PullRequestStackMenu({
                   <Button
                     variant="ghost"
                     size="xs"
-                    aria-label={`Stack ${stack.number}, layer ${position} of ${stack.layers.length}`}
+                    aria-label={t(
+                      "web.dynamic.PullRequestStackMenu.stack-param-layer-param-of-param",
+                      { number: stack.number, position: position, length: stack.layers.length },
+                    )}
                   />
                 }
               >
@@ -150,14 +156,26 @@ export function PullRequestStackMenu({
             }
           />
           <TooltipPopup>
-            View stack #{stack.number}, layer {position} of {stack.layers.length}
-            {notice ? ` · ${notice}` : null}
+            <Trans
+              t={t}
+              i18nKey="web.rich.PullRequestStackMenu.view-stack-part-layer-part-of-part-part"
+              components={{
+                value0: <>{stack.number}</>,
+                value1: <>{position}</>,
+                value2: <>{stack.layers.length}</>,
+                value3: <>{notice ? ` · ${notice}` : null}</>,
+              }}
+            />
           </TooltipPopup>
         </Tooltip>
         <MenuPopup align="start">
           <MenuGroup>
             <PullRequestStackHeader number={stack.number} notice={notice} stale={!!onRetry} />
-            {onRetry ? <MenuItem onClick={onRetry}>Retry stack refresh</MenuItem> : null}
+            {onRetry ? (
+              <MenuItem onClick={onRetry}>
+                {t("web.ui.PullRequestStackMenu.retry-stack-refresh")}
+              </MenuItem>
+            ) : null}
             <PullRequestStackLayers
               stack={stack}
               reference={reference}
@@ -177,8 +195,14 @@ export function PullRequestStackMenu({
               <MenuSeparator />
               {canMerge ? (
                 <MenuItem disabled={mergeDisabled} onClick={() => setConfirmation("merge")}>
-                  <PullRequestGlyph.merged aria-hidden />
-                  Merge stack ({mergeLayers.length})
+                  <Trans
+                    t={t}
+                    i18nKey="web.rich.PullRequestStackMenu.part-merge-stack-part"
+                    components={{
+                      part0: <PullRequestGlyph.merged aria-hidden />,
+                      value1: <>{mergeLayers.length}</>,
+                    }}
+                  />
                 </MenuItem>
               ) : null}
               {canRebase ? (
@@ -187,12 +211,14 @@ export function PullRequestStackMenu({
                   onClick={() => setConfirmation("update-branch")}
                 >
                   <RefreshCwIcon aria-hidden />
-                  Rebase stack
+                  {t("web.ui.PullRequestStackMenu.rebase-stack")}
                 </MenuItem>
               ) : null}
               {mergeHasClosed || mergeLayers.some((layer) => layer.isDraft) ? (
                 <p className="px-2 py-1 text-xs text-muted-foreground">
-                  Every layer being merged must be open and ready for review.
+                  {t(
+                    "web.ui.PullRequestStackMenu.every-layer-being-merged-must-be-open-and-ready-for-review",
+                  )}
                 </p>
               ) : null}
             </>
@@ -211,14 +237,22 @@ export function PullRequestStackMenu({
                   onClick={() => setConfirmation("merge")}
                 >
                   <PullRequestGlyph.merged aria-hidden className="size-3.5" />
-                  Merge stack
+                  {t("web.ui.PullRequestStackMenu.merge-stack")}
                 </Button>
               </span>
             }
           />
           <TooltipPopup>
-            Merge stack through #{reference.number} into {stack.base} ({mergeLayers.length}{" "}
-            {mergeLayers.length === 1 ? terminology.singular : terminology.plural})
+            <Trans
+              t={t}
+              i18nKey="web.rich.PullRequestStackMenu.merge-stack-through-part-into-part-part-part"
+              components={{
+                value0: <>{reference.number}</>,
+                value1: <>{stack.base}</>,
+                value2: <>{mergeLayers.length}</>,
+                value3: <>{mergeLayers.length === 1 ? terminology.singular : terminology.plural}</>,
+              }}
+            />
           </TooltipPopup>
         </Tooltip>
       ) : null}
@@ -232,13 +266,30 @@ export function PullRequestStackMenu({
           <DialogHeader>
             <DialogTitle>
               {confirmation === "merge"
-                ? `Merge ${mergeLayers.length} ${mergeLayers.length === 1 ? terminology.singular : terminology.plural}?`
-                : `Rebase ${unmerged.length} ${unmerged.length === 1 ? terminology.singular : terminology.plural}?`}
+                ? t("web.dynamic.PullRequestStackMenu.merge-param-param", {
+                    length: mergeLayers.length,
+                    value: mergeLayers.length === 1 ? terminology.singular : terminology.plural,
+                  })
+                : t("web.dynamic.PullRequestStackMenu.rebase-param-param", {
+                    length: unmerged.length,
+                    value: unmerged.length === 1 ? terminology.singular : terminology.plural,
+                  })}
             </DialogTitle>
             <DialogDescription>
               {confirmation === "merge"
-                ? `Merge #${reference.number} and its unmerged layers below into ${stack.base} using ${mergeMethod}. ${hostLabel} checks their rules before merging or queueing them and rebases the remaining stack after merging.`
-                : `Rebase the remote branches from bottom to top onto ${stack.base}. This rewrites branch history and may restart checks. If a layer fails, earlier updates remain.`}
+                ? t(
+                    "web.dynamic.PullRequestStackMenu.merge-param-and-its-unmerged-layers-below-into-param-using-param-param-checks-their-rules-before-merging-or-queueing-them-and-rebases-the-remaining-stack-after-merging",
+                    {
+                      number: reference.number,
+                      base: stack.base,
+                      mergeMethod: mergeMethod,
+                      hostLabel: hostLabel,
+                    },
+                  )
+                : t(
+                    "web.dynamic.PullRequestStackMenu.rebase-the-remote-branches-from-bottom-to-top-onto-param-this-rewrites-branch-history-and-may-restart-checks-if-a-layer-fails-earlier-updates-remain",
+                    { base: stack.base },
+                  )}
             </DialogDescription>
           </DialogHeader>
           <DialogPanel>
@@ -255,10 +306,12 @@ export function PullRequestStackMenu({
           </DialogPanel>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmation(null)}>
-              Cancel
+              {t("web.ui.PullRequestStackMenu.cancel")}
             </Button>
             <Button onClick={() => void run()}>
-              {confirmation === "merge" ? "Merge stack" : "Rebase stack"}
+              {confirmation === "merge"
+                ? t("web.dynamic.PullRequestStackMenu.merge-stack")
+                : t("web.dynamic.PullRequestStackMenu.rebase-stack")}
             </Button>
           </DialogFooter>
         </DialogPopup>

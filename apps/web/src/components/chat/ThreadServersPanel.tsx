@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { scopeThreadRef } from "@t3tools/client-runtime/environment";
 import {
@@ -35,6 +37,7 @@ export function ThreadServersPanel(props: {
   readonly environmentId: EnvironmentId;
   readonly threadId: ThreadId;
 }) {
+  const t = useTranslate();
   const servers = useThreadDiscoveredPorts(props);
   const canOpen = useEnvironmentScope(props.environmentId, AuthPreviewOperateScope);
   const canStop = useAtomValue(
@@ -94,7 +97,10 @@ export function ThreadServersPanel(props: {
   };
 
   return (
-    <ThreadDetailsSection headingId="thread-details-servers-heading" title="Servers">
+    <ThreadDetailsSection
+      headingId="thread-details-servers-heading"
+      title={t("web.ui.ThreadServersPanel.servers")}
+    >
       <ul className="m-0 list-none p-0">
         {servers.map((server) => {
           const key = serverKey(server);
@@ -130,7 +136,11 @@ export function ThreadServersPanel(props: {
                   </span>
                 </TooltipTrigger>
                 <TooltipPopup side="left">
-                  Open in the browser panel. {externalClickLabel} for your browser.
+                  <Trans
+                    t={t}
+                    i18nKey="web.rich.ThreadServersPanel.open-in-the-browser-panel-part-for-your-browser"
+                    components={{ value0: <>{externalClickLabel}</> }}
+                  />
                 </TooltipPopup>
               </Tooltip>
               {stoppable ? (
@@ -143,7 +153,9 @@ export function ThreadServersPanel(props: {
                           variant="ghost"
                           part="icon"
                           tone="destructive"
-                          aria-label={`Stop localhost:${server.port}`}
+                          aria-label={t("web.dynamic.ThreadServersPanel.stop-localhost-param", {
+                            port: server.port,
+                          })}
                           disabled={stoppingKey !== null}
                           onClick={() => void stop(server)}
                         />
@@ -155,7 +167,9 @@ export function ThreadServersPanel(props: {
                         <SquareIcon aria-hidden className="size-3 fill-current" />
                       )}
                     </TooltipTrigger>
-                    <TooltipPopup side="left">Stop server</TooltipPopup>
+                    <TooltipPopup side="left">
+                      {t("web.ui.ThreadServersPanel.stop-server")}
+                    </TooltipPopup>
                   </Tooltip>
                 </div>
               ) : null}

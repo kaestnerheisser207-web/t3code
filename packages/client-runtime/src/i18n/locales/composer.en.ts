@@ -1,0 +1,22 @@
+export const composerEn = {
+  "composer.ui.expand-composer": "Expand composer",
+  "composer.ui.skill": "/skill:",
+  "composer.ui.waiting-for-approval": "Waiting for approval",
+  "composer.ui.provider-process-is-gone-interrupt-or-restart-the-run-to-respond":
+    "Provider process is gone. Interrupt or restart the run to respond.",
+  "composer.ui.dismiss-question-without-answering": "Dismiss question without answering",
+  "composer.ui.plan": "Plan",
+  "composer.ui.plan-actions": "Plan actions",
+  "composer.ui.download-as-markdown": "Download as markdown",
+  "composer.ui.save-to-workspace": "Save to workspace",
+  "composer.ui.save-plan-to-workspace": "Save plan to workspace",
+  "composer.ui.workspace-path": "Workspace path",
+  "composer.ui.cancel": "Cancel",
+  "composer.ui.context-window": "Context Window",
+  "composer.ui.context-window-usage": "Context window usage",
+  "composer.ui.total-processed": "Total processed",
+  "composer.ui.cost": "Cost",
+  "composer.ui.compact-context": "Compact context",
+  "composer.savePathDescription": "Enter a path relative to <workspace/>.",
+  "composer.workspaceFallback": "the workspace",
+} as const;

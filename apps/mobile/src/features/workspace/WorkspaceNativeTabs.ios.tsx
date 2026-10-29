@@ -1,5 +1,6 @@
+import { useTranslate } from "../../i18n";
 import {
-  WORKSPACE_TAB_LABELS,
+  workspaceTabLabel,
   NAVIGATION_TAB_ICONS,
   useEnabledNavigationTabs,
 } from "./navigation-tabs";
@@ -70,6 +71,7 @@ export function WorkspaceNativeTabs(props: {
   readonly children: ReactNode;
   readonly hidden: boolean;
 }) {
+  const t = useTranslate();
   const workspace = useWorkspaceTabs()!;
   const order = useEnabledNavigationTabs();
   const primaryTabs = order.slice(0, 4);
@@ -121,7 +123,9 @@ export function WorkspaceNativeTabs(props: {
               key={slot}
               screenKey={slot}
               title=""
-              tabBarItemAccessibilityLabel={settings ? "Settings" : WORKSPACE_TAB_LABELS[tab]}
+              tabBarItemAccessibilityLabel={
+                settings ? t("settings.title") : workspaceTabLabel(tab, t)
+              }
               ios={{
                 icon: settings
                   ? { type: "sfSymbol", name: "gearshape" }

@@ -1,0 +1,17 @@
+export const deviceUsageZhCN = {
+  "device.menu.checkVersions": "检查设备工具版本",
+  "device.menu.versions": "设备工具版本",
+  "device.menu.reload": "重新加载画面流",
+  "device.menu.back": "返回",
+  "device.menu.switcher": "应用切换器",
+  "device.menu.rotate": "旋转设备",
+  "device.menu.devices": "设备",
+  "usage.enable": "启用",
+  "usage.enableOn": "在 {{environment}} 上启用",
+  "usage.upToDate": "用量已是最新",
+  "usage.ultrafast": "超快",
+  "usage.chart.hourCost": "每小时费用",
+  "usage.chart.dayCost": "每日费用",
+  "usage.chart.hourTokens": "每小时处理的 token 数",
+  "usage.chart.dayTokens": "每日处理的 token 数",
+} as const;

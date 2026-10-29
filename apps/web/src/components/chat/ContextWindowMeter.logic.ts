@@ -102,10 +102,19 @@ export function resolveContextWindowModelDisplayName(
 export function formatContextWindowCompactionMessage(
   modelDisplayName: string | null | undefined,
   autoCompactThreshold?: number | null,
+  t?: import("i18next").TFunction,
 ): string {
   if (typeof autoCompactThreshold === "number" && autoCompactThreshold > 0) {
+    if (t)
+      return t("context.autoCompactThreshold", {
+        tokens: autoCompactThreshold.toLocaleString("en-US"),
+      });
     return `Compacts automatically at about ${autoCompactThreshold.toLocaleString("en-US")} tokens.`;
   }
+  if (t)
+    return modelDisplayName
+      ? t("context.modelAutoCompact", { model: modelDisplayName })
+      : t("context.autoCompact");
   return modelDisplayName
     ? `Context for ${modelDisplayName} compacts automatically when needed.`
     : "Context compacts automatically when needed.";

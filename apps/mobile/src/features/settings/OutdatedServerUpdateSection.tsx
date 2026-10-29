@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtom, useAtomValue } from "@effect/atom-react";
 import { squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
 import type { EnvironmentId } from "@t3tools/contracts";
@@ -28,6 +29,7 @@ export function OutdatedServerUpdateSection({
   readonly environmentId: EnvironmentId;
   readonly label: string;
 }) {
+  const t = useTranslate();
   const describe = useAtomCommand(describeOutdatedServer, { reportFailure: false });
   const update = useAtomCommand(updateOutdatedServer, { reportFailure: false });
   const state = useAtomValue(serverEnvironment.updateStateAtom(environmentId));
@@ -76,20 +78,28 @@ export function OutdatedServerUpdateSection({
     <SettingsSection title="T3 Code">
       <View className="gap-1 p-4">
         <Text className="text-base text-foreground">
-          {release ? `Version ${release.fromVersion}` : "Update required"}
+          {release
+            ? t("mobile.dynamic.OutdatedServerUpdateSection.version-param", {
+                fromVersion: release.fromVersion,
+              })
+            : t("mobile.dynamic.OutdatedServerUpdateSection.update-required")}
         </Text>
         <Text className="text-sm text-foreground-muted">
           {state.status === "running"
             ? state.stage === "resuming"
-              ? "Restarting and reconnecting…"
+              ? t("mobile.dynamic.OutdatedServerUpdateSection.restarting-and-reconnecting")
               : state.stage === "installing"
-                ? "Installing update…"
-                : "Downloading update…"
+                ? t("mobile.dynamic.OutdatedServerUpdateSection.installing-update")
+                : t("mobile.dynamic.OutdatedServerUpdateSection.downloading-update")
             : release
               ? release.targetVersion
-                ? `Version ${release.targetVersion} is available.`
-                : "No newer version is available yet."
-              : "This app needs a newer version of T3 Code on this machine."}
+                ? t("mobile.dynamic.OutdatedServerUpdateSection.version-param-is-available", {
+                    targetVersion: release.targetVersion,
+                  })
+                : t("mobile.dynamic.OutdatedServerUpdateSection.no-newer-version-is-available-yet")
+              : t(
+                  "mobile.dynamic.OutdatedServerUpdateSection.this-app-needs-a-newer-version-of-t3-code-on-this-machine",
+                )}
         </Text>
         {error || state.status === "failed" ? (
           <Text selectable accessibilityRole="alert" className="text-sm text-danger-foreground">
@@ -99,7 +109,7 @@ export function OutdatedServerUpdateSection({
       </View>
       <SettingsActionRow
         icon="arrow.clockwise"
-        label="Check for updates"
+        label={t("mobile.settings.OutdatedServerUpdateSection.check-for-updates")}
         disabled={busy}
         loading={checking}
         onPress={check}
@@ -107,7 +117,13 @@ export function OutdatedServerUpdateSection({
       {release?.targetVersion ? (
         <SettingsActionRow
           icon="arrow.up.circle"
-          label={state.status === "failed" ? "Retry update" : `Update to ${release.targetVersion}`}
+          label={
+            state.status === "failed"
+              ? t("mobile.dynamic.OutdatedServerUpdateSection.retry-update")
+              : t("mobile.dynamic.OutdatedServerUpdateSection.update-to-param", {
+                  targetVersion: release.targetVersion,
+                })
+          }
           disabled={busy}
           loading={state.status === "running"}
           onPress={requestUpdate}

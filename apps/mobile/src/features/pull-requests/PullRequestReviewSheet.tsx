@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { AsyncResult } from "effect/reactivity";
 import { useAtomRefresh } from "@effect/atom-react";
 import { StackActions, useNavigation, type StaticScreenProps } from "@react-navigation/native";
@@ -21,6 +23,7 @@ import { pullRequestTarget, type PullRequestParams } from "./usePullRequestDiff"
 import { usePullRequestPermissions } from "./usePullRequestPermissions";
 
 function useActionSubmission(params: PullRequestParams) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const refreshDetail = useAtomRefresh(composerPullRequests.detail(pullRequestTarget(params)));
   const refreshActivity = useAtomRefresh(composerPullRequests.activity(pullRequestTarget(params)));
@@ -42,28 +45,25 @@ function useActionSubmission(params: PullRequestParams) {
     setBusy(false);
     if (AsyncResult.isFailure(result)) {
       const cause = squashAtomCommandFailure(result);
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "The provider could not complete this action. Try again.",
-      );
+      setError(cause instanceof Error ? cause.message : t("pr.actions.failedRetry"));
     }
   };
   return { busy, error, submit };
 }
 
-const VERDICTS = [
-  { value: "comment", title: "Comment" },
-  { value: "approve", title: "Approve" },
-  {
-    value: "request-changes",
-    title: "Request changes",
-  },
-] as const;
-
 export function PullRequestReviewSheet({
   route,
 }: StaticScreenProps<PullRequestParams & { readonly mode: "review" | "comment" }>) {
+  const t = useTranslate();
+  const VERDICTS = [
+    { value: "comment", title: t("pr.review.comment") },
+    { value: "approve", title: t("pr.review.approve") },
+    {
+      value: "request-changes",
+      title: t("pr.review.requestChanges"),
+    },
+  ] as const;
+
   const params = route.params;
   const target = pullRequestTarget(params);
   const result = useEnvironmentQuery(composerPullRequests.detail(target));
@@ -105,8 +105,7 @@ export function PullRequestReviewSheet({
       : permissions.canComment && body.trim().length > 0);
   const perform = () =>
     submission.submit(async () => {
-      if (!canSubmit)
-        throw new Error("Add your feedback and check your permissions before submitting.");
+      if (!canSubmit) throw new Error(t("pr.actions.feedbackNeeded"));
       const submitted = store.draft;
       const response =
         reviewing && verdict
@@ -132,21 +131,25 @@ export function PullRequestReviewSheet({
     });
   return (
     <SheetContent
-      title={reviewing ? "Submit review" : "Add comment"}
+      title={
+        reviewing
+          ? t("mobile.dynamic.PullRequestReviewSheet.submit-review")
+          : t("mobile.dynamic.PullRequestReviewSheet.add-comment")
+      }
       subtitle={`#${params.number}${reviewing && result.data?.headSha ? ` · reviewing ${result.data.headSha.slice(0, 7)}` : ` · ${params.repository}`}`}
       busy={submission.busy}
       footer={
         <Button
           label={
             submission.busy
-              ? "Submitting…"
+              ? t("mobile.dynamic.PullRequestReviewSheet.submitting")
               : reviewing
                 ? verdict?.value === "approve"
-                  ? "Approve"
+                  ? t("mobile.dynamic.PullRequestReviewSheet.approve")
                   : verdict?.value === "request-changes"
-                    ? "Request changes"
-                    : "Submit review"
-                : "Post comment"
+                    ? t("mobile.dynamic.PullRequestReviewSheet.request-changes")
+                    : t("mobile.dynamic.PullRequestReviewSheet.submit-review")
+                : t("mobile.dynamic.PullRequestReviewSheet.post-comment")
           }
           fullWidth
           tone={Platform.OS === "android" ? "primary" : "contrast"}
@@ -167,17 +170,23 @@ export function PullRequestReviewSheet({
         />
       ) : null}
       <Text className="px-4 text-xs text-foreground-muted">
-        {reviewing ? "Summary" : "Comment"}
+        {reviewing
+          ? t("mobile.dynamic.PullRequestReviewSheet.summary")
+          : t("mobile.dynamic.PullRequestReviewSheet.comment")}
       </Text>
       <TextInput
         multiline
-        accessibilityLabel={reviewing ? "Review summary" : "Comment"}
+        accessibilityLabel={
+          reviewing
+            ? t("mobile.dynamic.PullRequestReviewSheet.review-summary")
+            : t("mobile.dynamic.PullRequestReviewSheet.comment")
+        }
         placeholder={
           reviewing
             ? summaryRequired
-              ? "Summary required to request changes…"
-              : "Summarize your review…"
-            : "Write a comment…"
+              ? t("mobile.dynamic.PullRequestReviewSheet.summary-required-to-request-changes")
+              : t("mobile.dynamic.PullRequestReviewSheet.summarize-your-review")
+            : t("mobile.dynamic.PullRequestReviewSheet.write-a-comment")
         }
         placeholderTextColorClassName="accent-foreground-muted"
         editable={store.ready && !submission.busy}
@@ -190,8 +199,15 @@ export function PullRequestReviewSheet({
       {reviewing && store.draft.comments.length ? (
         <View className="gap-2">
           <Text className="text-sm font-t3-medium">
-            {store.draft.comments.length} pending line{" "}
-            {store.draft.comments.length === 1 ? "comment" : "comments"}
+            <Trans
+              t={t}
+              i18nKey={
+                store.draft.comments.length === 1
+                  ? "mobile.rich.PullRequestReviewSheet.pendingLineComment_one"
+                  : "mobile.rich.PullRequestReviewSheet.pendingLineComment_other"
+              }
+              components={{ value0: <>{store.draft.comments.length}</> }}
+            />
           </Text>
           {store.draft.comments.map((draft) => (
             <Pressable
@@ -227,8 +243,10 @@ export function PullRequestReviewSheet({
               </Text>
               <Text className="text-2xs text-foreground-muted">
                 {draft.headSha !== result.data?.headSha
-                  ? "Branch changed · Tap to choose a new line"
-                  : "Tap to edit"}
+                  ? t(
+                      "mobile.dynamic.PullRequestReviewSheet.branch-changed-tap-to-choose-a-new-line",
+                    )
+                  : t("mobile.dynamic.PullRequestReviewSheet.tap-to-edit")}
               </Text>
             </Pressable>
           ))}
@@ -236,14 +254,20 @@ export function PullRequestReviewSheet({
       ) : null}
       {reviewing && stale ? (
         <Text className="text-sm text-danger-foreground">
-          The branch changed since you wrote a comment. Choose its current line before submitting.
+          {t(
+            "mobile.review.PullRequestReviewSheet.the-branch-changed-since-you-wrote-a-comment-choose-its-current-line-before-submitting",
+          )}
         </Text>
       ) : null}
       {reviewing && !canSubmitComments ? (
         <Text className="text-sm text-danger-foreground">
-          You can no longer submit line comments on this{" "}
-          {sourceControlClients.get(result.data?.provider).changeRequest.singular}. Your drafts are
-          kept here.
+          <Trans
+            t={t}
+            i18nKey="mobile.rich.PullRequestReviewSheet.you-can-no-longer-submit-line-comments-on-this-part-your-drafts-are-kept-here"
+            components={{
+              value0: <>{sourceControlClients.get(result.data?.provider).changeRequest.singular}</>,
+            }}
+          />
         </Text>
       ) : null}
       {submission.error || result.error || store.error ? (

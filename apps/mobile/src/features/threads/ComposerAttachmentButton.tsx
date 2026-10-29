@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { MenuAction } from "@react-native-menu/menu";
 import { Pressable } from "react-native";
 
@@ -5,9 +6,9 @@ import { useAndroidControlSizing } from "../../components/ui/useAndroidControlSi
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { Menu } from "../../components/ui/Menu";
 
-const ATTACHMENT_MENU_ACTIONS: MenuAction[] = [
-  { id: "photos", title: "Photo Library", image: "photo" },
-  { id: "files", title: "Choose Files", image: "folder" },
+const attachmentMenuActions = (t: ReturnType<typeof useTranslate>): MenuAction[] => [
+  { id: "photos", title: t("mobile.actions.photos"), image: "photo" },
+  { id: "files", title: t("mobile.actions.files"), image: "folder" },
 ];
 
 export function ComposerAttachmentButton(props: {
@@ -17,10 +18,11 @@ export function ComposerAttachmentButton(props: {
   readonly onPickMedia: () => Promise<void>;
   readonly onPickFiles: () => Promise<void>;
 }) {
+  const t = useTranslate();
   const { scale } = useAndroidControlSizing();
   const button = (
     <Pressable
-      accessibilityLabel="Add attachment"
+      accessibilityLabel={t("mobile.threads.ComposerAttachmentButton.add-attachment")}
       accessibilityRole="button"
       accessibilityState={{ disabled: props.disabled }}
       className="size-[44px] shrink-0 items-center justify-center rounded-full active:opacity-70 disabled:opacity-50"
@@ -44,9 +46,9 @@ export function ComposerAttachmentButton(props: {
   return (
     <Menu
       accessible
-      accessibilityLabel="Add attachment"
+      accessibilityLabel={t("mobile.threads.ComposerAttachmentButton.add-attachment")}
       accessibilityRole="button"
-      actions={ATTACHMENT_MENU_ACTIONS}
+      actions={attachmentMenuActions(t)}
       onPressAction={({ nativeEvent }) => {
         if (nativeEvent.event === "photos") {
           void props.onPickMedia();

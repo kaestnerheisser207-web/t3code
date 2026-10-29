@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { SheetHeader } from "../../components/ui/SheetHeader";
 import { appAtomRegistry } from "../../state/atom-registry";
 import { useAtomValue } from "@effect/atom-react";
@@ -102,6 +103,7 @@ function DragHandle(props: {
   canMoveUp: boolean;
   canMoveDown: boolean;
 }) {
+  const t = useTranslate();
   const latest = useRef(props);
   /* oxlint-disable react/refs -- The pan gesture captures its callbacks once per `disabled` change; they read the latest handlers when native gesture events fire. */
   latest.current = props;
@@ -126,8 +128,12 @@ function DragHandle(props: {
         collapsable={false}
         accessible
         accessibilityRole="adjustable"
-        accessibilityLabel={`Reorder ${props.title}`}
-        accessibilityHint="Move up and Move down reorder within this section. Other actions move between sections."
+        accessibilityLabel={t("mobile.dynamic.ThreadArrangementSheet.reorder-param", {
+          title: props.title,
+        })}
+        accessibilityHint={t(
+          "mobile.threads.ThreadArrangementSheet.move-up-and-move-down-reorder-within-this-section-other-actions-move-between-sections",
+        )}
         accessibilityState={{ disabled: props.disabled }}
         accessibilityActions={[
           ...props.sectionActions,
@@ -162,6 +168,7 @@ function DragHandle(props: {
 }
 
 function ThreadArrangementSheet(props: { onClose: () => void }) {
+  const t = useTranslate();
   const threads = useAtomValue(environmentThreadShells.navigationThreadShellsAtom);
   const configs = useAtomValue(environmentServerConfigsAtom);
   const queuedThreadKeys = useAtomValue(queuedThreadKeysAtom);
@@ -381,12 +388,16 @@ function ThreadArrangementSheet(props: { onClose: () => void }) {
             <SafeAreaView style={{ flex: 1 }}>
               <SheetHeader
                 presentation="inline"
-                title="Arrange threads"
+                title={t("mobile.threads.ThreadArrangementSheet.arrange-threads")}
                 onClose={props.onClose}
-                accessibilityLabel="Close arrange threads"
+                accessibilityLabel={t(
+                  "mobile.threads.ThreadArrangementSheet.close-arrange-threads",
+                )}
               />
               <Text className="px-5 pb-3 text-sm text-foreground-muted">
-                Drag to reorder, pin, or settle. Changes save when you drop.
+                {t(
+                  "mobile.threads.ThreadArrangementSheet.drag-to-reorder-pin-or-settle-changes-save-when-you-drop",
+                )}
               </Text>
               <View
                 onLayout={(event) => {
@@ -511,10 +522,15 @@ function ThreadArrangementSheet(props: { onClose: () => void }) {
                           >
                             <Text className="text-sm text-foreground-muted">
                               {olderSettledShelf.loading
-                                ? "Loading"
+                                ? t("mobile.dynamic.ThreadArrangementSheet.loading")
                                 : olderSettledShelf.failed
-                                  ? "Could not load older threads. Retry"
-                                  : `Show more (${settledCount - visibleSettled.length} settled hidden)`}
+                                  ? t(
+                                      "mobile.dynamic.ThreadArrangementSheet.could-not-load-older-threads-retry",
+                                    )
+                                  : t(
+                                      "mobile.dynamic.ThreadArrangementSheet.show-more-param-settled-hidden",
+                                      { value: settledCount - visibleSettled.length },
+                                    )}
                             </Text>
                           </Pressable>
                         ) : (

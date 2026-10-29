@@ -1,3 +1,5 @@
+import { useTranslate } from "../../i18n";
+import { Trans } from "react-i18next";
 import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import { resolveProviderInstanceDisplayName } from "@t3tools/client-runtime/state/provider-instance-display";
 import { resolveSubagentMetadata } from "@t3tools/client-runtime/state/subagent-display";
@@ -36,6 +38,7 @@ export function SubagentRow(props: {
   /** The task runs in a linked environment this app is connected to. */
   readonly canOpenRemote?: boolean;
 }) {
+  const t = useTranslate();
   const presentation = resolveSubagentRowPresentation(props.subagent, props.canOpenRemote);
   const detail = subagentCardDetail(presentation.detail);
   return (
@@ -69,7 +72,11 @@ export function SubagentRow(props: {
             </Text>
             {presentation.runsOn !== null ? (
               <Text numberOfLines={1} className="shrink text-xs text-foreground-muted">
-                on {presentation.runsOn}
+                <Trans
+                  t={t}
+                  i18nKey="mobile.rich.SubagentRow.on-part"
+                  components={{ value0: <>{presentation.runsOn}</> }}
+                />
               </Text>
             ) : null}
           </View>

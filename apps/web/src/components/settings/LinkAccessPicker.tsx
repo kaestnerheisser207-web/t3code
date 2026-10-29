@@ -1,3 +1,6 @@
+import { Trans } from "react-i18next";
+import { runtimeModeText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { AuthMcpClientAccess } from "@t3tools/contracts";
 import { useId } from "react";
 
@@ -14,12 +17,13 @@ export function LinkAccessPicker({
   readonly onChange: (access: AuthMcpClientAccess) => void;
   readonly disabled?: boolean;
 }) {
+  const t = useTranslate();
   const labelId = useId();
-  const selected = accessConfig[value];
+  const selected = { ...accessConfig[value], ...runtimeModeText(t, value) };
   return (
     <div className="space-y-1.5">
       <span id={labelId} className="block text-xs font-medium">
-        What agents here may do there
+        {t("settings.pages.LinkAccessPicker.what-agents-here-may-do-there")}
       </span>
       <Select
         value={value}
@@ -38,7 +42,8 @@ export function LinkAccessPicker({
         </SelectTrigger>
         <SelectPopup alignItemWithTrigger={false}>
           {AuthMcpClientAccess.literals.map((option) => {
-            const { label, description, icon: Icon } = accessConfig[option];
+            const { label, description } = runtimeModeText(t, option);
+            const Icon = accessConfig[option].icon;
             return (
               <SelectItem key={option} value={option} hideIndicator>
                 <span className="grid min-w-0 gap-0.5 py-0.5">
@@ -54,9 +59,11 @@ export function LinkAccessPicker({
         </SelectPopup>
       </Select>
       <p className="text-xs text-muted-foreground">
-        {selected.description} An agent never gets more access there than its own mode here. Below
-        full access, it can change only threads this link started, not that machine's own threads,
-        projects or settings.
+        <Trans
+          t={t}
+          i18nKey="web.rich.LinkAccessPicker.part-an-agent-never-gets-more-access-there-than-its-own-mode-here-below-full-access-it-can-change-only-threads-this-link-started-not-that-machine-s-own-threads-projects-or-settings"
+          components={{ value0: <>{selected.description}</> }}
+        />
       </p>
     </div>
   );

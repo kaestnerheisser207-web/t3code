@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtomCommand } from "~/state/use-atom-command";
 import type {
   EnvironmentId,
@@ -34,6 +35,7 @@ export function PullRequestReviewerPicker({
   reference: PullRequestRef;
   allowed: boolean;
 }) {
+  const t = useTranslate();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<string | null>(null);
@@ -85,7 +87,7 @@ export function PullRequestReviewerPicker({
   return (
     <PullRequestCandidatePicker
       icon={<UserPlusIcon className="size-3.5" />}
-      label="Request a review"
+      label={t("web.ui.PullRequestReviewerPicker.request-a-review")}
       allowed={allowed}
       disabledReason="Asking someone to review needs write access on this repository"
       open={open}
@@ -112,7 +114,10 @@ export function PullRequestReviewerPicker({
             <span className="shrink-0 text-muted-foreground">team</span>
           ) : null}
           {candidate.isRequested ? (
-            <CheckIcon aria-label="Already asked" className="size-3.5 shrink-0" />
+            <CheckIcon
+              aria-label={t("web.ui.PullRequestReviewerPicker.already-asked")}
+              className="size-3.5 shrink-0"
+            />
           ) : null}
         </>
       )}

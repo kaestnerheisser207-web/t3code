@@ -1,3 +1,4 @@
+import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import type { EnvironmentId, ThreadId } from "@t3tools/contracts";
 import type { ClientSettings } from "@t3tools/contracts/settings";
 
@@ -5,12 +6,12 @@ import completionUrl from "./assets/notification-completion.mp3";
 import inputUrl from "./assets/notification-input.mp3";
 
 type NotificationMode = ClientSettings["notificationMode"];
-export const NOTIFICATION_MODE_LABELS = {
-  off: "Off",
-  notifications: "Notifications only",
-  sound: "Sound only",
-  "notifications-and-sound": "Notifications with sound",
-} satisfies Record<NotificationMode, string>;
+export const NOTIFICATION_MODE_KEYS = {
+  off: "settings.support.off",
+  notifications: "settings.support.notifications-only",
+  sound: "settings.support.sound-only",
+  "notifications-and-sound": "settings.support.notifications-with-sound",
+} satisfies Record<NotificationMode, TranslationKey>;
 
 export function hasNotificationSound(mode: NotificationMode) {
   return mode === "sound" || mode === "notifications-and-sound";

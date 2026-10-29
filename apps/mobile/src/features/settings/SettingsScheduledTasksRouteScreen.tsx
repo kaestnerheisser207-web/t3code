@@ -1,3 +1,6 @@
+import { useTranslate } from "../../i18n";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import * as Dialog from "../../components/ui/Dialog";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -106,19 +109,26 @@ const DAYS = [
   { index: 0, label: "Sun" },
 ] as const;
 
-function describeSchedule(task: ScheduledTask): string {
-  if (task.schedule.type === "webhook") return "On webhook";
-  if (task.schedule.type === "interval") return formatScheduledTaskInterval(task.schedule.everyMs);
-  const days = task.schedule.weekdays?.length ? repeatLabel(task.schedule.weekdays) : "Every day";
-  return `${days} at ${formatTime(task.schedule.timeOfDay)}`;
+function describeSchedule(task: ScheduledTask, t: TFunction, locale: string): string {
+  if (task.schedule.type === "webhook") return t("schedule.onWebhook");
+  if (task.schedule.type === "interval")
+    return formatScheduledTaskInterval(task.schedule.everyMs, t);
+  const days = task.schedule.weekdays?.length
+    ? repeatLabel(task.schedule.weekdays, t, locale)
+    : t("schedule.daily");
+  return t("schedule.atTime", { days, time: formatTime(task.schedule.timeOfDay, locale) });
 }
 
-function formatTime(value: string): string {
+function formatTime(value: string, locale: string): string {
   const [hours, minutes] = value.split(":").map(Number);
   if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return value;
   const time = new Date();
   time.setHours(hours ?? 9, minutes ?? 0, 0, 0);
-  return time.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  return time.toLocaleTimeString(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: new Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions().hour12,
+  });
 }
 
 function timePickerValue(value: string): Date {
@@ -133,14 +143,17 @@ function timePickerValue(value: string): Date {
   return time;
 }
 
-function repeatLabel(weekdays: ReadonlyArray<number>): string {
+function repeatLabel(weekdays: ReadonlyArray<number>, t: TFunction, locale: string): string {
   const days = new Set(weekdays);
-  if (days.size === 7) return "Every day";
-  if (days.size === 5 && [1, 2, 3, 4, 5].every((day) => days.has(day))) return "Weekdays";
+  if (days.size === 7) return t("schedule.daily");
+  if (days.size === 5 && [1, 2, 3, 4, 5].every((day) => days.has(day)))
+    return t("schedule.weekdays");
   return (
     DAYS.filter((day) => days.has(day.index))
-      .map((day) => day.label)
-      .join(", ") || "Choose days"
+      .map((day) =>
+        new Date(2024, 0, 7 + day.index).toLocaleDateString(locale, { weekday: "short" }),
+      )
+      .join(", ") || t("schedule.chooseDays")
   );
 }
 
@@ -245,6 +258,7 @@ function WebhookFilterRows(props: {
   readonly disabled: boolean;
   readonly onChange: (filters: ReadonlyArray<WebhookFilterDraft>) => void;
 }) {
+  const { t } = useTranslation();
   const update = (index: number, patch: Partial<WebhookFilterDraft>) =>
     props.onChange(
       props.filters.map((filter, at) => (at === index ? { ...filter, ...patch } : filter)),
@@ -254,10 +268,15 @@ function WebhookFilterRows(props: {
       {props.filters.map((filter, index) => (
         <View key={filter.id}>
           <View className="flex-row items-center gap-3 border-t border-border-subtle px-4 pt-3">
-            <Text className="min-w-0 flex-1 text-sm text-foreground-muted">Filter {index + 1}</Text>
+            <Text className="min-w-0 flex-1 text-sm text-foreground-muted">
+              {t("mobile.settings.dynamic.filter", { index: index + 1 })}
+            </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Remove filter ${index + 1}`}
+              accessibilityLabel={t(
+                "mobile.dynamic.SettingsScheduledTasksRouteScreen.remove-filter-param",
+                { value: index + 1 },
+              )}
               disabled={props.disabled}
               hitSlop={8}
               onPress={() => props.onChange(removeWebhookFilterDraft(props.filters, filter.id))}
@@ -267,14 +286,14 @@ function WebhookFilterRows(props: {
             </Pressable>
           </View>
           <FormField
-            label="Path"
+            label={t("mobile.settings.SettingsScheduledTasksRouteScreen.path")}
             value={filter.path}
             placeholder="body.action"
             disabled={props.disabled}
             onChange={(path) => update(index, { path })}
           />
           <SelectRow
-            label="Test"
+            label={t("mobile.settings.SettingsScheduledTasksRouteScreen.test")}
             value={WEBHOOK_FILTER_OPS.find((option) => option.op === filter.op)?.label ?? ""}
             actions={WEBHOOK_FILTER_OPS.map((option) => ({
               id: option.op,
@@ -288,7 +307,11 @@ function WebhookFilterRows(props: {
           />
           {filter.op === "exists" ? null : (
             <FormField
-              label={filter.op === "in" ? "Values, comma-separated" : "Value"}
+              label={
+                filter.op === "in"
+                  ? t("mobile.dynamic.SettingsScheduledTasksRouteScreen.values-comma-separated")
+                  : t("mobile.dynamic.SettingsScheduledTasksRouteScreen.value")
+              }
               value={filter.value}
               placeholder={filter.op === "in" ? "opened, reopened" : "opened"}
               disabled={props.disabled}
@@ -305,15 +328,16 @@ function WebhookFilterRows(props: {
           className="min-h-14 flex-row items-center gap-3 border-t border-border-subtle px-4 py-3 active:opacity-70"
         >
           <Text textRole="body" className="min-w-0 flex-1 text-foreground">
-            Add filter
+            {t("mobile.settings.SettingsScheduledTasksRouteScreen.add-filter")}
           </Text>
           <SymbolView name="plus" size={16} tintColorClassName="accent-icon" />
         </Pressable>
       ) : null}
       {props.filters.length > 0 ? (
         <Text className="px-4 pb-3 text-sm text-foreground-muted">
-          Runs only when every filter matches. Other requests are logged as filtered. Separate “is
-          one of” values with commas; a value can't contain a comma.
+          {t(
+            "mobile.settings.SettingsScheduledTasksRouteScreen.runs-only-when-every-filter-matches-other-requests-are-logged-as-filtered-separate-is-one-of-values-with-commas-a-value-can-t-contain-a-comma",
+          )}
         </Text>
       ) : null}
     </>
@@ -361,6 +385,7 @@ function PickerRow(props: {
 }
 
 export function SettingsScheduledTasksRouteScreen() {
+  const { t } = useTranslation();
   const [now, setNow] = useState(Date.now);
   useFocusEffect(() => {
     const updateNow = () => setNow(Date.now());
@@ -397,7 +422,7 @@ export function SettingsScheduledTasksRouteScreen() {
           withNativeGlassHeaderItem({
             type: "button",
             label: "",
-            accessibilityLabel: "New task",
+            accessibilityLabel: t("mobile.schedule.new"),
             icon: { type: "sfSymbol", name: "plus" } as const,
             disabled: visibleEnvironments.length === 0,
             onPress: newTask,
@@ -405,13 +430,13 @@ export function SettingsScheduledTasksRouteScreen() {
         ]}
       />
       <SettingsScreen
-        title="Scheduled tasks"
+        title={t("mobile.settings.SettingsScheduledTasksRouteScreen.scheduled-tasks")}
         trailing={
           <View className="flex-row items-center">
             <AndroidSettingsEnvironmentFilter />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="New task"
+              accessibilityLabel={t("mobile.settings.SettingsScheduledTasksRouteScreen.new-task")}
               accessibilityState={{ disabled: visibleEnvironments.length === 0 }}
               disabled={visibleEnvironments.length === 0}
               onPress={newTask}
@@ -459,8 +484,12 @@ export function SettingsScheduledTasksRouteScreen() {
           ) : (
             <Text className="px-2 text-base text-foreground-muted">
               {availableTargets.length === 0
-                ? "Connect an environment to view and create scheduled tasks."
-                : "No environments match these filters. Change the filter above."}
+                ? t(
+                    "mobile.dynamic.SettingsScheduledTasksRouteScreen.connect-an-environment-to-view-and-create-scheduled-tasks",
+                  )
+                : t(
+                    "mobile.dynamic.SettingsScheduledTasksRouteScreen.no-environments-match-these-filters-change-the-filter-above",
+                  )}
             </Text>
           )}
         </ScrollView>
@@ -469,17 +498,28 @@ export function SettingsScheduledTasksRouteScreen() {
   );
 }
 
-// The "New task" action and takeScheduledTaskNewLink clear the editor before
+// The t("mobile.schedule.new") action and takeScheduledTaskNewLink clear the editor before
 // this screen opens, so it starts from the default target.
 export function SettingsScheduledTaskNewRouteScreen() {
-  return <SettingsScheduledTaskEditorScreen title="New scheduled task" />;
+  const { t } = useTranslation();
+  return (
+    <SettingsScheduledTaskEditorScreen
+      title={t("mobile.settings.SettingsScheduledTasksRouteScreen.new-scheduled-task")}
+    />
+  );
 }
 
 export function SettingsScheduledTaskEditRouteScreen() {
-  return <SettingsScheduledTaskEditorScreen title="Edit scheduled task" />;
+  const { t } = useTranslation();
+  return (
+    <SettingsScheduledTaskEditorScreen
+      title={t("mobile.settings.SettingsScheduledTasksRouteScreen.edit-scheduled-task")}
+    />
+  );
 }
 
 function SettingsScheduledTaskEditorScreen({ title }: { readonly title: string }) {
+  const t = useTranslate();
   const { editor, voiceOwnerKey, readEditor, setEditor, hasChanges, draftForEnvironment } =
     useScheduledTaskEditor();
   const { availableTargets } = useSettingsEnvironmentFilter();
@@ -533,13 +573,13 @@ function SettingsScheduledTaskEditorScreen({ title }: { readonly title: string }
       return;
     }
     if (saving) {
-      Dialog.alert("Saving task", "Wait for the task to finish saving before leaving.");
+      Dialog.alert(t("mobile.schedule.saving"), t("mobile.schedule.waitSaving"));
       return;
     }
-    Dialog.alert("Discard changes?", "Your unsaved changes will be lost.", [
-      { text: "Keep editing", style: "cancel" },
+    Dialog.alert(t("mobile.schedule.discardTitle"), t("mobile.schedule.discardDetail"), [
+      { text: t("mobile.schedule.keepEditing"), style: "cancel" },
       {
-        text: "Discard changes",
+        text: t("mobile.schedule.discard"),
         style: "destructive",
         onPress: () => {
           if (voiceInput.isBusy) voiceInput.cancel();
@@ -561,7 +601,7 @@ function SettingsScheduledTaskEditorScreen({ title }: { readonly title: string }
               withNativeGlassHeaderItem({
                 type: "button",
                 label: "",
-                accessibilityLabel: "Back",
+                accessibilityLabel: t("mobile.schedule.back"),
                 icon: { type: "sfSymbol", name: "chevron.backward" },
                 onPress: () => navigation.goBack(),
               }),
@@ -627,8 +667,12 @@ function SettingsScheduledTaskEditorScreen({ title }: { readonly title: string }
         ) : (
           <Text className="px-2 text-base text-foreground-muted">
             {availableTargets.length === 0
-              ? "Connect an environment to create a scheduled task."
-              : "No environments match the current filters. Change the filters to create a task."}
+              ? t(
+                  "mobile.dynamic.SettingsScheduledTasksRouteScreen.connect-an-environment-to-create-a-scheduled-task",
+                )
+              : t(
+                  "mobile.dynamic.SettingsScheduledTasksRouteScreen.no-environments-match-the-current-filters-change-the-filters-to-create-a-task",
+                )}
           </Text>
         )}
       </ScrollView>
@@ -661,6 +705,7 @@ function TaskForm({
   readonly onSaved: () => void;
   readonly onChangeEnvironment: (target: SettingsTarget) => void;
 }) {
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<ScheduledTaskRoutes>>();
   const tasks = useEnvironmentQuery(
     serverEnvironment.scheduledTasksLive({ environmentId, input: {} }),
@@ -713,21 +758,18 @@ function TaskForm({
       parseMaxDeliveryAge(draft.schedule.maxDeliveryAgeMinutes) === undefined
     ) {
       Dialog.alert(
-        "Invalid age limit",
-        `Enter whole minutes from 1 to ${MAX_WEBHOOK_DELIVERY_AGE_MINUTES}, or leave it blank.`,
+        t("mobile.schedule.invalidAge"),
+        t("mobile.schedule.ageHint", { max: MAX_WEBHOOK_DELIVERY_AGE_MINUTES }),
       );
       return;
     }
     const parsedFilters = parseWebhookFilterDrafts(draft.schedule.filters);
     if (draft.schedule.mode === "webhook" && "error" in parsedFilters) {
-      Dialog.alert("Invalid filter", parsedFilters.error);
+      Dialog.alert(t("mobile.schedule.invalidFilter"), parsedFilters.error);
       return;
     }
     if (draft.schedule.mode === "webhook" && schedule === null) {
-      Dialog.alert(
-        "Invalid webhook settings",
-        "Each dedupe key must contain a valid request placeholder. The coalesce window must be whole seconds from 10 to 3600, or blank.",
-      );
+      Dialog.alert(t("mobile.schedule.invalidWebhook"), t("settings.extra.webhookHint"));
       return;
     }
     if (
@@ -738,14 +780,11 @@ function TaskForm({
       !schedule ||
       (draft.workspace === "existing_worktree" && !draft.checkoutPath.trim())
     ) {
-      Dialog.alert(
-        "Incomplete task",
-        "Add a name, prompt, project, model, valid schedule, and checkout path if needed.",
-      );
+      Dialog.alert(t("mobile.schedule.incomplete"), t("mobile.schedule.incompleteHint"));
       return;
     }
     if (!projects.some((project) => project.id === draft.projectId)) {
-      Dialog.alert("Project unavailable", "Choose a project in this environment.");
+      Dialog.alert(t("mobile.schedule.projectUnavailable"), t("mobile.schedule.projectHint"));
       return;
     }
     const input: ScheduledTaskUpsertInput = {
@@ -777,7 +816,7 @@ function TaskForm({
     setSaving(false);
     if (result._tag === "Failure") {
       submissionPending.current = false;
-      failure("Could not save task", result);
+      failure(t("mobile.schedule.saveFailed"), result);
       return;
     }
     onSaved();
@@ -792,17 +831,21 @@ function TaskForm({
         importantForAccessibility={saving ? "no-hide-descendants" : "auto"}
       >
         {taskMissing ? (
-          <Text className="px-1 text-base text-danger-foreground">This task no longer exists.</Text>
+          <Text className="px-1 text-base text-danger-foreground">
+            {t("mobile.settings.SettingsScheduledTasksRouteScreen.this-task-no-longer-exists")}
+          </Text>
         ) : null}
 
         {environmentUnavailable ? (
           <Text className="px-1 text-base text-danger-foreground">
-            This environment is disconnected. Reconnect before saving.
+            {t(
+              "mobile.settings.SettingsScheduledTasksRouteScreen.this-environment-is-disconnected-reconnect-before-saving",
+            )}
           </Text>
         ) : null}
         <SettingsSection>
           <SelectRow
-            label="Runs on"
+            label={t("mobile.settings.SettingsScheduledTasksRouteScreen.runs-on")}
             value={environmentLabel}
             valueIcon={
               <EnvironmentMachineSymbol
@@ -830,23 +873,25 @@ function TaskForm({
             }}
           />
         </SettingsSection>
-        <SettingsSection title="Task">
+        <SettingsSection title={t("mobile.settings.SettingsScheduledTasksRouteScreen.task")}>
           <FormField
-            label="Name"
+            label={t("mobile.settings.SettingsScheduledTasksRouteScreen.name")}
             disabled={saving}
             value={draft.title}
-            placeholder="Check for issues"
+            placeholder={t("mobile.settings.SettingsScheduledTasksRouteScreen.check-for-issues")}
             onChange={(title) => setDraft({ ...draft, title })}
           />
           {promptField}
         </SettingsSection>
 
-        <SettingsSection title="Context">
+        <SettingsSection title={t("mobile.settings.SettingsScheduledTasksRouteScreen.context")}>
           <SelectRow
-            label="Project"
+            label={t("mobile.settings.SettingsScheduledTasksRouteScreen.project")}
             value={
               projects.find((project) => project.id === draft.projectId)?.title ??
-              (projects.length ? "Choose project" : "No projects available")
+              (projects.length
+                ? t("mobile.schedule.chooseProject")
+                : t("mobile.schedule.noProjects"))
             }
             actions={projects.map((project) => ({
               id: project.id,
@@ -876,7 +921,7 @@ function TaskForm({
             }}
           />
           <PickerRow
-            label="Model"
+            label={t("mobile.settings.SettingsScheduledTasksRouteScreen.model")}
             borderTop
             value={
               modelOptions.find(
@@ -885,37 +930,39 @@ function TaskForm({
                   option.selection.model === draft.modelSelection?.model,
               )?.label ??
               draft.modelSelection?.model ??
-              (modelOptions.length ? "Choose model" : "No models available")
+              (modelOptions.length
+                ? t("mobile.schedule.chooseModel")
+                : t("mobile.schedule.noModels"))
             }
             onPress={() => navigation.navigate("SettingsScheduledTaskModel")}
             disabled={saving || dictationPending || environmentUnavailable}
           />
         </SettingsSection>
 
-        <SettingsSection title="Workspace">
+        <SettingsSection title={t("mobile.settings.SettingsScheduledTasksRouteScreen.workspace")}>
           <SelectRow
-            label="Run in"
+            label={t("mobile.settings.SettingsScheduledTasksRouteScreen.run-in")}
             value={
               draft.workspace === "worktree"
-                ? "New worktree"
+                ? t("mobile.schedule.worktree")
                 : draft.workspace === "root"
-                  ? "Project checkout"
-                  : "Specific checkout"
+                  ? t("mobile.schedule.projectCheckout")
+                  : t("mobile.schedule.checkout")
             }
             actions={[
               {
                 id: "worktree",
-                title: "New worktree",
+                title: t("mobile.schedule.worktree"),
                 state: draft.workspace === "worktree" ? "on" : undefined,
               },
               {
                 id: "root",
-                title: "Project checkout",
+                title: t("mobile.schedule.projectCheckout"),
                 state: draft.workspace === "root" ? "on" : undefined,
               },
               {
                 id: "existing_worktree",
-                title: "Specific checkout",
+                title: t("mobile.schedule.checkout"),
                 state: draft.workspace === "existing_worktree" ? "on" : undefined,
               },
             ]}
@@ -926,7 +973,7 @@ function TaskForm({
           />
           {draft.workspace === "worktree" ? (
             <PickerRow
-              label="Base branch"
+              label={t("mobile.settings.SettingsScheduledTasksRouteScreen.base-branch")}
               value={resolveNewTaskBranchLabel({
                 branchName: draft.baseRef,
                 startFromOrigin: draft.startFromOrigin,
@@ -939,7 +986,7 @@ function TaskForm({
           ) : null}
           {draft.workspace === "existing_worktree" ? (
             <FormField
-              label="Checkout path"
+              label={t("mobile.settings.SettingsScheduledTasksRouteScreen.checkout-path")}
               disabled={saving}
               value={draft.checkoutPath}
               borderTop
@@ -948,14 +995,14 @@ function TaskForm({
           ) : null}
         </SettingsSection>
 
-        <SettingsSection title="Schedule">
+        <SettingsSection title={t("mobile.settings.SettingsScheduledTasksRouteScreen.schedule")}>
           <View className="px-4 py-3">
             <SegmentedControl
               variant="card"
               options={[
-                { value: "fixed_time", label: "At a time" },
-                { value: "interval", label: "Interval" },
-                { value: "webhook", label: "On webhook" },
+                { value: "fixed_time", label: t("mobile.schedule.atTime") },
+                { value: "interval", label: t("mobile.schedule.interval") },
+                { value: "webhook", label: t("mobile.schedule.webhook") },
               ]}
               selected={draft.schedule.mode}
               onSelect={(mode) => {
@@ -975,18 +1022,21 @@ function TaskForm({
             <>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Time, ${formatTime(draft.schedule.timeOfDay)}`}
+                accessibilityLabel={t(
+                  "mobile.dynamic.SettingsScheduledTasksRouteScreen.time-param",
+                  { value: formatTime(draft.schedule.timeOfDay, i18n.resolvedLanguage ?? "en") },
+                )}
                 onPress={() => setTimePickerOpen((open) => !open)}
                 className="min-h-14 flex-row items-center gap-3 border-t border-border-subtle px-4 py-3 active:opacity-70"
               >
                 <Text textRole="body" className="text-foreground">
-                  Time
+                  {t("mobile.settings.SettingsScheduledTasksRouteScreen.time")}
                 </Text>
                 <Text
                   textRole="footnote"
                   className="min-w-0 flex-1 text-right text-foreground-muted"
                 >
-                  {formatTime(draft.schedule.timeOfDay)}
+                  {formatTime(draft.schedule.timeOfDay, i18n.resolvedLanguage ?? "en")}
                 </Text>
                 <SymbolView
                   name="chevron.right"
@@ -1008,23 +1058,30 @@ function TaskForm({
                 />
               ) : null}
               <SelectRow
-                label="Repeat"
-                value={repeatLabel(draft.schedule.weekdays)}
+                label={t("mobile.settings.SettingsScheduledTasksRouteScreen.repeat")}
+                value={repeatLabel(draft.schedule.weekdays, t, i18n.resolvedLanguage ?? "en")}
                 borderTop
                 actions={[
                   {
                     id: "every_day",
-                    title: "Every day",
+                    title: t("schedule.daily"),
                     state: draft.schedule.weekdays.length === 7 ? "on" : undefined,
                   },
                   {
                     id: "weekdays",
-                    title: "Weekdays",
-                    state: repeatLabel(draft.schedule.weekdays) === "Weekdays" ? "on" : undefined,
+                    title: t("schedule.weekdays"),
+                    state:
+                      new Set(draft.schedule.weekdays).size === 5 &&
+                      [1, 2, 3, 4, 5].every((day) => draft.schedule.weekdays.includes(day))
+                        ? "on"
+                        : undefined,
                   },
                   ...DAYS.map((day) => ({
                     id: String(day.index),
-                    title: day.label,
+                    title: new Date(2024, 0, 7 + day.index).toLocaleDateString(
+                      i18n.resolvedLanguage ?? "en",
+                      { weekday: "short" },
+                    ),
                     attributes: { keepsMenuPresented: true },
                     state: draft.schedule.weekdays.includes(day.index)
                       ? ("on" as const)
@@ -1062,9 +1119,13 @@ function TaskForm({
                 disabled={!canOperate || saving || environmentUnavailable}
               />
               <FormField
-                label="Skip requests older than (minutes)"
+                label={t(
+                  "mobile.settings.SettingsScheduledTasksRouteScreen.skip-requests-older-than-minutes",
+                )}
                 value={draft.schedule.maxDeliveryAgeMinutes}
-                placeholder="Run every request"
+                placeholder={t(
+                  "mobile.settings.SettingsScheduledTasksRouteScreen.run-every-request",
+                )}
                 keyboardType="number-pad"
                 disabled={saving}
                 borderTop
@@ -1080,7 +1141,7 @@ function TaskForm({
                 }
               />
               <FormField
-                label="Replay key template"
+                label={t("mobile.settings.SettingsScheduledTasksRouteScreen.replay-key-template")}
                 value={draft.schedule.replayKey}
                 placeholder="{{headers.delivery-id}}"
                 disabled={saving}
@@ -1090,7 +1151,7 @@ function TaskForm({
                 }
               />
               <FormField
-                label="Coalesce key template"
+                label={t("mobile.settings.SettingsScheduledTasksRouteScreen.coalesce-key-template")}
                 value={draft.schedule.coalesceKey}
                 placeholder="{{body.id}}"
                 disabled={saving}
@@ -1100,7 +1161,9 @@ function TaskForm({
                 }
               />
               <FormField
-                label="Coalesce window (seconds, 10–3600)"
+                label={t(
+                  "mobile.settings.SettingsScheduledTasksRouteScreen.coalesce-window-seconds-10-3600",
+                )}
                 value={draft.schedule.coalesceWindowSeconds}
                 placeholder="120"
                 keyboardType="number-pad"
@@ -1111,14 +1174,15 @@ function TaskForm({
                 }
               />
               <Text className="px-4 pb-3 text-sm text-foreground-muted">
-                Replay keys suppress repeats for 7 days. Coalescing runs the latest payload when the
-                window from the first delivery closes. Empty keys run normally.
+                {t(
+                  "mobile.settings.SettingsScheduledTasksRouteScreen.replay-keys-suppress-repeats-for-7-days-coalescing-runs-the-latest-payload-when-the-window-from-the-first-delivery-closes-empty-keys-run-normally",
+                )}
               </Text>
             </>
           ) : (
             <>
               <FormField
-                label="Minutes between runs"
+                label={t("mobile.settings.SettingsScheduledTasksRouteScreen.minutes-between-runs")}
                 value={draft.schedule.intervalMinutes}
                 keyboardType="decimal-pad"
                 disabled={saving}
@@ -1129,23 +1193,28 @@ function TaskForm({
               />
               {Number(draft.schedule.intervalMinutes) < 1 ? (
                 <Text className="px-4 pb-3 text-sm text-danger-foreground">
-                  Intervals must be at least 1 minute. Update this interval before saving.
+                  {t(
+                    "mobile.settings.SettingsScheduledTasksRouteScreen.intervals-must-be-at-least-1-minute-update-this-interval-before-saving",
+                  )}
                 </Text>
               ) : draft.task?.schedule.type === "interval" &&
                 draft.task.schedule.everyMs < 60_000 ? (
                 <Text className="px-4 pb-3 text-sm text-foreground-muted">
-                  This task previously ran more than once per minute. Saving requires an interval of
-                  at least 1 minute.
+                  {t(
+                    "mobile.settings.SettingsScheduledTasksRouteScreen.this-task-previously-ran-more-than-once-per-minute-saving-requires-an-interval-of-at-least-1-minute",
+                  )}
                 </Text>
               ) : null}
             </>
           )}
           <View className="min-h-14 flex-row items-center gap-3 border-t border-border-subtle px-4 py-3">
             <Text textRole="body" className="min-w-0 flex-1 text-foreground">
-              Enabled
+              {t("mobile.settings.SettingsScheduledTasksRouteScreen.enabled")}
             </Text>
             <ThemedSwitch
-              accessibilityLabel="Task enabled"
+              accessibilityLabel={t(
+                "mobile.settings.SettingsScheduledTasksRouteScreen.task-enabled",
+              )}
               value={draft.enabled}
               onValueChange={(enabled) => setDraft({ ...draft, enabled })}
             />
@@ -1153,7 +1222,9 @@ function TaskForm({
         </SettingsSection>
         {draft.schedule.mode === "fixed_time" ? (
           <Text className="px-2 text-sm text-foreground-muted">
-            Time uses the environment's time zone, which may differ from your phone's.
+            {t(
+              "mobile.settings.SettingsScheduledTasksRouteScreen.time-uses-the-environment-s-time-zone-which-may-differ-from-your-phone-s",
+            )}
           </Text>
         ) : null}
       </View>
@@ -1163,7 +1234,13 @@ function TaskForm({
         loading={saving}
         disabled={!canOperate || dictationPending || taskMissing || environmentUnavailable}
         onPress={() => void save()}
-        label={saving ? "Saving…" : draft.task ? "Save changes" : "Create task"}
+        label={
+          saving
+            ? t("mobile.dynamic.SettingsScheduledTasksRouteScreen.saving")
+            : draft.task
+              ? t("mobile.dynamic.SettingsScheduledTasksRouteScreen.save-changes")
+              : t("mobile.dynamic.SettingsScheduledTasksRouteScreen.create-task")
+        }
       />
     </View>
   );
@@ -1180,6 +1257,7 @@ function WebhookScheduleDetails({
   readonly signatureConfigured: boolean;
   readonly disabled: boolean;
 }) {
+  const { t } = useTranslation();
   const [rotating, setRotating] = useState(false);
   const rotate = useAtomCommand(serverEnvironment.rotateScheduledTaskWebhookToken, {
     label: "scheduled task rotate webhook token",
@@ -1193,24 +1271,41 @@ function WebhookScheduleDetails({
   return (
     <View className="gap-2 border-t border-border-subtle px-4 py-3">
       <Text className="text-sm text-foreground-muted">
-        {
-          "The prompt can use {{body.a.b}}, {{headers.name}}, {{query.name}}, {{body}} and {{request}}. The filled-in prompt is all the agent sees."
-        }
+        {t(
+          "mobile.dynamic.SettingsScheduledTasksRouteScreen.the-prompt-can-use-param-param-param-param-and-param-the-filled-in-prompt-is-all-the-agent-sees",
+          {
+            bodyPathTemplate: "{{body.a.b}}",
+            headerTemplate: "{{headers.name}}",
+            queryTemplate: "{{query.name}}",
+            bodyTemplate: "{{body}}",
+            requestTemplate: "{{request}}",
+          },
+        )}
       </Text>
       {task === null || resolved === null ? (
-        <Text className="text-sm text-foreground-muted">Save the task to get its webhook URL.</Text>
+        <Text className="text-sm text-foreground-muted">
+          {t(
+            "mobile.settings.SettingsScheduledTasksRouteScreen.save-the-task-to-get-its-webhook-url",
+          )}
+        </Text>
       ) : (
         <>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Copy webhook URL"
-            accessibilityHint="Copies the URL to the clipboard"
+            accessibilityLabel={t(
+              "mobile.settings.SettingsScheduledTasksRouteScreen.copy-webhook-url",
+            )}
+            accessibilityHint={t(
+              "mobile.settings.SettingsScheduledTasksRouteScreen.copies-the-url-to-the-clipboard",
+            )}
             disabled={!resolved.copyable}
             onPress={() => void tryCopyTextWithHaptic(resolved.address)}
             className="gap-1 active:opacity-70"
           >
             <Text textRole="body" className="text-foreground">
-              {resolved.copyable ? "Webhook URL" : "Webhook path"}
+              {resolved.copyable
+                ? t("mobile.dynamic.SettingsScheduledTasksRouteScreen.webhook-url")
+                : t("mobile.dynamic.SettingsScheduledTasksRouteScreen.webhook-path")}
             </Text>
             <Text className="text-sm text-foreground-muted" numberOfLines={2} selectable>
               {resolved.address}
@@ -1220,14 +1315,18 @@ function WebhookScheduleDetails({
             <Text className="text-sm text-foreground-muted">{resolved.note}</Text>
           ) : null}
           <Button
-            label={rotating ? "Rotating…" : "Rotate URL"}
+            label={
+              rotating
+                ? t("mobile.dynamic.SettingsScheduledTasksRouteScreen.rotating")
+                : t("mobile.dynamic.SettingsScheduledTasksRouteScreen.rotate-url")
+            }
             tone="danger"
             disabled={disabled || rotating}
             onPress={() =>
-              Dialog.alert("Rotate URL?", "The current URL stops working immediately.", [
-                { text: "Cancel", style: "cancel" },
+              Dialog.alert(t("mobile.schedule.rotateTitle"), t("mobile.schedule.rotateDetail"), [
+                { text: t("mobile.schedule.cancel"), style: "cancel" },
                 {
-                  text: "Rotate",
+                  text: t("mobile.schedule.rotate"),
                   style: "destructive",
                   onPress: () => {
                     setRotating(true);
@@ -1235,7 +1334,7 @@ function WebhookScheduleDetails({
                       setRotating(false);
                       if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
                         Dialog.alert(
-                          "Could not rotate URL",
+                          t("mobile.schedule.rotateFailed"),
                           String(squashAtomCommandFailure(result)),
                         );
                       }
@@ -1250,7 +1349,9 @@ function WebhookScheduleDetails({
       )}
       {signatureConfigured ? (
         <Text className="text-sm text-foreground-muted">
-          Signature check configured on desktop/web.
+          {t(
+            "mobile.settings.SettingsScheduledTasksRouteScreen.signature-check-configured-on-desktop-web",
+          )}
         </Text>
       ) : null}
     </View>
@@ -1268,6 +1369,7 @@ function EnvironmentTasks({
   readonly projectIds: readonly ProjectId[] | null;
   readonly onEdit: (task: ScheduledTask) => void;
 }) {
+  const { t, i18n } = useTranslation();
   const environmentId = environment.environmentId;
   const tasks = useEnvironmentQuery(
     serverEnvironment.scheduledTasksLive({ environmentId, input: {} }),
@@ -1304,7 +1406,16 @@ function EnvironmentTasks({
         : action === "toggle"
           ? await setEnabled({ environmentId, input: { id: task.id, enabled: !task.enabled } })
           : await remove({ environmentId, input: { id: task.id } });
-    failure(`Could not ${action === "toggle" ? "update" : action} task`, result);
+    failure(
+      t(
+        action === "toggle"
+          ? "mobile.schedule.updateFailed"
+          : action === "run"
+            ? "mobile.schedule.runFailed"
+            : "mobile.schedule.deleteFailed",
+      ),
+      result,
+    );
   };
 
   return (
@@ -1323,10 +1434,14 @@ function EnvironmentTasks({
       {tasks.error ? (
         <Text className="p-4 text-base text-danger-foreground">{tasks.error}</Text>
       ) : !tasks.data ? (
-        <Text className="p-4 text-base text-foreground-muted">Loading tasks…</Text>
+        <Text className="p-4 text-base text-foreground-muted">
+          {t("mobile.settings.SettingsScheduledTasksRouteScreen.loading-tasks")}
+        </Text>
       ) : visibleTasks?.length === 0 ? (
         <Text className="p-4 text-base text-foreground-muted">
-          {projectIds === null ? "No scheduled tasks yet." : "No tasks in this project."}
+          {projectIds === null
+            ? t("mobile.dynamic.SettingsScheduledTasksRouteScreen.no-scheduled-tasks-yet")
+            : t("mobile.dynamic.SettingsScheduledTasksRouteScreen.no-tasks-in-this-project")}
         </Text>
       ) : (
         visibleTasks?.map((task, index) => (
@@ -1340,7 +1455,9 @@ function EnvironmentTasks({
           >
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Edit ${task.title}`}
+              accessibilityLabel={t("mobile.dynamic.SettingsScheduledTasksRouteScreen.edit-param", {
+                title: task.title,
+              })}
               onPress={() => {
                 onEdit(task);
               }}
@@ -1350,33 +1467,39 @@ function EnvironmentTasks({
                 {task.title}
               </Text>
               <Text className="text-sm text-foreground-muted" numberOfLines={2}>
-                {describeSchedule(task)}
+                {describeSchedule(task, t, i18n.resolvedLanguage ?? "en")}
                 {!task.enabled
-                  ? " · Paused"
+                  ? ` · ${t("schedule.paused")}`
                   : task.nextRunAt
-                    ? ` · ${formatNextScheduledTaskRun(task.nextRunAt, now)}`
+                    ? ` · ${formatNextScheduledTaskRun(task.nextRunAt, now, t, i18n.resolvedLanguage ?? "en")}`
                     : ""}
               </Text>
               {task.lastRunError ? (
                 <Text className="text-sm text-danger-foreground" numberOfLines={2}>
-                  Last run failed: {task.lastRunError}
+                  {t("mobile.settings.dynamic.lastRunFailed", { error: task.lastRunError })}
                 </Text>
               ) : null}
             </Pressable>
             <Menu
               actions={[
-                { id: "edit", title: "Edit" },
+                { id: "edit", title: t("mobile.schedule.edit") },
                 {
                   id: "toggle",
-                  title: task.enabled ? "Pause" : "Resume",
+                  title: task.enabled ? t("mobile.schedule.pause") : t("mobile.schedule.resume"),
                   attributes: { disabled: !canOperate },
                 },
                 ...(task.schedule.type === "webhook"
                   ? []
-                  : [{ id: "run", title: "Run now", attributes: { disabled: !canOperate } }]),
+                  : [
+                      {
+                        id: "run",
+                        title: t("mobile.schedule.run"),
+                        attributes: { disabled: !canOperate },
+                      },
+                    ]),
                 {
                   id: "delete",
-                  title: "Delete",
+                  title: t("mobile.schedule.delete"),
                   attributes: { destructive: true, disabled: !canOperate },
                 },
               ]}
@@ -1385,10 +1508,10 @@ function EnvironmentTasks({
                 if (action === "edit") {
                   onEdit(task);
                 } else if (action === "delete") {
-                  Dialog.alert("Delete task?", task.title, [
-                    { text: "Cancel", style: "cancel" },
+                  Dialog.alert(t("mobile.schedule.deleteTitle"), task.title, [
+                    { text: t("mobile.schedule.cancel"), style: "cancel" },
                     {
-                      text: "Delete",
+                      text: t("mobile.schedule.delete"),
                       style: "destructive",
                       onPress: () => void act(task, "delete"),
                     },
@@ -1400,7 +1523,10 @@ function EnvironmentTasks({
             >
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Actions for ${task.title}`}
+                accessibilityLabel={t(
+                  "mobile.dynamic.SettingsScheduledTasksRouteScreen.actions-for-param",
+                  { title: task.title },
+                )}
                 className="h-11 w-11 items-center justify-center"
               >
                 <SymbolView

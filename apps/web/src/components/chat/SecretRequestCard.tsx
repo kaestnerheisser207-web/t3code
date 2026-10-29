@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { pipe } from "effect/Function";
 import {
   SECRET_REQUEST_DEFAULT_PLACEHOLDER,
@@ -54,6 +55,7 @@ function PendingSecretRequestForm(props: {
   readonly environmentId: EnvironmentId;
   readonly item: SecretRequestItem;
 }) {
+  const t = useTranslate();
   const { item } = props;
   const inputId = useId();
   const errorId = useId();
@@ -137,7 +139,7 @@ function PendingSecretRequestForm(props: {
           />
         </div>
         <Button type="submit" disabled={submitting || secret.trim().length === 0}>
-          Save securely
+          {t("web.ui.SecretRequestCard.save-securely")}
         </Button>
       </div>
       {error !== null ? (
@@ -160,7 +162,7 @@ function PendingSecretRequestForm(props: {
           disabled={submitting}
           onClick={() => void send({ type: "decline" })}
         >
-          Decline
+          {t("web.ui.SecretRequestCard.decline")}
         </Button>
       </div>
     </form>

@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import type { CommandOutputView } from "@t3tools/client-runtime/state/command-output";
 import type { EnvironmentId, ThreadId, TurnItemId } from "@t3tools/contracts";
 import { TERMINAL_PALETTES, terminalOutputSpans } from "@t3tools/shared/terminalOutput";
@@ -29,6 +31,7 @@ export function CommandOutputPanel(props: {
   readonly itemId: TurnItemId;
   readonly source?: TurnItemSource["commandOutput"] | undefined;
 }) {
+  const t = useTranslate();
   const input = { threadId: props.threadId, itemId: props.itemId };
   const { data, error } = useEnvironmentQuery<CommandOutputView, unknown>(
     props.source
@@ -47,16 +50,34 @@ export function CommandOutputPanel(props: {
   });
 
   if (text.length === 0) {
-    if (error) return <div className="text-destructive">Couldn&apos;t load output: {error}</div>;
-    if (data === null) return <div className="text-muted-foreground italic">Loading output…</div>;
-    return data.running ? null : <div className="text-muted-foreground italic">No output.</div>;
+    if (error)
+      return (
+        <div className="text-destructive">
+          <Trans
+            t={t}
+            i18nKey="web.rich.CommandOutputPanel.couldn-t-load-output-part"
+            components={{ value0: <>{error}</> }}
+          />
+        </div>
+      );
+    if (data === null)
+      return (
+        <div className="text-muted-foreground italic">
+          {t("web.ui.CommandOutputPanel.loading-output")}
+        </div>
+      );
+    return data.running ? null : (
+      <div className="text-muted-foreground italic">{t("web.ui.CommandOutputPanel.no-output")}</div>
+    );
   }
   // Parse after all hooks to preserve the text/theme compiler cache.
   const spans = terminalOutputSpans(text, TERMINAL_PALETTES[resolvedTheme]);
   return (
     <div>
       {data?.output.truncated ? (
-        <div className="text-muted-foreground italic">Earlier output not shown</div>
+        <div className="text-muted-foreground italic">
+          {t("web.ui.CommandOutputPanel.earlier-output-not-shown")}
+        </div>
       ) : null}
       <div
         ref={scrollRef}

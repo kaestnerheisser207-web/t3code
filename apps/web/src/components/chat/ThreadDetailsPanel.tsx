@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type {
   EditorId,
   EnvironmentId,
@@ -70,6 +71,7 @@ interface ThreadDetailsPanelProps extends Pick<
 }
 
 export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
+  const t = useTranslate();
   const fileScripts = useT3ProjectFileScripts(
     props.environmentId,
     props.activeProjectScripts ? props.gitCwd : null,
@@ -111,7 +113,7 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
         <>
           <ThreadDetailsSection
             headingId="thread-details-workspace-heading"
-            title="Workspace"
+            title={t("web.ui.ThreadDetailsPanel.workspace")}
             separated={false}
             showHeading={false}
           >
@@ -160,7 +162,7 @@ export function ThreadDetailsPanel(props: ThreadDetailsPanelProps) {
           {props.gitCwd ? (
             <ThreadDetailsSection
               headingId="thread-details-version-control-heading"
-              title="Version Control"
+              title={t("web.ui.ThreadDetailsPanel.version-control")}
               showHeading={false}
               separated={density === "full"}
             >

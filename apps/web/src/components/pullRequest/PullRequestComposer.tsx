@@ -1,3 +1,5 @@
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import {
   capitalizeTerm,
   sourceControlClients,
@@ -39,6 +41,7 @@ export function PullRequestComposer({
   onReviewSubmitted: () => void;
   openReviewRequest?: number | undefined;
 }) {
+  const t = useTranslate();
   const term = sourceControlClients.get(detail.provider).changeRequest.singular;
   const [open, setOpen] = useState(false);
   const [reviewPending, setReviewPending] = useState(false);
@@ -80,10 +83,17 @@ export function PullRequestComposer({
         render={<Button size="icon" variant="glass" />}
         aria-label={
           pendingComments.length > 0
-            ? `Review ${term}, ${pendingComments.length} ${pendingComments.length === 1 ? "comment" : "comments"} pending`
+            ? t("web.dynamic.PullRequestComposer.pendingReviewCount", {
+                term: sourceControlTerm(t, term),
+                count: pendingComments.length,
+              })
             : reviewStarted || !canComment
-              ? `Review ${term}`
-              : `Comment on ${term}`
+              ? t("web.dynamic.PullRequestComposer.review-param", {
+                  term: sourceControlTerm(t, term),
+                })
+              : t("web.dynamic.PullRequestComposer.comment-on-param", {
+                  term: sourceControlTerm(t, term),
+                })
         }
       >
         <MessageSquareIcon className="size-4" />
@@ -103,12 +113,14 @@ export function PullRequestComposer({
         sideOffset={8}
         width="lg"
         initialFocus={mode === "review" ? reviewRef : commentRef}
-        aria-label={`${capitalizeTerm(term)} composer`}
+        aria-label={t("web.dynamic.PullRequestComposer.param-composer", {
+          value: capitalizeTerm(term),
+        })}
       >
         <div className="mb-3 flex items-center justify-between gap-2">
           {canComment && verdicts.length > 0 ? (
             <ToggleGroup
-              aria-label="Composer mode"
+              aria-label={t("web.ui.PullRequestComposer.composer-mode")}
               variant="segmented"
               value={[mode]}
               onValueChange={(next) => {
@@ -116,14 +128,22 @@ export function PullRequestComposer({
                 if (value === "comment" || value === "review") setRequestedMode(value);
               }}
             >
-              <Toggle value="comment">Comment</Toggle>
+              <Toggle value="comment">{t("web.ui.PullRequestComposer.comment")}</Toggle>
               <Toggle value="review">
-                {pendingComments.length > 0 ? `Review (${pendingComments.length})` : "Review"}
+                {pendingComments.length > 0
+                  ? t("review.count", { count: pendingComments.length })
+                  : t("web.dynamic.PullRequestComposer.review")}
               </Toggle>
             </ToggleGroup>
           ) : (
             <PopoverTitle>
-              {mode === "review" ? `Review ${term}` : `Comment on ${term}`}
+              {mode === "review"
+                ? t("web.dynamic.PullRequestComposer.review-param", {
+                    term: sourceControlTerm(t, term),
+                  })
+                : t("web.dynamic.PullRequestComposer.comment-on-param", {
+                    term: sourceControlTerm(t, term),
+                  })}
             </PopoverTitle>
           )}
           <div className="flex items-center gap-1">
@@ -131,8 +151,8 @@ export function PullRequestComposer({
               <Button
                 size="icon-xs"
                 variant="ghost"
-                aria-label="Discard pending line comments"
-                title="Discard pending line comments"
+                aria-label={t("web.ui.PullRequestComposer.discard-pending-line-comments")}
+                title={t("web.ui.PullRequestComposer.discard-pending-line-comments")}
                 disabled={reviewPending}
                 onClick={() => clearComments(reviewKey)}
               >
@@ -141,7 +161,7 @@ export function PullRequestComposer({
             ) : null}
             <PopoverClose
               render={<Button size="icon-xs" variant="ghost" />}
-              aria-label="Close composer"
+              aria-label={t("web.ui.PullRequestComposer.close-composer")}
             >
               <XIcon className="size-3.5" />
             </PopoverClose>

@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { settingsScopeEnvironmentLabels } from "./settingsScopeAxis";
 import { Spinner } from "~/components/ui/spinner";
 import { ArchiveIcon, ArchiveX } from "lucide-react";
@@ -21,6 +23,7 @@ import { searchableSetting } from "./settingsSearch";
 import { ProjectFavicon } from "../ProjectFavicon";
 
 export function ArchivedThreadsPanel() {
+  const t = useTranslate();
   const { scope, groups: projectGroups, environments } = useSettingsScope();
   const { unarchiveThread, confirmAndDeleteThread } = useThreadActions();
   const {
@@ -175,7 +178,7 @@ export function ArchivedThreadsPanel() {
       {archivedGroups.length === 0 ? (
         <SettingsSection
           id={isLoadingArchive ? undefined : searchableSetting("archive").id}
-          title={searchableSetting("archive").title}
+          title={searchableSetting("archive", t).title}
         >
           <SettingsRow
             title={
@@ -186,16 +189,17 @@ export function ArchivedThreadsPanel() {
                   <ArchiveIcon className="size-3.5 text-muted-foreground" />
                 )}
                 {isLoadingArchive
-                  ? "Loading archived threads"
+                  ? t("web.dynamic.ArchivedThreadsPanel.loading-archived-threads")
                   : archiveError
-                    ? "Could not load archived threads"
-                    : "No archived threads"}
+                    ? t("web.dynamic.ArchivedThreadsPanel.could-not-load-archived-threads")
+                    : t("web.dynamic.ArchivedThreadsPanel.no-archived-threads")}
               </span>
             }
             description={
               isLoadingArchive
-                ? "Checking connected environments."
-                : (archiveError ?? "Archived threads will appear here.")
+                ? t("web.dynamic.ArchivedThreadsPanel.checking-connected-environments")
+                : (archiveError ??
+                  t("web.dynamic.ArchivedThreadsPanel.archived-threads-will-appear-here"))
             }
           />
         </SettingsSection>
@@ -238,10 +242,18 @@ export function ArchivedThreadsPanel() {
                 title={thread.title}
                 description={
                   <span className={hasMultipleEnvironments ? "block truncate" : undefined}>
-                    {hasMultipleEnvironments ? `${thread.environmentLabel} · ` : null}
-                    Archived <RelativeTime timestamp={thread.archivedAt ?? thread.createdAt} />
-                    {" \u00b7 Created "}
-                    <RelativeTime timestamp={thread.createdAt} />
+                    <Trans
+                      t={t}
+                      i18nKey="web.rich.ArchivedThreadsPanel.part-archived-part-part-part"
+                      components={{
+                        value0: (
+                          <>{hasMultipleEnvironments ? `${thread.environmentLabel} · ` : null}</>
+                        ),
+                        part1: <RelativeTime timestamp={thread.archivedAt ?? thread.createdAt} />,
+                        value2: <>{t("web.dynamic.ArchivedThreadsPanel.created")}</>,
+                        part3: <RelativeTime timestamp={thread.createdAt} />,
+                      }}
+                    />
                   </span>
                 }
                 control={
@@ -274,7 +286,7 @@ export function ArchivedThreadsPanel() {
                     }}
                   >
                     <ArchiveX className="size-3.5" />
-                    <span>Unarchive</span>
+                    <span>{t("settings.pages.ArchivedThreadsPanel.unarchive")}</span>
                   </Button>
                 }
               />

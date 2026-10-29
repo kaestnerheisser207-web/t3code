@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { scopedThreadKey, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import { findForMessageMatch, openThreadFindOnQuery } from "./chat/threadFindStore";
 import {
@@ -97,6 +98,7 @@ export function useCommandPaletteThreadItems(input: {
   readonly activeThread: { readonly environmentId: EnvironmentId; readonly id: ThreadId } | null;
   readonly threadSearchQuery: string;
 }) {
+  const { i18n: dateI18n } = useTranslation();
   const { activeThread, threadSearchQuery } = input;
   const navigate = useNavigate();
   const threads = useThreadShells();
@@ -209,7 +211,13 @@ export function useCommandPaletteThreadItems(input: {
         ...rest,
         // When the matching message was written, not when the thread last moved.
         ...(match.messageCreatedAt
-          ? { timestamp: formatRelativeTimeLabel(match.messageCreatedAt) }
+          ? {
+              timestamp: formatRelativeTimeLabel(
+                match.messageCreatedAt,
+                undefined,
+                dateI18n.resolvedLanguage,
+              ),
+            }
           : {}),
         threadContentMatch: {
           source: match.source,

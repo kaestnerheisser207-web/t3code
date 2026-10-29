@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import type { PullRequestActivity, PullRequestCheck, PullRequestComment } from "@t3tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 import { pullRequestChecksSummary, pullRequestReviewSummary } from "./pullRequestStatus";
@@ -35,6 +36,17 @@ describe("mobile overview review status", () => {
     );
     expect(result.title).toBe("Changes requested");
     expect(result.reviews).toHaveLength(1);
+    const translated = pullRequestReviewSummary(
+      { reviewers: [] },
+      activity([
+        review("CHANGES_REQUESTED", "2026-10-10T10:00:00Z"),
+        review("APPROVED", "2026-10-10T09:00:00Z"),
+      ]),
+      createI18n("zh-CN").t,
+    );
+    expect(translated.reviews).toEqual(result.reviews);
+    expect(translated.tint).toBe(result.tint);
+    expect(translated.title).toBe("已要求修改");
   });
 
   it("does not claim a dismissed approval or an approval preceding the latest commit", () => {
@@ -81,5 +93,9 @@ describe("mobile overview check status", () => {
     expect(
       pullRequestChecksSummary({ checks: [check("success"), check("pending"), check("failure")] }),
     ).toMatchObject({ title: "1 check failing", count: "1 of 3" });
+    const checks = [check("success"), check("pending"), check("failure")];
+    const translated = pullRequestChecksSummary({ checks }, createI18n("zh-CN").t);
+    expect(translated).toMatchObject({ title: "1 项检查未通过", count: "1/3" });
+    expect(translated.tint).toBe(pullRequestChecksSummary({ checks }).tint);
   });
 });

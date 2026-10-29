@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { View } from "react-native";
 
@@ -38,12 +39,13 @@ export function AttachmentDocumentBody(props: {
   readonly nativeError: string | null;
   readonly onOpenNative: () => void;
 }) {
+  const t = useTranslate();
   const { document } = props;
   if (document.error) {
     return (
       <View className="flex-1 items-center justify-center bg-sheet px-6">
         <EmptyState
-          title="File unavailable"
+          title={t("mobile.tools.AttachmentDocumentBody.file-unavailable")}
           detail={document.error}
           actionLabel="Try again"
           onAction={document.retry}
@@ -63,8 +65,10 @@ export function AttachmentDocumentBody(props: {
     return (
       <View className="flex-1 bg-sheet">
         {content.truncated ? (
-          <FilePreviewNotice title="Partial file">
-            Preview limited to the first 1 MB. Save or share the file to read it in full.
+          <FilePreviewNotice title={t("mobile.tools.AttachmentDocumentBody.partial-file")}>
+            {t(
+              "mobile.tools.AttachmentDocumentBody.preview-limited-to-the-first-1-mb-save-or-share-the-file-to-read-it-in-full",
+            )}
           </FilePreviewNotice>
         ) : null}
         {table && document.activeMode === "table" ? (
@@ -98,10 +102,12 @@ export function AttachmentDocumentBody(props: {
   return (
     <View className="flex-1 items-center justify-center bg-sheet px-6">
       <EmptyState
-        title="No preview for this file"
+        title={t("mobile.tools.AttachmentDocumentBody.no-preview-for-this-file")}
         detail={
           props.nativeError ??
-          "No app on this device can show this format. Save or share it to open it elsewhere."
+          t(
+            "mobile.dynamic.AttachmentDocumentBody.no-app-on-this-device-can-show-this-format-save-or-share-it-to-open-it-elsewhere",
+          )
         }
         actionLabel="Try again"
         onAction={props.onOpenNative}

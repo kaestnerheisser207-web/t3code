@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useId, useRef, useState, type ComponentProps } from "react";
 
 import { cn } from "~/lib/utils";
@@ -9,6 +10,7 @@ export function PullRequestCommentBody({
   className,
   ...props
 }: ComponentProps<typeof PullRequestMarkdown>) {
+  const t = useTranslate();
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
   const clip = useRef<HTMLDivElement>(null);
@@ -51,7 +53,9 @@ export function PullRequestCommentBody({
             setExpanded(!expanded);
           }}
         >
-          {expanded ? "Show less" : "Show full comment"}
+          {expanded
+            ? t("web.dynamic.PullRequestCommentBody.show-less")
+            : t("web.dynamic.PullRequestCommentBody.show-full-comment")}
         </Button>
       ) : null}
     </div>

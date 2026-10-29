@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { ExternalLinkIcon } from "lucide-react";
 import { useState } from "react";
@@ -26,6 +28,7 @@ export function SourceControlTokenSettings({
   readonly credentials: SourceControlHostCredentials;
   readonly onSaved: () => void;
 }) {
+  const t = useTranslate();
   const { tokens } = useEnvironmentSettings(environmentId, (settings) =>
     readHostCredentialSettings(settings, definition.kind),
   );
@@ -71,30 +74,47 @@ export function SourceControlTokenSettings({
       {/* Locked while saving: a successful save clears the draft, which would drop edits made mid-request. */}
       <fieldset disabled={saving} className="contents">
         <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
-          A token saved here is used before{" "}
-          <code className="rounded bg-muted px-1 py-px text-2xs">{credentials.tokenEnvVar}</code>{" "}
-          and the{" "}
-          <code className="rounded bg-muted px-1 py-px text-2xs">{credentials.cliName}</code> login,
-          so {definition.label} works without the {credentials.cliLabel}. Give it{" "}
-          {credentials.tokenAccess}.{" "}
-          {normalizedHost || defaultHost ? (
-            <InlineButton
-              render={
-                <a
-                  href={credentials.newTokenUrl(normalizedHost || defaultHost)}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                />
-              }
-            >
-              Create a token
-              <ExternalLinkIcon aria-hidden className="size-3" />
-            </InlineButton>
-          ) : null}
+          <Trans
+            t={t}
+            i18nKey="web.rich.SourceControlTokenSettings.a-token-saved-here-is-used-before-part-and-the-part-login-so-part-works-without-the-part-give-it-part-part"
+            components={{
+              part0: (
+                <code className="rounded bg-muted px-1 py-px text-2xs">
+                  {credentials.tokenEnvVar}
+                </code>
+              ),
+              part1: (
+                <code className="rounded bg-muted px-1 py-px text-2xs">{credentials.cliName}</code>
+              ),
+              value2: <>{definition.label}</>,
+              value3: <>{credentials.cliLabel}</>,
+              value4: <>{credentials.tokenAccess}</>,
+              value5: (
+                <>
+                  {normalizedHost || defaultHost ? (
+                    <InlineButton
+                      render={
+                        <a
+                          href={credentials.newTokenUrl(normalizedHost || defaultHost)}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        />
+                      }
+                    >
+                      {t("settings.pages.SourceControlTokenSettings.create-a-token")}
+                      <ExternalLinkIcon aria-hidden className="size-3" />
+                    </InlineButton>
+                  ) : null}
+                </>
+              ),
+            }}
+          />
         </p>
         <div className="grid gap-3 sm:grid-cols-[12rem_1fr]">
           <div className="grid gap-1.5">
-            <Label htmlFor={`${definition.kind}-token-host-${environmentId}`}>Host</Label>
+            <Label htmlFor={`${definition.kind}-token-host-${environmentId}`}>
+              {t("settings.pages.SourceControlTokenSettings.host")}
+            </Label>
             <Input
               id={`${definition.kind}-token-host-${environmentId}`}
               autoComplete="off"
@@ -105,7 +125,9 @@ export function SourceControlTokenSettings({
             />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor={`${definition.kind}-token-${environmentId}`}>Token</Label>
+            <Label htmlFor={`${definition.kind}-token-${environmentId}`}>
+              {t("settings.pages.SourceControlTokenSettings.token")}
+            </Label>
             <SecretInput
               id={`${definition.kind}-token-${environmentId}`}
               size="sm"
@@ -118,8 +140,13 @@ export function SourceControlTokenSettings({
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             {savedHosts.length === 0
-              ? `No token saved; the server uses ${credentials.tokenEnvVar} or the ${credentials.cliName} login.`
-              : `Saved for ${savedHosts.join(", ")}.`}
+              ? t(
+                  "web.dynamic.SourceControlTokenSettings.no-token-saved-the-server-uses-param-or-the-param-login",
+                  { tokenEnvVar: credentials.tokenEnvVar, cliName: credentials.cliName },
+                )
+              : t("web.dynamic.SourceControlTokenSettings.saved-for-param", {
+                  value: savedHosts.join(", "),
+                })}
           </p>
           <div className="flex shrink-0 gap-2">
             {isSaved ? (
@@ -129,11 +156,11 @@ export function SourceControlTokenSettings({
                 disabled={saving}
                 onClick={() => void save(normalizedHost, "")}
               >
-                Remove
+                {t("settings.pages.SourceControlTokenSettings.remove")}
               </Button>
             ) : null}
             <Button type="submit" size="xs" disabled={!normalizedHost || !draft.trim() || saving}>
-              Save
+              {t("settings.pages.SourceControlTokenSettings.save")}
             </Button>
           </div>
         </div>

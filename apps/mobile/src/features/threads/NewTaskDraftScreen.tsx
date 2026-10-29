@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { DraftEnvironmentControl } from "./DraftEnvironmentControl";
 import { NativeScrollEdgeEffectsContext } from "../../native/NativeScrollViewMarker";
 import { DraftThreadHeader } from "./DraftThreadHeader";
@@ -152,6 +153,7 @@ export function NewTaskDraftScreen(props: {
   readonly draftId?: string;
   readonly incomingShareId?: string;
 }) {
+  const t = useTranslate();
   const [creationMetadata] = useState(makeTurnCommandMetadata);
   const projects = useProjects();
   const flow = useNewTaskFlow();
@@ -720,22 +722,24 @@ export function NewTaskDraftScreen(props: {
   );
   const shareUnavailableNotice = isIncomingShareUnavailable ? (
     <Text textRole="footnote" className="text-center text-foreground-muted">
-      The shared content is no longer in the inbox. You can continue editing this task draft.
+      {t(
+        "mobile.threads.NewTaskDraftScreen.the-shared-content-is-no-longer-in-the-inbox-you-can-continue-editing-this-task-draft",
+      )}
     </Text>
   ) : null;
   const hero = flow.isScratchDraft ? (
     <View className="items-center gap-2 px-6" testID="new-task-hero">
       <Text className="text-center text-2xl font-t3-medium tracking-tight text-foreground">
-        What should we work on?
+        {t("mobile.threads.NewTaskDraftScreen.what-should-we-work-on")}
       </Text>
       <View className="flex-row flex-wrap items-center justify-center gap-x-1">
         <ComposerInlineControl
-          accessibilityHint="Opens the project picker"
-          accessibilityLabel="No project"
+          accessibilityHint={t("mobile.threads.NewTaskDraftScreen.opens-the-project-picker")}
+          accessibilityLabel={t("mobile.threads.NewTaskDraftScreen.no-project")}
           chevronDirection="right"
           disabled={isComposerInteractionLocked}
           icon="folder"
-          label="No project"
+          label={t("mobile.threads.NewTaskDraftScreen.no-project")}
           onPress={chooseProject}
         />
         {environmentControl}
@@ -746,12 +750,12 @@ export function NewTaskDraftScreen(props: {
     <View className="items-center gap-6 px-6" testID="new-task-hero">
       <View className="w-full items-center gap-1.5">
         <Text className="text-center text-2xl font-t3-medium tracking-tight text-foreground">
-          What should we build
+          {t("mobile.threads.NewTaskDraftScreen.what-should-we-build")}
         </Text>
         <View className="max-w-full flex-row items-center justify-center">
           <Text className="text-2xl font-t3-medium tracking-tight text-foreground">in </Text>
           <Pressable
-            accessibilityHint="Opens the project picker"
+            accessibilityHint={t("mobile.threads.NewTaskDraftScreen.opens-the-project-picker")}
             accessibilityLabel={selectedProjectLabel ?? selectedProject.title}
             accessibilityRole="button"
             disabled={isComposerInteractionLocked}
@@ -813,7 +817,11 @@ export function NewTaskDraftScreen(props: {
   const workspaceControls = (
     <View className="flex-row items-center gap-1 px-2">
       <ComposerInlineControl
-        accessibilityHint={`Switches to ${flow.workspaceMode === "local" ? "a new worktree" : "the current checkout"}`}
+        accessibilityHint={t(
+          flow.workspaceMode === "local"
+            ? "mobile.dynamic.NewTaskDraftScreen.switchFromLocalYes"
+            : "mobile.dynamic.NewTaskDraftScreen.switchFromLocalNo",
+        )}
         accessibilityLabel={workspaceLabel}
         disabled={isComposerInteractionLocked || !flow.isGitRepo}
         renderIcon={(size) => (
@@ -835,7 +843,11 @@ export function NewTaskDraftScreen(props: {
           chevronDirection="right"
           disabled={isComposerInteractionLocked || !flow.isGitRepo}
           icon="arrow.triangle.branch"
-          label={showBranchLoading ? "Loading branches…" : selectedBranchLabel}
+          label={
+            showBranchLoading
+              ? t("mobile.dynamic.NewTaskDraftScreen.loading-branches")
+              : selectedBranchLabel
+          }
           maxWidth="100%"
           onPress={() => openContextPicker("NewTaskBranch")}
         />
@@ -848,7 +860,7 @@ export function NewTaskDraftScreen(props: {
       <ThreadScreenFallback
         header={
           <AppBar
-            title="New thread"
+            title={t("mobile.threads.NewTaskDraftScreen.new-thread")}
             sidebar={false}
             onBack={goBack}
             options={{
@@ -863,13 +875,15 @@ export function NewTaskDraftScreen(props: {
         <View className="flex-1 justify-end gap-3 p-4">
           {environmentControl}
           <Text className="text-foreground-muted">
-            Your draft is saved on this device. Connect to an environment to choose its first model.
+            {t(
+              "mobile.threads.NewTaskDraftScreen.your-draft-is-saved-on-this-device-connect-to-an-environment-to-choose-its-first-model",
+            )}
           </Text>
           <ComposerEditor
             draftKey={flow.draftKey}
             value={flow.prompt}
             onChangeText={flow.setPrompt}
-            placeholder="Ask anything"
+            placeholder={t("mobile.threads.NewTaskDraftScreen.ask-anything")}
             multiline
             style={{ minHeight: 64 }}
           />

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { settlePromise } from "@t3tools/client-runtime/state/runtime";
 import { AsyncResult } from "effect/reactivity";
 import * as Dialog from "../../components/ui/Dialog";
@@ -25,6 +26,7 @@ export type InlineCommentParams = PullRequestParams & {
   readonly code: string;
 };
 export function PullRequestInlineCommentScreen({ route }: StaticScreenProps<InlineCommentParams>) {
+  const t = useTranslate();
   const params = route.params;
   const navigation = useNavigation();
   const store = usePullRequestReviewDraft(params);
@@ -75,13 +77,21 @@ export function PullRequestInlineCommentScreen({ route }: StaticScreenProps<Inli
   return (
     <PullRequestSheetContent
       busy={busy}
-      title={saved ? "Edit review comment" : "Review comment"}
+      title={
+        saved
+          ? t("mobile.dynamic.PullRequestInlineCommentScreen.edit-review-comment")
+          : t("mobile.dynamic.PullRequestInlineCommentScreen.review-comment")
+      }
       subtitle={`#${params.number} · ${reviewPositionLabel(params.position)}`}
       footer={
         <Button
           fullWidth
           tone="contrast"
-          label={busy ? "Saving…" : "Save draft"}
+          label={
+            busy
+              ? t("mobile.dynamic.PullRequestInlineCommentScreen.saving")
+              : t("mobile.dynamic.PullRequestInlineCommentScreen.save-draft")
+          }
           loading={busy}
           disabled={
             !store.ready ||
@@ -105,8 +115,8 @@ export function PullRequestInlineCommentScreen({ route }: StaticScreenProps<Inli
         multiline
         editable={store.ready && !busy}
         autoFocus
-        accessibilityLabel="Inline review comment"
-        placeholder="Write feedback on this line…"
+        accessibilityLabel={t("mobile.review.PullRequestInlineCommentScreen.inline-review-comment")}
+        placeholder={t("mobile.review.PullRequestInlineCommentScreen.write-feedback-on-this-line")}
         placeholderTextColorClassName="accent-foreground-muted"
         maxLength={65536}
         value={body}
@@ -115,11 +125,15 @@ export function PullRequestInlineCommentScreen({ route }: StaticScreenProps<Inli
         style={{ textAlignVertical: "top" }}
       />
       <Text className="text-xs text-foreground-muted">
-        Saved comments are private until you submit your review.
+        {t(
+          "mobile.review.PullRequestInlineCommentScreen.saved-comments-are-private-until-you-submit-your-review",
+        )}
       </Text>
       {stale ? (
         <Text className="text-sm text-danger-foreground">
-          The branch changed. Return to the current diff and select the line again.
+          {t(
+            "mobile.review.PullRequestInlineCommentScreen.the-branch-changed-return-to-the-current-diff-and-select-the-line-again",
+          )}
         </Text>
       ) : null}
       {store.error || detail.error ? (
@@ -127,12 +141,12 @@ export function PullRequestInlineCommentScreen({ route }: StaticScreenProps<Inli
       ) : null}
       {saved ? (
         <Button
-          label="Delete draft"
+          label={t("mobile.review.PullRequestInlineCommentScreen.delete-draft")}
           onPress={() =>
-            Dialog.alert("Delete this draft?", "Your other review comments will be kept.", [
-              { text: "Cancel", style: "cancel" },
+            Dialog.alert(t("pr.actions.deleteDraftTitle"), t("pr.actions.deleteDraftDetail"), [
+              { text: t("composer.ui.cancel"), style: "cancel" },
               {
-                text: "Delete",
+                text: t("thread.menu.delete"),
                 style: "destructive",
                 onPress: () => {
                   store.update((draft) => ({

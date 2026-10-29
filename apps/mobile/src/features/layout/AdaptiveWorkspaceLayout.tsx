@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   WorkspaceColumnsRendererContext,
   WorkspacePresentationHostContext,
@@ -177,6 +178,7 @@ function AdaptiveWorkspaceLayoutContent(
     readonly savedThreadListFilters?: ThreadListFilters | undefined;
   },
 ) {
+  const t = useTranslate();
   const floatingTabsEnabled = useAndroidFloatingTabs();
   const projectGroupingMode = props.projectGroupingMode;
   const nativeWorkspace = use(NativeWorkspaceModeContext);
@@ -878,7 +880,9 @@ function AdaptiveWorkspaceLayoutContent(
               renderFallback={(fallback) => (
                 <RenderFailureView
                   {...fallback}
-                  title="The sidebar couldn't be displayed"
+                  title={t(
+                    "mobile.surfaces.AdaptiveWorkspaceLayout.the-sidebar-couldn-t-be-displayed",
+                  )}
                   exit={{ label: "Open settings", onPress: handleOpenSettings }}
                 />
               )}

@@ -1,0 +1,17 @@
+export const deviceUsageEn = {
+  "device.menu.checkVersions": "Check device tool versions",
+  "device.menu.versions": "Device tool versions",
+  "device.menu.reload": "Reload stream",
+  "device.menu.back": "Back",
+  "device.menu.switcher": "App switcher",
+  "device.menu.rotate": "Rotate device",
+  "device.menu.devices": "Devices",
+  "usage.enable": "Enable",
+  "usage.enableOn": "Enable on {{environment}}",
+  "usage.upToDate": "Usage up to date",
+  "usage.ultrafast": "Ultrafast",
+  "usage.chart.hourCost": "Hourly cost",
+  "usage.chart.dayCost": "Daily cost",
+  "usage.chart.hourTokens": "Hourly processed tokens",
+  "usage.chart.dayTokens": "Daily processed tokens",
+} as const;

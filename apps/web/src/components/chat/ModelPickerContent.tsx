@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   ANTIGRAVITY_DEFAULT_MODEL,
   type ProviderInstanceId,
@@ -205,6 +206,7 @@ function ModelPickerProviderNotices({
   onRequestClose: (() => void) | undefined;
   onOpenProviderSetup: ((instanceId: ProviderInstanceId) => void) | undefined;
 }) {
+  const t = useTranslate();
   const navigate = useNavigate();
   return (
     <>
@@ -222,7 +224,11 @@ function ModelPickerProviderNotices({
                   onOpenProviderSetup?.(entry.instanceId);
                 }}
               >
-                {setupEntries.length > 1 ? `Set up ${entry.displayName}` : "Open provider setup"}
+                {setupEntries.length > 1
+                  ? t("web.dynamic.ModelPickerContent.set-up-param", {
+                      displayName: entry.displayName,
+                    })
+                  : t("web.dynamic.ModelPickerContent.open-provider-setup")}
               </InlineButton>
             </div>
           ))}
@@ -242,7 +248,7 @@ function ModelPickerProviderNotices({
               void navigate({ to: "/settings/providers" });
             }}
           >
-            Provider settings
+            {t("web.ui.ModelPickerContent.provider-settings")}
           </InlineButton>
         </p>
       ))}
@@ -363,6 +369,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
   /** The owning popup moves focus here when it opens (its `initialFocus`). */
   searchInputRef: RefObject<HTMLInputElement | null>;
 }) {
+  const t = useTranslate();
   const {
     searchInputRef,
     keybindings: providedKeybindings,
@@ -902,7 +909,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
           >
             <ComboboxSearchInput
               ref={searchInputRef}
-              placeholder="Search models..."
+              placeholder={t("web.ui.ModelPickerContent.search-models")}
               value={searchQuery}
               onChange={(e) => {
                 if (!isSearching) setSearchHeight(pickerContentRef.current?.offsetHeight ?? 0);
@@ -975,9 +982,11 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
                       className="group w-full cursor-pointer"
                     >
                       <div className="min-w-0 flex-1 text-left">
-                        <div className="text-sm font-normal leading-snug">Legacy models</div>
+                        <div className="text-sm font-normal leading-snug">
+                          {t("web.ui.ModelPickerContent.legacy-models")}
+                        </div>
                         <div className="mt-1 text-xs font-normal leading-snug text-muted-foreground">
-                          {legacySection.legacyModels.length} models
+                          {t("counts.models", { count: legacySection.legacyModels.length })}
                         </div>
                       </div>
                       <ChevronRightIcon

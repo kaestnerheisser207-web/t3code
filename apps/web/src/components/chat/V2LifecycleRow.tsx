@@ -1,3 +1,5 @@
+import { useTranslate } from "../../i18n";
+import { Trans, useTranslation } from "react-i18next";
 import { ThreadHoverCardPopup } from "../ThreadHoverCard";
 import { AgentElapsed } from "./AgentElapsed";
 import { projectedSubagentsToRuntime } from "@t3tools/client-runtime/state/subagentRuntime";
@@ -69,10 +71,15 @@ export function V2LifecycleRow(props: {
   readonly runs: ReadonlyArray<HandoffTimelineRun>;
   readonly onOpenThread: (threadId: ThreadId) => void;
 }) {
+  const t = useTranslate();
   const { item } = props;
   if (item.type === "run_interrupt_result") {
     return (
-      <TimelineSystemDivider label="Run interrupted" detail={item.message} icon={CircleStopIcon} />
+      <TimelineSystemDivider
+        label={t("web.ui.V2LifecycleRow.run-interrupted")}
+        detail={item.message}
+        icon={CircleStopIcon}
+      />
     );
   }
   if (item.type === "handoff") {
@@ -88,7 +95,11 @@ export function V2LifecycleRow(props: {
     const relatedThreadId = item.source.type === "run" ? item.source.threadId : item.targetThreadId;
     return (
       <TimelineSystemDivider
-        label={item.source.type === "run" ? "Forked from conversation" : "Conversation fork"}
+        label={
+          item.source.type === "run"
+            ? t("web.dynamic.V2LifecycleRow.forked-from-conversation")
+            : t("web.dynamic.V2LifecycleRow.conversation-fork")
+        }
         icon={GitForkIcon}
         actionLabel={item.source.type === "run" ? "Open source conversation" : "Open fork"}
         onAction={() => props.onOpenThread(relatedThreadId)}
@@ -106,15 +117,17 @@ export function V2LifecycleRow(props: {
             <MessageSquareIcon className="size-4 text-secondary-label" aria-hidden />
           </span>
           <span className="min-w-0 flex-1 truncate text-sm font-medium">
-            {item.title ?? "Created thread"}
+            {item.title ?? t("web.dynamic.V2LifecycleRow.created-thread")}
           </span>
           <Button
             size="xs"
             variant="outline"
-            aria-label={`Open ${item.title ?? "created thread"}`}
+            aria-label={t("web.dynamic.V2LifecycleRow.open-param", {
+              value: item.title ?? "created thread",
+            })}
             onClick={() => props.onOpenThread(item.targetThreadId)}
           >
-            Open chat
+            {t("web.ui.V2LifecycleRow.open-chat")}
           </Button>
         </div>
       );
@@ -123,13 +136,20 @@ export function V2LifecycleRow(props: {
       <WorkLogRow
         data-v2-item-type={item.type}
         icon={<T3Wordmark className="size-4 text-icon-muted" aria-hidden />}
-        label={<>Created thread{item.title ? ` · ${item.title}` : ""}</>}
+        label={
+          <>
+            {t("web.dynamic.V2LifecycleRow.created-thread")}
+            {item.title ? ` · ${item.title}` : ""}
+          </>
+        }
         trailing={
           <InlineButton
-            aria-label={`Open ${item.title ?? "created thread"}`}
+            aria-label={t("web.dynamic.V2LifecycleRow.open-param", {
+              value: item.title ?? "created thread",
+            })}
             onClick={() => props.onOpenThread(item.targetThreadId)}
           >
-            Open chat
+            {t("web.ui.V2LifecycleRow.open-chat")}
           </InlineButton>
         }
       />
@@ -299,6 +319,7 @@ export function SubagentNotificationLink(props: {
   readonly onOpenThread: (threadId: ThreadId) => void;
   readonly fallback: ReactNode;
 }) {
+  const { i18n: dateI18n } = useTranslation();
   const agent = useAtomValue(
     environmentThreadDetails.threadAtom(props.parentRef),
     (thread) =>
@@ -330,7 +351,11 @@ export function SubagentNotificationLink(props: {
             event: {
               status: NOTIFICATION_OUTCOME_STATUS[props.outcome],
               label: NOTIFICATION_OUTCOME_LABEL[props.outcome],
-              timestamp: formatShortTimestamp(props.createdAt, props.timestampFormat),
+              timestamp: formatShortTimestamp(
+                props.createdAt,
+                props.timestampFormat,
+                dateI18n.resolvedLanguage,
+              ),
             },
           })}
     />
@@ -359,6 +384,7 @@ function SubagentTimelineLink(props: {
     readonly timestamp: string;
   };
 }) {
+  const t = useTranslate();
   const agent = useAtomValue(
     environmentThreadDetails.threadAtom(props.parentRef),
     (thread) => thread?.projection.subagents.find((agent) => agent.id === props.subagentId) ?? null,
@@ -380,7 +406,7 @@ function SubagentTimelineLink(props: {
         : null;
   const liveStatus = agent?.status ?? props.status;
   const status = props.event ? props.event.status : liveStatus;
-  const statusLabel = props.event?.label ?? subagentStatusVisual(liveStatus).label;
+  const statusLabel = props.event?.label ?? t(`lifecycle.${liveStatus}`);
   const result = (agent?.result ?? props.result)?.trim();
   const progress = (agent?.progress ?? props.progress)?.trim();
   const settled = SETTLED_SUBAGENT_STATUSES.has(status ?? liveStatus);
@@ -407,7 +433,13 @@ function SubagentTimelineLink(props: {
             {props.title}
           </span>
           {remote !== undefined ? (
-            <span className="shrink-0 text-xs text-muted-foreground">on {remote.label}</span>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              <Trans
+                t={t}
+                i18nKey="web.rich.V2LifecycleRow.on-part"
+                components={{ value0: <>{remote.label}</> }}
+              />
+            </span>
           ) : null}
         </span>
         <span
@@ -458,7 +490,7 @@ function SubagentTimelineLink(props: {
             <button
               type="button"
               data-v2-item-type="subagent"
-              aria-label={`Open ${props.title}`}
+              aria-label={t("mobile.dynamic.ThreadFeed.open-param", { name: props.title })}
               aria-description={statusLabel}
               onClick={open}
               className={cn(
@@ -547,13 +579,18 @@ export function HandoffRow(props: {
   readonly pending?: boolean;
   readonly failed?: boolean;
 }) {
+  const t = useTranslate();
   const { from: fromEndpoints, to } = props.endpoints;
   const settings = useAtomValue(serverEnvironment.settingsValueAtom(props.environmentId));
   const derived = deriveProviderInstanceEntries(props.providers);
   const entries = settings ? applyProviderInstanceSettings(derived, settings, null) : derived;
   return (
     <TimelineSystemDivider
-      label={props.pending ? "Context handoff pending" : "Context handoff"}
+      label={
+        props.pending
+          ? t("web.dynamic.V2LifecycleRow.context-handoff-pending")
+          : t("web.dynamic.V2LifecycleRow.context-handoff")
+      }
       icon={ArrowRightLeftIcon}
       showDetailSeparator={false}
       tone={props.failed ? "danger" : "neutral"}

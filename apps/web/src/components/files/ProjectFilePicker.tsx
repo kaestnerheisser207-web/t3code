@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { useState, type ReactNode } from "react";
 
@@ -51,9 +52,10 @@ function getEmptyStateMessage(query: string, error: string | null, isPending: bo
 }
 
 function EmptyProjectFilePicker() {
+  const t = useTranslate();
   return (
     <CommandPaletteContent
-      aria-label="File picker"
+      aria-label={t("web.ui.ProjectFilePicker.file-picker")}
       escapeLabel="Back"
       footerActionLabel="Open file"
       inputProps={{ disabled: true, placeholder: "Search files…" }}
@@ -62,13 +64,14 @@ function EmptyProjectFilePicker() {
       value=""
     >
       <div className="py-10 text-center text-sm text-muted-foreground">
-        Open a project to search its files.
+        {t("web.ui.ProjectFilePicker.open-a-project-to-search-its-files")}
       </div>
     </CommandPaletteContent>
   );
 }
 
 function OpenProjectFilePicker(props: ProjectFilePickerProps & { target: ActiveProjectTarget }) {
+  const t = useTranslate();
   const { target } = props;
   const [query, setQuery] = useState("");
   const [highlightedItemValue, setHighlightedItemValue] = useState<string | null>(null);
@@ -110,7 +113,7 @@ function OpenProjectFilePicker(props: ProjectFilePickerProps & { target: ActiveP
 
   return (
     <CommandPaletteContent
-      aria-label="File picker"
+      aria-label={t("web.ui.ProjectFilePicker.file-picker")}
       autoHighlight="always"
       escapeLabel="Back"
       footerActionLabel="Open file"

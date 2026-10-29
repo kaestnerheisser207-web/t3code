@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import {
@@ -51,6 +52,7 @@ const optionsFamily = Atom.family((key: string) => {
 export function PullRequestFilterSearchScreen({
   route,
 }: StaticScreenProps<PullRequestFilterSearchParams>) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const { kind, environmentId, environmentIds, suggestions, labelColors } = route.params;
   const listControls = usePullRequestListControls();
@@ -113,7 +115,11 @@ export function PullRequestFilterSearchScreen({
   const placeholder = kind === "labels" ? "Search labels" : "Search authors";
   return (
     <PullRequestSearchSheet
-      title={kind === "labels" ? "Filter by label" : "Filter by author"}
+      title={
+        kind === "labels"
+          ? t("mobile.dynamic.PullRequestFilterSearchScreen.filter-by-label")
+          : t("mobile.dynamic.PullRequestFilterSearchScreen.filter-by-author")
+      }
       placeholder={placeholder}
       closeAccessibilityLabel={kind === "labels" ? "Close label filter" : "Close author filter"}
       clearAccessibilityLabel={kind === "labels" ? "Clear label search" : "Clear author search"}
@@ -154,17 +160,23 @@ export function PullRequestFilterSearchScreen({
               <EmptyState
                 title={
                   hosted.failed
-                    ? "Couldn't search the host"
+                    ? t("mobile.dynamic.PullRequestFilterSearchScreen.couldn-t-search-the-host")
                     : kind === "labels"
-                      ? "No matching labels"
-                      : "No matching authors"
+                      ? t("mobile.dynamic.PullRequestFilterSearchScreen.no-matching-labels")
+                      : t("mobile.dynamic.PullRequestFilterSearchScreen.no-matching-authors")
                 }
                 detail={
                   hosted.failed
-                    ? "The host didn't answer. Try again in a moment."
+                    ? t(
+                        "mobile.dynamic.PullRequestFilterSearchScreen.the-host-didn-t-answer-try-again-in-a-moment",
+                      )
                     : kind === "labels"
-                      ? "Search the labels of the repositories this list covers."
-                      : "Search people by name or handle on the repositories' hosts."
+                      ? t(
+                          "mobile.dynamic.PullRequestFilterSearchScreen.search-the-labels-of-the-repositories-this-list-covers",
+                        )
+                      : t(
+                          "mobile.dynamic.PullRequestFilterSearchScreen.search-people-by-name-or-handle-on-the-repositories-hosts",
+                        )
                 }
                 variant="plain"
               />

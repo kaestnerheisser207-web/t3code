@@ -1,3 +1,5 @@
+import { runtimeModeText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import {
   getPromptControlledTraits,
   getTraitSelectChange,
@@ -158,6 +160,7 @@ function ProviderHeader(props: {
   readonly modelCount: number;
   readonly onToggle: () => void;
 }) {
+  const t = useTranslate();
   const content = (
     <>
       <ProviderIcon iconUrl={props.iconUrl} provider={props.driver} size={15} />
@@ -184,7 +187,10 @@ function ProviderHeader(props: {
   if (props.collapsible) {
     return (
       <Pressable
-        accessibilityLabel={`${props.label}, ${props.modelCount} models`}
+        accessibilityLabel={t("mobile.dynamic.ThreadSettingsSheet.param-param-models", {
+          label: props.label,
+          modelCount: props.modelCount,
+        })}
         accessibilityRole="button"
         accessibilityState={{ expanded: !props.collapsed }}
         className="mx-4 mt-1 min-h-11 flex-row items-center gap-2 rounded-xl px-1 pt-2 active:opacity-60 android:min-h-12"
@@ -326,6 +332,7 @@ const ThreadSettingsSessionContext = createContext<ThreadSettingsSessionValue | 
 function ThreadSettingsSessionProvider(
   props: ThreadSettingsSessionProps & { readonly children: ReactNode },
 ) {
+  const t = useTranslate();
   const registry = use(RegistryContext);
   const preferences = useAtomValue(mobilePreferencesAtom);
   const configs = useAtomValue(environmentServerConfigsAtom);
@@ -507,7 +514,7 @@ function ThreadSettingsSessionProvider(
     null;
   const runtimeModeChoices = runtimeModeChoicesForSupportedModes(
     displayedModel?.supportedRuntimeModes,
-  );
+  ).map((choice) => ({ ...choice, ...runtimeModeText(t, choice.mode) }));
   const compatibleRuntimeMode = compatibleRuntimeModeForChoices(
     props.runtimeMode,
     runtimeModeChoices,
@@ -520,8 +527,8 @@ function ThreadSettingsSessionProvider(
     if (pendingModel) {
       if (!canCommitPendingModel(pendingModel, props.providerGroups)) {
         Dialog.alert(
-          "Model unavailable",
-          "Set up this provider on web or desktop, or select another model.",
+          t("mobile.threadStatus.modelUnavailable"),
+          t("mobile.threadStatus.setupModel"),
         );
         return false;
       }
@@ -824,6 +831,7 @@ function ThreadSettingsOptionsItem(props: {
   readonly animationsReady: boolean;
   readonly onOpenSubmenu: (submenu: ThreadSettingsSubmenuPage) => void;
 }) {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
   const session = useThreadSettingsSession();
   const configs = useAtomValue(environmentServerConfigsAtom);
@@ -838,7 +846,9 @@ function ThreadSettingsOptionsItem(props: {
   return (
     <View style={{ paddingBottom: insets.bottom + bottomToolbarInset + 12 }}>
       <ChatGptSharingStatus provider={selectedProvider} />
-      <Text className="px-5 pb-2 pt-2 text-sm font-t3-medium text-foreground-muted">Options</Text>
+      <Text className="px-5 pb-2 pt-2 text-sm font-t3-medium text-foreground-muted">
+        {t("mobile.threads.ThreadSettingsSheet.options")}
+      </Text>
       <Animated.View
         className="mx-4 overflow-hidden rounded-2xl bg-grouped-card"
         layout={THREAD_SETTINGS_OPTIONS_LAYOUT_TRANSITION}
@@ -889,7 +899,7 @@ function ThreadSettingsOptionsItem(props: {
         <Animated.View layout={THREAD_SETTINGS_OPTIONS_LAYOUT_TRANSITION}>
           <DisclosureRow
             isLast
-            label="Runtime"
+            label={t("mobile.threads.ThreadSettingsSheet.runtime")}
             value={
               session.runtimeModeChoices.find((choice) => choice.mode === session.runtimeMode)
                 ?.label
@@ -899,10 +909,12 @@ function ThreadSettingsOptionsItem(props: {
         </Animated.View>
       </Animated.View>
 
-      <Text className="px-5 pb-2 pt-7 text-sm font-t3-medium text-foreground-muted">Catalog</Text>
+      <Text className="px-5 pb-2 pt-7 text-sm font-t3-medium text-foreground-muted">
+        {t("mobile.threads.ThreadSettingsSheet.catalog")}
+      </Text>
       <View className="mx-4 overflow-hidden rounded-2xl bg-grouped-card">
         <SwitchRow
-          label="Manage hidden models"
+          label={t("mobile.threads.ThreadSettingsSheet.manage-hidden-models")}
           value={session.manageHidden}
           onValueChange={session.setManageHidden}
           isLast={Platform.OS === "ios" || !session.hasLegacyModels}
@@ -910,7 +922,7 @@ function ThreadSettingsOptionsItem(props: {
         {Platform.OS !== "ios" && session.hasLegacyModels ? (
           <SwitchRow
             isLast
-            label="Legacy models"
+            label={t("mobile.threads.ThreadSettingsSheet.legacy-models")}
             onValueChange={session.setShowLegacy}
             value={session.showLegacy}
           />
@@ -923,6 +935,7 @@ function ThreadSettingsOptionsItem(props: {
 function ThreadSettingsMainContent(props: {
   readonly onOpenSubmenu: (submenu: ThreadSettingsSubmenuPage) => void;
 }) {
+  const t = useTranslate();
   const session = useThreadSettingsSession();
   const refreshProvidersCommand = useAtomCommand(serverEnvironment.refreshProviders, {
     reportFailure: false,
@@ -935,7 +948,7 @@ function ThreadSettingsMainContent(props: {
     void refreshProviderCatalog(session.environmentId).then((result) => {
       setIsRefreshingProviders(false);
       const error = providerCatalogRefreshError(result);
-      if (error) Dialog.alert("Could not refresh models", error);
+      if (error) Dialog.alert(t("mobile.threadStatus.refreshModelsFailed"), error);
     });
   };
   const [animationsReady, setAnimationsReady] = useState(false);
@@ -968,10 +981,10 @@ function ThreadSettingsMainContent(props: {
           <Text className="text-center text-sm text-foreground-muted">
             {session.providerFilter === FAVORITES_PROVIDER_FILTER &&
             session.searchQuery.trim().length === 0
-              ? "No favorite models"
+              ? t("mobile.dynamic.ThreadSettingsSheet.no-favorite-models")
               : hasActiveCatalogFilter
-                ? "No matching models"
-                : "No available models"}
+                ? t("mobile.dynamic.ThreadSettingsSheet.no-matching-models")
+                : t("mobile.dynamic.ThreadSettingsSheet.no-available-models")}
           </Text>
         </View>
       );
@@ -1033,13 +1046,13 @@ function ThreadSettingsMainContent(props: {
                   />
                 </View>
                 <TextInput
-                  accessibilityLabel="Find a model"
+                  accessibilityLabel={t("mobile.threads.ThreadSettingsSheet.find-a-model")}
                   autoCapitalize="none"
                   autoCorrect={false}
                   className="min-w-0 flex-1 px-2 py-0 text-base text-foreground"
                   style={{ minHeight: 56, includeFontPadding: false, textAlignVertical: "center" }}
                   onChangeText={session.setSearchQuery}
-                  placeholder="Find a model"
+                  placeholder={t("mobile.threads.ThreadSettingsSheet.find-a-model")}
                   placeholderTextColorClassName="accent-placeholder"
                   selectionColorClassName="accent-focus/32"
                   cursorColorClassName="accent-focus"
@@ -1048,7 +1061,7 @@ function ThreadSettingsMainContent(props: {
                 />
                 {session.searchQuery.length > 0 ? (
                   <IconButton
-                    accessibilityLabel="Clear model search"
+                    accessibilityLabel={t("mobile.threads.ThreadSettingsSheet.clear-model-search")}
                     icon="xmark"
                     onPress={() => session.setSearchQuery("")}
                   />
@@ -1075,6 +1088,7 @@ function ThreadSettingsChoiceContent(props: {
   readonly submenu: ThreadSettingsSubmenuPage;
   readonly onSelected: () => void;
 }) {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
   const session = useThreadSettingsSession();
   const descriptorId = props.submenu.kind === "descriptor" ? props.submenu.id : null;
@@ -1124,8 +1138,8 @@ function ThreadSettingsChoiceContent(props: {
                   activeDescriptor.id === session.promptTraits.primarySelectDescriptor?.id
                 ) {
                   Dialog.alert(
-                    "Reasoning controlled by prompt",
-                    'Your prompt contains "ultrathink" in the text. Remove it to change this option.',
+                    t("mobile.threadStatus.reasoningPrompt"),
+                    t("mobile.threadStatus.removeUltrathink"),
                   );
                   return;
                 }
@@ -1202,6 +1216,7 @@ function useThreadSettingsMailSearchToolbar() {
 }
 
 function ThreadSettingsModelsScreen() {
+  const t = useTranslate();
   const session = useThreadSettingsSession();
   const presentation = useThreadSettingsPickerPresentation();
   const navigation = useNavigation<NativeStackNavigationProp<ThreadSettingsPickerStackParams>>();
@@ -1212,8 +1227,8 @@ function ThreadSettingsModelsScreen() {
     presentation.onClose();
   });
   const providerFilters = [
-    { id: "all-providers", title: "All providers", value: null },
-    { id: "favorites", title: "Favorites", value: FAVORITES_PROVIDER_FILTER },
+    { id: "all-providers", title: t("modelFilter.all"), value: null },
+    { id: "favorites", title: t("modelFilter.favorites"), value: FAVORITES_PROVIDER_FILTER },
     ...session.providerGroups.map((group) => ({
       id: `provider:${group.providerKey}`,
       title: group.providerLabel,
@@ -1221,11 +1236,11 @@ function ThreadSettingsModelsScreen() {
     })),
   ];
   const filterMenu = {
-    title: "Model filters",
+    title: t("modelFilter.filters"),
     items: [
       {
         type: "submenu" as const,
-        title: "Provider",
+        title: t("modelFilter.provider"),
         items: providerFilters.map((filter) => ({
           type: "action" as const,
           title: filter.title,
@@ -1237,7 +1252,7 @@ function ThreadSettingsModelsScreen() {
         ? [
             {
               type: "action" as const,
-              title: "Show legacy models",
+              title: t("modelFilter.legacy"),
               state: session.showLegacy ? ("on" as const) : ("off" as const),
               onPress: () => session.setShowLegacy(!session.showLegacy),
             },
@@ -1253,10 +1268,10 @@ function ThreadSettingsModelsScreen() {
           trailing={
             <View className="flex-row items-center">
               <AndroidAnchoredMenu
-                title="Model filters"
+                title={t("mobile.threads.ThreadSettingsSheet.model-filters")}
                 actions={[
                   {
-                    title: "Provider",
+                    title: t("modelFilter.provider"),
                     subactions: providerFilters.map((filter) => ({
                       id: filter.id,
                       title: filter.title,
@@ -1267,7 +1282,7 @@ function ThreadSettingsModelsScreen() {
                     ? [
                         {
                           id: "show-legacy",
-                          title: "Show legacy models",
+                          title: t("modelFilter.legacy"),
                           state: session.showLegacy ? ("on" as const) : ("off" as const),
                         },
                       ]
@@ -1284,7 +1299,7 @@ function ThreadSettingsModelsScreen() {
               >
                 {(open) => (
                   <IconButton
-                    accessibilityLabel="Filter models"
+                    accessibilityLabel={t("mobile.threads.ThreadSettingsSheet.filter-models")}
                     icon="line.3.horizontal.decrease"
                     selected={hasCustomCatalogFilter}
                     variant={hasCustomCatalogFilter ? "tonal" : "standard"}
@@ -1295,8 +1310,12 @@ function ThreadSettingsModelsScreen() {
             </View>
           }
           onCancel={presentation.onClose}
-          title="Thread settings"
-          confirm={session.pendingModel ? { label: "Save", onPress: commitAndClose } : undefined}
+          title={t("mobile.threads.ThreadSettingsSheet.thread-settings")}
+          confirm={
+            session.pendingModel
+              ? { label: t("modelFilter.save"), onPress: commitAndClose }
+              : undefined
+          }
         />
       ) : null}
       <NativeStackScreenOptions
@@ -1315,7 +1334,7 @@ function ThreadSettingsModelsScreen() {
                     ? "line.3.horizontal.decrease.circle.fill"
                     : "line.3.horizontal.decrease",
                   onSearchTextChange: session.setSearchQuery,
-                  placeholder: "Find a model",
+                  placeholder: t("modelFilter.find"),
                   searchTextChangeId: "thread-settings-model-search-text",
                   showsSearchDismissButton: true,
                 }),
@@ -1331,7 +1350,7 @@ function ThreadSettingsModelsScreen() {
                   obscureBackground: false,
                   onCancelButtonPress: () => session.setSearchQuery(""),
                   onChangeText: (event) => session.setSearchQuery(event.nativeEvent.text),
-                  placeholder: "Find a model",
+                  placeholder: t("modelFilter.find"),
                 }
               : undefined,
         }}
@@ -1341,21 +1360,21 @@ function ThreadSettingsModelsScreen() {
           onOpenSubmenu={(submenu) => {
             const title =
               submenu.kind === "runtime"
-                ? "Runtime"
+                ? t("modelFilter.runtime")
                 : (session.displayedDescriptors.find(
                     (descriptor) => descriptor.type === "select" && descriptor.id === submenu.id,
-                  )?.label ?? "Option");
+                  )?.label ?? t("modelFilter.option"));
             navigation.navigate("ThreadSettingsChoice", { ...submenu, title });
           }}
         />
       </ScreenContent>
       {Platform.OS === "ios" ? (
         <SheetHeader
-          title="Thread settings"
+          title={t("mobile.threads.ThreadSettingsSheet.thread-settings")}
           onCancel={presentation.onClose}
-          accessibilityLabel="Cancel thread settings"
+          accessibilityLabel={t("mobile.threads.ThreadSettingsSheet.cancel-thread-settings")}
           confirm={{
-            label: session.pendingModel ? "Save thread settings" : "Done",
+            label: session.pendingModel ? t("modelFilter.saveSettings") : t("modelFilter.done"),
             onPress: commitAndClose,
           }}
         />
@@ -1363,27 +1382,27 @@ function ThreadSettingsModelsScreen() {
       {Platform.OS === "ios" && !usesNativeMailSearchToolbar ? (
         <Toolbar placement="bottom">
           <Toolbar.Menu
-            accessibilityLabel="Filter models"
+            accessibilityLabel={t("mobile.threads.ThreadSettingsSheet.filter-models")}
             icon={
               hasCustomCatalogFilter
                 ? "line.3.horizontal.decrease.circle.fill"
                 : "line.3.horizontal.decrease.circle"
             }
-            title="Model filters"
+            title={t("mobile.threads.ThreadSettingsSheet.model-filters")}
           >
-            <Toolbar.Menu title="Provider">
-              <Toolbar.Label>Provider</Toolbar.Label>
+            <Toolbar.Menu title={t("mobile.threads.ThreadSettingsSheet.provider")}>
+              <Toolbar.Label>{t("mobile.threads.ThreadSettingsSheet.provider")}</Toolbar.Label>
               <Toolbar.MenuAction
                 isOn={session.providerFilter === null}
                 onPress={() => session.setProviderFilter(null)}
               >
-                All providers
+                {t("mobile.threads.ThreadSettingsSheet.all-providers")}
               </Toolbar.MenuAction>
               <Toolbar.MenuAction
                 isOn={session.providerFilter === FAVORITES_PROVIDER_FILTER}
                 onPress={() => session.setProviderFilter(FAVORITES_PROVIDER_FILTER)}
               >
-                Favorites
+                {t("mobile.threads.ThreadSettingsSheet.favorites")}
               </Toolbar.MenuAction>
               {session.providerGroups.map((group) => (
                 <Toolbar.MenuAction
@@ -1400,7 +1419,7 @@ function ThreadSettingsModelsScreen() {
                 isOn={session.showLegacy}
                 onPress={() => session.setShowLegacy(!session.showLegacy)}
               >
-                Show legacy models
+                {t("mobile.threads.ThreadSettingsSheet.show-legacy-models")}
               </Toolbar.MenuAction>
             ) : null}
           </Toolbar.Menu>
@@ -1436,6 +1455,7 @@ function ThreadSettingsChoiceScreen() {
 }
 
 function ThreadSettingsPickerNavigator(props: ThreadSettingsPickerPresentation) {
+  const t = useTranslate();
   const theme = useUniwindTheme();
   const solidSheetBackground = theme["--color-sheet-solid"];
   const foreground = theme["--color-foreground"];
@@ -1469,7 +1489,7 @@ function ThreadSettingsPickerNavigator(props: ThreadSettingsPickerPresentation) 
         <ThreadSettingsPickerStack.Screen
           name="ThreadSettingsModels"
           component={ThreadSettingsModelsScreen}
-          options={{ headerBackVisible: false, title: "Thread settings" }}
+          options={{ headerBackVisible: false, title: t("modelFilter.settings") }}
         />
         <ThreadSettingsPickerStack.Screen
           name="ThreadSettingsChoice"

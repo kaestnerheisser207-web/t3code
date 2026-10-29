@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { VoiceInputPhase, VoiceInputState } from "@t3tools/client-runtime/voice-input";
 import { memo, useState, type ReactNode } from "react";
 import { Linking, Pressable, Text as SystemText, View, type LayoutChangeEvent } from "react-native";
@@ -325,6 +326,7 @@ export function ComposerDictationStatus(props: {
   readonly presentation: VoiceComposerPresentation;
   readonly onDismissError: () => void;
 }) {
+  const t = useTranslate();
   const recording = props.phase === "recording";
   const waveformStyle = useAnimatedStyle(() => ({
     opacity: withTiming(recording ? 1 : 0, DICTATION_TIMING),
@@ -343,7 +345,9 @@ export function ComposerDictationStatus(props: {
             {props.presentation.statusLabel}
           </Text>
           <Pressable
-            accessibilityLabel="Dismiss voice input error"
+            accessibilityLabel={t(
+              "mobile.surfaces.ComposerDictationControl.dismiss-voice-input-error",
+            )}
             accessibilityRole="button"
             className="size-7 items-center justify-center active:opacity-70"
             hitSlop={8}
@@ -390,11 +394,12 @@ export function ComposerDictationCancelAction(props: {
   readonly presentation: VoiceComposerPresentation;
   readonly onCancel: () => void;
 }) {
+  const t = useTranslate();
   if (props.presentation.leadingAction !== "cancel") return null;
   return (
     <VoiceActionButton
       size={props.size}
-      accessibilityLabel="Cancel dictation"
+      accessibilityLabel={t("mobile.surfaces.ComposerDictationControl.cancel-dictation")}
       icon="xmark"
       onPress={props.onCancel}
     />
@@ -411,14 +416,16 @@ export function ComposerDictationPrimaryAction(props: {
   readonly onConfirm: () => void;
   readonly onCancel: () => void;
 }) {
+  const t = useTranslate();
   if (props.presentation.trailingAction === "confirm") {
     return (
       <VoiceActionButton
         size={props.size}
         accessibilityLabel={
           props.presentation.confirmationEnabled
-            ? "Finish dictation"
-            : (props.presentation.statusLabel ?? "Preparing voice input")
+            ? t("mobile.dynamic.ComposerDictationControl.finish-dictation")
+            : (props.presentation.statusLabel ??
+              t("mobile.dynamic.ComposerDictationControl.preparing-voice-input"))
         }
         disabled={!props.presentation.confirmationEnabled}
         icon="checkmark"
@@ -440,12 +447,17 @@ export function ComposerDictationStartAction(props: {
   readonly onStart: () => void;
   readonly onCancel: () => void;
 }) {
+  const t = useTranslate();
   if (!props.isAvailable) return null;
   const openSettings = props.state.phase === "error" && props.state.errorAction === "settings";
   return (
     <VoiceActionButton
       size={props.size}
-      accessibilityLabel={openSettings ? "Open microphone settings" : "Start dictation"}
+      accessibilityLabel={
+        openSettings
+          ? t("mobile.dynamic.ComposerDictationControl.open-microphone-settings")
+          : t("mobile.dynamic.ComposerDictationControl.start-dictation")
+      }
       disabled={props.disabled}
       icon="mic"
       onPress={

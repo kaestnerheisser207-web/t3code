@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type {
   EditorId,
   EnvironmentId,
@@ -76,6 +77,7 @@ export function RightPanelSurfaceContent(props: {
   readonly pullRequest: RightPanelPullRequestProps;
   readonly files: RightPanelFileProps;
 }) {
+  const t = useTranslate();
   const { surface, threadRef, visible } = props;
   if (surface === null) return null;
   switch (surface.kind) {
@@ -119,7 +121,7 @@ export function RightPanelSurfaceContent(props: {
       if (!pullRequest.supported) {
         return (
           <PullRequestsUnavailableState
-            title="Pull requests unavailable"
+            title={t("web.ui.RightPanelSurfaceContent.pull-requests-unavailable")}
             error="Update this environment's T3 Code server to browse pull requests."
           />
         );

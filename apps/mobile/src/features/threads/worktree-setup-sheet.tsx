@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ReactElement } from "react";
 import { Sheet } from "../../components/ui/Sheet";
 
@@ -8,8 +9,9 @@ export interface WorktreeSetupSheetProps {
 }
 
 export function WorktreeSetupSheet({ children, onClose }: WorktreeSetupSheetProps) {
+  const t = useTranslate();
   return (
-    <Sheet title="Worktree setup" onClose={onClose}>
+    <Sheet title={t("mobile.threads.worktree-setup-sheet.worktree-setup")} onClose={onClose}>
       {children}
     </Sheet>
   );

@@ -1,4 +1,5 @@
 import { type TimestampFormat } from "@t3tools/contracts/settings";
+import { webI18n } from "./i18n";
 
 function getTimestampFormatOptions(
   timestampFormat: TimestampFormat,
@@ -11,7 +12,10 @@ function getTimestampFormatOptions(
   };
 
   if (timestampFormat === "locale") {
-    return baseOptions;
+    return {
+      ...baseOptions,
+      hour12: new Intl.DateTimeFormat(timestampLocale, baseOptions).resolvedOptions().hour12,
+    };
   }
 
   return {
@@ -39,6 +43,10 @@ function readHostSystemLocale(): string | null {
 }
 
 const timestampLocale = resolveTimestampLocale(readHostSystemLocale());
+
+function displayLocale(language: string = webI18n.resolvedLanguage ?? "en") {
+  return resolveTimestampLocale(language);
+}
 
 const WEEKDAY_INDEXES = [0, 1, 2, 3, 4, 5, 6] as const;
 type WeekdayIndex = (typeof WEEKDAY_INDEXES)[number];
@@ -73,15 +81,17 @@ const timestampFormatterCache = new Map<string, Intl.DateTimeFormat>();
 function getTimestampFormatter(
   timestampFormat: TimestampFormat,
   includeSeconds: boolean,
+  language: string = webI18n.resolvedLanguage ?? "en",
 ): Intl.DateTimeFormat {
-  const cacheKey = `${timestampFormat}:${includeSeconds ? "seconds" : "minutes"}`;
+  const locale = displayLocale(language);
+  const cacheKey = `${locale ?? "system"}:${timestampFormat}:${includeSeconds ? "seconds" : "minutes"}`;
   const cachedFormatter = timestampFormatterCache.get(cacheKey);
   if (cachedFormatter) {
     return cachedFormatter;
   }
 
   const formatter = new Intl.DateTimeFormat(
-    timestampLocale,
+    locale,
     getTimestampFormatOptions(timestampFormat, includeSeconds),
   );
   timestampFormatterCache.set(cacheKey, formatter);
@@ -120,40 +130,53 @@ function ordinalSuffix(day: number): string {
 export function formatChatTimestampTooltip(
   isoDate: string,
   timestampFormat: TimestampFormat,
+  language: string = webI18n.resolvedLanguage ?? "en",
 ): string {
   const date = parseTimestampDate(isoDate);
   if (!date) return "";
-  const time = formatShortTimestamp(isoDate, timestampFormat);
+  const time = formatShortTimestamp(isoDate, timestampFormat, language);
+  if (language !== "en") {
+    return `${getDateFormatter("long", language).format(date)} ${time}`;
+  }
   const day = date.getDate();
   const month = monthNameFormatter.format(date);
   const year = date.getFullYear();
   return `${time}, ${day}${ordinalSuffix(day)} ${month} ${year}`;
 }
 
-export function formatShortTimestamp(isoDate: string, timestampFormat: TimestampFormat): string {
+export function formatShortTimestamp(
+  isoDate: string,
+  timestampFormat: TimestampFormat,
+  language: string = webI18n.resolvedLanguage ?? "en",
+): string {
   const date = parseTimestampDate(isoDate);
   if (!date) return "";
-  return getTimestampFormatter(timestampFormat, false).format(date);
+  return getTimestampFormatter(timestampFormat, false, language).format(date);
 }
 
-const numericDateFormatter = new Intl.DateTimeFormat(timestampLocale, {
-  month: "numeric",
-  day: "numeric",
-});
-const numericDateWithYearFormatter = new Intl.DateTimeFormat(timestampLocale, {
-  month: "numeric",
-  day: "numeric",
-  year: "numeric",
-});
+function getDateFormatter(style: "short" | "year" | "long", language: string) {
+  const locale = displayLocale(language);
+  const key = `${locale ?? "system"}:date:${style}`;
+  const existing = timestampFormatterCache.get(key);
+  if (existing) return existing;
+  const formatter = new Intl.DateTimeFormat(locale, {
+    month: style === "long" ? "long" : "numeric",
+    day: "numeric",
+    ...(style === "short" ? {} : { year: "numeric" as const }),
+  });
+  timestampFormatterCache.set(key, formatter);
+  return formatter;
+}
 
 export function formatDayAwareTimestamp(
   isoDate: string,
   timestampFormat: TimestampFormat,
   nowMs: number = Date.now(),
+  language: string = webI18n.resolvedLanguage ?? "en",
 ): string {
   const date = parseTimestampDate(isoDate);
   if (!date) return "";
-  const time = getTimestampFormatter(timestampFormat, false).format(date);
+  const time = getTimestampFormatter(timestampFormat, false, language).format(date);
 
   const now = new Date(nowMs);
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -162,9 +185,11 @@ export function formatDayAwareTimestamp(
   const dayDiff = Math.round((startOfToday - startOfMessageDay) / 86_400_000);
 
   if (dayDiff <= 0) return time;
-  if (dayDiff === 1) return `yesterday at ${time}`;
-  const dateFormatter =
-    date.getFullYear() === now.getFullYear() ? numericDateFormatter : numericDateWithYearFormatter;
+  if (dayDiff === 1) return webI18n.getFixedT(language)("time.yesterday", { time });
+  const dateFormatter = getDateFormatter(
+    date.getFullYear() === now.getFullYear() ? "short" : "year",
+    language,
+  );
   return `${dateFormatter.format(date)} ${time}`;
 }
 
@@ -172,21 +197,24 @@ export function formatUpcomingTimestamp(
   isoDate: string,
   timestampFormat: TimestampFormat,
   nowMs: number = Date.now(),
+  language: string = webI18n.resolvedLanguage ?? "en",
 ): string {
   const date = parseTimestampDate(isoDate);
   if (!date) return "";
-  const time = getTimestampFormatter(timestampFormat, false).format(date);
+  const time = getTimestampFormatter(timestampFormat, false, language).format(date);
 
   const now = new Date(nowMs);
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const startOfTargetDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
   const dayDiff = Math.round((startOfTargetDay - startOfToday) / 86_400_000);
 
-  if (dayDiff < 0) return formatDayAwareTimestamp(isoDate, timestampFormat, nowMs);
+  if (dayDiff < 0) return formatDayAwareTimestamp(isoDate, timestampFormat, nowMs, language);
   if (dayDiff === 0) return time;
-  if (dayDiff === 1) return `tomorrow at ${time}`;
-  const dateFormatter =
-    date.getFullYear() === now.getFullYear() ? numericDateFormatter : numericDateWithYearFormatter;
+  if (dayDiff === 1) return webI18n.getFixedT(language)("time.tomorrow", { time });
+  const dateFormatter = getDateFormatter(
+    date.getFullYear() === now.getFullYear() ? "short" : "year",
+    language,
+  );
   return `${dateFormatter.format(date)} ${time}`;
 }
 
@@ -247,7 +275,23 @@ export function formatRelativeTime(
   return elapsedMs === null ? null : formatRelativeElapsed(elapsedMs);
 }
 
-export function formatRelativeTimeLabel(isoDate: string, nowMs: number = Date.now()) {
+export function formatRelativeTimeLabel(
+  isoDate: string,
+  nowMs: number = Date.now(),
+  language: string = webI18n.resolvedLanguage ?? "en",
+) {
+  if (language !== "en") {
+    const elapsed = relativeTimeElapsedMs(isoDate, nowMs);
+    if (elapsed === null) return "";
+    if (elapsed < MINUTE_MS) return webI18n.getFixedT(language)("time.justNow");
+    if (elapsed < HOUR_MS)
+      return webI18n.getFixedT(language)("time.minutesAgo", {
+        count: Math.floor(elapsed / MINUTE_MS),
+      });
+    if (elapsed < DAY_MS)
+      return webI18n.getFixedT(language)("time.hoursAgo", { count: Math.floor(elapsed / HOUR_MS) });
+    return webI18n.getFixedT(language)("time.daysAgo", { count: Math.floor(elapsed / DAY_MS) });
+  }
   const relative = formatRelativeTime(isoDate, nowMs);
   if (!relative) return "";
   return relative.suffix ? `${relative.value} ${relative.suffix}` : relative.value;

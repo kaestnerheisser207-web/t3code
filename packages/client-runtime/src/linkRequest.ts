@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import {
   type AuthMcpClientAccess,
   type EnvironmentId,
@@ -214,30 +215,36 @@ export function linkRequestDisplay(
   >,
   visibility: "local" | "inherited" | "synthetic",
   accessLabel: (access: AuthMcpClientAccess) => string,
+  t?: TFunction,
 ): LinkRequestDisplay {
   switch (item.linkStatus) {
     case "pending":
       return visibility === "local"
         ? { kind: "pending" }
-        : { kind: "pending-elsewhere", label: "Waiting for an answer in the original thread" };
+        : {
+            kind: "pending-elsewhere",
+            label: t?.("link.waitingOriginal") ?? "Waiting for an answer in the original thread",
+          };
     case "linked":
       return {
         kind: "answered",
         outcome: "linked",
-        label: `Linked ${item.linkedLabel ?? linkRequestTargetName(item)}${
+        label: `${t?.("link.linked", { environment: item.linkedLabel ?? linkRequestTargetName(item) }) ?? `Linked ${item.linkedLabel ?? linkRequestTargetName(item)}`}${
           item.linkedAccess === undefined ? "" : ` · ${accessLabel(item.linkedAccess)}`
         }`,
       };
     case "declined":
-      return { kind: "answered", outcome: "declined", label: "Declined" };
+      return { kind: "answered", outcome: "declined", label: t?.("link.declined") ?? "Declined" };
     case "failed":
       return {
         kind: "answered",
         outcome: "failed",
-        label: `Could not link: ${item.failure ?? "the other environment refused"}`,
+        label:
+          t?.("link.failed", { error: item.failure ?? t("link.refused") }) ??
+          `Could not link: ${item.failure ?? "the other environment refused"}`,
       };
     case "cancelled":
-      return { kind: "answered", outcome: "ended", label: "Request ended" };
+      return { kind: "answered", outcome: "ended", label: t?.("link.ended") ?? "Request ended" };
   }
 }
 

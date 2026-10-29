@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { findErrorTraceId } from "@t3tools/client-runtime/errors";
 import {
   isAtomCommandInterrupted,
@@ -48,6 +50,7 @@ function T3ConnectEnvironmentRow(props: {
   readonly onConfirmationChange: (open: boolean) => void;
   readonly onDeregister: (environment: RelayClientEnvironmentRecord) => void;
 }) {
+  const t = useTranslate();
   const { environment } = props;
   return (
     <ClerkUserProfileRow icon={<ServerIcon className="size-4" />}>
@@ -64,7 +67,7 @@ function T3ConnectEnvironmentRow(props: {
           <CollapsibleTrigger
             render={
               <Button size="sm" variant="destructive-outline" disabled={props.mutationPending}>
-                Deregister
+                {t("web.ui.T3ConnectUserProfilePage.deregister")}
               </Button>
             }
           />
@@ -75,17 +78,25 @@ function T3ConnectEnvironmentRow(props: {
             <div
               className="rounded-lg border border-input bg-muted/32 px-5 py-4 shadow-xs/5"
               role="group"
-              aria-label={`Confirm deregistration of ${environment.label}`}
+              aria-label={t(
+                "web.dynamic.T3ConnectUserProfilePage.confirm-deregistration-of-param",
+                { label: environment.label },
+              )}
             >
               <h4 className="text-sm leading-4.5 font-semibold text-foreground">
-                Deregister server
+                {t("web.ui.T3ConnectUserProfilePage.deregister-server")}
               </h4>
               <p className="mt-1 text-xs leading-4.5 text-muted-foreground">
-                “{environment.label}” will be removed from this account.
+                <Trans
+                  t={t}
+                  i18nKey="web.rich.T3ConnectUserProfilePage.part-will-be-removed-from-this-account"
+                  components={{ value0: <>{environment.label}</> }}
+                />
               </p>
               <p className="mt-4 max-w-xl text-xs leading-4.5 text-muted-foreground">
-                T3 Connect access will be revoked, any managed tunnel will be removed, and a host
-                space will become available. Local connections on your devices are not changed.
+                {t(
+                  "web.ui.T3ConnectUserProfilePage.t3-connect-access-will-be-revoked-any-managed-tunnel-will-be-removed-and-a-host-space-will-become-available-local-connections-on-your-devices-are-not-changed",
+                )}
               </p>
               <div className="mt-4 flex justify-end gap-2">
                 <Button
@@ -94,7 +105,7 @@ function T3ConnectEnvironmentRow(props: {
                   disabled={props.mutationPending}
                   onClick={() => props.onConfirmationChange(false)}
                 >
-                  Cancel
+                  {t("web.ui.T3ConnectUserProfilePage.cancel")}
                 </Button>
                 <Button
                   size="sm"
@@ -102,7 +113,9 @@ function T3ConnectEnvironmentRow(props: {
                   disabled={props.mutationPending}
                   onClick={() => props.onDeregister(environment)}
                 >
-                  {props.mutationPending ? "Deregistering…" : "Deregister"}
+                  {props.mutationPending
+                    ? t("web.dynamic.T3ConnectUserProfilePage.deregistering")
+                    : t("web.dynamic.T3ConnectUserProfilePage.deregister")}
                 </Button>
               </div>
             </div>
@@ -114,6 +127,7 @@ function T3ConnectEnvironmentRow(props: {
 }
 
 function T3ConnectTunnelUsage() {
+  const t = useTranslate();
   const usage = useManagedTunnelUsage();
   const t3Chat = useT3ChatLink();
   if (usage.used === null || usage.limit === null) return null;
@@ -124,23 +138,31 @@ function T3ConnectTunnelUsage() {
         <p className="mt-2 text-xs leading-4.5 text-muted-foreground">
           {usage.upgrade === "link" && t3Chat.linkUrl ? (
             <>
-              Confirm on{" "}
-              <a
-                className="underline"
-                href={t3Chat.linkUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                t3.chat
-              </a>
-              , then select Refresh.
+              <Trans
+                t={t}
+                i18nKey="web.rich.T3ConnectUserProfilePage.confirm-on-part-t3-chat-part-then-select-refresh"
+                components={{
+                  part0: (
+                    <a
+                      className="underline"
+                      href={t3Chat.linkUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {null}
+                    </a>
+                  ),
+                }}
+              />
             </>
           ) : (
             <>
               {tunnelUpgradeCopy(usage.upgrade)}{" "}
               {usage.upgrade === "link" ? (
                 <InlineButton disabled={t3Chat.pending !== null} onClick={() => void t3Chat.link()}>
-                  {t3Chat.pending === "link" ? "Opening…" : "Link T3 Chat"}
+                  {t3Chat.pending === "link"
+                    ? t("web.dynamic.T3ConnectUserProfilePage.opening")
+                    : t("web.dynamic.T3ConnectUserProfilePage.link-t3-chat")}
                 </InlineButton>
               ) : (
                 <a
@@ -149,7 +171,7 @@ function T3ConnectTunnelUsage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Upgrade on T3 Chat
+                  {t("web.ui.T3ConnectUserProfilePage.upgrade-on-t3-chat")}
                 </a>
               )}
             </>
@@ -161,6 +183,7 @@ function T3ConnectTunnelUsage() {
 }
 
 export function T3ConnectUserProfilePage() {
+  const t = useTranslate();
   const environmentsState = useManagedRelayEnvironments();
   const deregisterEnvironment = useAtomCommand(deregisterManagedRelayEnvironmentCommand, {
     reportFailure: false,
@@ -246,7 +269,9 @@ export function T3ConnectUserProfilePage() {
   return (
     <ClerkUserProfilePage
       title="T3 Connect"
-      description="Environments registered to your account. Connections on this device are managed in Settings."
+      description={t(
+        "web.ui.T3ConnectUserProfilePage.environments-registered-to-your-account-connections-on-this-device-are-managed-in-settings",
+      )}
       action={
         <ClerkUserProfileRefreshButton
           disabled={deregisteringEnvironmentId !== null}
@@ -260,7 +285,7 @@ export function T3ConnectUserProfilePage() {
         {environmentsState.error ? (
           <div className="mb-4 border-t border-destructive/35 py-3 text-xs" role="alert">
             <p className="font-medium text-destructive-foreground">
-              Could not load T3 Connect environments
+              {t("web.ui.T3ConnectUserProfilePage.could-not-load-t3-connect-environments")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">{environmentsState.error}</p>
           </div>
@@ -268,7 +293,7 @@ export function T3ConnectUserProfilePage() {
 
         {isInitialLoad ? (
           <p className="border-t py-4 text-xs text-muted-foreground" role="status">
-            Loading environments…
+            {t("web.ui.T3ConnectUserProfilePage.loading-environments")}
           </p>
         ) : environments.length > 0 ? (
           <ul className="border-t">
@@ -292,10 +317,13 @@ export function T3ConnectUserProfilePage() {
                 <ServerIcon />
               </EmptyMedia>
               <EmptyHeader>
-                <EmptyTitle>No T3 Connect environments</EmptyTitle>
+                <EmptyTitle>
+                  {t("web.ui.T3ConnectUserProfilePage.no-t3-connect-environments")}
+                </EmptyTitle>
                 <EmptyDescription>
-                  Link an environment from its local Settings to make it available through T3
-                  Connect.
+                  {t(
+                    "web.ui.T3ConnectUserProfilePage.link-an-environment-from-its-local-settings-to-make-it-available-through-t3-connect",
+                  )}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

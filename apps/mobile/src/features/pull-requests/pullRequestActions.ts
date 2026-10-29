@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
 import {
   sourceControlClients,
   type ChangeRequestTerminology,
@@ -26,7 +28,7 @@ type ActionDetail = Pick<
   readonly mergeCapabilities: PullRequestDetail["mergeCapabilities"];
 };
 
-export const MERGE_METHODS = {
+const MERGE_METHODS = {
   squash: { title: "Squash and merge", description: "Combine the commits into one commit." },
   merge: {
     title: "Create a merge commit",
@@ -35,10 +37,32 @@ export const MERGE_METHODS = {
   rebase: { title: "Rebase and merge", description: "Add the commits without a merge commit." },
 } as const satisfies Record<PullRequestMergeMethod, { title: string; description: string }>;
 
+export function mergeMethodPresentation(method: PullRequestMergeMethod, t?: TFunction) {
+  return t
+    ? { title: t(`pr.method.${method}`), description: t(`pr.method.${method}Hint`) }
+    : MERGE_METHODS[method];
+}
+
+const ACTION_LABEL_KEYS = {
+  merge: "pr.action.merge",
+  ready: "pr.action.ready",
+  draft: "pr.action.draft",
+  close: "pr.action.close",
+  reopen: "pr.action.reopen",
+  "update-branch": "pr.action.updateBranch",
+  "enable-auto-merge": "pr.action.enableAuto",
+  "disable-auto-merge": "pr.action.disableAuto",
+  revert: "pr.action.revert",
+  "delete-branch": "pr.action.deleteBranch",
+  "approve-workflows": "pr.action.approveWorkflows",
+} as const satisfies Record<PullRequestAction, string>;
+
 export function pullRequestActionLabel(
   action: PullRequestAction,
   terminology: ChangeRequestTerminology,
+  t?: TFunction,
 ): string {
+  if (t) return t(ACTION_LABEL_KEYS[action], { kind: sourceControlTerm(t, terminology.singular) });
   switch (action) {
     case "merge":
       return `Merge ${terminology.singular}`;
@@ -117,25 +141,47 @@ export function canPerformPullRequestAction(pr: ActionDetail, action: PullReques
   }
 }
 
-export const MERGE_CONFLICT_REASON = "Resolve the branch conflicts before merging.";
+export function mergeUnavailableCode(pr: ActionDetail, connectionAllowsWrites: boolean) {
+  if (pr.state === "merged") return "merged";
+  if (pr.state === "closed") return "closed";
+  if (!connectionAllowsWrites) return "readOnly";
+  if (!pr.capabilities.actions.includes("merge")) return "unsupported";
+  if (!pr.viewerPermissions.actions.includes("merge")) return "noPermission";
+  if (pr.isDraft) return "draft";
+  if (pr.mergeability === "conflicting") return "conflicts";
+  if (!allowedMergeMethods(pr).length) return "noMethods";
+  return null;
+}
 
 export function mergeUnavailableReason(
   pr: ActionDetail,
   connectionAllowsWrites: boolean,
   terminology: ChangeRequestTerminology,
+  t?: TFunction,
 ) {
-  if (pr.state === "merged") return `This ${terminology.singular} has been merged.`;
-  if (pr.state === "closed") return `Reopen this ${terminology.singular} before merging.`;
-  if (!connectionAllowsWrites) return "This environment connection is read-only.";
-  if (!pr.capabilities.actions.includes("merge"))
-    return "This provider does not support merging here.";
-  if (!pr.viewerPermissions.actions.includes("merge"))
-    return `Your account cannot merge this ${terminology.singular}.`;
-  if (pr.isDraft) return "Mark this draft ready for review before merging.";
-  if (pr.mergeability === "conflicting") return MERGE_CONFLICT_REASON;
-  if (!allowedMergeMethods(pr).length) return "This repository has no available merge methods.";
-  return null;
+  const code = mergeUnavailableCode(pr, connectionAllowsWrites);
+  if (code === null) return null;
+  if (t) return t(`pr.merge.${code}`, { kind: sourceControlTerm(t, terminology.singular) });
+  switch (code) {
+    case "merged":
+      return `This ${terminology.singular} has been merged.`;
+    case "closed":
+      return `Reopen this ${terminology.singular} before merging.`;
+    case "readOnly":
+      return "This environment connection is read-only.";
+    case "unsupported":
+      return "This provider does not support merging here.";
+    case "noPermission":
+      return `Your account cannot merge this ${terminology.singular}.`;
+    case "draft":
+      return "Mark this draft ready for review before merging.";
+    case "conflicts":
+      return "Resolve the branch conflicts before merging.";
+    case "noMethods":
+      return "This repository has no available merge methods.";
+  }
 }
 
-export const openOnProviderLabel = (provider: SourceControlProviderKind) =>
+export const openOnProviderLabel = (provider: SourceControlProviderKind, t?: TFunction) =>
+  t?.("pr.action.openProvider", { provider: sourceControlClients.get(provider).label }) ??
   `Open on ${sourceControlClients.get(provider).label}`;

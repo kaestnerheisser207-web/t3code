@@ -32,6 +32,12 @@ const state = vi.hoisted(() => ({
   afterRequest: undefined as (() => void) | undefined,
 }));
 
+vi.mock("../../i18n", async () => {
+  const { createI18n } = await import("@t3tools/client-runtime/i18n");
+  const instance = createI18n("en");
+  return { useTranslate: () => instance.t };
+});
+
 vi.mock("react", () => ({
   useCallback: (callback: unknown) => callback,
   useRef: (current: unknown) => ({ current }),

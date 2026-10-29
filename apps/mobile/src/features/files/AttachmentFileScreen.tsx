@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Toolbar } from "../../components/ui/Toolbar";
 import * as Dialog from "../../components/ui/Dialog";
 import { NativeStackScreenOptions } from "../../native/StackHeader";
@@ -44,6 +45,7 @@ export type AttachmentFileRouteParams = {
 type AttachmentFileScreenProps = StaticScreenProps<AttachmentFileRouteParams>;
 
 export function AttachmentFileScreen(props: AttachmentFileScreenProps) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const { appearance, setCodeWordBreak } = useAppearancePreferences();
   const iconColor = useUniwindTheme()["--color-icon"];
@@ -249,16 +251,22 @@ export function AttachmentFileScreen(props: AttachmentFileScreenProps) {
             <Menu
               actions={androidMenuActions}
               isAnchoredToRight
-              title="File actions"
+              title={t("mobile.tools.AttachmentFileScreen.file-actions")}
               onPressAction={handleAndroidMenuAction}
             >
-              <AndroidHeaderIconButton accessibilityLabel="File actions" icon="ellipsis" />
+              <AndroidHeaderIconButton
+                accessibilityLabel={t("mobile.tools.AttachmentFileScreen.file-actions")}
+                icon="ellipsis"
+              />
             </Menu>
           }
         />
       ) : null}
       <Toolbar placement="right">
-        <Toolbar.Menu accessibilityLabel="File actions" icon="ellipsis">
+        <Toolbar.Menu
+          accessibilityLabel={t("mobile.tools.AttachmentFileScreen.file-actions")}
+          icon="ellipsis"
+        >
           {renderedMode ? (
             <Toolbar.Menu inline>
               {menuActions

@@ -22,6 +22,13 @@ class T3AgentNotificationsModule : Module() {
       }
     }
 
+    Function("setPresentationLabels") { labels: Map<String, String> ->
+      appContext.reactContext?.let { context ->
+        context.getSharedPreferences("t3-activity-language", android.content.Context.MODE_PRIVATE)
+          .edit().clear().apply { labels.forEach { (key, value) -> putString(key, value) } }.apply()
+      }
+    }
+
     Function("clear") {
       appContext.reactContext?.let { AgentNotifications.clear(it) }
     }

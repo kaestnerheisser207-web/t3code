@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import type { EnvironmentId, PullRequestContextMetadata } from "@t3tools/contracts";
 import { CircleDashedIcon, FilmIcon, ImageIcon } from "lucide-react";
 import { useEffect, useState, type ComponentProps, type MouseEvent, type ReactNode } from "react";
@@ -62,6 +63,7 @@ export function ContextChipPopover(props: {
   accessibleLabel: string;
   children: ReactNode;
 }) {
+  const t = useTranslate();
   return (
     <Popover>
       <PopoverTrigger
@@ -69,7 +71,9 @@ export function ContextChipPopover(props: {
           <ContextChip
             kind={props.kind}
             render={<button type="button" />}
-            aria-label={`${props.accessibleLabel}. Show details`}
+            aria-label={t("web.dynamic.contextChipParts.param-show-details", {
+              accessibleLabel: props.accessibleLabel,
+            })}
             data-markdown-copy={props.copyMarkdown}
           />
         }
@@ -94,6 +98,7 @@ export function PullRequestChip(props: {
   copyMarkdown?: string;
   onOpen: (event: MouseEvent<HTMLElement>, url: string) => void;
 }) {
+  const t = useTranslate();
   const previewTarget = usePullRequestPreviewTarget(props.environmentId, props.metadata.url);
   const displayState =
     props.metadata.state === "open" && props.metadata.isDraft ? "draft" : props.metadata.state;
@@ -102,7 +107,11 @@ export function PullRequestChip(props: {
     <ContextChip
       kind={props.kind}
       render={<button type="button" />}
-      aria-label={`Open ${props.kindLabel} ${props.label}: ${props.metadata.title}`}
+      aria-label={t("web.dynamic.contextChipParts.open-param-param-param", {
+        kindLabel: props.kindLabel,
+        label: props.label,
+        title: props.metadata.title,
+      })}
       data-markdown-copy={props.copyMarkdown}
       onClick={(event) => props.onOpen(event, props.metadata.url)}
       onAuxClick={(event) => props.onOpen(event, props.metadata.url)}
@@ -148,11 +157,15 @@ export function ImageChipButton({
   disabled?: boolean | undefined;
   onPreviewError?: (() => void) | undefined;
 }) {
+  const t = useTranslate();
   return (
     <ContextChip
       kind="image"
       render={<button type="button" disabled={disabled} />}
-      aria-label={`Image attachment, ${name}, ${size}`}
+      aria-label={t("web.dynamic.contextChipParts.image-attachment-param-param", {
+        name: name,
+        size: size,
+      })}
       {...props}
     >
       {previewUrl ? (
@@ -327,12 +340,15 @@ function FileChipContent(props: {
 }
 
 export function UnresolvedChip(props: { label: string; tooltip: string; copyMarkdown?: string }) {
+  const t = useTranslate();
   return (
     <ContextChipShell
       icon={<CircleDashedIcon />}
       label={props.label}
       state="unresolved"
-      aria-label={`Unavailable context, ${props.label}`}
+      aria-label={t("web.dynamic.contextChipParts.unavailable-context-param", {
+        label: props.label,
+      })}
       data-markdown-copy={props.copyMarkdown}
       tooltip={props.tooltip}
     />

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { findSearchTokenRanges, splitSearchText } from "@t3tools/shared/paletteSearch";
 import type { EnvironmentThreadSearchMatch } from "@t3tools/client-runtime/state/thread-search";
 
@@ -11,6 +12,7 @@ export function ThreadSearchMatchExcerpt(props: {
   readonly compact?: boolean;
   readonly sidebar?: boolean;
 }) {
+  const t = useTranslate();
   const isUser = props.match.source === "user";
   const parts = splitSearchText(
     props.match.snippet,
@@ -40,7 +42,9 @@ export function ThreadSearchMatchExcerpt(props: {
               : "text-adaptive-emerald-600-400",
         )}
       >
-        {isUser ? "You:" : "Agent:"}{" "}
+        {isUser
+          ? t("mobile.dynamic.thread-search-match.you")
+          : t("mobile.dynamic.thread-search-match.agent")}{" "}
       </Text>
       {parts.map((part) => (
         <Text

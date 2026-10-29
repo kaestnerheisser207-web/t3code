@@ -1,3 +1,5 @@
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import {
   capitalizeTerm,
@@ -30,6 +32,7 @@ export type PullRequestEditParams = PullRequestParams &
   );
 
 export function PullRequestEditScreen({ route }: StaticScreenProps<PullRequestEditParams>) {
+  const t = useTranslate();
   const params = route.params;
   const navigation = useNavigation();
   const target = pullRequestTarget(params);
@@ -67,12 +70,12 @@ export function PullRequestEditScreen({ route }: StaticScreenProps<PullRequestEd
     !pr || allowed
       ? null
       : !permissions.connected
-        ? "Reconnect to save changes."
+        ? t("pr.edit.reconnect")
         : !canWrite
-          ? "This device isn't allowed to change source control on this environment."
+          ? t("pr.actions.readOnly")
           : params.field === "comment"
-            ? "You can't edit this comment."
-            : `You can't edit this ${singular}.`;
+            ? t("pr.edit.commentDenied")
+            : t("pr.edit.denied", { kind: sourceControlTerm(t, singular) });
   const unchanged = draft === null || draft === original;
   const invalid = params.field === "title" && value.trim().length === 0;
   const save = async () => {
@@ -102,7 +105,7 @@ export function PullRequestEditScreen({ route }: StaticScreenProps<PullRequestEd
     setBusy(false);
     if (AsyncResult.isFailure(result)) {
       const cause = squashAtomCommandFailure(result);
-      setError(cause instanceof Error ? cause.message : "The provider refused the change.");
+      setError(cause instanceof Error ? cause.message : t("pr.edit.refused"));
       return;
     }
     // updateComment refreshes the activity on its own; a title or body lives on the detail.
@@ -111,10 +114,10 @@ export function PullRequestEditScreen({ route }: StaticScreenProps<PullRequestEd
   };
   const title =
     params.field === "title"
-      ? "Edit title"
+      ? t("mobile.review.PullRequestRouteScreen.edit-title")
       : params.field === "body"
-        ? "Edit description"
-        : "Edit comment";
+        ? t("mobile.review.PullRequestRouteScreen.edit-description")
+        : t("pr.edit.comment");
   return (
     <PullRequestSheetContent
       busy={busy}
@@ -124,7 +127,11 @@ export function PullRequestEditScreen({ route }: StaticScreenProps<PullRequestEd
         <Button
           fullWidth
           tone="contrast"
-          label={busy ? "Saving…" : "Save"}
+          label={
+            busy
+              ? t("mobile.dynamic.PullRequestEditScreen.saving")
+              : t("mobile.dynamic.PullRequestEditScreen.save")
+          }
           loading={busy}
           disabled={!allowed || unchanged || invalid || original === null}
           onPress={() => void save()}
@@ -137,12 +144,20 @@ export function PullRequestEditScreen({ route }: StaticScreenProps<PullRequestEd
         autoFocus
         accessibilityLabel={
           params.field === "title"
-            ? `${capitalizeTerm(singular)} title`
+            ? t("mobile.dynamic.PullRequestEditScreen.param-title", {
+                value: capitalizeTerm(singular),
+              })
             : params.field === "body"
-              ? `${capitalizeTerm(singular)} description`
-              : "Comment"
+              ? t("mobile.dynamic.PullRequestEditScreen.param-description", {
+                  value: capitalizeTerm(singular),
+                })
+              : t("mobile.dynamic.PullRequestEditScreen.comment")
         }
-        placeholder={params.field === "title" ? "Title" : "Write in Markdown…"}
+        placeholder={
+          params.field === "title"
+            ? t("mobile.dynamic.PullRequestEditScreen.title")
+            : t("mobile.dynamic.PullRequestEditScreen.write-in-markdown")
+        }
         placeholderTextColorClassName="accent-foreground-muted"
         maxLength={params.field === "title" ? 1024 : 65536}
         value={value}

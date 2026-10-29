@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import {
   AuthOrchestrationOperateScope,
   type EditorId,
@@ -21,6 +22,7 @@ export function KeybindingsConfigWarning({
   configPath: string | null;
   availableEditors: readonly EditorId[];
 }) {
+  const t = useTranslate();
   const canOpenEditor = useEnvironmentScope(environmentId, AuthOrchestrationOperateScope);
   const openInEditor = useOpenInPreferredEditor(environmentId, availableEditors);
 
@@ -46,7 +48,7 @@ export function KeybindingsConfigWarning({
             );
           }}
         >
-          Open keybindings.json
+          {t("web.ui.KeybindingsConfigWarning.open-keybindings-json")}
         </Button>
       </span>
     </>

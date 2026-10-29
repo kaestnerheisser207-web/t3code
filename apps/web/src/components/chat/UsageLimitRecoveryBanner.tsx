@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   type OrchestrationV2LimitRecovery,
   type OrchestrationV2LimitRecoveryUpdate,
@@ -23,7 +24,10 @@ type RecoveryProps = {
   onChange: (recovery: OrchestrationV2LimitRecoveryUpdate) => Promise<void>;
 };
 
-export function usageLimitRecoveryBannerItem(props: RecoveryProps): ComposerBannerStackItem {
+export function usageLimitRecoveryBannerItem(
+  props: RecoveryProps,
+  language?: string,
+): ComposerBannerStackItem {
   const { runId, resetAt, stoppedAt, timestampFormat } = props;
   const canSchedule = resetAt !== null && Date.parse(resetAt) > Date.parse(stoppedAt);
   return {
@@ -32,13 +36,14 @@ export function usageLimitRecoveryBannerItem(props: RecoveryProps): ComposerBann
     icon: <GaugeIcon />,
     title: "Usage limit reached",
     description: resetAt
-      ? `Resets ${formatUpcomingTimestamp(resetAt, timestampFormat)}`
+      ? `Resets ${formatUpcomingTimestamp(resetAt, timestampFormat, undefined, language)}`
       : "Reset time unavailable; retry manually",
     actions: canSchedule ? <RecoveryActions key={`${runId}:${resetAt}`} {...props} /> : null,
   };
 }
 
 function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: RecoveryProps) {
+  const t = useTranslate();
   const [pending, setPending] = useState(false);
 
   const scheduled =
@@ -86,7 +91,11 @@ function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: R
   return (
     <>
       <Button size="xs" variant="ghost" disabled={pending} onClick={() => void toggle("resume")}>
-        {pending ? "Saving..." : scheduled ? "Cancel auto-resume" : "Resume at reset"}
+        {pending
+          ? t("web.dynamic.UsageLimitRecoveryBanner.saving")
+          : scheduled
+            ? t("web.dynamic.UsageLimitRecoveryBanner.cancel-auto-resume")
+            : t("web.dynamic.UsageLimitRecoveryBanner.resume-at-reset")}
       </Button>
       <Button
         size="xs"
@@ -94,7 +103,11 @@ function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: R
         disabled={pending || (!snoozed && resetPassed)}
         onClick={() => void toggle("snooze")}
       >
-        {pending ? "Saving..." : snoozed ? "Wake now" : "Snooze until reset"}
+        {pending
+          ? t("web.dynamic.UsageLimitRecoveryBanner.saving")
+          : snoozed
+            ? t("web.dynamic.UsageLimitRecoveryBanner.wake-now")
+            : t("web.dynamic.UsageLimitRecoveryBanner.snooze-until-reset")}
       </Button>
     </>
   );

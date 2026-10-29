@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import { getCloneDestinationPath } from "@t3tools/client-runtime/operations/projects";
 import {
@@ -98,6 +100,7 @@ const pullRequestThreadLookupAtom = Atom.family((key: string) => {
 const NO_PULL_REQUEST_THREAD_LOOKUP = Atom.make(null);
 
 export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
+  const t = useTranslate();
   const locationKey = useLocation({ select: (location) => location.state.__TSR_key ?? "" });
   const navigate = useNavigate();
   const ready = useAtomValue(allReachableShellsLiveAtom);
@@ -334,10 +337,10 @@ export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
 
   switch (state.status) {
     case "opening":
-      return <LinkPage title="Opening the link..." />;
+      return <LinkPage title={t("web.ui.NewThreadLinkView.opening-the-link")} />;
     case "opened":
       return (
-        <LinkPage title="This link is open">
+        <LinkPage title={t("web.ui.NewThreadLinkView.this-link-is-open")}>
           <Button
             size="sm"
             variant="outline"
@@ -347,26 +350,35 @@ export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
               setState({ status: "opening" });
             }}
           >
-            Open it again
+            {t("web.ui.NewThreadLinkView.open-it-again")}
           </Button>
         </LinkPage>
       );
     case "failed":
       return (
-        <LinkPage title={state.title ?? "Could not open the link"} description={state.message} />
+        <LinkPage
+          title={state.title ?? t("web.dynamic.NewThreadLinkView.could-not-open-the-link")}
+          description={state.message}
+        />
       );
     case "missing-repository": {
       const name = `${state.repository.owner}/${state.repository.name}`;
       return (
         <LinkPage
-          title={`You don't have ${name}`}
-          description="Clone it to work on it here, or start without a project."
+          title={t("web.dynamic.NewThreadLinkView.you-don-t-have-param", { name: name })}
+          description={t(
+            "web.ui.NewThreadLinkView.clone-it-to-work-on-it-here-or-start-without-a-project",
+          )}
         >
           <Button size="sm" onClick={() => void cloneRepository(state.repository)}>
-            Clone {name}
+            <Trans
+              t={t}
+              i18nKey="web.rich.NewThreadLinkView.clone-part"
+              components={{ value0: <>{name}</> }}
+            />
           </Button>
           <Button size="sm" variant="outline" onClick={openWithoutProject}>
-            Use without project
+            {t("web.ui.NewThreadLinkView.use-without-project")}
           </Button>
         </LinkPage>
       );
@@ -386,6 +398,7 @@ function PullRequestLinkCheckout({
   readonly link: Extract<NewThreadLink, { kind: "pull-request" }>;
   readonly project: EnvironmentProject;
 }) {
+  const t = useTranslate();
   const { handoff, startHandoff } = usePullRequestHandoffs({
     environmentId: project.environmentId,
     detail: {
@@ -404,8 +417,14 @@ function PullRequestLinkCheckout({
   const { owner, name, number } = link.pullRequest;
   return (
     <LinkPage
-      title={`Check out ${owner}/${name}#${number}?`}
-      description="This puts the pull request's code in a new worktree and runs your project's setup script on it."
+      title={t("web.dynamic.NewThreadLinkView.check-out-param-param-param", {
+        owner: owner,
+        name: name,
+        number: number,
+      })}
+      description={t(
+        "web.ui.NewThreadLinkView.this-puts-the-pull-request-s-code-in-a-new-worktree-and-runs-your-project-s-setup-script-on-it",
+      )}
     >
       <Button
         size="sm"
@@ -417,7 +436,9 @@ function PullRequestLinkCheckout({
           )
         }
       >
-        {handoff !== null ? "Checking out..." : "Check out"}
+        {handoff !== null
+          ? t("web.dynamic.NewThreadLinkView.checking-out")
+          : t("web.dynamic.NewThreadLinkView.check-out")}
       </Button>
     </LinkPage>
   );

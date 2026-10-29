@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { idleCompactionTitle, idleCompactingLabel } from "@t3tools/client-runtime/i18n";
 import type {
   ThreadPendingApproval,
   ThreadPendingUserInput,
@@ -339,7 +341,7 @@ export function isContextCompactionActivityGroup(entry: ThreadFeedActivityGroup)
   );
 }
 
-export function threadFeedCompactionLabels(feed: ReadonlyArray<ThreadFeedEntry>) {
+export function threadFeedCompactionLabels(feed: ReadonlyArray<ThreadFeedEntry>, t?: TFunction) {
   const labelsByRunId = new Map<RunId, { title: string; compacting: string }>();
   const labelsByEntryId = new Map<string, { title: string; compacting: string }>();
   const pendingResumeAgeByRunId = new Map<RunId, string>();
@@ -347,8 +349,8 @@ export function threadFeedCompactionLabels(feed: ReadonlyArray<ThreadFeedEntry>)
     const reason = entry.type === "message" ? idleCompactionOf(entry.message) : undefined;
     if (entry.type === "message" && entry.message.runId !== null && reason !== undefined) {
       labelsByRunId.set(entry.message.runId, {
-        title: IDLE_COMPACTION_TITLES[reason],
-        compacting: IDLE_COMPACTING_LABELS[reason],
+        title: t ? idleCompactionTitle(reason, t) : IDLE_COMPACTION_TITLES[reason],
+        compacting: t ? idleCompactingLabel(reason, t) : IDLE_COMPACTING_LABELS[reason],
       });
     } else if (entry.type === "activity-group" && entry.runId !== null) {
       if (isContextCompactionActivityGroup(entry)) {
@@ -358,8 +360,9 @@ export function threadFeedCompactionLabels(feed: ReadonlyArray<ThreadFeedEntry>)
           (age === undefined
             ? undefined
             : {
-                title: `Context compacted after ${age} idle`,
-                compacting: "Compacting…",
+                title:
+                  t?.("compaction.afterIdle", { age }) ?? `Context compacted after ${age} idle`,
+                compacting: t?.("compaction.onReturn") ?? "Compacting…",
               });
         if (labels) labelsByEntryId.set(entry.id, labels);
         pendingResumeAgeByRunId.delete(entry.runId);

@@ -1,3 +1,5 @@
+import { useTranslate } from "../i18n";
+import { Trans } from "react-i18next";
 import { type SlowRpcAckRequest, subscribeSlowRpcAckRequests } from "../rpc/requestLatencyState";
 import { toastManager } from "./ui/toast";
 
@@ -11,6 +13,7 @@ function describeSlowRequests(requests: ReadonlyArray<SlowRpcAckRequest>): strin
 }
 
 function SlowRequestDetails({ requests }: { requests: ReadonlyArray<SlowRpcAckRequest> }) {
+  const t = useTranslate();
   return (
     <ul className="space-y-2.5 text-xs text-muted-foreground">
       {requests.map((request) => (
@@ -20,7 +23,11 @@ function SlowRequestDetails({ requests }: { requests: ReadonlyArray<SlowRpcAckRe
         >
           <div className="wrap-break-word font-medium text-foreground">{request.tag}</div>
           <div className="mt-0.5 text-3xs opacity-75">
-            Started {new Date(request.startedAt).toLocaleTimeString()}
+            <Trans
+              t={t}
+              i18nKey="web.rich.SlowRpcRequestToastCoordinator.started-part"
+              components={{ value0: <>{new Date(request.startedAt).toLocaleTimeString()}</> }}
+            />
           </div>
         </li>
       ))}

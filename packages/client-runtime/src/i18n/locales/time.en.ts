@@ -1,0 +1,17 @@
+export const timeEn = {
+  "time.yesterday": "yesterday at {{time}}",
+  "time.tomorrow": "tomorrow at {{time}}",
+  "time.justNow": "just now",
+  "time.minutesAgo_one": "{{count}} minute ago",
+  "time.minutesAgo_other": "{{count}} minutes ago",
+  "time.hoursAgo_one": "{{count}} hour ago",
+  "time.hoursAgo_other": "{{count}} hours ago",
+  "time.daysAgo_one": "{{count}} day ago",
+  "time.daysAgo_other": "{{count}} days ago",
+  "context.autoCompactThreshold": "Compacts automatically at about {{tokens}} tokens.",
+  "context.modelAutoCompact": "Context for {{model}} compacts automatically when needed.",
+  "context.autoCompact": "Context compacts automatically when needed.",
+  "context.usedTokens": "Context window {{tokens}} tokens used",
+  "context.usagePercent": "Context window {{percent}}% used",
+  "context.unknownLimit": "Context window size is unknown",
+} as const;

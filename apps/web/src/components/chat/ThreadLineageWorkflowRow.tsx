@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type {
   SubagentWorkflowGroup,
   RuntimeSubagent,
@@ -63,6 +64,7 @@ function WorkflowMemberRow({
   onOpen: (threadId: string) => void;
   isThreadAvailable: (threadId: string) => boolean;
 }) {
+  const t = useTranslate();
   const threadId = member.childThreadId;
   const canOpen = threadId !== null && isThreadAvailable(threadId);
   return (
@@ -73,7 +75,9 @@ function WorkflowMemberRow({
           render={
             <ThreadDetailsControl
               part="row"
-              aria-label={`Open ${member.title} chat`}
+              aria-label={t("web.dynamic.ThreadLineageWorkflowRow.open-param-chat", {
+                title: member.title,
+              })}
               disabled={!canOpen}
               onClick={() => canOpen && onOpen(threadId)}
             />
@@ -133,6 +137,7 @@ export function ThreadLineageWorkflowRow({
   readonly stopping: boolean;
   readonly stopDisabled: boolean;
 }) {
+  const t = useTranslate();
   const [expanded, setExpanded] = useState(false);
   const [phaseOpen, setPhaseOpen] = useState<ReadonlyMap<number, boolean>>(() => new Map());
   const label = group.workflow.workflowName ?? group.workflow.title;
@@ -151,7 +156,9 @@ export function ThreadLineageWorkflowRow({
                     variant="ghost"
                     part="icon"
                     tone="destructive"
-                    aria-label={`Stop workflow ${label}`}
+                    aria-label={t("web.dynamic.ThreadLineageWorkflowRow.stop-workflow-param", {
+                      label: label,
+                    })}
                     disabled={stopDisabled}
                     onClick={onStop}
                   />
@@ -163,7 +170,9 @@ export function ThreadLineageWorkflowRow({
                   <SquareIcon aria-hidden className="size-3 fill-current" />
                 )}
               </TooltipTrigger>
-              <TooltipPopup side="left">Stop entire workflow</TooltipPopup>
+              <TooltipPopup side="left">
+                {t("web.ui.ThreadLineageWorkflowRow.stop-entire-workflow")}
+              </TooltipPopup>
             </Tooltip>
           </div>
         ) : null}
@@ -196,16 +205,24 @@ export function ThreadLineageWorkflowRow({
                   variant="panel"
                   tone={phase.state === "running" ? "emphasized" : "muted"}
                   expanded={open}
-                  aria-label={`${open ? "Collapse" : "Expand"} ${phase.title} phase, ${status}`}
+                  aria-label={t("web.dynamic.ThreadLineageWorkflowRow.param-param-phase-param", {
+                    value: open ? "Collapse" : "Expand",
+                    title: phase.title,
+                    status: status,
+                  })}
                   onClick={() => setPhaseOpen((phases) => new Map(phases).set(phase.index, !open))}
                   accessory={
                     <>
                       {status === "failed" ? (
-                        <SectionHeaderStatus>Failed</SectionHeaderStatus>
+                        <SectionHeaderStatus>
+                          {t("web.ui.ThreadLineageWorkflowRow.failed")}
+                        </SectionHeaderStatus>
                       ) : null}
                       <span className="shrink-0 text-2xs font-normal tabular-nums">
                         {phase.settledCount}/{phase.members.length}{" "}
-                        {phase.members.length === 1 ? "agent" : "agents"}
+                        {phase.members.length === 1
+                          ? t("web.dynamic.ThreadLineageWorkflowRow.agent")
+                          : t("web.dynamic.ThreadLineageWorkflowRow.agents")}
                       </span>
                       <span className="shrink-0 text-2xs font-normal tabular-nums empty:hidden">
                         <AgentElapsed agent={phaseElapsed(phase)} />
@@ -247,7 +264,9 @@ export function ThreadLineageWorkflowRow({
             />
           ))}
           {phases.length === 0 && group.unphasedMembers.length === 0 ? (
-            <li className="px-2.5 py-1.5 text-2xs text-muted-foreground/70">No agents yet</li>
+            <li className="px-2.5 py-1.5 text-2xs text-muted-foreground/70">
+              {t("web.ui.ThreadLineageWorkflowRow.no-agents-yet")}
+            </li>
           ) : null}
         </ul>
       ) : null}

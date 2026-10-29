@@ -1,0 +1,16 @@
+export const zipErrorsEn = {
+  "zip.saveHint": "Save the ZIP to open it in another app.",
+  "zip.tooLarge": "Too large to browse here",
+  "zip.browseLimit": "Browsing works up to {{size}}. Save the ZIP to open it in another app.",
+  "zip.cancelled": "Download cancelled",
+  "zip.cancelledDetail": "The ZIP wasn't downloaded. Try again to list its files.",
+  "zip.network": "Couldn't download this ZIP",
+  "zip.networkDetail": "Check the connection to this environment and try again.",
+  "zip.browseFailed": "Couldn't browse this ZIP",
+  "zip.damaged": "It may be incomplete or damaged.",
+  "zip.previewLarge": "Too big to preview",
+  "zip.previewLimit": "Previews stop at {{size}}. Save the file to open it in another app.",
+  "zip.readFailed": "Couldn't read this file",
+  "zip.readDetail": "Could not read this file.",
+  "palette.theme.forMode": "For {{mode}} mode",
+} as const;

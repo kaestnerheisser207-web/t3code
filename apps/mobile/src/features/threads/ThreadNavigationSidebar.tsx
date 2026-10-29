@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useActiveNewTask } from "../../state/active-new-task";
 import { ThreadUndoNotice } from "../home/ThreadUndoNotice";
 import { useAndroidControlSizing } from "../../components/ui/useAndroidControlSizing";
@@ -138,6 +139,7 @@ function NativeSidebarContainer(props: ThreadNavigationSidebarProps) {
 function ThreadNavigationSidebarPane(
   props: ThreadNavigationSidebarProps & { readonly nativeChrome: boolean },
 ) {
+  const t = useTranslate();
   const floatingTabsEnabled = useAndroidFloatingTabs();
   const { themeVariables: materialTheme } = useAppearancePreferences();
   const drawerColor = materialTheme["--color-drawer"];
@@ -682,16 +684,18 @@ function ThreadNavigationSidebarPane(
       }
     >
       {catalogState.isLoadingConnections
-        ? "Loading threads…"
+        ? t("mobile.dynamic.ThreadNavigationSidebar.loading-threads")
         : Platform.OS === "android" && !catalogState.hasConnections
-          ? "No environments connected"
+          ? t("mobile.dynamic.ThreadNavigationSidebar.no-environments-connected")
           : props.searchQuery.trim().length > 0
             ? threadSearch.isPending
-              ? "Searching thread messages…"
-              : "No matching threads"
+              ? t("mobile.dynamic.ThreadNavigationSidebar.searching-thread-messages")
+              : t("mobile.dynamic.ThreadNavigationSidebar.no-matching-threads")
             : selectedProjectScope !== null
-              ? `No threads in ${selectedProjectScope.title}`
-              : "No threads yet"}
+              ? t("mobile.dynamic.ThreadNavigationSidebar.no-threads-in-param", {
+                  title: selectedProjectScope.title,
+                })
+              : t("mobile.dynamic.ThreadNavigationSidebar.no-threads-yet")}
     </Text>
   );
 
@@ -871,7 +875,10 @@ function ThreadNavigationSidebarPane(
             />
             <View className="flex-row items-center gap-2.5">
               <Menu actions={listMenuActions} onPressAction={handleListMenuAction}>
-                <SidebarFilterButton accessibilityLabel="Filter threads" icon={filterIcon} />
+                <SidebarFilterButton
+                  accessibilityLabel={t("mobile.threads.ThreadNavigationSidebar.filter-threads")}
+                  icon={filterIcon}
+                />
               </Menu>
               <SidebarHeaderActions onOpenSettings={props.onOpenSettings} />
             </View>
@@ -886,12 +893,12 @@ function ThreadNavigationSidebarPane(
             />
             <TextInput
               ref={searchInputRef}
-              accessibilityLabel="Search threads"
+              accessibilityLabel={t("mobile.threads.ThreadNavigationSidebar.search-threads")}
               autoCapitalize="none"
               autoCorrect={false}
               clearButtonMode="while-editing"
               onChangeText={props.onSearchQueryChange}
-              placeholder="Search"
+              placeholder={t("mobile.threads.ThreadNavigationSidebar.search")}
               placeholderTextColorClassName="accent-placeholder"
               selectionColorClassName={undefined}
               cursorColorClassName={undefined}

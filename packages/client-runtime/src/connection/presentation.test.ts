@@ -13,7 +13,13 @@ import {
   RelayConnectionTarget,
   type SupervisorConnectionState,
 } from "./model.ts";
-import { environmentMcpUrl, presentConnectionState } from "./presentation.ts";
+import { createI18n } from "../i18n/index.ts";
+import {
+  connectionStatusText,
+  connectionStatusTitle,
+  environmentMcpUrl,
+  presentConnectionState,
+} from "./presentation.ts";
 
 const TARGET = new BearerConnectionTarget({
   environmentId: EnvironmentId.make("environment-1"),
@@ -148,6 +154,19 @@ describe("connection presentation", () => {
       error: "Disconnected.",
       traceId: "trace-1",
     });
+    const state = {
+      phase: "reconnecting" as const,
+      error: "Socket <closed> {{raw}}",
+      traceId: "trace-1",
+    };
+    const t = createI18n("zh-CN").t;
+    expect(connectionStatusTitle(state, t)).toBe(t("connection.retryFailed"));
+    expect(connectionStatusText(state, t)).toBe(
+      t("connection.retryReason", { reason: state.error }),
+    );
+    expect(connectionStatusText(state, t)).toContain("Socket <closed> {{raw}}");
+    expect(state.error).toBe("Socket <closed> {{raw}}");
+    expect(state.traceId).toBe("trace-1");
   });
 
   it("preserves an explicitly available environment while offline", () => {

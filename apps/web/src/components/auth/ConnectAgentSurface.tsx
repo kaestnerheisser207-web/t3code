@@ -1,3 +1,6 @@
+import { Trans } from "react-i18next";
+import { runtimeModeText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import {
   type AuthMcpApprovalDecision,
   type AuthMcpApprovalDetails,
@@ -40,18 +43,20 @@ function redirectsToThisComputer(redirectHost: string): boolean {
   return isLoopbackHost(new URL(`http://${redirectHost}`).hostname);
 }
 
+type ApprovalMessage = string | { readonly key: "auth.agent.unreachable" | "auth.agent.failed" };
+
 type Loaded =
   | { readonly status: "loading" }
-  | { readonly status: "invalid"; readonly message: string }
+  | { readonly status: "invalid"; readonly message: ApprovalMessage }
   | { readonly status: "ready"; readonly details: AuthMcpApprovalDetails };
 
-const UNREACHABLE = "Could not reach this environment. Try again.";
+const UNREACHABLE = { key: "auth.agent.unreachable" } as const;
 const isApprovalError = Schema.is(AuthMcpApprovalError);
 
 type Answer<A> =
   | { readonly kind: "ok"; readonly value: A }
   | { readonly kind: "redirect"; readonly url: string }
-  | { readonly kind: "error"; readonly message: string };
+  | { readonly kind: "error"; readonly message: ApprovalMessage };
 
 function runApproval<A>(
   call: (
@@ -86,11 +91,12 @@ function oneClickApproves(details: AuthMcpApprovalDetails, access: AuthMcpClient
 }
 
 export function ConnectAgentSurface() {
+  const t = useTranslate();
   const [authorization] = useState(readAuthorizationRequest);
   const [loaded, setLoaded] = useState<Loaded>({ status: "loading" });
   const [access, setAccess] = useState<AuthMcpClientAccess>("read-only");
   const [pairingCode, setPairingCode] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState<ApprovalMessage>("");
   const [pending, setPending] = useState<"approve" | "deny" | null>(null);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- fetches the MCP OAuth approval and redirects the window or stores details, ignoring stale answers
@@ -134,15 +140,17 @@ export function ConnectAgentSurface() {
       return;
     }
     setPending(null);
-    setErrorMessage(answer.kind === "error" ? answer.message : "The sign-in could not continue.");
+    setErrorMessage(answer.kind === "error" ? answer.message : { key: "auth.agent.failed" });
   };
 
   if (loaded.status === "loading") {
     return (
       <StandalonePage>
         <ConnectAgentHeading
-          title="Checking the sign-in request"
-          description="One moment while this environment verifies the agent's request."
+          title={t("web.ui.ConnectAgentSurface.checking-the-sign-in-request")}
+          description={t(
+            "web.ui.ConnectAgentSurface.one-moment-while-this-environment-verifies-the-agent-s-request",
+          )}
         />
         <Spinner className="mt-6" size="lg" tone="muted" />
       </StandalonePage>
@@ -152,9 +160,14 @@ export function ConnectAgentSurface() {
   if (loaded.status === "invalid") {
     return (
       <StandalonePage>
-        <ConnectAgentHeading title="This sign-in cannot continue" description={loaded.message} />
+        <ConnectAgentHeading
+          title={t("web.ui.ConnectAgentSurface.this-sign-in-cannot-continue")}
+          description={typeof loaded.message === "string" ? loaded.message : t(loaded.message.key)}
+        />
         <p className="mt-4 text-sm text-muted-foreground">
-          Close this page and start the sign-in again from your agent.
+          {t(
+            "web.ui.ConnectAgentSurface.close-this-page-and-start-the-sign-in-again-from-your-agent",
+          )}
         </p>
       </StandalonePage>
     );
@@ -167,26 +180,28 @@ export function ConnectAgentSurface() {
   return (
     <StandalonePage>
       <ConnectAgentHeading
-        title={`Connect ${details.clientName}`}
+        title={t("auth.agent.connect", { client: details.clientName })}
         description={
-          <>
-            This agent wants to use the threads in every project on{" "}
-            <span className="font-medium text-foreground">{details.environmentHost}</span>.
-          </>
+          <Trans
+            t={t}
+            i18nKey="auth.agent.scope"
+            components={{
+              host: <span className="font-medium text-foreground">{details.environmentHost}</span>,
+            }}
+          />
         }
       />
       <p className="mt-2 text-xs text-muted-foreground">
         {redirectsToThisComputer(details.redirectHost) ? (
-          <>
-            The name is chosen by the agent. Approval returns to {details.redirectHost} on the
-            computer that opened this page. Only approve a sign-in you just started.
-          </>
+          t("auth.agent.localRedirect", { host: details.redirectHost })
         ) : (
-          <>
-            The name is chosen by the agent. Approval gives access to whoever runs{" "}
-            <span className="font-medium text-foreground">{details.redirectHost}</span>. Only
-            approve a sign-in you just started there.
-          </>
+          <Trans
+            t={t}
+            i18nKey="auth.agent.remoteRedirect"
+            components={{
+              host: <span className="font-medium text-foreground">{details.redirectHost}</span>,
+            }}
+          />
         )}
       </p>
 
@@ -199,7 +214,7 @@ export function ConnectAgentSurface() {
       >
         <div className="space-y-2">
           <span id="connect-agent-access-label" className="text-sm font-medium">
-            What it may do
+            {t("web.ui.ConnectAgentSurface.what-it-may-do")}
           </span>
           <RadioGroup
             aria-labelledby="connect-agent-access-label"
@@ -211,15 +226,16 @@ export function ConnectAgentSurface() {
             ))}
           </RadioGroup>
           <p className="text-xs text-muted-foreground">
-            Beyond read only, it can start, message and stop threads, and none of them can run with
-            more than the mode you pick.
+            {t(
+              "web.ui.ConnectAgentSurface.beyond-read-only-it-can-start-message-and-stop-threads-and-none-of-them-can-run-with-more-than-the-mode-you-pick",
+            )}
           </p>
         </div>
 
         {oneClick ? null : (
           <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor="connect-agent-pairing-code">
-              Pairing code
+              {t("web.ui.ConnectAgentSurface.pairing-code")}
             </label>
             <Input
               id="connect-agent-pairing-code"
@@ -229,26 +245,31 @@ export function ConnectAgentSurface() {
               disabled={pending !== null}
               nativeInput
               onChange={(event) => setPairingCode(event.currentTarget.value)}
-              placeholder="Paste a one-time pairing code"
+              placeholder={t("web.ui.ConnectAgentSurface.paste-a-one-time-pairing-code")}
               spellCheck={false}
               value={pairingCode}
             />
             <p className="text-xs text-muted-foreground">
-              Create one in Settings → Sharing & access, or run <code>t3 auth pairing create</code>{" "}
-              on this machine.
+              <Trans
+                t={t}
+                i18nKey="auth.agent.createCode"
+                components={{ command: <code>t3 auth pairing create</code> }}
+              />
             </p>
           </div>
         )}
 
         {errorMessage ? (
           <Alert variant="error">
-            <AlertDescription>{errorMessage}</AlertDescription>
+            <AlertDescription>
+              {typeof errorMessage === "string" ? errorMessage : t(errorMessage.key)}
+            </AlertDescription>
           </Alert>
         ) : null}
 
         <div className="flex flex-wrap gap-2">
           <Button disabled={!canApprove} type="submit">
-            {pending === "approve" ? "Approving…" : "Approve"}
+            {t(pending === "approve" ? "auth.agent.approving" : "auth.agent.approve")}
           </Button>
           <Button
             disabled={pending !== null}
@@ -256,7 +277,7 @@ export function ConnectAgentSurface() {
             type="button"
             variant="outline"
           >
-            {pending === "deny" ? "Denying…" : "Deny"}
+            {t(pending === "deny" ? "auth.agent.denying" : "auth.agent.deny")}
           </Button>
         </div>
       </form>
@@ -271,7 +292,14 @@ function ConnectAgentHeading({
   readonly title: string;
   readonly description: ReactNode;
 }) {
-  return <StandalonePageHeader context="Agent sign-in" title={title} description={description} />;
+  const t = useTranslate();
+  return (
+    <StandalonePageHeader
+      context={t("auth.agent.signIn")}
+      title={title}
+      description={description}
+    />
+  );
 }
 
 function AccessOption({
@@ -281,7 +309,9 @@ function AccessOption({
   readonly access: AuthMcpClientAccess;
   readonly selected: boolean;
 }) {
-  const { label, description, icon: Icon } = accessConfig[access];
+  const t = useTranslate();
+  const { label, description } = runtimeModeText(t, access);
+  const Icon = accessConfig[access].icon;
   return (
     <RadioPrimitive.Root
       value={access}

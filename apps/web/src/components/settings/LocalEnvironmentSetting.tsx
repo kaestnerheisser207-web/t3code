@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useState } from "react";
 
 import { isLocalEnvironmentDisabled } from "../../localEnvironment";
@@ -18,6 +19,7 @@ import { searchableSetting } from "./settingsSearch";
 
 // Toggling relaunches desktop; the switch reflects startup state.
 export function LocalEnvironmentSetting() {
+  const t = useTranslate();
   const setEnabled = window.desktopBridge?.setLocalEnvironmentEnabled;
   const [enabled] = useState(() => !isLocalEnvironmentDisabled());
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -42,15 +44,19 @@ export function LocalEnvironmentSetting() {
         {...searchableSetting("local-environment")}
         description={
           enabled
-            ? "Run agents on this computer. Turn off to use T3 Code only with remote environments."
-            : "Turned off. Agents only run in remote environments."
+            ? t(
+                "web.dynamic.LocalEnvironmentSetting.run-agents-on-this-computer-turn-off-to-use-t3-code-only-with-remote-environments",
+              )
+            : t(
+                "web.dynamic.LocalEnvironmentSetting.turned-off-agents-only-run-in-remote-environments",
+              )
         }
         control={
           <Switch
             checked={enabled}
             disabled={isUpdating}
             onCheckedChange={() => setConfirmOpen(true)}
-            aria-label="Local environment"
+            aria-label={t("settings.pages.LocalEnvironmentSetting.local-environment")}
           />
         }
       />
@@ -65,18 +71,24 @@ export function LocalEnvironmentSetting() {
         <AlertDialogPopup>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {enabled ? "Turn off local environment?" : "Turn on local environment?"}
+              {enabled
+                ? t("web.dynamic.LocalEnvironmentSetting.turn-off-local-environment")
+                : t("web.dynamic.LocalEnvironmentSetting.turn-on-local-environment")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {enabled
-                ? "T3 Code will restart without running a server on this computer. Any agents and terminals running here will stop, and other devices will no longer be able to connect to this computer. Your projects, history, and remote environments are unaffected."
-                : "T3 Code will restart and start running a server on this computer again."}
+                ? t(
+                    "web.dynamic.LocalEnvironmentSetting.t3-code-will-restart-without-running-a-server-on-this-computer-any-agents-and-terminals-running-here-will-stop-and-other-devices-will-no-longer-be-able-to-connect-to-this-computer-your-projects-history-and-remote-environments-are-unaffected",
+                  )
+                : t(
+                    "web.dynamic.LocalEnvironmentSetting.t3-code-will-restart-and-start-running-a-server-on-this-computer-again",
+                  )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error ? <p className="px-6 pb-4 text-sm text-destructive">{error}</p> : null}
           <AlertDialogFooter>
             <AlertDialogClose disabled={isUpdating} render={<Button variant="outline" />}>
-              Cancel
+              {t("settings.pages.LocalEnvironmentSetting.cancel")}
             </AlertDialogClose>
             <Button
               variant={enabled ? "destructive" : "default"}
@@ -86,12 +98,12 @@ export function LocalEnvironmentSetting() {
               {isUpdating ? (
                 <>
                   <Spinner size="sm" />
-                  Restarting…
+                  {t("settings.pages.LocalEnvironmentSetting.restarting")}
                 </>
               ) : enabled ? (
-                "Restart and turn off"
+                t("web.dynamic.LocalEnvironmentSetting.restart-and-turn-off")
               ) : (
-                "Restart and turn on"
+                t("web.dynamic.LocalEnvironmentSetting.restart-and-turn-on")
               )}
             </Button>
           </AlertDialogFooter>

@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { useAuth } from "@clerk/react";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { Link } from "@tanstack/react-router";
@@ -19,6 +20,7 @@ import { WorkspacePageHeader } from "./WorkspacePageHeader";
 
 /** Home screen for the hosted app before any computer is added. */
 export function HostedEmptyState() {
+  const t = useTranslate();
   const cloudEnabled = hasCloudPublicConfig();
   const localEnvironmentOff = isLocalEnvironmentDisabled();
 
@@ -36,20 +38,24 @@ export function HostedEmptyState() {
         <Empty className="flex-1">
           <EmptyHeader>
             <EmptyTitle>
-              {localEnvironmentOff ? "This computer is off" : "No computer connected"}
+              {localEnvironmentOff
+                ? t("web.dynamic.HostedEmptyState.this-computer-is-off")
+                : t("web.dynamic.HostedEmptyState.no-computer-connected")}
             </EmptyTitle>
             <EmptyDescription>
               {localEnvironmentOff
-                ? "Turn it back on, or connect a different computer."
+                ? t("web.dynamic.HostedEmptyState.turn-it-back-on-or-connect-a-different-computer")
                 : cloudEnabled
-                  ? "Your agents run on your computer."
-                  : "Your agents run on your computer. Start T3 Code there first."}
+                  ? t("web.dynamic.HostedEmptyState.your-agents-run-on-your-computer")
+                  : t(
+                      "web.dynamic.HostedEmptyState.your-agents-run-on-your-computer-start-t3-code-there-first",
+                    )}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             {localEnvironmentOff ? (
               <Button render={<Link to="/settings/connections" />} size="sm">
-                Open Environments
+                {t("web.ui.HostedEmptyState.open-environments")}
               </Button>
             ) : (
               <ol className="w-full space-y-4 text-left">
@@ -64,6 +70,7 @@ export function HostedEmptyState() {
 }
 
 function T3ConnectSteps() {
+  const t = useTranslate();
   const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
   const { openAuthPrompt } = useT3ConnectAuthPrompt();
   // Adding the first computer unmounts this screen. Wait for all health checks
@@ -79,11 +86,11 @@ function T3ConnectSteps() {
         {isSignedIn ? (
           <p className="flex items-center gap-1.5 text-muted-foreground">
             <CheckIcon className="size-4" />
-            Signed in
+            {t("web.ui.HostedEmptyState.signed-in")}
           </p>
         ) : (
           <Button size="sm" disabled={!isLoaded} onClick={openAuthPrompt}>
-            Sign in
+            {t("web.ui.HostedEmptyState.sign-in")}
           </Button>
         )}
       </SetupStep>
@@ -106,7 +113,11 @@ function T3ConnectSteps() {
                     return next;
                   }),
               }}
-              empty={<p className="text-xs text-muted-foreground">Waiting for your computer…</p>}
+              empty={
+                <p className="text-xs text-muted-foreground">
+                  {t("web.ui.HostedEmptyState.waiting-for-your-computer")}
+                </p>
+              }
             />
           </div>
         ) : null}
@@ -116,6 +127,7 @@ function T3ConnectSteps() {
 }
 
 function PairingSteps() {
+  const t = useTranslate();
   return (
     <>
       <SetupStep number={1}>
@@ -123,7 +135,7 @@ function PairingSteps() {
       </SetupStep>
       <SetupStep number={2}>
         <Button render={<Link to="/settings/connections" />} size="sm">
-          Add pairing link
+          {t("web.ui.HostedEmptyState.add-pairing-link")}
         </Button>
       </SetupStep>
     </>
@@ -146,9 +158,10 @@ function SetupStep({
 }
 
 function RunOnComputer({ command }: { readonly command: string }) {
+  const t = useTranslate();
   return (
     <>
-      <p>Run on your computer:</p>
+      <p>{t("web.ui.HostedEmptyState.run-on-your-computer")}</p>
       <CommandBlock command={command} className="mt-2" />
       <a
         className="mt-2 inline-block text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
@@ -156,7 +169,7 @@ function RunOnComputer({ command }: { readonly command: string }) {
         target="_blank"
         rel="noreferrer noopener"
       >
-        Or download the desktop app
+        {t("web.ui.HostedEmptyState.or-download-the-desktop-app")}
       </a>
     </>
   );

@@ -1,3 +1,6 @@
+import { Trans } from "react-i18next";
+import type { TFunction } from "i18next";
+import { useTranslate } from "../../i18n";
 import { PullRequestEntryRow } from "./PullRequestEntryRow";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useAppearancePreferences } from "../settings/appearance/AppearancePreferencesProvider";
@@ -72,6 +75,7 @@ function TimelineComment({
   params: PullRequestParams;
   actions: CommentActions;
 }) {
+  const t = useTranslate();
   const [expanded, setExpanded] = useState(false);
   const { themeVariables: colors } = useAppearancePreferences();
   const long = comment.body.length > 450 || comment.body.split("\n").length > 8;
@@ -91,13 +95,21 @@ function TimelineComment({
         <PullRequestAvatar actor={comment.author} size={22} />
         <View className="min-w-0 flex-1">
           <Text className="text-sm">
-            <Text className="font-t3-medium">{comment.author?.login ?? "Unknown author"}</Text>
+            <Text className="font-t3-medium">
+              {comment.author?.login ?? t("mobile.dynamic.PullRequestTimeline.unknown-author")}
+            </Text>
             <Text className="text-foreground-muted">
-              {approved ? " approved" : changes ? " requested changes" : " commented"}
+              {approved
+                ? t("mobile.dynamic.PullRequestTimeline.approved")
+                : changes
+                  ? t("mobile.dynamic.PullRequestTimeline.requested-changes")
+                  : t("mobile.dynamic.PullRequestTimeline.commented")}
             </Text>
           </Text>
         </View>
-        <Text className="text-2xs text-foreground-tertiary">{relativeTime(comment.createdAt)}</Text>
+        <Text className="text-2xs text-foreground-tertiary">
+          {relativeTime(comment.createdAt, t)}
+        </Text>
       </View>
       {comment.path ? (
         <Text className="font-mono text-2xs text-foreground-muted" numberOfLines={2}>
@@ -172,7 +184,9 @@ function TimelineComment({
               className="flex-row items-center justify-center gap-1 py-2 active:opacity-70"
             >
               <Text className="text-xs font-t3-medium text-foreground">
-                {expanded ? "Show less" : "Show more"}
+                {expanded
+                  ? t("mobile.dynamic.PullRequestTimeline.show-less")
+                  : t("mobile.dynamic.PullRequestTimeline.show-more")}
               </Text>
               <SymbolView
                 name={expanded ? "chevron.up" : "chevron.down"}
@@ -198,6 +212,7 @@ export function pullRequestTimelineRows(
   params: PullRequestParams,
   navigation: Pick<NavigationProp<ReactNavigation.RootParamList>, "navigate" | "dispatch">,
   actions: CommentActions,
+  t: TFunction,
 ) {
   const discussionIds = new Set(
     activity.reviewThreads.flatMap((thread) => thread.comments.map((comment) => comment.id)),
@@ -217,21 +232,32 @@ export function pullRequestTimelineRows(
         <TimelineEvent icon="text.bubble" tone={thread.isResolved ? "success" : undefined}>
           <View className="flex-row items-center gap-2">
             <PullRequestAvatar actor={thread.comments[0]?.author ?? null} size={22} />
-            <Text className="flex-1 text-sm">
-              <Text className="font-t3-medium">
-                {thread.comments[0]?.author?.login ?? "Unknown author"}
-              </Text>
-              <Text className="text-foreground-muted"> started a discussion</Text>
+            <Text className="flex-1 text-sm text-foreground-muted">
+              <Trans
+                t={t}
+                i18nKey="pr.startedDiscussion"
+                components={{
+                  author: (
+                    <Text className="font-t3-medium text-foreground">
+                      {thread.comments[0]?.author?.login ??
+                        t("mobile.dynamic.PullRequestTimeline.unknown-author")}
+                    </Text>
+                  ),
+                }}
+              />
             </Text>
             {thread.comments[0] ? (
               <Text className="text-2xs text-foreground-tertiary">
-                {relativeTime(thread.comments[0].createdAt)}
+                {relativeTime(thread.comments[0].createdAt, t)}
               </Text>
             ) : null}
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Open ${thread.isResolved ? "resolved" : "unresolved"} discussion in ${thread.path}`}
+            accessibilityLabel={t(
+              thread.isResolved ? "discussion.openResolved" : "discussion.openUnresolved",
+              { path: thread.path },
+            )}
             onPress={() =>
               navigation.navigate("PullRequestDiscussion", { ...params, discussionId: thread.id })
             }
@@ -246,9 +272,10 @@ export function pullRequestTimelineRows(
               <SymbolView name="chevron.right" size={12} tintColorClassName="accent-icon-muted" />
             </View>
             <Text className="text-xs text-foreground-muted">
-              {thread.isResolved ? "Resolved" : "Unresolved"}
-              {thread.isOutdated ? " · Outdated" : ""} ·{" "}
-              {thread.commentCount ?? thread.comments.length} comments
+              {t(thread.isResolved ? "discussion.resolved" : "discussion.unresolved")}
+              {thread.isOutdated ? t("discussion.outdated") : ""} ·{" "}
+              {t?.("counts.comments", { count: thread.commentCount ?? thread.comments.length }) ??
+                `${thread.commentCount ?? thread.comments.length} comments`}
             </Text>
           </Pressable>
         </TimelineEvent>
@@ -261,7 +288,10 @@ export function pullRequestTimelineRows(
         <TimelineEvent icon="commit">
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`View commit ${commit.oid.slice(0, 7)}, ${commit.messageHeadline}`}
+            accessibilityLabel={t("discussion.viewCommit", {
+              oid: commit.oid.slice(0, 7),
+              message: commit.messageHeadline,
+            })}
             onPress={() =>
               navigation.dispatch(
                 StackActions.push("PullRequestFile", { ...params, commit: commit.oid, path: "" }),
@@ -287,7 +317,7 @@ export function pullRequestTimelineRows(
       date: "",
       content: (
         <Text className="py-3 text-xs text-foreground-muted">
-          More activity is available on the provider.
+          {t("mobile.remaining.PullRequestTimeline.more-activity-is-available-on-the-provider")}
         </Text>
       ),
     });

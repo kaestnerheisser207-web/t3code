@@ -1,0 +1,15 @@
+export const relaySnoozeEn = {
+  "relay.stage.checking": "Checking current installation",
+  "relay.stage.waiting_for_lock": "Waiting for installer",
+  "relay.stage.downloading": "Downloading relay client",
+  "relay.stage.verifying": "Verifying download",
+  "relay.stage.installing": "Installing relay client",
+  "relay.stage.validating": "Validating executable",
+  "relay.stage.activating": "Activating installation",
+  "snooze.custom.date": "Date and time",
+  "snooze.custom.duration": "Duration",
+  "snooze.custom.minutes": "Minutes",
+  "snooze.custom.hours": "Hours",
+  "snooze.custom.days": "Days",
+  "snooze.custom.title": "Custom snooze",
+} as const;

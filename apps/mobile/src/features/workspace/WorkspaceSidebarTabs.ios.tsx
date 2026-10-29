@@ -1,3 +1,4 @@
+import { useNativeControlLabels } from "../../native/useNativeControlLabels";
 import { selectedNavigationTab, visibleNavigationTabs } from "./navigation-tab-order";
 import { requireNativeView } from "expo";
 import type { NativeSyntheticEvent, ViewProps } from "react-native";
@@ -8,6 +9,7 @@ import { useSelectWorkspaceTab } from "./useSelectWorkspaceTab";
 
 const NativeSidebarTabBar = requireNativeView<
   ViewProps & {
+    labels: Readonly<Record<string, string>>;
     tabs: readonly string[];
     selectedTab: string;
     selectedColor: string;
@@ -24,6 +26,7 @@ export function WorkspaceSidebarTabs(props: {
   readonly compact?: boolean;
   readonly reserveComposeSpace?: boolean;
 }) {
+  const labels = useNativeControlLabels();
   const workspace = useWorkspaceTabs()!;
   const order = useNavigationTabOrder();
   const hidden = useHiddenNavigationTabs();
@@ -34,6 +37,7 @@ export function WorkspaceSidebarTabs(props: {
   const tabBarKey = tabs.join(":");
   return (
     <NativeSidebarTabBar
+      labels={labels}
       key={tabBarKey}
       tabs={tabs}
       selectedTab={selectedNavigationTab(

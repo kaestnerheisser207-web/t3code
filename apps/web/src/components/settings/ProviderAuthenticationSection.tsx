@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
@@ -40,6 +42,7 @@ export function ProviderAuthenticationSection({
   readonly provider: ServerProvider;
   readonly readOnly: boolean;
 }) {
+  const t = useTranslate();
   const target = { environmentId, input: { instanceId } };
   const query = useEnvironmentQuery(serverEnvironment.providerAuthState(target));
   const commands = { reportFailure: false, reportDefect: false };
@@ -158,15 +161,17 @@ export function ProviderAuthenticationSection({
 
   return (
     <SettingsRow
-      title="Account"
+      title={t("settings.pages.ProviderAuthenticationSection.account")}
       description={
         signedIn && !active && provider.auth.email?.trim() ? (
           <span>
-            Signed in as{" "}
+            {t("settings.pages.ProviderAuthenticationSection.signed-in-as")}{" "}
             <RedactedSensitiveText
               key={provider.auth.email}
               value={provider.auth.email}
-              ariaLabel="Toggle account email visibility"
+              ariaLabel={t(
+                "settings.pages.ProviderAuthenticationSection.toggle-account-email-visibility",
+              )}
               revealTooltip="Click to reveal email"
               hideTooltip="Click to hide email"
               className="max-w-full truncate"
@@ -191,14 +196,20 @@ export function ProviderAuthenticationSection({
               disabled={disabled}
               onValueChange={(value) => setMethodId(value ?? "")}
             >
-              <SelectTrigger size="sm" aria-label="Sign-in method" className="w-44">
+              <SelectTrigger
+                size="sm"
+                aria-label={t("settings.pages.ProviderAuthenticationSection.sign-in-method")}
+                className="w-44"
+              >
                 <SelectValue>
                   {auth?.methods?.find((method) => method.id === methodId)?.name ??
-                    "Provider default"}
+                    t("web.dynamic.ProviderAuthenticationSection.provider-default")}
                 </SelectValue>
               </SelectTrigger>
               <SelectPopup>
-                <SelectItem value="">Provider default</SelectItem>
+                <SelectItem value="">
+                  {t("settings.pages.ProviderAuthenticationSection.provider-default")}
+                </SelectItem>
                 {auth?.methods?.map((method) => (
                   <SelectItem key={method.id} value={method.id}>
                     {method.name}
@@ -215,13 +226,15 @@ export function ProviderAuthenticationSection({
                 disabled={disabled}
                 onClick={() => void openBrowser()}
               >
-                Open browser
+                {t("settings.pages.ProviderAuthenticationSection.open-browser")}
               </Button>
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button
-                      aria-label="Copy sign-in link"
+                      aria-label={t(
+                        "settings.pages.ProviderAuthenticationSection.copy-sign-in-link",
+                      )}
                       size="icon-sm"
                       variant="ghost-muted"
                       disabled={disabled}
@@ -240,7 +253,9 @@ export function ProviderAuthenticationSection({
                     </Button>
                   }
                 />
-                <TooltipPopup>Copy sign-in link</TooltipPopup>
+                <TooltipPopup>
+                  {t("settings.pages.ProviderAuthenticationSection.copy-sign-in-link")}
+                </TooltipPopup>
               </Tooltip>
             </>
           ) : null}
@@ -253,13 +268,13 @@ export function ProviderAuthenticationSection({
                   <a href={provider.setup.documentationUrl} target="_blank" rel="noreferrer" />
                 }
               >
-                Open docs
+                {t("settings.pages.ProviderAuthenticationSection.open-docs")}
               </Button>
             ) : active && auth?.flowId ? (
               <Button
                 size="sm"
                 variant="ghost-muted"
-                aria-label="Cancel sign-in"
+                aria-label={t("settings.pages.ProviderAuthenticationSection.cancel-sign-in")}
                 disabled={disabled}
                 onClick={() =>
                   void run(() =>
@@ -267,7 +282,7 @@ export function ProviderAuthenticationSection({
                   )
                 }
               >
-                Cancel
+                {t("settings.pages.ProviderAuthenticationSection.cancel")}
               </Button>
             ) : !active && !needsExternalSetup && provider.setup?.canAuthenticate !== false ? (
               <Button
@@ -289,10 +304,10 @@ export function ProviderAuthenticationSection({
                 }
               >
                 {signedIn
-                  ? "Change account"
+                  ? t("web.dynamic.ProviderAuthenticationSection.change-account")
                   : auth?.phase === "failed" || auth?.phase === "cancelled"
-                    ? "Retry sign-in"
-                    : "Sign in"}
+                    ? t("web.dynamic.ProviderAuthenticationSection.retry-sign-in")
+                    : t("web.dynamic.ProviderAuthenticationSection.sign-in")}
               </Button>
             ) : null}
             {!active && signedIn && (provider.auth.canLogout ?? provider.setup?.canAuthenticate) ? (
@@ -310,7 +325,7 @@ export function ProviderAuthenticationSection({
                     });
                 }}
               >
-                Sign out
+                {t("settings.pages.ProviderAuthenticationSection.sign-out")}
               </Button>
             ) : null}
           </>
@@ -326,16 +341,26 @@ export function ProviderAuthenticationSection({
         <>
           {interaction?.type === "deviceCode" ? (
             <p className="py-2 text-sm text-muted-foreground">
-              Enter code{" "}
-              <code className="select-all font-mono text-foreground">{interaction.userCode}</code>{" "}
-              in your browser.
+              <Trans
+                t={t}
+                i18nKey="web.rich.ProviderAuthenticationSection.enter-code-part-in-your-browser"
+                components={{
+                  part0: (
+                    <code className="select-all font-mono text-foreground">
+                      {interaction.userCode}
+                    </code>
+                  ),
+                }}
+              />
             </p>
           ) : null}
           {interaction?.type === "terminal" ? (
             <div className="py-2">
               <Suspense
                 fallback={
-                  <p className="text-xs text-muted-foreground">Loading sign-in terminal…</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("settings.pages.ProviderAuthenticationSection.loading-sign-in-terminal")}
+                  </p>
                 }
               >
                 <ProviderAuthTerminal
@@ -416,7 +441,7 @@ export function ProviderAuthenticationSection({
                 className="w-fit"
                 disabled={disabled}
               >
-                Connect
+                {t("settings.pages.ProviderAuthenticationSection.connect")}
               </Button>
             </form>
           ) : null}
@@ -437,7 +462,9 @@ export function ProviderAuthenticationSection({
               }}
             >
               <label className="grid gap-1">
-                If the final localhost page does not load, paste its full URL here.
+                {t(
+                  "settings.pages.ProviderAuthenticationSection.if-the-final-localhost-page-does-not-load-paste-its-full-url-here",
+                )}
                 <Input
                   size="sm"
                   id={`provider-callback-${instanceId}`}
@@ -456,7 +483,7 @@ export function ProviderAuthenticationSection({
                 className="w-fit"
                 disabled={disabled || !values.callback?.trim()}
               >
-                Continue
+                {t("settings.pages.ProviderAuthenticationSection.continue")}
               </Button>
             </form>
           ) : null}

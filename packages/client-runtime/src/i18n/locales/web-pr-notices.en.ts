@@ -1,0 +1,32 @@
+export const webPrNoticesEn = {
+  "web.pr.notice.copyCheckoutFailed": "Could not copy checkout command",
+  "web.pr.notice.revertOpened": "Revert {{kind}} opened",
+  "web.pr.notice.branchDeleted": "Branch deleted",
+  "web.pr.notice.commentFailed": "Could not post the comment",
+  "web.pr.notice.addedComposer": "Added to the composer",
+  "web.pr.notice.questionReady": "The question is in the composer. Read it over, then send.",
+  "web.pr.notice.requestReady": "The {{kind}} is in the composer. Type your question, then send.",
+  "web.pr.notice.threadFailed": "Could not open a thread",
+  "web.pr.notice.retryFromProject": "Try again from the project, or open a thread first.",
+  "web.pr.notice.askedThread": "Asked in a thread",
+  "web.pr.notice.taskReady": "The task is in the composer. Read it over, then send.",
+  "web.pr.notice.preparingCheckout": "Preparing the {{kind}} checkout...",
+  "web.pr.notice.checkoutThreadFailed": "Could not open a thread for the checkout",
+  "web.pr.notice.prepareFailed": "Could not prepare the {{kind}} checkout",
+  "web.pr.notice.threadNotMoved": "Checked out, but the thread stayed where it was",
+  "web.pr.notice.pointThread":
+    "The checkout is ready on `{{branch}}`. Point a thread at it from the branch picker, then ask again.",
+  "web.pr.notice.checkedOutHere": "Checked out here",
+  "web.pr.notice.checkedOut": "Checked out",
+  "web.pr.notice.localCheckoutReady":
+    "This repository is on the {{kind}}'s branch, with a thread open on it.",
+  "web.pr.notice.worktreeReady": "The {{kind}} is in its own worktree, with a thread open on it.",
+  "web.pr.notice.checkoutReady": "Checkout ready",
+  "web.pr.notice.deleteBranch": "Delete branch {{branch}}?",
+  "web.pr.notice.deleteBranchDetail":
+    "This deletes {{branch}} from {{repository}}. Local branches and worktrees are not changed.",
+  "web.pr.notice.notFound": "{{kind}} #{{number}} not found",
+  "files.action.openWith": "Open with",
+  "files.action.editorFailed": "Could not open in {{editor}}",
+  "files.action.returnChat": "Return to chat",
+} as const;

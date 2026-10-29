@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { OlderSettledScope } from "@t3tools/client-runtime/state/threads";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { useMemo, useSyncExternalStore } from "react";
@@ -55,6 +56,7 @@ export function useThreadListV2(input: {
   readonly settledShelfExpanded: boolean;
   readonly selectedThreadKey: string | null;
 }) {
+  const t = useTranslate();
   const { threads, workingShelfEnabled } = input;
   // A thread can stop working when the threads change, or when its exit grace expires.
   const inboxVersion = useSyncExternalStore(
@@ -147,6 +149,7 @@ export function useThreadListV2(input: {
       (searchQuery.length === 0 || pendingTask.title.toLocaleLowerCase().includes(searchQuery)),
   );
   const items = buildThreadListV2ListItems({
+    t,
     items: layout.items,
     pendingTasks,
     workingCount: layout.workingCount,

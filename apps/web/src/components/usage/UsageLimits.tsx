@@ -1,3 +1,5 @@
+import { useTranslate } from "../../i18n";
+import { Trans, useTranslation } from "react-i18next";
 import {
   AuthProvidersManageScope,
   type EnvironmentId,
@@ -121,13 +123,15 @@ function WindowBar({
   readonly window: ServerProviderUsageWindow;
   readonly now: number;
 }) {
+  const t = useTranslate();
+  const { i18n: dateI18n } = useTranslation();
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
   const remaining = remainingPercent(window);
   const timeLeft = paceRemainingPercent(window, now);
   const [barRef, paceMark] = usePaceMark(timeLeft);
   const resetsIn = formatResetsIn(window, now);
   const resetsAt = window.resetsAt
-    ? formatUpcomingTimestamp(window.resetsAt, timestampFormat, now)
+    ? formatUpcomingTimestamp(window.resetsAt, timestampFormat, now, dateI18n.resolvedLanguage)
     : null;
   const summary = `${window.label}: ${remaining}% left${
     timeLeft === null ? "" : `, ${timeLeft}% of the window left`
@@ -167,14 +171,31 @@ function WindowBar({
       <TooltipPopup side="top">
         <div className="flex flex-col gap-0.5">
           <span className="text-foreground">
-            {remaining}% left{timeLeft !== null ? ` · ${timeLeft}% of the window left` : ""}
+            <Trans
+              t={t}
+              i18nKey="web.rich.UsageLimits.part-left-part"
+              components={{
+                value0: <>{remaining}</>,
+                value1: (
+                  <>
+                    {timeLeft !== null
+                      ? t("web.dynamic.UsageLimits.param-of-the-window-left", {
+                          timeLeft: timeLeft,
+                        })
+                      : ""}
+                  </>
+                ),
+              }}
+            />
           </span>
           {timeLeft !== null ? (
-            <span className="text-muted-foreground">The line is where even spending would be.</span>
+            <span className="text-muted-foreground">
+              {t("web.ui.UsageLimits.the-line-is-where-even-spending-would-be")}
+            </span>
           ) : null}
           {resetsAt ? (
             <span className="text-muted-foreground">
-              Resets {resetsAt}
+              {t("misc.resets", { time: resetsAt })}
               {resetsIn ? ` · ${resetsIn}` : ""}
             </span>
           ) : null}
@@ -195,6 +216,7 @@ export function LimitWindows({
   readonly now: number;
   readonly compact?: boolean;
 }) {
+  const t = useTranslate();
   const color = barColor(driver);
   return (
     <div
@@ -210,10 +232,20 @@ export function LimitWindows({
         return (
           <Fragment key={window.id}>
             <span className="flex min-w-0 items-center gap-2 text-xs">
-              <span className="truncate text-muted-foreground">{window.label}</span>
-              <span className="ms-auto shrink-0 font-medium text-foreground tabular-nums">
-                {remainingPercent(window)}% left
-              </span>
+              <Trans
+                t={t}
+                i18nKey="web.rich.UsageLimits.part-part-part-part-part-left-part"
+                components={{
+                  part0: <span className="truncate text-muted-foreground">{null}</span>,
+                  value1: <>{window.label}</>,
+                  part2: (
+                    <span className="ms-auto shrink-0 font-medium text-foreground tabular-nums">
+                      {null}
+                    </span>
+                  ),
+                  value3: <>{remainingPercent(window)}</>,
+                }}
+              />
             </span>
             <WindowBar color={color} window={window} now={now} />
             <span className="flex items-center gap-2 text-xs whitespace-nowrap text-muted-foreground tabular-nums">
@@ -278,20 +310,24 @@ export function ResetCreditDialog({
   readonly onConfirm: () => void;
   readonly disabled?: boolean;
 }) {
+  const t = useTranslate();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogPopup>
         <AlertDialogHeader>
-          <AlertDialogTitle>Use a reset credit?</AlertDialogTitle>
+          <AlertDialogTitle>{t("web.ui.UsageLimits.use-a-reset-credit")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This redeems one credit on your account and clears the current rate-limit windows. It
-            cannot be undone.
+            {t(
+              "web.ui.UsageLimits.this-redeems-one-credit-on-your-account-and-clears-the-current-rate-limit-windows-it-cannot-be-undone",
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+          <AlertDialogClose render={<Button variant="outline" />}>
+            {t("web.ui.UsageLimits.cancel")}
+          </AlertDialogClose>
           <Button disabled={disabled} onClick={onConfirm}>
-            Use credit
+            {t("web.ui.UsageLimits.use-credit")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogPopup>
@@ -326,6 +362,7 @@ export function ResetCredits({
   readonly credits: ServerProviderResetCredits;
   readonly now: number;
 }) {
+  const t = useTranslate();
   const { canManageProviders, confirming, setConfirming, busy, status, redeem } = useResetCredit(
     environmentId,
     input,
@@ -343,7 +380,7 @@ export function ResetCredits({
             if (readEnvironmentScope(environmentId, AuthProvidersManageScope)) setConfirming(true);
           }}
         >
-          {busy ? "Using…" : "Use reset"}
+          {busy ? t("web.dynamic.UsageLimits.using") : t("web.dynamic.UsageLimits.use-reset")}
         </Button>
       ) : null}
       {status ? <span className="text-foreground">{status}</span> : null}

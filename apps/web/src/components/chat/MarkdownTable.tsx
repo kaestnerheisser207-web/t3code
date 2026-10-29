@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Check, Copy, Maximize2, Minimize2 } from "lucide";
 import { useRef, useState, type ComponentProps } from "react";
 
@@ -15,6 +16,7 @@ import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { reportMarkdownActionFailure } from "./markdownActionFailure";
 
 export function MarkdownTable({ children, ...props }: ComponentProps<"table">) {
+  const t = useTranslate();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [expanded, setExpanded] = useState(() => getClientSettings().wordWrap);
   const { copyToClipboard, isCopied: copied } = useCopyToClipboard<"markdown" | "csv">({
@@ -85,8 +87,12 @@ export function MarkdownTable({ children, ...props }: ComponentProps<"table">) {
             <TooltipPopup side="top">{copyLabel}</TooltipPopup>
           </Tooltip>
           <MenuPopup align="end">
-            <MenuItem onClick={() => handleCopy("markdown")}>Copy as Markdown</MenuItem>
-            <MenuItem onClick={() => handleCopy("csv")}>Copy as CSV</MenuItem>
+            <MenuItem onClick={() => handleCopy("markdown")}>
+              {t("web.ui.MarkdownTable.copy-as-markdown")}
+            </MenuItem>
+            <MenuItem onClick={() => handleCopy("csv")}>
+              {t("web.ui.MarkdownTable.copy-as-csv")}
+            </MenuItem>
           </MenuPopup>
         </Menu>
       </div>

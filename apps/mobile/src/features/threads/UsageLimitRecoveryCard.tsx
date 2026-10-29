@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import { squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
 import { AsyncResult } from "effect/reactivity";
@@ -18,6 +19,7 @@ export function UsageLimitRecoveryCard({
   thread: EnvironmentThreadShell;
   environmentId: EnvironmentId;
 }) {
+  const t = useTranslate();
   const updateMetadata = useAtomCommand(threadEnvironment.updateMetadata);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,19 +74,31 @@ export function UsageLimitRecoveryCard({
     <View className="mx-3 mb-2 gap-2 rounded-xl border border-warning-foreground/25 bg-screen p-3">
       <Text className="text-sm text-warning-foreground">
         {resetAt
-          ? `Usage limit resets ${DateTime.toDateUtc(DateTime.makeUnsafe(resetAt)).toLocaleString()}.`
-          : "The provider did not report a reset time. Retry manually when your limit is available."}
+          ? t("mobile.dynamic.UsageLimitRecoveryCard.usage-limit-resets-param", {
+              value: DateTime.toDateUtc(DateTime.makeUnsafe(resetAt)).toLocaleString(),
+            })
+          : t(
+              "mobile.dynamic.UsageLimitRecoveryCard.the-provider-did-not-report-a-reset-time-retry-manually-when-your-limit-is-available",
+            )}
       </Text>
       {canSchedule ? (
         <View className="flex-row flex-wrap gap-2">
           <Button
-            label={scheduled ? "Cancel auto-resume" : "Resume at reset"}
+            label={
+              scheduled
+                ? t("mobile.dynamic.UsageLimitRecoveryCard.cancel-auto-resume")
+                : t("mobile.dynamic.UsageLimitRecoveryCard.resume-at-reset")
+            }
             tone="secondary"
             disabled={pending}
             onPress={() => void toggle("resume")}
           />
           <Button
-            label={snoozed ? "Wake now" : "Snooze until reset"}
+            label={
+              snoozed
+                ? t("mobile.dynamic.UsageLimitRecoveryCard.wake-now")
+                : t("mobile.dynamic.UsageLimitRecoveryCard.snooze-until-reset")
+            }
             tone="secondary"
             disabled={pending || (!snoozed && resetPassed)}
             onPress={() => void toggle("snooze")}

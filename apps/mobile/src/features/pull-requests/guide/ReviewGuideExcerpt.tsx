@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import type { FileDiffMetadata } from "@pierre/diffs";
@@ -26,6 +27,7 @@ export function ReviewGuideExcerpt({
   readonly loading: boolean;
   readonly onOpen: () => void;
 }) {
+  const t = useTranslate();
   const { nativeReviewDiffStyle, codeWordBreak } = useAppearanceCodeSurface();
   const { themeAppearance } = useAppearancePreferences();
   const slice = excerptPatch(file, excerpt);
@@ -59,7 +61,10 @@ export function ReviewGuideExcerpt({
       <View className="overflow-hidden rounded-lg border border-border-subtle">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Open ${excerpt.path} at line ${excerpt.start} in full diff`}
+          accessibilityLabel={t(
+            "mobile.dynamic.ReviewGuideExcerpt.open-param-at-line-param-in-full-diff",
+            { path: excerpt.path, start: excerpt.start },
+          )}
           onPress={onOpen}
           className="min-h-11 flex-row items-center gap-3 border-b border-border-subtle px-3 py-2 active:opacity-60"
         >
@@ -113,8 +118,12 @@ export function ReviewGuideExcerpt({
         ) : (
           <Text className="p-3 text-xs text-foreground-muted">
             {loading
-              ? `Loading ${excerpt.path}…`
-              : `${excerpt.path}:${excerpt.start}–${excerpt.end} is not in the loaded diff.`}
+              ? t("mobile.dynamic.ReviewGuideExcerpt.loading-param", { path: excerpt.path })
+              : t("mobile.dynamic.ReviewGuideExcerpt.param-param-param-is-not-in-the-loaded-diff", {
+                  path: excerpt.path,
+                  start: excerpt.start,
+                  end: excerpt.end,
+                })}
           </Text>
         )}
       </View>

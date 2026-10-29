@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { settlePromise } from "@t3tools/client-runtime/state/runtime";
 import type { DesktopSshPasswordPromptRequest } from "@t3tools/contracts";
 import * as AsyncResult from "effect/reactivity/AsyncResult";
@@ -83,6 +85,7 @@ function ActiveSshPasswordPrompt({
 }: {
   readonly request: DesktopSshPasswordPromptRequest;
 }) {
+  const t = useTranslate();
   const [password, setPassword] = useState("");
   const [isResponding, setIsResponding] = useState(false);
   const [responseError, setResponseError] = useState<string | null>(null);
@@ -156,11 +159,13 @@ function ActiveSshPasswordPrompt({
     >
       <DialogPopup className="max-w-md" initialFocus={inputRef} showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>SSH verification required</DialogTitle>
+          <DialogTitle>{t("web.ui.SshPasswordPromptDialog.ssh-verification-required")}</DialogTitle>
           <DialogDescription>
-            Enter the password or verification code required by <code>{target}</code>. T3 Code
-            passes your response to the local SSH process and keeps it in memory to reuse for this
-            host. T3 Code does not write it to disk.
+            <Trans
+              t={t}
+              i18nKey="web.rich.SshPasswordPromptDialog.enter-the-password-or-verification-code-required-by-part-t3-code-passes-your-response-to-the-local-ssh-process-and-keeps-it-in-memory-to-reuse-for-this-host-t3-code-does-not-write-it-to-disk"
+              components={{ part0: <code>{target}</code> }}
+            />
           </DialogDescription>
         </DialogHeader>
         <DialogPanel scrollFade={false}>
@@ -183,7 +188,7 @@ function ActiveSshPasswordPrompt({
                         : "shrink-0 text-xs text-muted-foreground"
                     }
                   >
-                    {isExpired ? "Expired" : remainingLabel}
+                    {isExpired ? t("web.dynamic.SshPasswordPromptDialog.expired") : remainingLabel}
                   </span>
                 ) : null}
               </div>
@@ -201,18 +206,21 @@ function ActiveSshPasswordPrompt({
               <p className="text-sm text-destructive">{visibleResponseError}</p>
             ) : (
               <p className="text-sm text-muted-foreground">
-                SSH keys may replace a password, but your server can still require a verification
-                code.
+                {t(
+                  "web.ui.SshPasswordPromptDialog.ssh-keys-may-replace-a-password-but-your-server-can-still-require-a-verification-code",
+                )}
               </p>
             )}
           </form>
         </DialogPanel>
         <DialogFooter>
           <Button disabled={isResponding} type="button" variant="outline" onClick={cancelPrompt}>
-            {isExpired ? "Dismiss" : "Cancel"}
+            {isExpired
+              ? t("web.dynamic.SshPasswordPromptDialog.dismiss")
+              : t("web.dynamic.SshPasswordPromptDialog.cancel")}
           </Button>
           <Button disabled={isResponding || isExpired} form={formId} type="submit">
-            Continue
+            {t("web.ui.SshPasswordPromptDialog.continue")}
           </Button>
         </DialogFooter>
       </DialogPopup>

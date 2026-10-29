@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n";
 import type { NativeStackHeaderItem } from "@react-navigation/native-stack";
 import { resolveEnvironmentMachineKind } from "@t3tools/contracts";
 import { Platform, Pressable } from "react-native";
@@ -117,6 +118,7 @@ export function SettingsEnvironmentFilterHeader(props: {
 }
 
 export function AndroidSettingsEnvironmentFilter() {
+  const t = useTranslate();
   const {
     availableTargets,
     selectedIds,
@@ -135,8 +137,10 @@ export function AndroidSettingsEnvironmentFilter() {
     <Menu
       accessible
       accessibilityRole="button"
-      accessibilityLabel="Filter settings environments and projects"
-      title="Settings scope"
+      accessibilityLabel={t(
+        "mobile.settings.SettingsEnvironmentFilterHeader.filter-settings-environments-and-projects",
+      )}
+      title={t("mobile.settings.SettingsEnvironmentFilterHeader.settings-scope")}
       actions={[
         {
           id: "all",
@@ -182,7 +186,9 @@ export function AndroidSettingsEnvironmentFilter() {
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Filter settings environments and projects"
+        accessibilityLabel={t(
+          "mobile.settings.SettingsEnvironmentFilterHeader.filter-settings-environments-and-projects",
+        )}
         className="size-11 items-center justify-center rounded-full"
       >
         <SymbolView name={filterIcon} size={22} tintColorClassName="accent-icon" />

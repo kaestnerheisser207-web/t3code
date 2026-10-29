@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import type { EnvironmentId, ThreadId, TurnItemId } from "@t3tools/contracts";
 import {
   makeMcpAppHost,
@@ -86,6 +88,7 @@ export function McpAppFrame(props: {
   readonly awaitingUser?: boolean;
   readonly onFullscreenChange?: (fullscreen: boolean) => void;
 }) {
+  const t = useTranslate();
   const { app } = props;
   const theme = useHtmlRenderTheme();
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -406,7 +409,13 @@ export function McpAppFrame(props: {
   if (closed) {
     return (
       <div className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-muted-foreground text-xs">
-        <span>The {app.server} app was closed</span>
+        <span>
+          <Trans
+            t={t}
+            i18nKey="web.rich.McpAppFrame.the-part-app-was-closed"
+            components={{ value0: <>{app.server}</> }}
+          />
+        </span>
         <Button
           size="xs"
           variant="ghost"
@@ -416,7 +425,7 @@ export function McpAppFrame(props: {
             setClosed(false);
           }}
         >
-          Show app
+          {t("web.ui.McpAppFrame.show-app")}
         </Button>
       </div>
     );
@@ -448,7 +457,7 @@ export function McpAppFrame(props: {
           >
             <span className="truncate">{app.server}</span>
             <Button
-              aria-label="Exit full screen"
+              aria-label={t("web.ui.McpAppFrame.exit-full-screen")}
               size="icon-sm"
               variant="ghost"
               onClick={() => setDisplayMode("inline")}
@@ -459,13 +468,17 @@ export function McpAppFrame(props: {
         ) : null}
         {navigatedAway ? (
           <p className="flex size-full items-center justify-center text-muted-foreground text-xs">
-            The {app.server} app left its page and was stopped
+            <Trans
+              t={t}
+              i18nKey="web.rich.McpAppFrame.the-part-app-left-its-page-and-was-stopped"
+              components={{ value0: <>{app.server}</> }}
+            />
           </p>
         ) : src !== null ? (
           <iframe
             ref={attachFrame}
             src={src}
-            title={`${app.server} app`}
+            title={t("web.dynamic.McpAppFrame.param-app", { server: app.server })}
             // Omitting allow-same-origin isolates the app from the session.
             sandbox="allow-scripts allow-forms"
             allow={mcpAppAllowAttribute(app.permissions)}
@@ -475,7 +488,11 @@ export function McpAppFrame(props: {
           />
         ) : asset._tag === "Failure" ? (
           <p className="flex size-full items-center justify-center text-muted-foreground text-xs">
-            Unable to load the {app.server} app
+            <Trans
+              t={t}
+              i18nKey="web.rich.McpAppFrame.unable-to-load-the-part-app"
+              components={{ value0: <>{app.server}</> }}
+            />
           </p>
         ) : null}
       </div>

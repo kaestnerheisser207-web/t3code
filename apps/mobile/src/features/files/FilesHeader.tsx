@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useRef, useState, type ReactNode } from "react";
 import { Keyboard, type TextInputInstance, View } from "react-native";
 
@@ -18,6 +19,7 @@ export function FilesHeader(props: {
   readonly onBack?: () => void;
   readonly leading?: ReactNode;
 }) {
+  const t = useTranslate();
   const { paddingTop, paddingBottom } = useToolbarLayout();
   const searchRef = useRef<TextInputInstance>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -44,7 +46,7 @@ export function FilesHeader(props: {
         style={{ opacity: searching ? 0 : 1 }}
       >
         <AndroidScreenHeader
-          title="Files"
+          title={t("mobile.tools.FilesHeader.files")}
           subtitle={props.projectName}
           hideBottomBorder
           onBack={props.onBack}
@@ -58,7 +60,7 @@ export function FilesHeader(props: {
           ]}
           trailing={
             <AndroidAnchoredMenu
-              title="File options"
+              title={t("mobile.tools.FilesHeader.file-options")}
               actions={[{ id: "refresh", title: "Refresh files" }]}
               onPressAction={({ nativeEvent }) => {
                 if (nativeEvent.event === "refresh") props.onRefresh();
@@ -66,7 +68,7 @@ export function FilesHeader(props: {
             >
               {(open) => (
                 <AndroidHeaderIconButton
-                  accessibilityLabel="File options"
+                  accessibilityLabel={t("mobile.tools.FilesHeader.file-options")}
                   icon="ellipsis"
                   onPress={open}
                 />
@@ -79,15 +81,15 @@ export function FilesHeader(props: {
         <View className="absolute inset-0 bg-header px-2" style={{ paddingTop, paddingBottom }}>
           <View className="flex-1 flex-row items-center gap-1">
             <AndroidHeaderIconButton
-              accessibilityLabel="Close file search"
+              accessibilityLabel={t("mobile.tools.FilesHeader.close-file-search")}
               icon="arrow.left"
               onPress={closeSearch}
             />
             <SearchField
               inputRef={searchRef}
-              accessibilityLabel="Search files"
+              accessibilityLabel={t("mobile.tools.FilesHeader.search-files")}
               clearAccessibilityLabel="Clear file search"
-              placeholder="Search files"
+              placeholder={t("mobile.tools.FilesHeader.search-files")}
               value={props.searchQuery}
               onChangeText={onSearchQueryChange}
             />

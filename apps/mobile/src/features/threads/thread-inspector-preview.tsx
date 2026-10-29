@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   NavigationContainer,
   NavigationIndependentTree,
@@ -34,18 +35,19 @@ export interface ThreadInspectorPresentation {
 export function ThreadInspectorHeader(
   props: ThreadInspectorPresentation & { readonly title: string },
 ) {
+  const t = useTranslate();
   return (
     <>
       <NativeStackScreenOptions options={{ headerShown: true, headerTransparent: true }} />
       <SheetHeader
         title={props.title}
         onClose={props.onClose}
-        accessibilityLabel="Close thread preview"
+        accessibilityLabel={t("mobile.threads.thread-inspector-preview.close-thread-preview")}
         trailing={
           props.onMaximize ? (
             <IconButton
               icon="arrow.up.left.and.arrow.down.right"
-              accessibilityLabel="Maximize thread"
+              accessibilityLabel={t("mobile.threads.thread-inspector-preview.maximize-thread")}
               onPress={props.onMaximize}
             />
           ) : undefined

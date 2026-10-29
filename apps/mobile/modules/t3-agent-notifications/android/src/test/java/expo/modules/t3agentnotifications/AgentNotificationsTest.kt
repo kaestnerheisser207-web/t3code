@@ -473,6 +473,15 @@ class AgentNotificationsTest {
       "activity_phase" to "running",
       "activity_active_count" to "2",
     )
+    val translated = ActivityPresentation(data, true, mapOf(
+      "activity.workingCount" to "{{count}} 项进行中",
+      "activity.liveCount" to "{{count}} 个进行中",
+      "activity.open" to "打开"
+    ))
+    assertEquals(ActivityPhase.RUNNING, translated.phase)
+    assertEquals("2 项进行中", translated.summary)
+    assertEquals("2 个进行中", translated.chip)
+    assertEquals("打开", translated.action)
     AgentNotifications.receive(context, data)
     val card = manager.activeNotifications.single().notification
     assertEquals("2 live", card.extras.getString(NotificationCompat.EXTRA_SHORT_CRITICAL_TEXT))

@@ -1,3 +1,7 @@
+import type { TFunction } from "i18next";
+import { Trans } from "react-i18next";
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { projectChangeRequestUrl } from "@t3tools/client-runtime/change-request-links";
 import { normalizeThreadPullRequestKey } from "@t3tools/client-runtime/thread-pull-requests";
 import { changeRequestReferenceAutolinker } from "@t3tools/client-runtime/pull-request-markdown";
@@ -68,10 +72,7 @@ import { pullRequestEnvironment, usePullRequestTurnRefresh } from "~/state/pullR
 import { useAtomCommand } from "~/state/use-atom-command";
 import { PullRequestStackMenu } from "./PullRequestStackMenu";
 import { PullRequestChangeBreakdownStat } from "./PullRequestChangeBreakdownStat";
-import {
-  capitalizeTerm,
-  sourceControlClients,
-} from "@t3tools/client-runtime/source-control-clients";
+import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { PullRequestThreadLinks } from "./PullRequestThreadLinks";
 import { vcsEnvironment } from "~/state/vcs";
 import { RelativeTime } from "~/components/RelativeTime";
@@ -158,49 +159,43 @@ import { PullRequestGuideTab } from "./PullRequestGuideTab";
 import { guideRunKey, useGuideRunStore } from "./guide/guideRunStore";
 import { useReviewGuideWriter } from "./guide/useReviewGuideWriter";
 
-const actionFailureLabels = (term: string): Record<PullRequestAction, string> => ({
-  merge: `Could not merge this ${term}`,
-  ready: "Could not mark this ready for review",
-  draft: "Could not convert this to a draft",
-  close: `Could not close this ${term}`,
-  reopen: `Could not reopen this ${term}`,
-  "update-branch": "Could not update this branch",
-  "enable-auto-merge": "Could not turn on auto-merge",
-  "disable-auto-merge": "Could not turn off auto-merge",
-  revert: `Could not open a revert ${term}`,
-  "delete-branch": "Could not delete this branch",
-  "approve-workflows": "Could not approve workflows",
+const actionFailureLabels = (term: string, t: TFunction): Record<PullRequestAction, string> => ({
+  merge: t("web.pr.failure.merge", { kind: sourceControlTerm(t, term) }),
+  ready: t("web.pr.failure.ready", { kind: sourceControlTerm(t, term) }),
+  draft: t("web.pr.failure.draft", { kind: sourceControlTerm(t, term) }),
+  close: t("web.pr.failure.close", { kind: sourceControlTerm(t, term) }),
+  reopen: t("web.pr.failure.reopen", { kind: sourceControlTerm(t, term) }),
+  "update-branch": t("web.pr.failure.update-branch", { kind: sourceControlTerm(t, term) }),
+  "enable-auto-merge": t("web.pr.failure.enable-auto-merge", { kind: sourceControlTerm(t, term) }),
+  "disable-auto-merge": t("web.pr.failure.disable-auto-merge", {
+    kind: sourceControlTerm(t, term),
+  }),
+  revert: t("web.pr.failure.revert", { kind: sourceControlTerm(t, term) }),
+  "delete-branch": t("web.pr.failure.delete-branch", { kind: sourceControlTerm(t, term) }),
+  "approve-workflows": t("web.pr.failure.approve-workflows", { kind: sourceControlTerm(t, term) }),
 });
 
-const actionFailureHints = (term: string): Record<PullRequestAction, string> => ({
-  merge:
-    "The host refused the merge. Check that you have write access, that the checks it requires have passed, and that the branch is not conflicting.",
-  ready: "The host refused it. Check that you have write access to this repository.",
-  draft: "The host refused it. Check that you have write access to this repository.",
-  close: "The host refused it. Check that you have write access, or that you opened it.",
-  reopen:
-    "The host refused it. Check that you have write access, and that the branch still exists.",
-  "update-branch":
-    "The host refused it. Check that you have write access to the branch (a fork branch also needs its author to allow edits from maintainers), and that it does not conflict with the base.",
-  "enable-auto-merge":
-    "The host refused it. Check that this repository allows auto-merge, that you have write access, and that there is something left for it to wait on.",
-  "disable-auto-merge":
-    "The host refused it. Check that you have write access, and that the merge has not already happened.",
-  revert: `The host refused it. Check that you have write access and that this ${term} was merged on the host.`,
-  "delete-branch":
-    "The host refused it. Check that you have write access to the source repository and that the branch has not moved since this page loaded.",
-  "approve-workflows":
-    "The host refused it. Check that you have Actions write access and that these workflow runs are still awaiting approval.",
+const actionFailureHints = (term: string, t: TFunction): Record<PullRequestAction, string> => ({
+  merge: t("web.pr.hint.merge", { kind: sourceControlTerm(t, term) }),
+  ready: t("web.pr.hint.ready", { kind: sourceControlTerm(t, term) }),
+  draft: t("web.pr.hint.draft", { kind: sourceControlTerm(t, term) }),
+  close: t("web.pr.hint.close", { kind: sourceControlTerm(t, term) }),
+  reopen: t("web.pr.hint.reopen", { kind: sourceControlTerm(t, term) }),
+  "update-branch": t("web.pr.hint.update-branch", { kind: sourceControlTerm(t, term) }),
+  "enable-auto-merge": t("web.pr.hint.enable-auto-merge", { kind: sourceControlTerm(t, term) }),
+  "disable-auto-merge": t("web.pr.hint.disable-auto-merge", { kind: sourceControlTerm(t, term) }),
+  revert: t("web.pr.hint.revert", { kind: sourceControlTerm(t, term) }),
+  "delete-branch": t("web.pr.hint.delete-branch", { kind: sourceControlTerm(t, term) }),
+  "approve-workflows": t("web.pr.hint.approve-workflows", { kind: sourceControlTerm(t, term) }),
 });
 
-const UPDATE_BRANCH_REBASE_FAILURE_HINT =
-  "The host refused it. A rebase stops at the first commit that does not apply cleanly; updating with a merge commit may still work.";
-
-const TABS: ReadonlyArray<{ value: PullRequestDetailTab; label: string }> = [
-  { value: "summary", label: "Summary" },
-  { value: "guide", label: "Guide" },
-  { value: "timeline", label: "Timeline" },
-  { value: "code", label: "Code" },
+const translatedTabs = (
+  t: TFunction,
+): ReadonlyArray<{ value: PullRequestDetailTab; label: string }> => [
+  { value: "summary", label: t("web.pr.tab.summary") },
+  { value: "guide", label: t("web.pr.tab.guide") },
+  { value: "timeline", label: t("web.pr.tab.timeline") },
+  { value: "code", label: t("web.pr.tab.code") },
 ];
 
 // Defer the diff viewer's worker pool until Code is approached.
@@ -213,10 +208,10 @@ const lastHandoffPromptByDraft = new Map<string, string>();
 const composerTargetKey = (target: ScopedThreadRef | DraftId): string =>
   typeof target === "string" ? target : scopedThreadKey(target);
 
-function reportCheckoutCommandError(error: Error) {
+function reportCheckoutCommandError(error: Error, t: TFunction) {
   toastManager.add({
     type: "error",
-    title: "Could not copy checkout command",
+    title: t("web.pr.notice.copyCheckoutFailed"),
     description: error.message,
   });
 }
@@ -296,6 +291,7 @@ export function PullRequestDetailPanel({
   initialTab?: PullRequestDetailTab;
   onTabChange?: ((tab: PullRequestDetailTab) => void) | undefined;
 }) {
+  const t = useTranslate();
   const environmentConfigs = useServerConfigs();
   const projects = useProjects();
   const project = projects.find(
@@ -667,21 +663,26 @@ export function PullRequestDetailPanel({
       const failure = squashAtomCommandFailure(result);
       const hint =
         updateMethod === "rebase"
-          ? UPDATE_BRANCH_REBASE_FAILURE_HINT
-          : actionFailureHints(terminology.singular)[action];
+          ? t("web.pr.rebaseFailure")
+          : actionFailureHints(terminology.singular, t)[action];
       toastManager.add({
         type: "error",
-        title: actionFailureLabels(terminology.singular)[action],
+        title: actionFailureLabels(terminology.singular, t)[action],
         description: readableFailure(failure, hint),
       });
       onActed?.(action, "failed");
       return false;
     }
     if (action === "revert") {
-      toastManager.add({ type: "success", title: `Revert ${terminology.singular} opened` });
+      toastManager.add({
+        type: "success",
+        title: t("web.pr.notice.revertOpened", {
+          kind: sourceControlTerm(t, terminology.singular),
+        }),
+      });
     }
     if (action === "delete-branch") {
-      toastManager.add({ type: "success", title: "Branch deleted" });
+      toastManager.add({ type: "success", title: t("web.pr.notice.branchDeleted") });
     }
     if (pullRequestActionNeedsHostRefresh(action)) {
       void refreshFromHost();
@@ -711,7 +712,7 @@ export function PullRequestDetailPanel({
     });
     if (commentResult._tag === "Failure") {
       setPendingAction(null);
-      toastManager.add({ type: "error", title: "Could not post the comment" });
+      toastManager.add({ type: "error", title: t("web.pr.notice.commentFailed") });
       return { commentPosted: false };
     }
     const actionSucceeded = await finishAction(action);
@@ -803,11 +804,11 @@ export function PullRequestDetailPanel({
       writeTaskToComposer(attachTarget, task);
       toastManager.add({
         type: "success",
-        title: "Added to the composer",
+        title: t("web.pr.notice.addedComposer"),
         description:
           task.prompt.length > 0
-            ? "The question is in the composer. Read it over, then send."
-            : `The ${terminology.singular} is in the composer. Type your question, then send.`,
+            ? t("web.pr.notice.questionReady")
+            : t("web.pr.notice.requestReady", { kind: sourceControlTerm(t, terminology.singular) }),
       });
       return;
     }
@@ -834,18 +835,18 @@ export function PullRequestDetailPanel({
     if (opened === null) {
       toastManager.add({
         type: "error",
-        title: "Could not open a thread",
-        description: "Try again from the project, or open a thread first.",
+        title: t("web.pr.notice.threadFailed"),
+        description: t("web.pr.notice.retryFromProject"),
       });
       return;
     }
     toastManager.add({
       type: "success",
-      title: "Asked in a thread",
+      title: t("web.pr.notice.askedThread"),
       description:
         task.prompt.length > 0
-          ? "The question is in the composer. Read it over, then send."
-          : `The ${terminology.singular} is in the composer. Type your question, then send.`,
+          ? t("web.pr.notice.questionReady")
+          : t("web.pr.notice.requestReady", { kind: sourceControlTerm(t, terminology.singular) }),
     });
   };
 
@@ -859,8 +860,8 @@ export function PullRequestDetailPanel({
       writeTaskToComposer(attachTarget, task);
       toastManager.add({
         type: "success",
-        title: "Added to the composer",
-        description: "The task is in the composer. Read it over, then send.",
+        title: t("web.pr.notice.addedComposer"),
+        description: t("web.pr.notice.taskReady"),
       });
       return;
     }
@@ -880,7 +881,9 @@ export function PullRequestDetailPanel({
     setHandoff(kind);
     const toastId = toastManager.add({
       type: "loading",
-      title: `Preparing the ${terminology.singular} checkout...`,
+      title: t("web.pr.notice.preparingCheckout", {
+        kind: sourceControlTerm(t, terminology.singular),
+      }),
     });
     const projectRef = scopeProjectRef(
       actingEnvironmentId,
@@ -895,8 +898,8 @@ export function PullRequestDetailPanel({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: "Could not open a thread for the checkout",
-        description: "Try again from the project, or open a thread first.",
+        title: t("web.pr.notice.checkoutThreadFailed"),
+        description: t("web.pr.notice.retryFromProject"),
       });
       return;
     }
@@ -909,7 +912,9 @@ export function PullRequestDetailPanel({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: `Could not prepare the ${terminology.singular} checkout`,
+        title: t("web.pr.notice.prepareFailed", {
+          kind: sourceControlTerm(t, terminology.singular),
+        }),
         description: checkoutFailureDescription(
           isAtomCommandInterrupted(prepared) ? undefined : squashAtomCommandFailure(prepared),
         ),
@@ -929,8 +934,8 @@ export function PullRequestDetailPanel({
       // Sending after failed rebinding would use the previous checkout.
       toastManager.update(toastId, {
         type: "error",
-        title: "Checked out, but the thread stayed where it was",
-        description: `The checkout is ready on \`${prepared.value.branch}\`. Point a thread at it from the branch picker, then ask again.`,
+        title: t("web.pr.notice.threadNotMoved"),
+        description: t("web.pr.notice.pointThread", { branch: prepared.value.branch }),
       });
       return;
     }
@@ -941,13 +946,20 @@ export function PullRequestDetailPanel({
         prepared.value.isOnPullRequestHead
           ? {
               type: "success",
-              title: mode === "local" ? "Checked out here" : "Checked out",
+              title:
+                mode === "local"
+                  ? t("web.pr.notice.checkedOutHere")
+                  : t("web.pr.notice.checkedOut"),
               description:
                 mode === "local"
-                  ? `This repository is on the ${terminology.singular}'s branch, with a thread open on it.`
-                  : `The ${terminology.singular} is in its own worktree, with a thread open on it.`,
+                  ? t("web.pr.notice.localCheckoutReady", {
+                      kind: sourceControlTerm(t, terminology.singular),
+                    })
+                  : t("web.pr.notice.worktreeReady", {
+                      kind: sourceControlTerm(t, terminology.singular),
+                    }),
             }
-          : offHeadPullRequestCheckoutToast(terminology),
+          : offHeadPullRequestCheckoutToast(terminology, t),
       );
       return;
     }
@@ -957,10 +969,10 @@ export function PullRequestDetailPanel({
       prepared.value.isOnPullRequestHead
         ? {
             type: "success",
-            title: "Checkout ready",
-            description: "The task is in the composer. Read it over, then send.",
+            title: t("web.pr.notice.checkoutReady"),
+            description: t("web.pr.notice.taskReady"),
           }
-        : offHeadPullRequestCheckoutToast(terminology),
+        : offHeadPullRequestCheckoutToast(terminology, t),
     );
   };
 
@@ -1117,7 +1129,7 @@ export function PullRequestDetailPanel({
   const workflowApprovalsRequired =
     detail?.state === "open" ? (detail.workflowApprovalsRequired ?? 0) : 0;
   const freshness = detail === null ? null : resolveBaseFreshness(detail);
-  const visibleTabs = TABS.filter((item) => isTabAvailable(item.value));
+  const visibleTabs = translatedTabs(t).filter((item) => isTabAvailable(item.value));
   const can = (action: PullRequestAction) =>
     detail?.capabilities.actions.includes(action) === true &&
     detail.viewerPermissions.actions.includes(action);
@@ -1173,7 +1185,7 @@ export function PullRequestDetailPanel({
     !conflicting &&
     allowedMergeMethods.length > 1;
   const statePresentation = detail
-    ? resolvePullRequestState({ state: detail.state, isDraft: detail.isDraft })
+    ? resolvePullRequestState({ state: detail.state, isDraft: detail.isDraft }, t)
     : null;
   const showsDeleteBranch = detail !== null && canDeletePullRequestBranch(detail);
   const environmentConnected = environments.some(
@@ -1184,8 +1196,11 @@ export function PullRequestDetailPanel({
     if (detail === null) return;
     const confirmed = await readLocalApi()?.dialogs.confirm(
       [
-        `Delete branch ${detail.headBranch}?`,
-        `This deletes ${detail.headBranch} from ${detail.headRepositoryNameWithOwner ?? detail.repository}. Local branches and worktrees are not changed.`,
+        t("web.pr.notice.deleteBranch", { branch: detail.headBranch }),
+        t("web.pr.notice.deleteBranchDetail", {
+          branch: detail.headBranch,
+          repository: detail.headRepositoryNameWithOwner ?? detail.repository,
+        }),
       ].join("\n"),
       { variant: "destructive" },
     );
@@ -1196,9 +1211,9 @@ export function PullRequestDetailPanel({
   const checksSummary = checksStale
     ? checksState === null
       ? "No checks reported"
-      : pullRequestChecksStatePresentation(checksState).label
+      : pullRequestChecksStatePresentation(checksState, t).label
     : detail
-      ? summarizePullRequestChecks(detail.checks)
+      ? summarizePullRequestChecks(detail.checks, t)
       : null;
   const approvalCount =
     detail && !detail.commentsTruncated
@@ -1236,7 +1251,7 @@ export function PullRequestDetailPanel({
         seed={matchingListEntry}
         summary={sharedSummary}
         checkoutCommand={checkoutCommand}
-        onCheckoutError={reportCheckoutCommandError}
+        onCheckoutError={(error) => reportCheckoutCommandError(error, t)}
         number={reference.number}
         tabs={visibleTabs}
         activeTab={tab}
@@ -1289,7 +1304,7 @@ export function PullRequestDetailPanel({
             <TooltipProvider delay={150} closeDelay={150} timeout={400}>
               {!nativeStack && supportsStackActions && nativeStackQuery.error ? (
                 <Button variant="ghost" size="xs" onClick={nativeStackQuery.refresh}>
-                  Retry stack lookup
+                  {t("web.ui.PullRequestDetailPanel.retry-stack-lookup")}
                 </Button>
               ) : null}
               {nativeStack ? (
@@ -1393,7 +1408,9 @@ export function PullRequestDetailPanel({
             <Button
               size="icon-xs"
               variant="ghost"
-              aria-label={`Collapse ${terminology.singular} panel`}
+              aria-label={t("web.dynamic.PullRequestDetailPanel.collapse-param-panel", {
+                singular: sourceControlTerm(t, terminology.singular),
+              })}
               onClick={onClose}
             >
               <PanelRightIcon className="size-3.5" />
@@ -1444,7 +1461,7 @@ export function PullRequestDetailPanel({
                       iconClassName="size-3"
                     />
                     <ArrowLeftIcon
-                      aria-label="receives changes from"
+                      aria-label={t("pr.branch.receives")}
                       className="size-3 shrink-0 opacity-60"
                     />
                     <Tooltip>
@@ -1461,9 +1478,10 @@ export function PullRequestDetailPanel({
                   <span className="ml-auto inline-flex shrink-0 items-baseline justify-end gap-2 text-2xs">
                     <span
                       className="inline-flex items-baseline gap-1 tabular-nums"
-                      aria-label={`${detail.changedFiles.toLocaleString()} changed ${
-                        detail.changedFiles === 1 ? "file" : "files"
-                      }`}
+                      aria-label={t("web.dynamic.PullRequestDetailPanel.changedFileCount", {
+                        formattedCount: detail.changedFiles.toLocaleString(),
+                        count: detail.changedFiles,
+                      })}
                     >
                       <FileDiffIcon aria-hidden className="size-3 self-center" />
                       {detail.changedFiles.toLocaleString()}
@@ -1518,7 +1536,11 @@ export function PullRequestDetailPanel({
                 }
                 updated={
                   <span>
-                    updated <RelativeTime timestamp={detail.updatedAt} />
+                    <Trans
+                      t={t}
+                      i18nKey="web.rich.PullRequestDetailPanel.updated-part"
+                      components={{ part0: <RelativeTime timestamp={detail.updatedAt} /> }}
+                    />
                   </span>
                 }
                 checkout={
@@ -1531,7 +1553,7 @@ export function PullRequestDetailPanel({
                       copiedLabel="Checkout command copied"
                       className="ml-auto font-mono"
                       tooltipSide="bottom"
-                      onError={reportCheckoutCommandError}
+                      onError={(error) => reportCheckoutCommandError(error, t)}
                     />
                   ) : null
                 }
@@ -1588,7 +1610,13 @@ export function PullRequestDetailPanel({
               ) : (
                 <PullRequestChecksStatusLine
                   className="text-muted-foreground"
-                  aria-label={checksSummary ? `Checks: ${checksSummary}` : "Checks"}
+                  aria-label={
+                    checksSummary
+                      ? t("web.dynamic.PullRequestDetailPanel.checks-param", {
+                          checksSummary: checksSummary,
+                        })
+                      : t("web.dynamic.PullRequestDetailPanel.checks")
+                  }
                   icon={
                     checksState !== null ? (
                       <PullRequestChecksPopover
@@ -1616,7 +1644,7 @@ export function PullRequestDetailPanel({
                     className="inline-flex items-center gap-1"
                     aria-label={
                       activityError
-                        ? "Comments unavailable"
+                        ? t("web.dynamic.PullRequestDetailPanel.comments-unavailable")
                         : `${detail.commentCount.toLocaleString()} ${
                             detail.commentCount === 1 ? "comment" : "comments"
                           }`
@@ -1633,7 +1661,7 @@ export function PullRequestDetailPanel({
                     className="inline-flex items-center gap-1"
                     aria-label={
                       activityError
-                        ? "Commits unavailable"
+                        ? t("web.dynamic.PullRequestDetailPanel.commits-unavailable")
                         : `${detail.commits.length.toLocaleString()} ${
                             detail.commits.length === 1 ? "commit" : "commits"
                           }`
@@ -1656,7 +1684,9 @@ export function PullRequestDetailPanel({
                       <PullRequestReviewOutcomeIcon outcome="approved" className="size-3" />
                       {approvalCount.toLocaleString()}
                       <span className="sr-only">
-                        {approvalCount === 1 ? "approval" : "approvals"}
+                        {approvalCount === 1
+                          ? t("web.dynamic.PullRequestDetailPanel.approval")
+                          : t("web.dynamic.PullRequestDetailPanel.approvals")}
                       </span>
                     </span>
                   ) : null}
@@ -1666,15 +1696,17 @@ export function PullRequestDetailPanel({
                   variant="ghost-muted"
                   aria-label={
                     timelineOrder === "newest"
-                      ? "Show oldest activity first"
-                      : "Show newest activity first"
+                      ? t("web.dynamic.PullRequestDetailPanel.show-oldest-activity-first")
+                      : t("web.dynamic.PullRequestDetailPanel.show-newest-activity-first")
                   }
                   onClick={() =>
                     setTimelineOrder((value) => (value === "newest" ? "oldest" : "newest"))
                   }
                 >
                   <ArrowDownUpIcon aria-hidden className="size-3" />
-                  {timelineOrder === "newest" ? "Newest first" : "Oldest first"}
+                  {timelineOrder === "newest"
+                    ? t("web.dynamic.PullRequestDetailPanel.newest-first")
+                    : t("web.dynamic.PullRequestDetailPanel.oldest-first")}
                 </Button>
               </div>
             ) : null}
@@ -1712,7 +1744,10 @@ export function PullRequestDetailPanel({
           <PullRequestsUnavailableState
             {...(isPullRequestNotFound(detailQuery.failure)
               ? {
-                  title: `${capitalizeTerm(terminology.singular)} #${reference.number} not found`,
+                  title: t("web.pr.notice.notFound", {
+                    kind: sourceControlTerm(t, terminology.singular),
+                    number: reference.number,
+                  }),
                   error: `It may be an issue rather than a ${terminology.singular}, or this account can't see it.`,
                 }
               : { error: detailQuery.error })}
@@ -1811,7 +1846,11 @@ export function PullRequestDetailPanel({
               <div className={cn("absolute inset-0", tab !== "code" && "invisible")}>
                 <Suspense
                   fallback={
-                    <DiffPanelLoadingState label={`Loading ${terminology.singular} diff...`} />
+                    <DiffPanelLoadingState
+                      label={t("web.dynamic.PullRequestDetailPanel.loading-param-diff", {
+                        singular: sourceControlTerm(t, terminology.singular),
+                      })}
+                    />
                   }
                 >
                   <PullRequestCodeTab

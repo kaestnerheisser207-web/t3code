@@ -1,3 +1,6 @@
+import type { TFunction } from "i18next";
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
 import { useNavigate } from "@tanstack/react-router";
@@ -37,19 +40,22 @@ const STATUS_DOT_CLASS: Record<ScheduledTask["lastRunStatus"], string> = {
   failed: "bg-destructive",
 };
 
-function taskScheduleLine(task: ScheduledTask) {
+function taskScheduleLine(task: ScheduledTask, t: TFunction) {
   return (
     <>
-      {scheduleLabel(task.schedule)}
+      {scheduleLabel(task.schedule, t)}
       {task.enabled && task.nextRunAt !== null ? (
         <>
-          {" · next "}
-          <ScheduledRelativeLabel value={task.nextRunAt} />
+          <Trans
+            t={t}
+            i18nKey="automation.next"
+            components={{ time: <ScheduledRelativeLabel value={task.nextRunAt} /> }}
+          />
         </>
       ) : task.enabled ? (
         ""
       ) : (
-        " · paused"
+        t("automation.paused")
       )}
     </>
   );
@@ -59,6 +65,7 @@ export function ThreadAutomationsPanel(props: {
   readonly environmentId: EnvironmentId;
   readonly threadId: ThreadId;
 }) {
+  const t = useTranslate();
   const canOperate = useAtomValue(
     serverEnvironment.runScheduledTaskNow.permissionAtom(props.environmentId),
   );
@@ -127,7 +134,7 @@ export function ThreadAutomationsPanel(props: {
   return (
     <ThreadDetailsSection
       headingId="thread-details-automations-heading"
-      title="Automations"
+      title={t("web.ui.ThreadAutomationsPanel.automations")}
       data-thread-automations-panel
       actions={
         <Tooltip>
@@ -137,7 +144,7 @@ export function ThreadAutomationsPanel(props: {
                 size="icon-xs"
                 variant="ghost"
                 part="icon"
-                aria-label="Manage scheduled tasks"
+                aria-label={t("web.ui.ThreadAutomationsPanel.manage-scheduled-tasks")}
                 onClick={() =>
                   void navigate({
                     to: "/settings/scheduled-tasks",
@@ -149,13 +156,17 @@ export function ThreadAutomationsPanel(props: {
               </ThreadDetailsControl>
             }
           />
-          <TooltipPopup>Manage scheduled tasks</TooltipPopup>
+          <TooltipPopup>{t("web.ui.ThreadAutomationsPanel.manage-scheduled-tasks")}</TooltipPopup>
         </Tooltip>
       }
     >
       {tasksQuery.error !== null ? (
         <p className="px-2.5 py-1.5 text-2xs text-destructive">
-          Could not load automations: {tasksQuery.error}
+          <Trans
+            t={t}
+            i18nKey="web.rich.ThreadAutomationsPanel.could-not-load-automations-part"
+            components={{ value0: <>{tasksQuery.error}</> }}
+          />
         </p>
       ) : null}
 
@@ -183,11 +194,13 @@ export function ThreadAutomationsPanel(props: {
                 <span className="block truncate text-sm font-medium text-foreground/80">
                   {task.title}
                 </span>
-                <p className="truncate text-2xs text-muted-foreground">{taskScheduleLine(task)}</p>
+                <p className="truncate text-2xs text-muted-foreground">
+                  {taskScheduleLine(task, t)}
+                </p>
               </TooltipTrigger>
               <TooltipPopup side="left">
                 <p className="font-medium">{task.title}</p>
-                <p className="text-muted-foreground">{taskScheduleLine(task)}</p>
+                <p className="text-muted-foreground">{taskScheduleLine(task, t)}</p>
               </TooltipPopup>
             </Tooltip>
             <Tooltip>
@@ -197,7 +210,9 @@ export function ThreadAutomationsPanel(props: {
                     size="icon-xs"
                     variant="ghost"
                     part="icon"
-                    aria-label={`Edit ${task.title}`}
+                    aria-label={t("web.dynamic.ThreadAutomationsPanel.edit-param", {
+                      title: task.title,
+                    })}
                     onClick={() =>
                       void navigate({
                         to: "/settings/scheduled-tasks",
@@ -209,7 +224,7 @@ export function ThreadAutomationsPanel(props: {
                   </ThreadDetailsControl>
                 }
               />
-              <TooltipPopup>Edit automation</TooltipPopup>
+              <TooltipPopup>{t("web.ui.ThreadAutomationsPanel.edit-automation")}</TooltipPopup>
             </Tooltip>
             {/* Webhook tasks need a request from their URL. */}
             {task.schedule.type === "webhook" ? null : (
@@ -220,7 +235,9 @@ export function ThreadAutomationsPanel(props: {
                       size="icon-xs"
                       variant="ghost"
                       part="icon"
-                      aria-label={`Run ${task.title} now`}
+                      aria-label={t("web.dynamic.ThreadAutomationsPanel.run-param-now", {
+                        title: task.title,
+                      })}
                       disabled={
                         !canOperate || busyTaskId !== null || task.lastRunStatus === "running"
                       }
@@ -230,13 +247,17 @@ export function ThreadAutomationsPanel(props: {
                     </ThreadDetailsControl>
                   }
                 />
-                <TooltipPopup>Run now</TooltipPopup>
+                <TooltipPopup>{t("web.ui.ThreadAutomationsPanel.run-now")}</TooltipPopup>
               </Tooltip>
             )}
             <Switch
               checked={task.enabled}
               disabled={!canOperate || busyTaskId !== null}
-              aria-label={task.enabled ? `Pause ${task.title}` : `Resume ${task.title}`}
+              aria-label={
+                task.enabled
+                  ? t("web.dynamic.ThreadAutomationsPanel.pause-param", { title: task.title })
+                  : t("web.dynamic.ThreadAutomationsPanel.resume-param", { title: task.title })
+              }
               onCheckedChange={(enabled) => void toggleEnabled(task, enabled)}
             />
           </li>

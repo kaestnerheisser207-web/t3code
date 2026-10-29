@@ -1,0 +1,17 @@
+export const paletteEn = {
+  "palette.newThreadIn": "New thread in…",
+  "palette.newThreadProject": "New thread in {{project}}",
+  "palette.triage": "Triage an issue",
+  "palette.onMachine": "On {{machine}}",
+  "palette.thisMachine": "this machine",
+  "palette.untitled": "Untitled thread",
+  "palette.alias.newTask": "new task chat create project",
+  "palette.alias.addProject": "folder clone repository git",
+  "palette.alias.settings": "preferences configuration",
+  "palette.alias.appearance": "theme colors dark light",
+  "palette.alias.environments": "connections server remote",
+  "palette.alias.scheduledTasks": "schedule automations recurring",
+  "palette.alias.usage": "limits accounts quota",
+  "palette.alias.archive": "restore history",
+  "palette.alias.triage": "triage bug issue report broken debug help support",
+} as const;

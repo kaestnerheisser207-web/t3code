@@ -1,9 +1,11 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { describe, expect, it } from "vite-plus/test";
 import {
   allowedMergeMethods,
   canPerformPullRequestAction,
   mergeUnavailableReason,
+  mergeUnavailableCode,
   pullRequestActionLabel,
 } from "./pullRequestActions";
 
@@ -63,12 +65,21 @@ describe("mobile pull request actions", () => {
     const pr = detail({ mergeability: "conflicting" });
     expect(canPerformPullRequestAction(pr, "merge")).toBe(false);
     expect(mergeUnavailableReason(pr, true, GITHUB)).toContain("conflicts");
+    expect(mergeUnavailableCode(pr, true)).toBe("conflicts");
+    expect(mergeUnavailableCode(pr, false)).toBe("readOnly");
+    const t = createI18n("zh-CN").t;
+    expect(mergeUnavailableReason(pr, true, GITHUB, t)).toBe(t("pr.merge.conflicts"));
+    expect(mergeUnavailableReason(pr, false, GITHUB, t)).toBe(t("pr.merge.readOnly"));
   });
 
   it("names the change request with its host's term", () => {
     expect(pullRequestActionLabel("close", GITHUB)).toBe("Close pull request");
     expect(pullRequestActionLabel("close", GITLAB)).toBe("Close merge request");
     expect(pullRequestActionLabel("revert", GITLAB)).toBe("Create revert merge request");
+    const t = createI18n("zh-CN").t;
+    expect(pullRequestActionLabel("close", GITHUB, t)).toBe("关闭拉取请求");
+    expect(pullRequestActionLabel("close", GITLAB, t)).toBe("关闭合并请求");
+
     expect(mergeUnavailableReason(detail({ state: "merged" }), true, GITLAB)).toBe(
       "This merge request has been merged.",
     );

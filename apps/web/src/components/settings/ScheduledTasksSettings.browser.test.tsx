@@ -1,3 +1,6 @@
+import { minuteTick } from "@t3tools/client-runtime/clock";
+import { createI18n } from "@t3tools/client-runtime/i18n";
+import { I18nextProvider } from "react-i18next";
 import {
   DEFAULT_UNIFIED_SETTINGS,
   EnvironmentId,
@@ -11,7 +14,7 @@ import { page, userEvent } from "vite-plus/test/browser";
 
 import "~/index.css";
 import { render } from "../../../test/render";
-import { ScheduledTasksSettings } from "./ScheduledTasksSettings";
+import { ScheduledRelativeLabel, ScheduledTasksSettings } from "./ScheduledTasksSettings";
 
 const environmentId = EnvironmentId.make("laptop");
 const projectId = ProjectId.make("project");
@@ -138,4 +141,26 @@ describe("ScheduledTasksSettings", () => {
     await expect.element(dialog.getByRole("heading", { name: "New task" })).toBeInTheDocument();
     await expect.element(name).toHaveValue("My draft");
   });
+});
+
+it("updates upcoming and elapsed run times when the language changes", async () => {
+  using _clock = vi.spyOn(minuteTick, "getSnapshot").mockReturnValue("2026-10-29T12:00");
+  const i18n = createI18n("en");
+  const view = (value: string | null) => (
+    <I18nextProvider i18n={i18n}>
+      <span>
+        <ScheduledRelativeLabel value={value} />
+      </span>
+    </I18nextProvider>
+  );
+  await using screen = await render(view("2026-10-29T12:01:30Z"));
+  await expect.element(screen.getByText("in 2m", { exact: true })).toBeVisible();
+  await i18n.changeLanguage("zh-CN");
+  await expect.element(screen.getByText("2分钟后", { exact: true })).toBeVisible();
+  await screen.rerender(view("2026-10-29T11:59:00Z"));
+  await expect.element(screen.getByText("1 分钟前", { exact: true })).toBeVisible();
+  await screen.rerender(view("invalid"));
+  await expect.element(screen.getByText("未安排", { exact: true })).toBeVisible();
+  await screen.rerender(view(null));
+  await expect.element(screen.getByText("未安排", { exact: true })).toBeVisible();
 });

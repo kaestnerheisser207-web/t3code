@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Toolbar } from "../../components/ui/Toolbar";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 
@@ -14,6 +15,7 @@ import { PullRequestRoutingSettings } from "./PullRequestRoutingSettings";
 import { LinkedEnvironmentsSection } from "./LinkedEnvironmentsSection";
 
 export function ConnectionsRouteScreen() {
+  const t = useTranslate();
   const {
     connectedEnvironments,
     onReconnectEnvironment,
@@ -32,11 +34,11 @@ export function ConnectionsRouteScreen() {
     <View collapsable={false} className="flex-1 bg-sheet">
       {Platform.OS === "android" ? (
         <AndroidScreenHeader
-          title="Environments"
+          title={t("mobile.connect.ConnectionsRouteScreen.environments")}
           onBack={() => navigation.goBack()}
           actions={[
             {
-              accessibilityLabel: "Add environment",
+              accessibilityLabel: t("mobile.connect.ConnectionsNewRouteScreen.add-environment"),
               icon: "plus",
               onPress: () => navigation.navigate("ConnectionsNew"),
             },

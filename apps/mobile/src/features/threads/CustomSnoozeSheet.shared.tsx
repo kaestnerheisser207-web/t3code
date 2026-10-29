@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import {
@@ -23,6 +24,7 @@ export function CustomSnoozeSheet(props: {
   readonly onClose: () => void;
   readonly onSnooze: (snoozedUntil: string) => void;
 }) {
+  const t = useTranslate();
   const [mode, setMode] = useState<CustomSnoozeInput["mode"]>("date");
   const [date, setDate] = useState(() => new Date(Date.now() + 3_600_000));
   const [picker, setPicker] = useState<"date" | "time" | null>(null);
@@ -42,10 +44,12 @@ export function CustomSnoozeSheet(props: {
           contentContainerStyle={{ padding: 24, paddingBottom: 24, gap: 20 }}
         >
           <AppText accessibilityRole="header" className="text-xl font-t3-semibold">
-            Custom snooze
+            {t("mobile.threads.CustomSnoozeSheet.shared.custom-snooze")}
           </AppText>
           <AppText className="text-base text-foreground-secondary">
-            Choose when snoozed threads return to your inbox.
+            {t(
+              "mobile.threads.CustomSnoozeSheet.shared.choose-when-snoozed-threads-return-to-your-inbox",
+            )}
           </AppText>
           <SegmentedControl
             options={
@@ -68,11 +72,19 @@ export function CustomSnoozeSheet(props: {
                 <Pressable
                   key={value}
                   accessibilityRole="button"
-                  accessibilityLabel={value === "date" ? "Choose date" : "Choose time"}
+                  accessibilityLabel={
+                    value === "date"
+                      ? t("mobile.dynamic.CustomSnoozeSheet.shared.choose-date")
+                      : t("mobile.dynamic.CustomSnoozeSheet.shared.choose-time")
+                  }
                   className="min-h-12 flex-row items-center justify-between rounded-xl bg-subtle px-3"
                   onPress={() => setPicker(value)}
                 >
-                  <AppText>{value === "date" ? "Date" : "Time"}</AppText>
+                  <AppText>
+                    {value === "date"
+                      ? t("mobile.dynamic.CustomSnoozeSheet.shared.date")
+                      : t("mobile.dynamic.CustomSnoozeSheet.shared.time")}
+                  </AppText>
                   <AppText>
                     {value === "date"
                       ? date.toLocaleDateString()
@@ -103,9 +115,9 @@ export function CustomSnoozeSheet(props: {
             </View>
           ) : (
             <View className="gap-3">
-              <AppText>Snooze for</AppText>
+              <AppText>{t("mobile.threads.CustomSnoozeSheet.shared.snooze-for")}</AppText>
               <TextInput
-                accessibilityLabel="Duration"
+                accessibilityLabel={t("mobile.threads.CustomSnoozeSheet.shared.duration")}
                 className="min-h-12 rounded-xl bg-subtle px-3 text-base text-foreground"
                 keyboardType="decimal-pad"
                 value={amount}
@@ -131,7 +143,11 @@ export function CustomSnoozeSheet(props: {
                     }}
                   >
                     <AppText>
-                      {value === "minutes" ? "Minutes" : value === "hours" ? "Hours" : "Days"}
+                      {value === "minutes"
+                        ? t("mobile.dynamic.CustomSnoozeSheet.shared.minutes")
+                        : value === "hours"
+                          ? t("mobile.dynamic.CustomSnoozeSheet.shared.hours")
+                          : t("mobile.dynamic.CustomSnoozeSheet.shared.days")}
                     </AppText>
                   </Pressable>
                 ))}
@@ -144,9 +160,13 @@ export function CustomSnoozeSheet(props: {
             </AppText>
           )}
           <View className="flex-row justify-end gap-3">
-            <Button label="Cancel" tone="text" onPress={props.onClose} />
             <Button
-              label="Snooze"
+              label={t("mobile.threads.CustomSnoozeSheet.shared.cancel")}
+              tone="text"
+              onPress={props.onClose}
+            />
+            <Button
+              label={t("mobile.threads.CustomSnoozeSheet.shared.snooze")}
               tone="secondary"
               onPress={() => {
                 const input: CustomSnoozeInput =

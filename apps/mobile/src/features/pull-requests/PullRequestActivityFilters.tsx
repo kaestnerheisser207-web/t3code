@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { Pressable, View } from "react-native";
 import { AppText as Text } from "../../components/ui/AppText";
 import { SymbolView } from "../../components/ui/AppSymbol";
@@ -13,15 +15,16 @@ export function PullRequestActivityFilters({
   readonly onChange: (value: ActivityFilter) => void;
   readonly hiddenCount: number;
 }) {
+  const t = useTranslate();
   const kinds = [
-    { id: "all", title: "All activity" },
-    { id: "comments", title: "Comments" },
-    { id: "commits", title: "Commits" },
+    { id: "all", title: t("pr.activity.all") },
+    { id: "comments", title: t("pr.activity.comments") },
+    { id: "commits", title: t("pr.activity.commits") },
   ] as const;
   return (
     <View className="mb-4 flex-row items-center justify-between gap-3">
       <Menu
-        title="Activity"
+        title={t("mobile.review.PullRequestActivityFilters.activity")}
         actions={kinds.map((kind) => ({ ...kind, state: value.kind === kind.id ? "on" : "off" }))}
         onPressAction={({ nativeEvent }) => {
           const kind = kinds.find((item) => item.id === nativeEvent.event);
@@ -30,7 +33,9 @@ export function PullRequestActivityFilters({
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Activity type, ${kinds.find((kind) => kind.id === value.kind)?.title}`}
+          accessibilityLabel={t("mobile.dynamic.PullRequestActivityFilters.activity-type-param", {
+            value: kinds.find((kind) => kind.id === value.kind)?.title ?? "",
+          })}
           className="min-h-11 flex-row items-center gap-2 active:opacity-60"
         >
           <Text className="text-sm font-t3-semibold">
@@ -41,12 +46,12 @@ export function PullRequestActivityFilters({
       </Menu>
       <View className="flex-row items-center gap-3">
         <Menu
-          title="Show in activity"
+          title={t("mobile.review.PullRequestActivityFilters.show-in-activity")}
           actions={[
-            { id: "bots", title: "Bot comments", state: value.bots ? "on" : "off" },
+            { id: "bots", title: t("pr.activity.bots"), state: value.bots ? "on" : "off" },
             {
               id: "resolved",
-              title: "Resolved or dismissed",
+              title: t("pr.activity.resolved"),
               state: value.resolved ? "on" : "off",
             },
           ]}
@@ -57,11 +62,20 @@ export function PullRequestActivityFilters({
         >
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Filter activity, ${hiddenCount} hidden`}
+            accessibilityLabel={t(
+              "mobile.dynamic.PullRequestActivityFilters.filter-activity-param-hidden",
+              { hiddenCount: hiddenCount },
+            )}
             className="min-h-11 flex-row items-center gap-1.5 active:opacity-60"
           >
             {hiddenCount > 0 ? (
-              <Text className="text-xs text-foreground-muted">{hiddenCount} hidden</Text>
+              <Text className="text-xs text-foreground-muted">
+                <Trans
+                  t={t}
+                  i18nKey="mobile.rich.PullRequestActivityFilters.part-hidden"
+                  components={{ value0: <>{hiddenCount}</> }}
+                />
+              </Text>
             ) : null}
             <SymbolView
               name="line.3.horizontal.decrease"
@@ -72,7 +86,11 @@ export function PullRequestActivityFilters({
         </Menu>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={value.newestFirst ? "Newest first" : "Oldest first"}
+          accessibilityLabel={
+            value.newestFirst
+              ? t("mobile.dynamic.PullRequestActivityFilters.newest-first")
+              : t("mobile.dynamic.PullRequestActivityFilters.oldest-first")
+          }
           onPress={() => onChange({ ...value, newestFirst: !value.newestFirst })}
           className="h-11 flex-row items-center gap-1 active:opacity-60"
         >
@@ -82,7 +100,9 @@ export function PullRequestActivityFilters({
             tintColorClassName="accent-icon-muted"
           />
           <Text className="text-xs text-foreground-muted">
-            {value.newestFirst ? "Newest" : "Oldest"}
+            {value.newestFirst
+              ? t("mobile.dynamic.PullRequestActivityFilters.newest")
+              : t("mobile.dynamic.PullRequestActivityFilters.oldest")}
           </Text>
         </Pressable>
       </View>

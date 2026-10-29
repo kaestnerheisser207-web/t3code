@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { useAtom, useAtomValue } from "@effect/atom-react";
 import { useNavigation, type StaticScreenProps } from "@react-navigation/native";
@@ -51,6 +52,7 @@ export function SettingsEnvironmentDetailRouteScreen({
 }
 
 function EnvironmentDetail({ environmentId }: { readonly environmentId: EnvironmentId }) {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const connections = useRemoteConnections();
@@ -166,7 +168,12 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
   }
 
   return (
-    <SettingsScreen title={environment?.environmentLabel ?? "Environment"}>
+    <SettingsScreen
+      title={
+        environment?.environmentLabel ??
+        t("mobile.dynamic.SettingsEnvironmentDetailRouteScreen.environment")
+      }
+    >
       <ScreenScrollView
         contentInsetAdjustmentBehavior="automatic"
         className="flex-1"
@@ -175,11 +182,15 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
       >
         {!environment ? (
           <Text className="text-base text-foreground-muted">
-            This environment is no longer saved on this device.
+            {t(
+              "mobile.settings.SettingsEnvironmentDetailRouteScreen.this-environment-is-no-longer-saved-on-this-device",
+            )}
           </Text>
         ) : (
           <>
-            <SettingsSection title="Connection">
+            <SettingsSection
+              title={t("mobile.settings.SettingsEnvironmentDetailRouteScreen.connection")}
+            >
               <ConnectionEnvironmentRow
                 environment={environment}
                 expanded={connectionExpanded}
@@ -204,15 +215,21 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
               />
             ) : !connected ? (
               <Text className="px-2 text-sm text-foreground-muted">
-                Connect this environment to manage it.
+                {t(
+                  "mobile.settings.SettingsEnvironmentDetailRouteScreen.connect-this-environment-to-manage-it",
+                )}
               </Text>
             ) : !allowed ? (
               <Text className="px-2 text-sm text-foreground-muted">
                 {AsyncResult.isFailure(sessionResult)
-                  ? "Could not verify your permissions. Reconnect to try again."
+                  ? t(
+                      "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.could-not-verify-your-permissions-reconnect-to-try-again",
+                    )
                   : session === null
-                    ? "Checking permissions…"
-                    : "This connection does not have permission to manage the environment."}
+                    ? t("mobile.dynamic.SettingsEnvironmentDetailRouteScreen.checking-permissions")
+                    : t(
+                        "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.this-connection-does-not-have-permission-to-manage-the-environment",
+                      )}
               </Text>
             ) : null}
             {error ? (
@@ -225,12 +242,18 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
               <>
                 <SettingsSection title="T3 Code">
                   <View className="gap-1 p-4">
-                    <Text className="text-base text-foreground">Version {version}</Text>
+                    <Text className="text-base text-foreground">
+                      {t("mobile.settings.dynamic.version", { version: version ?? "" })}
+                    </Text>
                     {running ? (
                       <Text className="text-sm text-foreground-muted">
                         {updateState.stage === "resuming"
-                          ? "Restarting and reconnecting…"
-                          : "Downloading update…"}
+                          ? t(
+                              "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.restarting-and-reconnecting",
+                            )
+                          : t(
+                              "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.downloading-update",
+                            )}
                       </Text>
                     ) : updateState.status === "failed" ? (
                       <Text selectable className="text-sm text-danger-foreground">
@@ -240,22 +263,33 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
                     {checkedRelease ? (
                       <Text className="text-sm text-foreground-muted">
                         {checkedRelease.targetVersion
-                          ? `Version ${checkedRelease.targetVersion} is available.`
-                          : "You are up to date."}
+                          ? t(
+                              "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.version-param-is-available",
+                              { targetVersion: checkedRelease.targetVersion },
+                            )
+                          : t(
+                              "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.you-are-up-to-date",
+                            )}
                       </Text>
                     ) : null}
                     {checkedRelease?.targetVersion &&
                     !supportsEnvironmentUpdate(config.environment.capabilities) ? (
                       <Text className="text-sm text-foreground-muted">
                         {capabilities?.serverSelfUpdate === "desktop-managed"
-                          ? "Update the desktop app on this machine."
-                          : "Update and restart T3 Code on this machine."}
+                          ? t(
+                              "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.update-the-desktop-app-on-this-machine",
+                            )
+                          : t(
+                              "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.update-and-restart-t3-code-on-this-machine",
+                            )}
                       </Text>
                     ) : null}
                   </View>
                   <SettingsActionRow
                     icon="arrow.clockwise"
-                    label="Check for updates"
+                    label={t(
+                      "mobile.settings.SettingsEnvironmentDetailRouteScreen.check-for-updates",
+                    )}
                     disabled={disabled}
                     loading={pending === "check"}
                     onPress={() => {
@@ -272,17 +306,24 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
                   supportsEnvironmentUpdate(config.environment.capabilities) ? (
                     <SettingsActionRow
                       icon="arrow.up.circle"
-                      label={`Update to ${checkedRelease.targetVersion}`}
+                      label={t(
+                        "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.update-to-param",
+                        { targetVersion: checkedRelease.targetVersion },
+                      )}
                       disabled={disabled}
                       loading={pending === "server" || running}
                       onPress={requestServerUpdate}
                     />
                   ) : null}
                 </SettingsSection>
-                <SettingsSection title="Providers">
+                <SettingsSection
+                  title={t("mobile.settings.SettingsEnvironmentDetailRouteScreen.providers")}
+                >
                   <SettingsActionRow
                     icon="arrow.clockwise"
-                    label="Refresh providers"
+                    label={t(
+                      "mobile.settings.SettingsEnvironmentDetailRouteScreen.refresh-providers",
+                    )}
                     disabled={busy || !canRead}
                     loading={pending === "refresh"}
                     onPress={() => {
@@ -309,10 +350,18 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
                           </View>
                           <Text className="text-sm text-foreground-muted">
                             {provider.installed
-                              ? (provider.version ?? "Version unknown")
-                              : "Not installed"}
+                              ? (provider.version ??
+                                t(
+                                  "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.version-unknown",
+                                ))
+                              : t(
+                                  "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.not-installed",
+                                )}
                             {provider.versionAdvisory?.latestVersion
-                              ? ` · Latest ${provider.versionAdvisory.latestVersion}`
+                              ? t(
+                                  "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.latest-param",
+                                  { latestVersion: provider.versionAdvisory.latestVersion },
+                                )
                               : ""}
                           </Text>
                           {provider.updateState && provider.updateState.status !== "idle" ? (
@@ -325,7 +374,10 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
                               }
                             >
                               {provider.updateState.message ??
-                                `Update ${provider.updateState.status}`}
+                                t(
+                                  "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.update-param",
+                                  { status: provider.updateState.status },
+                                )}
                             </Text>
                           ) : null}
                           {provider.compatibilityAdvisory?.message ? (
@@ -341,14 +393,18 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
                           {provider.versionAdvisory?.status === "behind_latest" &&
                           !provider.versionAdvisory.canUpdate ? (
                             <Text className="text-sm text-foreground-muted">
-                              Update this provider on the environment's machine.
+                              {t(
+                                "mobile.settings.SettingsEnvironmentDetailRouteScreen.update-this-provider-on-the-environment-s-machine",
+                              )}
                             </Text>
                           ) : null}
                         </View>
                         {canUpdateEnvironmentProvider(provider) ? (
                           <SettingsActionRow
                             icon="arrow.up.circle"
-                            label={`Update ${provider.displayName ?? provider.driver}`}
+                            label={t("updates.target", {
+                              target: provider.displayName ?? provider.driver,
+                            })}
                             disabled={busy || !canManageProviders}
                             loading={pending === provider.instanceId}
                             onPress={() => requestProviderUpdate(provider)}

@@ -1,0 +1,63 @@
+export const settingsStatusEn = {
+  "settings.status.deviceHostsPartial": "Device hosts not saved on all environments",
+  "settings.status.hostChecksFailed": "{{host}}: {{failed}} of {{total}} environments failed",
+  "settings.status.hostChecksPassed": "{{host}}: connection checks passed",
+  "settings.status.connectFromFailed": "Could not connect from {{environments}}.",
+  "settings.status.availableEach":
+    "Connected or already available locally on each selected environment.",
+  "settings.status.noHosts": "No device hosts",
+  "settings.status.checkingConnection": "Checking connection…",
+  "settings.status.installingDevice": "Installing device support…",
+  "settings.status.checkingConnections": "Checking connections",
+  "settings.status.unchecked": "Connection not checked",
+  "settings.status.checkingConnectionsProgress": "Checking connections…",
+  "settings.status.availableMachines": "Connected or available locally on each listed machine",
+  "settings.status.testMachines": "Test the connection to check access from each machine",
+  "settings.status.iosAvailable": "iOS available",
+  "settings.status.androidAvailable": "Android available",
+  "settings.status.retrying": "Retrying…",
+  "settings.status.revealEmail": "Click to reveal email",
+  "settings.status.hideEmail": "Click to hide email",
+  "settings.status.startUpdate": "Starting update",
+  "settings.status.updateHint": "Run it in a terminal when you are ready to update.",
+  "settings.status.copyUpdateFailed": "Could not copy {{provider}} update command",
+  "settings.status.incompatible": "Incompatible",
+  "settings.status.unsupported": "Unsupported",
+  "settings.status.limited": "Limited support",
+  "settings.status.resetDevice": "Reset to the device setting",
+  "settings.status.traceCopied": "Trace ID copied",
+  "settings.status.traceCopyFailed": "Could not copy trace ID",
+  "settings.status.mcpCopied": "MCP URL copied",
+  "settings.status.mcpHint": "Add it to an agent, e.g. claude mcp add --transport http t3 {{url}}",
+  "settings.status.mcpCopyFailed": "Could not copy MCP URL",
+  "settings.status.restart": "Restarting",
+  "settings.status.switchedOff": "Switched off",
+  "settings.status.switchOff": "Switch off {{environment}}",
+  "settings.status.switchOn": "Switch on {{environment}}",
+  "settings.status.fix": "Fix: {{fix}}",
+  "settings.status.connectLinked": "T3 Connect linked",
+  "settings.status.tunnelDisabled": "T3 Connect tunnel disabled",
+  "settings.status.connectUnlinked": "T3 Connect unlinked",
+  "settings.status.availableConnect": "This environment is available through T3 Connect.",
+  "settings.status.tunnelRemoved":
+    "The managed tunnel was removed. Agent activity publishing stays on.",
+  "settings.status.unavailableConnect":
+    "This environment is no longer available through T3 Connect.",
+  "settings.status.activityEnabled": "Agent activity enabled",
+  "settings.status.activityDisabled": "Agent activity disabled",
+  "settings.status.activityPublishes":
+    "This environment publishes agent activity to your mobile clients.",
+  "settings.status.activityStops": "This environment will stop publishing agent activity.",
+  "settings.status.holdWebhooks": "Webhooks held while offline",
+  "settings.status.stopHoldingWebhooks": "Webhooks no longer held",
+  "settings.status.holdHint":
+    "T3 Connect keeps webhook requests for up to 24 hours while this environment is offline.",
+  "settings.status.stopHoldingHint":
+    "Requests to an offline environment now fail. Anything already held is still delivered.",
+  "settings.writer.repositoryHint":
+    "In each project, matches recent change descriptions and change request titles.",
+  "settings.writer.conventionalHint":
+    "Use Conventional Commit prefixes and keep change request text concise.",
+  "settings.writer.customHint":
+    "Use your instructions for change descriptions and change requests in every project.",
+} as const;

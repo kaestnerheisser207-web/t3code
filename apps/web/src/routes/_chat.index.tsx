@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { workspaceAreaProps } from "../lib/workspaceFocus";
 import { RefreshIcon } from "~/components/ui/refresh-icon";
 import { scopeProjectRef } from "@t3tools/client-runtime/environment";
@@ -87,6 +88,7 @@ function IndexDraftLanding() {
 }
 
 function DraftStartError({ onRetry }: { readonly onRetry: () => void }) {
+  const t = useTranslate();
   const contentArea = workspaceAreaProps("home", 1, "Home");
   return (
     <SidebarInset
@@ -97,14 +99,16 @@ function DraftStartError({ onRetry }: { readonly onRetry: () => void }) {
       {isElectron ? <WorkspacePageHeader electron /> : null}
       <Empty className="flex-1">
         <EmptyHeader className="max-w-md">
-          <EmptyTitle>Couldn’t start a new thread</EmptyTitle>
+          <EmptyTitle>{t("web.remaining._chat.index.couldn-t-start-a-new-thread")}</EmptyTitle>
           <EmptyDescription>
-            The project is still available. Try opening the draft again.
+            {t(
+              "web.remaining._chat.index.the-project-is-still-available-try-opening-the-draft-again",
+            )}
           </EmptyDescription>
           <div className="mt-5 flex justify-center">
             <Button size="sm" onClick={onRetry}>
               <RefreshIcon size="md" />
-              Try again
+              {t("web.remaining._chat.index.try-again")}
             </Button>
           </div>
         </EmptyHeader>

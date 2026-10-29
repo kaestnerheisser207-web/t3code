@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../../i18n";
 import type { FileDiffContentsLoader, FileDiffMetadata } from "@pierre/diffs";
 import type {
   PullRequestReviewGuideAttention,
@@ -71,6 +73,7 @@ export function GuideStop({
   onFinish: (() => void) | null;
   onOpenFile: (path: string) => void;
 }) {
+  const t = useTranslate();
   const { lettered, byExcerpt } = letterStopNotes(stop);
   const excerptPaths = new Set(stop.excerpts.map((excerpt) => excerpt.path));
   const otherFiles = stop.files.filter((file) => !excerptPaths.has(file.path));
@@ -85,7 +88,11 @@ export function GuideStop({
         <Collapsible open={railOpen} onOpenChange={onRailOpenChange}>
           <header className="flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground tabular-nums @max-[56rem]/guide:hidden">
-              Stop {index + 1} of {stopCount}
+              <Trans
+                t={t}
+                i18nKey="web.rich.GuideStop.stop-part-of-part"
+                components={{ value0: <>{index + 1}</>, value1: <>{stopCount}</> }}
+              />
             </p>
             <CollapsibleTrigger
               render={
@@ -93,7 +100,11 @@ export function GuideStop({
               }
             >
               <span className="tabular-nums">
-                Stop {index + 1} of {stopCount}
+                <Trans
+                  t={t}
+                  i18nKey="web.rich.GuideStop.stop-part-of-part"
+                  components={{ value0: <>{index + 1}</>, value1: <>{stopCount}</> }}
+                />
               </span>
               <ChevronDownIcon aria-hidden className={cn(railOpen && "rotate-180")} />
             </CollapsibleTrigger>
@@ -101,7 +112,7 @@ export function GuideStop({
               <Button
                 size="icon-xs"
                 variant="outline"
-                aria-label="Previous stop"
+                aria-label={t("web.ui.GuideStop.previous-stop")}
                 disabled={index === 0}
                 onClick={() => onStep(-1)}
               >
@@ -110,7 +121,7 @@ export function GuideStop({
               <Button
                 size="icon-xs"
                 variant="outline"
-                aria-label="Next stop"
+                aria-label={t("web.ui.GuideStop.next-stop")}
                 disabled={index === stopCount - 1}
                 onClick={() => onStep(1)}
               >
@@ -174,7 +185,9 @@ export function GuideStop({
         {otherFiles.length > 0 ? (
           <section className="flex flex-col gap-1.5">
             <h3 className="text-xs font-medium text-muted-foreground">
-              {stop.excerpts.length > 0 ? "Also in this stop" : "Files in this stop"}
+              {stop.excerpts.length > 0
+                ? t("web.dynamic.GuideStop.also-in-this-stop")
+                : t("web.dynamic.GuideStop.files-in-this-stop")}
             </h3>
             <DiffWorkerPoolProvider>
               <ul className="flex flex-col overflow-hidden rounded-lg border border-border/60">
@@ -215,8 +228,8 @@ export function GuideStop({
                           ) : (
                             <p className="px-3 py-2 text-xs text-muted-foreground">
                               {diffLoading
-                                ? "Loading the diff..."
-                                : "This file is not in the loaded diff."}
+                                ? t("web.dynamic.GuideStop.loading-the-diff")
+                                : t("web.dynamic.GuideStop.this-file-is-not-in-the-loaded-diff")}
                             </p>
                           )}
                         </CollapsiblePanel>
@@ -232,7 +245,9 @@ export function GuideStop({
         {stop.questions.length > 0 || onAsk !== null ? (
           <section className="flex flex-col gap-1.5">
             {stop.questions.length > 0 ? (
-              <h3 className="text-xs font-medium text-muted-foreground">Questions to consider</h3>
+              <h3 className="text-xs font-medium text-muted-foreground">
+                {t("web.ui.GuideStop.questions-to-consider")}
+              </h3>
             ) : null}
             <div className="flex flex-col items-start gap-1.5">
               {stop.questions.map((question) =>
@@ -251,7 +266,7 @@ export function GuideStop({
                       aria-hidden
                       className="size-3.5 h-lh shrink-0 text-muted-foreground"
                     />
-                    <span className="sr-only">Ask an agent: </span>
+                    <span className="sr-only">{t("web.ui.GuideStop.ask-an-agent")}</span>
                     <span>
                       <GuideProse text={question} plain />
                     </span>
@@ -261,7 +276,7 @@ export function GuideStop({
               {onAsk !== null ? (
                 <Button size="sm" variant="ghost-muted" onClick={() => onAsk("")}>
                   <MessageCircleQuestionIcon aria-hidden />
-                  Ask about this stop
+                  {t("web.ui.GuideStop.ask-about-this-stop")}
                 </Button>
               ) : null}
             </div>
@@ -271,13 +286,20 @@ export function GuideStop({
         <footer className="flex flex-wrap items-center justify-end gap-3 border-t border-border/60 pt-4">
           {nextTitle !== null ? (
             <Button className="min-w-0" onClick={() => onStep(1)}>
-              <span className="min-w-0 truncate">Next: {nextTitle}</span>
-              <ArrowRightIcon aria-hidden />
+              <Trans
+                t={t}
+                i18nKey="web.rich.GuideStop.part-next-part-part-part"
+                components={{
+                  part0: <span className="min-w-0 truncate">{null}</span>,
+                  value1: <>{nextTitle}</>,
+                  part2: <ArrowRightIcon aria-hidden />,
+                }}
+              />
             </Button>
           ) : onFinish !== null ? (
             <Button onClick={onFinish}>
               <MessageSquareIcon aria-hidden />
-              Finish review
+              {t("web.ui.GuideStop.finish-review")}
             </Button>
           ) : null}
         </footer>

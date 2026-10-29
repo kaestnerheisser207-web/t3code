@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import { AppText as Text, AppTextInput } from "../../components/ui/AppText";
 import { Button } from "../../components/ui/Button";
@@ -45,6 +46,7 @@ import { DEFAULT_SETTINGS_PAGE } from "../workspace/workspace-tab-navigation";
 import { readUnloadedThreadCount } from "../../state/olderSettledShelf";
 
 export function SettingsProjectOverviewRouteScreen() {
+  const t = useTranslate();
   const insets = useSafeAreaInsets();
   const [isRemoving, setIsRemoving] = useState(false);
   const removalPending = useRef(false);
@@ -83,7 +85,10 @@ export function SettingsProjectOverviewRouteScreen() {
   return (
     <>
       <SettingsEnvironmentFilterHeader />
-      <SettingsScreen title="Projects" trailing={<AndroidSettingsEnvironmentFilter />}>
+      <SettingsScreen
+        title={t("mobile.settings.SettingsProjectOverviewRouteScreen.projects")}
+        trailing={<AndroidSettingsEnvironmentFilter />}
+      >
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
@@ -93,12 +98,15 @@ export function SettingsProjectOverviewRouteScreen() {
         >
           {selectedProjectKey === null ? (
             <Text className="px-2 text-base text-foreground-muted">
-              Choose a project with the filter above to manage its name, checkouts and removal.
+              {t(
+                "mobile.settings.SettingsProjectOverviewRouteScreen.choose-a-project-with-the-filter-above-to-manage-its-name-checkouts-and-removal",
+              )}
             </Text>
           ) : members.length === 0 ? (
             <Text className="px-2 text-base text-foreground-muted">
-              This project has no checkout on the selected connected environments. Change the filter
-              above.
+              {t(
+                "mobile.settings.SettingsProjectOverviewRouteScreen.this-project-has-no-checkout-on-the-selected-connected-environments-change-the-filter-above",
+              )}
             </Text>
           ) : (
             <ProjectOverviewContent
@@ -131,6 +139,7 @@ function ProjectOverviewContent(props: {
   readonly projectKey: string | null;
   readonly onProjectRemoved: (projectKey: string | null) => void;
 }) {
+  const t = useTranslate();
   const { isRemoving, setIsRemoving, startRemoval, finishRemoval } = props;
   const representative = props.members[0]!;
   const displayName = deriveProjectGroupLabel({ representative, members: props.members });
@@ -161,8 +170,10 @@ function ProjectOverviewContent(props: {
       (entry) => entry.environmentId === denied.environmentId,
     );
     Dialog.alert(
-      "Failed to remove project",
-      `This connection cannot change projects in ${environment?.label ?? "this environment"}.`,
+      t("project.extra.removeFailed"),
+      t("project.extra.permission", {
+        environment: environment?.label ?? t("project.extra.thisEnvironment"),
+      }),
     );
     return false;
   };
@@ -170,23 +181,32 @@ function ProjectOverviewContent(props: {
   const removeMembers = (members: readonly EnvironmentProject[]) => {
     if (!checkRemovalAccess(members) || !startRemoval()) return;
     const projectKey = props.projectKey;
-    const plan = planProjectRemoval({
-      members: members.map((member) => ({
-        ...member,
-        environmentLabel: props.environments.find(
-          (entry) => entry.environmentId === member.environmentId,
-        )?.label,
-      })),
-      groupMemberCount: props.members.length,
-      hasOtherMembers: props.hasOtherMembers,
-      displayName,
-      threads,
-      unloadedThreadCount: readUnloadedThreadCount(members, threads),
-    });
+    const plan = planProjectRemoval(
+      {
+        members: members.map((member) => ({
+          ...member,
+          environmentLabel: props.environments.find(
+            (entry) => entry.environmentId === member.environmentId,
+          )?.label,
+        })),
+        groupMemberCount: props.members.length,
+        hasOtherMembers: props.hasOtherMembers,
+        displayName,
+        threads,
+        unloadedThreadCount: readUnloadedThreadCount(members, threads),
+      },
+      t,
+    );
     Dialog.confirm({
-      title: plan.targetKind === "checkout" ? "Remove checkout" : "Remove project",
+      title:
+        plan.targetKind === "checkout"
+          ? t("mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-checkout")
+          : t("mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-project"),
       message: plan.confirmationMessage,
-      confirmText: plan.targetKind === "checkout" ? "Remove checkout" : "Remove project",
+      confirmText:
+        plan.targetKind === "checkout"
+          ? t("mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-checkout")
+          : t("mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-project"),
       destructive: true,
       onCancel: finishRemoval,
       onConfirm: () => {
@@ -203,8 +223,8 @@ function ProjectOverviewContent(props: {
               if (!isAtomCommandInterrupted(result)) {
                 const error = squashAtomCommandFailure(result);
                 Dialog.alert(
-                  `Failed to remove "${member.title}"`,
-                  error instanceof Error ? error.message : "An error occurred.",
+                  t("project.extra.removeNamedFailed", { project: member.title }),
+                  error instanceof Error ? error.message : t("menuFeedback.error"),
                 );
               }
               return;
@@ -265,17 +285,25 @@ function ProjectOverviewContent(props: {
             {displayName}
           </Text>
           <Text className="text-sm text-foreground-muted">
-            {props.members.length === 1 ? "1 checkout" : `${props.members.length} checkouts`}
+            {props.members.length === 1
+              ? t("mobile.dynamic.SettingsProjectOverviewRouteScreen.1-checkout")
+              : t("mobile.dynamic.SettingsProjectOverviewRouteScreen.param-checkouts", {
+                  length: props.members.length,
+                })}
           </Text>
         </View>
       </View>
 
-      <SettingsSection title="Project">
+      <SettingsSection title={t("mobile.settings.SettingsProjectOverviewRouteScreen.project")}>
         <View className="gap-3 p-4">
-          <Text className="text-sm font-t3-medium text-foreground-muted">Name</Text>
+          <Text className="text-sm font-t3-medium text-foreground-muted">
+            {t("mobile.settings.SettingsProjectOverviewRouteScreen.name")}
+          </Text>
           <View className="flex-row items-center gap-3">
             <AppTextInput
-              accessibilityLabel="Project name"
+              accessibilityLabel={t(
+                "mobile.settings.SettingsProjectOverviewRouteScreen.project-name",
+              )}
               className="min-h-11 min-w-0 flex-1 rounded-xl border-continuous bg-card px-3 text-base text-foreground"
               value={draftName ?? displayName}
               onChangeText={setDraftName}
@@ -285,8 +313,10 @@ function ProjectOverviewContent(props: {
             />
             {canSave ? (
               <Button
-                label="Save"
-                accessibilityHint="Save project name"
+                label={t("mobile.settings.SettingsProjectOverviewRouteScreen.save")}
+                accessibilityHint={t(
+                  "mobile.settings.SettingsProjectOverviewRouteScreen.save-project-name",
+                )}
                 tone="secondary"
                 onPress={saveName}
               />
@@ -295,7 +325,7 @@ function ProjectOverviewContent(props: {
         </View>
       </SettingsSection>
 
-      <SettingsSection title="Checkouts">
+      <SettingsSection title={t("mobile.settings.SettingsProjectOverviewRouteScreen.checkouts")}>
         {props.members.map((member, index) => {
           const environment = props.environments.find(
             (entry) => entry.environmentId === member.environmentId,
@@ -312,7 +342,8 @@ function ProjectOverviewContent(props: {
                     : "text-lg text-foreground"
                 }
               >
-                {environment?.label ?? "Environment"}
+                {environment?.label ??
+                  t("mobile.dynamic.SettingsProjectOverviewRouteScreen.environment")}
               </Text>
               {environment?.displayUrl ? (
                 <Text className="text-sm leading-normal text-foreground-muted">
@@ -333,22 +364,31 @@ function ProjectOverviewContent(props: {
           );
         })}
       </SettingsSection>
-      <SettingsSection title="Danger">
+      <SettingsSection title={t("mobile.settings.SettingsProjectOverviewRouteScreen.danger")}>
         <SettingsActionRow
           icon="trash"
           label={
             props.hasOtherMembers
-              ? "Remove checkout"
+              ? t("mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-checkout")
               : props.members.length > 1
-                ? "Remove this project everywhere"
-                : "Remove project"
+                ? t(
+                    "mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-this-project-everywhere",
+                  )
+                : t("mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-project")
           }
           description={
             props.hasOtherMembers
-              ? "Deletes the selected machine's checkout entries and their threads. Other machines and files on disk are not touched."
+              ? t(
+                  "mobile.dynamic.SettingsProjectOverviewRouteScreen.deletes-the-selected-machine-s-checkout-entries-and-their-threads-other-machines-and-files-on-disk-are-not-touched",
+                )
               : props.members.length > 1
-                ? `Deletes all ${props.members.length} checkout entries and their threads on every machine. Files on disk are not touched.`
-                : "Deletes the project entry and its threads. Files on disk are not touched."
+                ? t(
+                    "mobile.dynamic.SettingsProjectOverviewRouteScreen.deletes-all-param-checkout-entries-and-their-threads-on-every-machine-files-on-disk-are-not-touched",
+                    { length: props.members.length },
+                  )
+                : t(
+                    "mobile.dynamic.SettingsProjectOverviewRouteScreen.deletes-the-project-entry-and-its-threads-files-on-disk-are-not-touched",
+                  )
           }
           tone="danger"
           disabled={!canRemoveGroup || isRemoving}
@@ -365,16 +405,22 @@ function RemoveCheckoutAction(props: {
   readonly disabled: boolean;
   readonly onPress: () => void;
 }) {
+  const t = useTranslate();
   const canRemove = useEnvironmentScope(props.member.environmentId, AuthOrchestrationOperateScope);
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Remove checkout ${props.member.workspaceRoot}`}
+      accessibilityLabel={t(
+        "mobile.dynamic.SettingsProjectOverviewRouteScreen.remove-checkout-param",
+        { workspaceRoot: props.member.workspaceRoot },
+      )}
       disabled={props.disabled || !canRemove}
       onPress={props.onPress}
       className="self-start rounded-full border border-border bg-card px-3 py-1.5 disabled:opacity-40"
     >
-      <Text className="font-t3-medium text-xs text-danger-foreground">Remove checkout</Text>
+      <Text className="font-t3-medium text-xs text-danger-foreground">
+        {t("mobile.settings.SettingsProjectOverviewRouteScreen.remove-checkout")}
+      </Text>
     </Pressable>
   );
 }

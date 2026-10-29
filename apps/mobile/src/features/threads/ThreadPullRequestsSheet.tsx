@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import { LegendList } from "@legendapp/list/react-native";
 import { useMemo } from "react";
@@ -23,6 +25,7 @@ import { useLinkedPullRequestActions } from "./useLinkedPullRequestActions";
 export function ThreadPullRequestsSheet(
   _props: StaticScreenProps<{ readonly environmentId: string; readonly threadId: string }>,
 ) {
+  const t = useTranslate();
   const { layout } = useAdaptiveWorkspaceLayout();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -77,13 +80,21 @@ export function ThreadPullRequestsSheet(
         ListHeaderComponent={
           lines.length > 0 ? (
             <Text className="px-4 pt-2 pb-1 text-xs text-foreground-muted">
-              {openCount} open · {lines.length} linked
+              <Trans
+                t={t}
+                i18nKey="mobile.rich.ThreadPullRequestsSheet.part-open-part-linked"
+                components={{ value0: <>{openCount}</>, value1: <>{lines.length}</> }}
+              />
             </Text>
           ) : null
         }
         ListEmptyComponent={
           <Text className="pt-6 text-center text-sm text-foreground-muted">
-            No linked {actions.terminology.plural}.
+            <Trans
+              t={t}
+              i18nKey="mobile.rich.ThreadPullRequestsSheet.no-linked-part"
+              components={{ value0: <>{actions.terminology.plural}</> }}
+            />
           </Text>
         }
       />
@@ -98,7 +109,9 @@ export function ThreadPullRequestsSheet(
           <Toolbar placement="right">
             <Toolbar.Button
               icon="plus"
-              accessibilityLabel={`Link ${singular}`}
+              accessibilityLabel={t("mobile.dynamic.ThreadPullRequestsSheet.link-param", {
+                singular: singular,
+              })}
               onPress={actions.promptLink}
             />
           </Toolbar>

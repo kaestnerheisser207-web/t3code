@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useRef, useState } from "react";
 import { Keyboard, Pressable, TextInput, type TextInputInstance, View } from "react-native";
 import { useHardwareBack } from "../../lib/backHandler";
@@ -15,6 +16,7 @@ import type { AppBarProps } from "./AppBar.types";
 import { useAndroidControlSizing } from "./useAndroidControlSizing";
 
 export function AppBar(props: AppBarProps) {
+  const t = useTranslate();
   const { search } = props;
   const { paddingTop, paddingBottom } = useToolbarLayout();
   const { scale, buttonSize, iconSize, smallIconSize } = useAndroidControlSizing();
@@ -90,7 +92,7 @@ export function AppBar(props: AppBarProps) {
           <View className="flex-row items-center gap-2" style={{ minHeight: buttonSize }}>
             {props.onBack ? (
               <Pressable
-                accessibilityLabel="Navigate up"
+                accessibilityLabel={t("mobile.common.AppBar.android.navigate-up")}
                 accessibilityRole="button"
                 hitSlop={8}
                 onPress={props.onBack}
@@ -201,7 +203,10 @@ export function AppBar(props: AppBarProps) {
             >
               <View className="flex-1 flex-row items-center gap-1">
                 <ScreenHeaderButton
-                  accessibilityLabel={search.closeAccessibilityLabel ?? "Close search"}
+                  accessibilityLabel={
+                    search.closeAccessibilityLabel ??
+                    t("mobile.dynamic.AppBar.android.close-search")
+                  }
                   icon="arrow.left"
                   onPress={closeSearch}
                 />

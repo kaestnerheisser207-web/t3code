@@ -1,5 +1,6 @@
 import { SourceControlProviderKind, type VcsStatusResult } from "@t3tools/contracts";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { resolveAutoFeatureBranchName } from "@t3tools/shared/git";
 import { assert, describe, it } from "vite-plus/test";
 import {
@@ -157,6 +158,29 @@ describe("when: the ref is on GitLab", () => {
     });
     assert.equal(copy.title, "Push & create MR from default ref?");
     assert.include(copy.description, "create a merge request on");
+    const chinese = createI18n("zh-CN");
+    const { label: englishLabel, ...englishAction } = resolveQuickAction(ahead, false);
+    const { label: chineseLabel, ...chineseAction } = resolveQuickAction(
+      ahead,
+      false,
+      false,
+      true,
+      chinese.t,
+    );
+    assert.deepEqual(chineseAction, englishAction);
+    assert.notEqual(chineseLabel, englishLabel);
+    assert.include(chineseLabel, "MR");
+    const translatedCopy = resolveDefaultBranchActionDialogCopy(
+      {
+        action: "create_pr",
+        branchName: "feature/示例",
+        includesCommit: false,
+        terminology: sourceControlClients.get("gitlab").changeRequest,
+      },
+      chinese.t,
+    );
+    assert.include(translatedCopy.description, "feature/示例");
+    assert.include(translatedCopy.description, "合并请求");
   });
 });
 

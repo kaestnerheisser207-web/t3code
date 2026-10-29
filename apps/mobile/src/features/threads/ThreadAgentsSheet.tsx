@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import type { ThreadTurnSubagents } from "@t3tools/client-runtime/state/thread-subagents";
 import {
@@ -46,6 +47,7 @@ export function useThreadTurnSubagents(target: AgentsTarget | null): ThreadTurnS
 }
 
 export function ThreadAgentsSheet({ route }: StaticScreenProps<AgentsTarget>) {
+  const t = useTranslate();
   const { layout } = useAdaptiveWorkspaceLayout();
   const target = route.params;
   const navigation = useNavigation();
@@ -85,7 +87,7 @@ export function ThreadAgentsSheet({ route }: StaticScreenProps<AgentsTarget>) {
     >
       {subagents.length === 0 ? (
         <Text className="pt-6 text-center text-sm text-foreground-muted">
-          No agents in this turn.
+          {t("mobile.threads.ThreadAgentsSheet.no-agents-in-this-turn")}
         </Text>
       ) : (
         subagents.map((subagent) => (
@@ -120,7 +122,7 @@ export function ThreadAgentsSheet({ route }: StaticScreenProps<AgentsTarget>) {
               tintColorClassName="accent-foreground"
               hideBackButton
               hideShadow={false}
-              title="Agents"
+              title={t("mobile.threads.ThreadAgentsSheet.agents")}
               titleColorClassName="accent-foreground"
               titleFontSize={18}
               titleFontWeight="800"
@@ -135,7 +137,10 @@ export function ThreadAgentsSheet({ route }: StaticScreenProps<AgentsTarget>) {
   return (
     <View collapsable={false} className="flex-1 bg-sheet">
       <NativeStackScreenOptions options={{ sheetCornerRadius: 28 }} />
-      <AndroidSheetHeader title="Agents" onBack={() => navigation.goBack()} />
+      <AndroidSheetHeader
+        title={t("mobile.threads.ThreadAgentsSheet.agents")}
+        onBack={() => navigation.goBack()}
+      />
       <ScreenContent insetHorizontal={layout.usesSplitView}>{content}</ScreenContent>
     </View>
   );
@@ -147,6 +152,7 @@ function AgentRow(props: {
   readonly tickSeconds: boolean;
   readonly onOpen: (child: { environmentId: EnvironmentId; threadId: ThreadId }) => void;
 }) {
+  const t = useTranslate();
   const { subagent } = props;
   const { presentationById } = useEnvironments();
   const target = subagentThreadTarget(subagent, props.environmentId, (id) =>
@@ -170,8 +176,12 @@ function AgentRow(props: {
         accessible
         accessibilityHint={
           subagent.remoteChild === undefined
-            ? "Provider-managed agent. Its work appears in the transcript."
-            : `Runs on ${subagent.remoteChild.label}. Connect to it to open its thread.`
+            ? t(
+                "mobile.dynamic.ThreadAgentsSheet.provider-managed-agent-its-work-appears-in-the-transcript",
+              )
+            : t("mobile.dynamic.ThreadAgentsSheet.runs-on-param-connect-to-it-to-open-its-thread", {
+                label: subagent.remoteChild.label,
+              })
         }
       >
         {row}
@@ -182,7 +192,7 @@ function AgentRow(props: {
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityHint="Opens this agent's thread"
+      accessibilityHint={t("mobile.threads.ThreadAgentsSheet.opens-this-agent-s-thread")}
       onPress={() => props.onOpen(target)}
       className="active:opacity-70"
     >

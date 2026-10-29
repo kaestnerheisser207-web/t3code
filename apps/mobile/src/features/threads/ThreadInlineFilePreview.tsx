@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useIsFocused } from "@react-navigation/native";
 import { formatAttachmentSize } from "@t3tools/client-runtime/state/attachments";
 import { useAudioPlayerStatus } from "expo-audio";
@@ -29,10 +30,13 @@ type PreviewProps = {
 };
 
 function FileCardHeader(props: PreviewProps) {
+  const t = useTranslate();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Open ${props.source.name}`}
+      accessibilityLabel={t("mobile.dynamic.ThreadInlineFilePreview.open-param", {
+        name: props.source.name ?? "",
+      })}
       onPress={props.onOpen}
       onLongPress={props.onLongPress}
       className="h-[72px] flex-row items-center gap-3 p-3 active:bg-subtle"
@@ -45,7 +49,7 @@ function FileCardHeader(props: PreviewProps) {
           {props.source.name}
         </Text>
         <Text className="text-xs text-foreground-muted" numberOfLines={1}>
-          Audio
+          {t("mobile.remaining.ThreadInlineFilePreview.audio")}
           {props.sizeBytes !== undefined ? ` · ${formatAttachmentSize(props.sizeBytes)}` : ""}
         </Text>
       </View>
@@ -60,6 +64,7 @@ function timestamp(seconds: number) {
 }
 
 function InlineAudio(props: PreviewProps & { readonly resolveUri: () => Promise<string | null> }) {
+  const t = useTranslate();
   // An empty source keeps native buffering off until the user explicitly plays.
   const player = usePlaybackAudioPlayer(null);
   const status = useAudioPlayerStatus(player);
@@ -188,7 +193,11 @@ function InlineAudio(props: PreviewProps & { readonly resolveUri: () => Promise<
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
-            playing ? "Pause audio" : error || status.error ? "Retry audio" : "Play audio"
+            playing
+              ? t("mobile.dynamic.ThreadInlineFilePreview.pause-audio")
+              : error || status.error
+                ? t("mobile.dynamic.ThreadInlineFilePreview.retry-audio")
+                : t("mobile.dynamic.ThreadInlineFilePreview.play-audio")
           }
           accessibilityState={{ busy }}
           onPress={toggle}
@@ -210,9 +219,9 @@ function InlineAudio(props: PreviewProps & { readonly resolveUri: () => Promise<
           </View>
           <Text className="text-xs text-foreground-muted" numberOfLines={1}>
             {error || status.error
-              ? "Unavailable · tap play to retry"
+              ? t("mobile.dynamic.ThreadInlineFilePreview.unavailable-tap-play-to-retry")
               : busy
-                ? "Loading…"
+                ? t("mobile.dynamic.ThreadInlineFilePreview.loading")
                 : `${timestamp(status.currentTime)} / ${status.isLoaded ? timestamp(status.duration) : "--:--"}`}
           </Text>
         </View>

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 
@@ -14,6 +15,7 @@ export function DatabaseStorageNotice({
 }: {
   readonly targets: readonly SettingsTarget[];
 }) {
+  const t = useTranslate();
   const recommendations = useAtomValue(
     serverEnvironment.databaseCompactionRecommendations(
       JSON.stringify(targets.map((target) => target.environmentId)),
@@ -30,8 +32,10 @@ export function DatabaseStorageNotice({
   if (visible.length === 0) return null;
   return (
     <SettingsSection
-      title="Reclaim database space"
-      footer="Old history is cleaned up automatically, but these databases still hold the freed space. Run the command on each machine to return it to disk; it pauses and restarts the background service. Quit the desktop app first if it hosts the environment."
+      title={t("mobile.settings.DatabaseStorageNotice.reclaim-database-space")}
+      footer={t(
+        "mobile.settings.DatabaseStorageNotice.old-history-is-cleaned-up-automatically-but-these-databases-still-hold-the-freed-space-run-the-command-on-each-machine-to-return-it-to-disk-it-pauses-and-restarts-the-background-service-quit-the-desktop-app-first-if-it-hosts-the-environment",
+      )}
     >
       {visible.map(({ environmentId, status }) => (
         <SettingsActionRow
@@ -39,13 +43,15 @@ export function DatabaseStorageNotice({
           icon="doc.on.doc"
           label={targets.find((target) => target.environmentId === environmentId)?.label ?? ""}
           description={status.compactCommand}
-          detail={`${(status.reclaimableBytes / 1024 ** 3).toFixed(1)} GiB`}
+          detail={t("mobile.dynamic.DatabaseStorageNotice.param-gib", {
+            value: (status.reclaimableBytes / 1024 ** 3).toFixed(1),
+          })}
           onPress={() => copyTextWithHaptic(status.compactCommand, { target: "command" })}
         />
       ))}
       <SettingsActionRow
         icon="xmark"
-        label="Dismiss"
+        label={t("mobile.settings.DatabaseStorageNotice.dismiss")}
         onPress={() =>
           updatePreferences({
             transform: (current) => ({

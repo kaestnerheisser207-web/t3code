@@ -1,0 +1,36 @@
+export const diagnosticsFinalEn = {
+  "diagnostics.device": "Device",
+  "diagnostics.subprocess": "Subprocess",
+  "diagnostics.agent": "Agent",
+  "diagnostics.process": "Process",
+  "diagnostics.root": "Root",
+  "diagnostics.child": "Child",
+  "diagnostics.logsFolderFailed": "Unable to open logs folder.",
+  "diagnostics.exited": "Process already exited",
+  "diagnostics.exitedDetail":
+    "The process is not a child of the T3 Server. It might already have exited.",
+  "diagnostics.cpuHint":
+    "Total CPU across live child processes of the current server process. The desktop shell and other parent processes are not included.",
+  "diagnostics.memoryHint":
+    "Total resident memory across live child processes of the current server process. The desktop shell and other parent processes are not included.",
+  "diagnostics.loadingProcesses": "Loading live processes...",
+  "diagnostics.noProcesses": "No live descendant processes found.",
+  "diagnostics.samplesHint":
+    "In-memory process samples retained by the server. The server samples only while diagnostics is open, and this resets when the server restarts.",
+  "diagnostics.onDemand": "On demand",
+  "diagnostics.collecting": "Collecting process resource samples...",
+  "diagnostics.noSamples": "No process resource samples found for this window.",
+  "diagnostics.slowThreshold": "Spans with a duration of {{duration}} or longer.",
+  "diagnostics.slowConfigured": "Spans at or above the configured slow-span threshold.",
+  "diagnostics.span": "Span",
+  "diagnostics.cause": "Cause",
+  "diagnostics.duration": "Duration",
+  "diagnostics.ended": "Ended",
+  "diagnostics.count": "Count",
+  "diagnostics.lastSeen": "Last Seen",
+  "diagnostics.trace": "Trace",
+  "diagnostics.failures": "Failures",
+  "diagnostics.average": "Average",
+  "diagnostics.max": "Max",
+  "diagnostics.fullMessage": "Show full message",
+} as const;

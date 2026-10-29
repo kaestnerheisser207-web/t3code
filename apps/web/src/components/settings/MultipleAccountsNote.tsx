@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import type { EnvironmentId, ProviderDriverKind } from "@t3tools/contracts";
 import { InfoIcon } from "lucide-react";
@@ -21,6 +23,7 @@ export function MultipleAccountsNote({
   readonly environmentId: EnvironmentId;
   readonly driver: ProviderDriverKind;
 }) {
+  const t = useTranslate();
   const providers = useAtomValue(serverEnvironment.providersValueAtom(environmentId));
   const providerName = PROVIDER_NAMES.get(driver);
   const hasSignedInAccount =
@@ -33,17 +36,25 @@ export function MultipleAccountsNote({
     <Alert variant="info" role="note">
       <InfoIcon aria-hidden />
       <AlertDescription>
-        <p>
-          We do not recommend managing multiple {providerName} accounts in T3 Code.{" "}
-          <a
-            href={MULTIPLE_ACCOUNTS_FAQ_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-2 hover:text-foreground"
-          >
-            More info
-          </a>
-        </p>
+        <Trans
+          t={t}
+          i18nKey="web.rich.MultipleAccountsNote.part-we-do-not-recommend-managing-multiple-part-accounts-in-t3-code-part-part-part-part"
+          components={{
+            part0: <p>{null}</p>,
+            value1: <>{providerName}</>,
+            part2: (
+              <a
+                href={MULTIPLE_ACCOUNTS_FAQ_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                {null}
+              </a>
+            ),
+            value3: <>{t("settings.pages.MultipleAccountsNote.more-info")}</>,
+          }}
+        />
       </AlertDescription>
     </Alert>
   );

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { useRememberThreadProject } from "./useRememberThreadProject";
 import { useOpenPullRequest } from "../../native/useOpenPullRequest";
@@ -122,6 +123,7 @@ function firstRouteParam(value: string | string[] | undefined): string | null {
 }
 
 function ThreadRouteFallbackLayout(props: { readonly children: ReactNode }) {
+  const t = useTranslate();
   const goBack = useWorkspaceBackNavigation("threads");
   const { layout } = useAdaptiveWorkspaceLayout();
   const { themeVariables } = useAppearancePreferences();
@@ -131,7 +133,7 @@ function ThreadRouteFallbackLayout(props: { readonly children: ReactNode }) {
   return (
     <>
       <AppBar
-        title="Thread"
+        title={t("mobile.threads.ThreadRouteScreen.thread")}
         options={{ contentStyle: { backgroundColor: themeVariables["--color-header"] } }}
         onBack={layout.usesSplitView ? undefined : goBack}
         hideBottomBorder
@@ -171,6 +173,7 @@ function ThreadUnavailableScreen(props: {
   readonly actionLabel: string;
   readonly onAction: () => void;
 }) {
+  const t = useTranslate();
   return (
     <ThreadRouteFallbackLayout>
       <ScrollView
@@ -184,8 +187,10 @@ function ThreadUnavailableScreen(props: {
         className="bg-screen flex-1 android:bg-transparent"
       >
         <EmptyState
-          title="Thread unavailable"
-          detail="This thread is not available in the current mobile snapshot."
+          title={t("mobile.threads.ThreadRouteScreen.thread-unavailable")}
+          detail={t(
+            "mobile.threads.ThreadRouteScreen.this-thread-is-not-available-in-the-current-mobile-snapshot",
+          )}
           actionLabel={props.actionLabel}
           onAction={props.onAction}
         />
@@ -235,6 +240,7 @@ export function ThreadRouteScreen(props: ThreadRouteScreenProps) {
 }
 
 function LiveThreadRouteController(props: ThreadRouteScreenProps) {
+  const t = useTranslate();
   useAndroidWorkspaceBack("threads");
   const connectionsReady = useConnectionsReady();
   const { connectionState } = useRemoteConnectionStatus();
@@ -269,7 +275,7 @@ function LiveThreadRouteController(props: ThreadRouteScreenProps) {
     <>
       {props.inspectorPresentation ? (
         <ThreadInspectorHeader
-          title={selectedThread?.title ?? "Thread"}
+          title={selectedThread?.title ?? t("mobile.dynamic.ThreadRouteScreen.thread")}
           {...props.inspectorPresentation}
         />
       ) : null}
@@ -329,6 +335,7 @@ function ThreadRouteContent(
     readonly selectedThreadDetailState: ReturnType<typeof useSelectedThreadDetailState>;
   },
 ) {
+  const t = useTranslate();
   const { themeVariables } = useAppearancePreferences();
   const headerColor = themeVariables["--color-header"];
   const { fileInspector, layout, panes, showAuxiliaryPane, toggleAuxiliaryPane } =
@@ -812,7 +819,7 @@ function ThreadRouteContent(
       await recoverFailedThreadDraft(creation);
     } catch (error) {
       Dialog.alert(
-        "Could not restore draft",
+        t("mobile.threadStatus.restoreDraftFailed"),
         error instanceof Error ? error.message : String(error),
       );
       return;

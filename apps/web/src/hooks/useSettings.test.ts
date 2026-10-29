@@ -20,7 +20,9 @@ import {
   persistClientSettingsPatch,
   persistClientSettingsUpdate,
   prepareModelPreferencesPatch,
+  refreshBrowserLanguagePreference,
 } from "./useSettings";
+import * as browserPersistence from "../clientPersistenceStorage";
 import { applyServerSettingsPatch } from "@t3tools/shared/serverSettings";
 
 beforeEach(() => {
@@ -198,6 +200,34 @@ describe("persistClientSettingsPatch", () => {
 });
 
 describe("persistClientSettingsUpdate", () => {
+  it("uses another tab's saved language without replacing local settings or writing it back", async () => {
+    __setClientSettingsForTests({ ...DEFAULT_CLIENT_SETTINGS, wordWrap: false });
+    using read = vi.spyOn(browserPersistence, "readBrowserClientSettings").mockReturnValue({
+      ...DEFAULT_CLIENT_SETTINGS,
+      languagePreference: "zh-CN",
+    });
+    await refreshBrowserLanguagePreference();
+    expect(persistenceMocks.setClientSettings).not.toHaveBeenCalled();
+    expect(getClientSettings()).toMatchObject({ languagePreference: "zh-CN", wordWrap: false });
+    await persistClientSettingsPatch({ timestampFormat: "24-hour" });
+    expect(persistenceMocks.setClientSettings).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        languagePreference: "zh-CN",
+        wordWrap: false,
+        timestampFormat: "24-hour",
+      }),
+    );
+    const failure = new Error("unreadable settings");
+    read.mockImplementationOnce(() => {
+      throw failure;
+    });
+    await expect(refreshBrowserLanguagePreference()).rejects.toBe(failure);
+    expect(getClientSettings().languagePreference).toBe("zh-CN");
+    read.mockReturnValueOnce(null);
+    await refreshBrowserLanguagePreference();
+    expect(getClientSettings()).toMatchObject({ languagePreference: "en", wordWrap: false });
+  });
+
   it("publishes the update only after persistence succeeds", async () => {
     let finishPersistence!: () => void;
     const persistence = new Promise<void>((resolve) => {
@@ -210,14 +240,17 @@ describe("persistClientSettingsUpdate", () => {
       (current) => ({
         ...current,
         timestampFormat: "12-hour",
+        languagePreference: "zh-CN",
       }),
       setClientSettings,
     );
 
     expect(getClientSettings().timestampFormat).toBe(DEFAULT_CLIENT_SETTINGS.timestampFormat);
+    expect(getClientSettings().languagePreference).toBe("en");
     finishPersistence();
     await expect(pending).resolves.toMatchObject({ timestampFormat: "12-hour" });
     expect(getClientSettings().timestampFormat).toBe("12-hour");
+    expect(getClientSettings().languagePreference).toBe("zh-CN");
   });
 
   it("preserves an optimistic write made while an awaited update persists", async () => {

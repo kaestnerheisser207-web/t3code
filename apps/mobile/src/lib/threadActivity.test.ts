@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import {
   MessageId,
   CheckpointId,
@@ -283,6 +284,13 @@ it("binds a persisted resume answer only to the next compaction in its run", () 
       compacting: "Compacting…",
     });
     expect(labels.get(compactRows[1]!.id)).toBeUndefined();
+    const t = createI18n("zh-CN").t;
+    const translated = threadFeedCompactionLabels(feed, t);
+    expect(translated.get(compactRows[0]!.id)).toEqual({
+      title: t("compaction.afterIdle", { age: "2h 10m" }),
+      compacting: t("compaction.onReturn"),
+    });
+    expect(translated.get(compactRows[1]!.id)).toBeUndefined();
   }
 });
 

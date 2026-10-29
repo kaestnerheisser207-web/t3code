@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Pressable, View } from "react-native";
 
 import { NativeStackScreenOptions } from "../../native/StackHeader";
@@ -10,10 +11,16 @@ import { useControlTheme } from "./useControlTheme";
 import type { SheetCloseButtonProps, SheetHeaderProps } from "./SheetHeader.types";
 
 export function SheetCloseButton(props: SheetCloseButtonProps) {
+  const t = useTranslate();
   return (
     <IconButton
       icon="xmark"
-      accessibilityLabel={props.accessibilityLabel ?? (props.onCancel ? "Cancel" : "Close")}
+      accessibilityLabel={
+        props.accessibilityLabel ??
+        (props.onCancel
+          ? t("mobile.dynamic.SheetHeader.cancel")
+          : t("mobile.dynamic.SheetHeader.close"))
+      }
       disabled={props.disabled}
       onPress={props.onCancel ?? props.onClose}
     />

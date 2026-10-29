@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import {
   codexFeedbackNotice,
   type CodexFeedbackSubmission,
@@ -12,6 +13,7 @@ import type { ComposerBannerStackItem } from "./ComposerBannerStack";
 export function feedbackBannerItem(
   submission: CodexFeedbackSubmission,
   onDismiss: () => void,
+  t: TFunction,
 ): ComposerBannerStackItem | null {
   const notice = codexFeedbackNotice(submission);
   if (!notice) return null;
@@ -38,7 +40,7 @@ export function feedbackBannerItem(
             );
           }}
         >
-          Copy ID
+          {t("mobile.threads.ComposerFeedback.copy-id")}
         </Button>
       ) : undefined,
     ...(submission.status !== "uploading"

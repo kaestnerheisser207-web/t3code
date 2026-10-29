@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { AuthRelayWriteScope } from "@t3tools/contracts";
 import { readEnvironmentScope } from "../../state/session";
@@ -89,15 +90,18 @@ function useDeviceRegistered(): boolean {
 }
 
 export function SettingsNotificationsRouteScreen() {
+  const t = useTranslate();
   if (!hasCloudPublicConfig()) {
     return (
-      <SettingsScreen title="Notifications">
+      <SettingsScreen title={t("mobile.settings.SettingsNotificationsRouteScreen.notifications")}>
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           contentContainerClassName="px-5 pt-4"
         >
           <Text className="text-base text-foreground-muted">
-            Notifications require T3 Connect in this app build.
+            {t(
+              "mobile.settings.SettingsNotificationsRouteScreen.notifications-require-t3-connect-in-this-app-build",
+            )}
           </Text>
         </ScrollView>
       </SettingsScreen>
@@ -108,13 +112,14 @@ export function SettingsNotificationsRouteScreen() {
 }
 
 function ConfiguredSettingsNotificationsRouteScreen() {
+  const t = useTranslate();
   const preferencesResult = useAtomValue(mobilePreferencesAtom);
   const savePreferences = useAtomSet(updateMobilePreferencesAtom);
   const agentAwarenessPushAvailable = supportsAgentAwarenessPush();
   const agentAwarenessPlatform = resolveAgentAwarenessPlatformPresentation(Platform.OS);
   const agentAwarenessSubtitle =
     Platform.OS === "android" && !agentAwarenessPushAvailable
-      ? "Install a newer app build to enable notifications"
+      ? t("mobile.notifications.install-a-newer-app-build-to-enable-notifications")
       : agentAwarenessPlatform.subtitle;
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -164,8 +169,10 @@ function ConfiguredSettingsNotificationsRouteScreen() {
       if (!isAtomCommandInterrupted(result)) {
         const error = squashAtomCommandFailure(result);
         Dialog.alert(
-          "Notifications unavailable",
-          error instanceof Error ? error.message : "Could not request notification permission.",
+          t("mobile.notifications.notifications-unavailable"),
+          error instanceof Error
+            ? error.message
+            : t("mobile.notifications.could-not-request-notification-permission"),
         );
       }
       return;
@@ -173,11 +180,16 @@ function ConfiguredSettingsNotificationsRouteScreen() {
     if (result.value.type === "granted") {
       setNotificationStatus("enabled");
       if (getAgentAwarenessRegistrationStatus() === "registered") {
-        Dialog.alert("Notifications enabled", "Agent notifications are enabled for this device.");
+        Dialog.alert(
+          t("mobile.notifications.notifications-enabled"),
+          t("mobile.notifications.agent-notifications-are-enabled-for-this-device"),
+        );
       } else {
         Dialog.alert(
-          "Couldn't finish enabling notifications",
-          "Notification access was granted, but this device could not be registered with T3 Connect. Notifications will start once registration succeeds.",
+          t("mobile.notifications.couldn-t-finish-enabling-notifications"),
+          t(
+            "mobile.notifications.notification-access-was-granted-but-this-device-could-not-be-registered-with-t3-connect-notifications-will-start-once-registration-succeeds",
+          ),
         );
       }
       return;
@@ -185,32 +197,40 @@ function ConfiguredSettingsNotificationsRouteScreen() {
     if (result.value.type === "unsupported") {
       setNotificationStatus("unsupported");
       Dialog.alert(
-        "Notifications unavailable",
-        "Agent notifications are unavailable on this platform.",
+        t("mobile.notifications.notifications-unavailable"),
+        t("mobile.notifications.agent-notifications-are-unavailable-on-this-platform"),
       );
       return;
     }
     setNotificationStatus("disabled");
     if (result.value.canAskAgain) {
-      Dialog.alert("Notifications disabled", "Notifications were not enabled.");
+      Dialog.alert(
+        t("mobile.notifications.notifications-disabled"),
+        t("mobile.notifications.notifications-were-not-enabled"),
+      );
       return;
     }
     Dialog.alert(
-      "Notifications disabled",
-      "Notifications were denied for this app. Open Settings to enable them.",
+      t("mobile.notifications.notifications-disabled"),
+      t("mobile.notifications.notifications-were-denied-for-this-app-open-settings-to-enable-them"),
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Open Settings", onPress: () => void Linking.openSettings() },
+        { text: t("mobile.notifications.cancel"), style: "cancel" },
+        {
+          text: t("mobile.notifications.open-settings"),
+          onPress: () => void Linking.openSettings(),
+        },
       ],
     );
   };
 
   const promptSignIn = () => {
     Dialog.alert(
-      "Sign in to T3 Connect",
-      "Live Activity updates require T3 Connect so relay can deliver updates to this device.",
+      t("mobile.notifications.sign-in-to-t3-connect"),
+      t(
+        "mobile.notifications.live-activity-updates-require-t3-connect-so-relay-can-deliver-updates-to-this-device",
+      ),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("mobile.notifications.cancel"), style: "cancel" },
         {
           text: "Continue",
           onPress: () => navigation.navigate("SettingsAuth"),
@@ -234,19 +254,26 @@ function ConfiguredSettingsNotificationsRouteScreen() {
         setLiveActivityStatus("disabled");
         const error = squashAtomCommandFailure(permission);
         Dialog.alert(
-          "Ongoing activity unavailable",
-          error instanceof Error ? error.message : "Could not enable agent notifications.",
+          t("mobile.notifications.ongoing-activity-unavailable"),
+          error instanceof Error
+            ? error.message
+            : t("mobile.notifications.could-not-enable-agent-notifications"),
         );
         return;
       }
       if (permission.value.type !== "granted") {
         setLiveActivityStatus("disabled");
         Dialog.alert(
-          "Notification permission needed",
-          "Enable notifications in system Settings to show ongoing agent activity.",
+          t("mobile.notifications.notification-permission-needed"),
+          t(
+            "mobile.notifications.enable-notifications-in-system-settings-to-show-ongoing-agent-activity",
+          ),
           [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => void Linking.openSettings() },
+            { text: t("mobile.notifications.cancel"), style: "cancel" },
+            {
+              text: t("mobile.notifications.open-settings"),
+              onPress: () => void Linking.openSettings(),
+            },
           ],
         );
         return;
@@ -258,8 +285,12 @@ function ConfiguredSettingsNotificationsRouteScreen() {
       setLiveActivityStatus("disabled");
       const error = squashAtomCommandFailure(tokenResult);
       Dialog.alert(
-        Platform.OS === "android" ? "Ongoing activity unavailable" : "Live Activities unavailable",
-        error instanceof Error ? error.message : "Could not enable agent activity updates.",
+        Platform.OS === "android"
+          ? t("mobile.notifications.ongoing-activity-unavailable")
+          : t("mobile.notifications.live-activities-unavailable"),
+        error instanceof Error
+          ? error.message
+          : t("mobile.notifications.could-not-enable-agent-activity-updates"),
       );
       return;
     }
@@ -287,9 +318,11 @@ function ConfiguredSettingsNotificationsRouteScreen() {
         const error = squashAtomCommandFailure(updateResult);
         Dialog.alert(
           Platform.OS === "android"
-            ? "Ongoing activity unavailable"
-            : "Live Activities unavailable",
-          error instanceof Error ? error.message : "Could not enable agent activity updates.",
+            ? t("mobile.notifications.ongoing-activity-unavailable")
+            : t("mobile.notifications.live-activities-unavailable"),
+          error instanceof Error
+            ? error.message
+            : t("mobile.notifications.could-not-enable-agent-activity-updates"),
         );
       }
       return;
@@ -301,15 +334,23 @@ function ConfiguredSettingsNotificationsRouteScreen() {
     // Environment linking can precede device registration; only registered devices can receive Live Activities.
     if (getAgentAwarenessRegistrationStatus() === "registered") {
       Dialog.alert(
-        Platform.OS === "android" ? "Ongoing activity enabled" : "Live Activities enabled",
+        Platform.OS === "android"
+          ? t("mobile.notifications.ongoing-activity-enabled")
+          : t("mobile.notifications.live-activities-enabled"),
         environmentCount > 0
-          ? "Agent activity updates are enabled for environments this connection can configure."
-          : "Agent activity updates are enabled. Add an environment to start receiving updates.",
+          ? t(
+              "mobile.notifications.agent-activity-updates-are-enabled-for-environments-this-connection-can-configure",
+            )
+          : t(
+              "mobile.notifications.agent-activity-updates-are-enabled-add-an-environment-to-start-receiving-updates",
+            ),
       );
     } else {
       Dialog.alert(
-        "Couldn't finish enabling activity updates",
-        "This device could not be registered with T3 Connect, so activity updates won't appear yet. They'll start once registration succeeds.",
+        t("mobile.notifications.couldn-t-finish-enabling-activity-updates"),
+        t(
+          "mobile.notifications.this-device-could-not-be-registered-with-t3-connect-so-activity-updates-won-t-appear-yet-they-ll-start-once-registration-succeeds",
+        ),
       );
     }
   };
@@ -325,11 +366,14 @@ function ConfiguredSettingsNotificationsRouteScreen() {
     }
 
     Dialog.alert(
-      "Disable notifications",
-      "Open system Settings to disable notifications for T3 Code.",
+      t("mobile.notifications.disable-notifications"),
+      t("mobile.notifications.open-system-settings-to-disable-notifications-for-t3-code"),
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Open Settings", onPress: () => void Linking.openSettings() },
+        { text: t("mobile.notifications.cancel"), style: "cancel" },
+        {
+          text: t("mobile.notifications.open-settings"),
+          onPress: () => void Linking.openSettings(),
+        },
       ],
     );
   };
@@ -394,7 +438,7 @@ function ConfiguredSettingsNotificationsRouteScreen() {
   };
 
   return (
-    <SettingsScreen title="Notifications">
+    <SettingsScreen title={t("mobile.settings.SettingsNotificationsRouteScreen.notifications")}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
@@ -404,10 +448,12 @@ function ConfiguredSettingsNotificationsRouteScreen() {
           paddingBottom: Math.max(insets.bottom, 18) + 18,
         }}
       >
-        <SettingsSection title="Agent activity">
+        <SettingsSection
+          title={t("mobile.settings.SettingsNotificationsRouteScreen.agent-activity")}
+        >
           <SettingsSwitchRow
             icon="bell.badge"
-            label="Device Notifications"
+            label={t("mobile.settings.SettingsNotificationsRouteScreen.device-notifications")}
             disabled={
               !agentAwarenessPlatform.supported ||
               !agentAwarenessPushAvailable ||
@@ -432,9 +478,9 @@ function ConfiguredSettingsNotificationsRouteScreen() {
             label={
               Platform.OS === "android"
                 ? supportsAndroidLiveUpdateSettings()
-                  ? "Agent Live Updates"
-                  : "Ongoing Agent Activity"
-                : "Live Activity Updates"
+                  ? t("mobile.notifications.agent-live-updates")
+                  : t("mobile.notifications.ongoing-agent-activity")
+                : t("mobile.notifications.live-activity-updates")
             }
             subtitle={agentAwarenessSubtitle}
             value={
@@ -447,19 +493,23 @@ function ConfiguredSettingsNotificationsRouteScreen() {
           {liveActivityStatus === "signed-out" && canClearLiveActivitiesPreference ? (
             <SettingsRow
               icon="bolt.circle"
-              label="Turn off Live Activity preference"
+              label={t(
+                "mobile.settings.SettingsNotificationsRouteScreen.turn-off-live-activity-preference",
+              )}
               onPress={() => void handleLiveActivitiesChange(false)}
             />
           ) : null}
           {supportsAndroidLiveUpdateSettings() ? (
             <SettingsRow
               icon="bolt.circle"
-              label="Live Update Settings"
+              label={t("mobile.settings.SettingsNotificationsRouteScreen.live-update-settings")}
               onPress={() => {
                 void openAndroidLiveUpdateSettings().catch(() => {
                   Dialog.alert(
-                    "Couldn't open Settings",
-                    "Open Android Settings, select T3 Code, then enable Live Updates in Notifications.",
+                    t("mobile.notifications.couldn-t-open-settings"),
+                    t(
+                      "mobile.notifications.open-android-settings-select-t3-code-then-enable-live-updates-in-notifications",
+                    ),
                   );
                 });
               }}

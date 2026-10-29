@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Platform } from "react-native";
 
 import { AndroidHeaderIconButton } from "../../components/ui/AndroidScreenHeader";
@@ -5,12 +6,17 @@ import { AndroidHeaderIconButton } from "../../components/ui/AndroidScreenHeader
 import { useAdaptiveWorkspaceLayout } from "./adaptive-workspace-context";
 
 export function AndroidWorkspaceSidebarButton() {
+  const t = useTranslate();
   const { layout, panes, togglePrimarySidebar } = useAdaptiveWorkspaceLayout();
   if (Platform.OS !== "android" || !layout.usesSplitView) return null;
 
   return (
     <AndroidHeaderIconButton
-      accessibilityLabel={panes.primarySidebarVisible ? "Maximize content" : "Show sidebar"}
+      accessibilityLabel={
+        panes.primarySidebarVisible
+          ? t("mobile.dynamic.workspace-sidebar-toolbar.maximize-content")
+          : t("mobile.dynamic.workspace-sidebar-toolbar.show-sidebar")
+      }
       icon={panes.primarySidebarVisible ? "arrow.up.left.and.arrow.down.right" : "sidebar.left"}
       onPress={togglePrimarySidebar}
     />

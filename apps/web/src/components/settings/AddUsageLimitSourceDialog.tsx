@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { type EnvironmentId, UsageLimitSourceId } from "@t3tools/contracts";
 import { useState } from "react";
 
@@ -40,6 +41,7 @@ export function AddUsageLimitSourceDialog({
   readonly environmentId: EnvironmentId;
   readonly environmentLabel: string;
 }) {
+  const t = useTranslate();
   const updateSettings = useUpdateEnvironmentSettings(environmentId);
   const [label, setLabel] = useState("");
   const [url, setUrl] = useState("");
@@ -81,10 +83,11 @@ export function AddUsageLimitSourceDialog({
     >
       <DialogPopup className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add a CLIProxyAPI hub</DialogTitle>
+          <DialogTitle>
+            {t("settings.pages.AddUsageLimitSourceDialog.add-a-cliproxyapi-hub")}
+          </DialogTitle>
           <DialogDescription>
-            Show the quota of every account the hub pools, next to the providers on{" "}
-            {environmentLabel}. The key stays on that server.
+            {t("settings.compound.addHub", { environment: environmentLabel })}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
@@ -96,7 +99,9 @@ export function AddUsageLimitSourceDialog({
             }}
           >
             <div className="grid gap-1.5">
-              <Label htmlFor="usage-source-url">Hub URL</Label>
+              <Label htmlFor="usage-source-url">
+                {t("settings.pages.AddUsageLimitSourceDialog.hub-url")}
+              </Label>
               <Input
                 id="usage-source-url"
                 placeholder="https://hub.example.ts.net:8318"
@@ -106,7 +111,9 @@ export function AddUsageLimitSourceDialog({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="usage-source-key">Management key</Label>
+              <Label htmlFor="usage-source-key">
+                {t("settings.pages.AddUsageLimitSourceDialog.management-key")}
+              </Label>
               <SecretInput
                 id="usage-source-key"
                 value={managementKey}
@@ -114,10 +121,14 @@ export function AddUsageLimitSourceDialog({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="usage-source-label">Label (optional)</Label>
+              <Label htmlFor="usage-source-label">
+                {t("settings.pages.AddUsageLimitSourceDialog.label-optional")}
+              </Label>
               <Input
                 id="usage-source-label"
-                placeholder="Defaults to the hub's host name"
+                placeholder={t(
+                  "settings.pages.AddUsageLimitSourceDialog.defaults-to-the-hub-s-host-name",
+                )}
                 value={label}
                 onChange={(event) => setLabel(event.target.value)}
               />
@@ -132,10 +143,10 @@ export function AddUsageLimitSourceDialog({
               onOpenChange(false);
             }}
           >
-            Cancel
+            {t("settings.pages.AddUsageLimitSourceDialog.cancel")}
           </Button>
           <Button onClick={save} disabled={!canSave}>
-            Add hub
+            {t("settings.pages.AddUsageLimitSourceDialog.add-hub")}
           </Button>
         </DialogFooter>
       </DialogPopup>

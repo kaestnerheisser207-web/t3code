@@ -1,5 +1,15 @@
 # Appearance and themes
 
+## Interface language
+
+Choose **English**, **简体中文**, or **Follow system** in **Settings → General → Language**
+on web and desktop, or **Settings → Appearance → Language** on mobile. English is the default;
+unsupported system languages fall back to English. The choice is saved on this device (per site
+in a browser), independently of connected environments. It does not change agent replies or voice
+recognition languages.
+
+## Theme and appearance
+
 On web and desktop, open **Settings → Appearance** to choose a theme and follow the system
 appearance or stay in light or dark mode. To use different themes for light and dark mode, select
 the corresponding preview within each theme. Appearance preferences are saved separately on each

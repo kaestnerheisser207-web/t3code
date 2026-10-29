@@ -2,9 +2,11 @@
 import { ThreadId } from "@t3tools/contracts";
 import { TurnId } from "@t3tools/contracts";
 import type { SnoozePresetSetting } from "@t3tools/contracts/settings";
+import { createI18n } from "../i18n/index.ts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {
+  snoozeWakeLabel,
   canSnooze,
   effectiveSnoozed,
   hasQueuedTurnStart,
@@ -292,6 +294,25 @@ describe("resolveSnoozePresets", () => {
         { kind: "after", minutes: 180 },
       ]),
     ).toEqual(["In 3 hours 23:00", "In 6 hours Thu 2:00", "Tomorrow 21:00", "Next week Mon 18:00"]);
+    const settings: ReadonlyArray<SnoozePresetSetting> = [
+      { kind: "at", day: "monday", time: "18:00" },
+      { kind: "at", day: "tomorrow", time: "21:00" },
+      { kind: "after", minutes: 360 },
+      { kind: "after", minutes: 180 },
+    ];
+    const clock = localDate(2026, 4, 8, 20);
+    const english = resolveSnoozePresets(clock, { presets: settings, formatTime });
+    const chinese = resolveSnoozePresets(clock, {
+      presets: settings,
+      formatTime,
+      t: createI18n("zh-CN").t,
+    });
+    expect(chinese.map(({ id, snoozedUntil }) => ({ id, snoozedUntil }))).toEqual(
+      english.map(({ id, snoozedUntil }) => ({ id, snoozedUntil })),
+    );
+    expect(chinese.map((preset) => preset.label)).toEqual(["3 小时后", "6 小时后", "明天", "下周"]);
+    expect(chinese.at(-1)?.whenLabel).toContain("18:00");
+    expect(chinese.at(-1)?.whenLabel).not.toBe("18:00");
   });
 
   it("drops a today preset once its time passes and moves a weekday on that day to next week", () => {
@@ -389,4 +410,25 @@ it("dismisses a wake at its timestamp without hiding a later wake", () => {
   expect(isThreadWokeUnseen(state)).toBe(true);
   expect(isThreadWokeUnseen({ ...state, lastVisitedAt: firstWake })).toBe(false);
   expect(isThreadWokeUnseen({ ...state, lastVisitedAt: firstWake, wokeAt: NOW })).toBe(true);
+});
+
+it("keeps snooze rounding and expiry stable when labels change language", async () => {
+  const i18n = createI18n("en");
+  for (const [offset, short, key, count] of [
+    [1, "1m", "schedule.minute", 1],
+    [60_001, "2m", "schedule.minute", 2],
+    [3_600_000, "1h", "schedule.hour", 1],
+    [3_600_001, "2h", "schedule.hour", 2],
+    [86_400_000, "1d", "schedule.day", 1],
+  ] as const) {
+    const wake = new Date(Date.parse(NOW) + offset).toISOString();
+    expect(snoozeWakeLabel(wake, { now: NOW })).toBe(short);
+    for (const language of ["en", "zh-CN"] as const) {
+      await i18n.changeLanguage(language);
+      expect(snoozeWakeLabel(wake, { now: NOW, t: i18n.t })).toBe(i18n.t(key, { count }));
+    }
+  }
+  for (const wake of [NOW, PAST_WAKE, "invalid"]) {
+    expect(snoozeWakeLabel(wake, { now: NOW, t: i18n.t })).toBe(i18n.t("snooze.now"));
+  }
 });

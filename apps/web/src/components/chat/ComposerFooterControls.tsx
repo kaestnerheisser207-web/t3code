@@ -1,3 +1,5 @@
+import { runtimeModeText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import type {
   ModelSelection,
   ProviderInstanceId,
@@ -35,12 +37,13 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
   onToggleInteractionMode: () => void;
   onRuntimeModeChange: (mode: RuntimeMode) => void;
 }) {
+  const t = useTranslate();
   const size = props.size ?? "sm";
   const composerFloatingLayerProps = useComposerMenuProps();
   const [open, setOpen] = useComposerMenuState(props.hidden);
-  const runtimeModeOption =
-    props.runtimeModeOptions.find((option) => option.mode === props.runtimeMode) ??
-    supervisedRuntimeModeOption;
+  const runtimeModeOption = props.runtimeModeOptions.find(
+    (option) => option.mode === props.runtimeMode,
+  ) ?? { ...supervisedRuntimeModeOption, ...runtimeModeText(t, "approval-required") };
   const RuntimeModeIcon = runtimeModeOption.icon;
   const interactionModeTooltip =
     props.interactionMode === "plan"
@@ -75,7 +78,9 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
           />
         )}
         <span data-composer-control-label className="sr-only sm:not-sr-only">
-          {props.interactionMode === "plan" ? "Plan" : "Build"}
+          {props.interactionMode === "plan"
+            ? t("web.dynamic.ComposerFooterControls.plan")
+            : t("web.dynamic.ComposerFooterControls.build")}
         </span>
       </TooltipTrigger>
       <TooltipPopup side="top">{interactionModeTooltip}</TooltipPopup>
@@ -96,7 +101,7 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
               <ComposerSelectControl
                 data-composer-shortcut="composer.mode"
                 size={size}
-                aria-label="Runtime mode"
+                aria-label={t("web.ui.ComposerFooterControls.runtime-mode")}
               />
             }
           >

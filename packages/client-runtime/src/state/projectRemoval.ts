@@ -1,20 +1,24 @@
+import type { TFunction } from "i18next";
 import type { EnvironmentProject, EnvironmentThreadShell } from "./models.ts";
 
 export function planProjectRemoval<
   Thread extends Pick<EnvironmentThreadShell, "environmentId" | "projectId">,
->(options: {
-  readonly members: ReadonlyArray<
-    Pick<EnvironmentProject, "id" | "environmentId" | "title" | "workspaceRoot"> & {
-      readonly environmentLabel?: string | null;
-    }
-  >;
-  readonly groupMemberCount: number;
-  readonly hasOtherMembers: boolean;
-  readonly displayName: string;
-  readonly threads: ReadonlyArray<Thread>;
-  /** The members' threads this client does not hold: older settled threads its shell left out. */
-  readonly unloadedThreadCount?: number;
-}) {
+>(
+  options: {
+    readonly members: ReadonlyArray<
+      Pick<EnvironmentProject, "id" | "environmentId" | "title" | "workspaceRoot"> & {
+        readonly environmentLabel?: string | null;
+      }
+    >;
+    readonly groupMemberCount: number;
+    readonly hasOtherMembers: boolean;
+    readonly displayName: string;
+    readonly threads: ReadonlyArray<Thread>;
+    /** The members' threads this client does not hold: older settled threads its shell left out. */
+    readonly unloadedThreadCount?: number;
+  },
+  t?: TFunction,
+) {
   const { members, groupMemberCount, hasOtherMembers, displayName, threads } = options;
   const memberKeys = new Set(members.map((member) => `${member.environmentId}:${member.id}`));
   const projectThreads = threads.filter((thread) =>
@@ -27,23 +31,46 @@ export function planProjectRemoval<
   const targetLabel = singleMember?.title ?? displayName;
   const confirmationMessage = [
     threadCount > 0
-      ? `Remove ${targetKind} "${targetLabel}" and delete its ${threadCount} thread${threadCount === 1 ? "" : "s"}?`
-      : `Remove ${targetKind} "${targetLabel}"?`,
+      ? (t?.("project.remove.withThreads", {
+          kind: t(`project.remove.${targetKind}`),
+          name: targetLabel,
+          count: threadCount,
+        }) ??
+        `Remove ${targetKind} "${targetLabel}" and delete its ${threadCount} thread${threadCount === 1 ? "" : "s"}?`)
+      : (t?.("project.remove.empty", {
+          kind: t(`project.remove.${targetKind}`),
+          name: targetLabel,
+        }) ?? `Remove ${targetKind} "${targetLabel}"?`),
     ...(singleMember
       ? [
-          `Path: ${singleMember.workspaceRoot}`,
+          t?.("project.remove.path", { path: singleMember.workspaceRoot }) ??
+            `Path: ${singleMember.workspaceRoot}`,
           ...(singleMember.environmentLabel
-            ? [`Environment: ${singleMember.environmentLabel}`]
+            ? [
+                t?.("project.remove.environment", { environment: singleMember.environmentLabel }) ??
+                  `Environment: ${singleMember.environmentLabel}`,
+              ]
             : []),
         ]
-      : [`This removes ${members.length} grouped project entries.`]),
+      : [
+          t?.("project.remove.entries", { count: members.length }) ??
+            `This removes ${members.length} grouped project entries.`,
+        ]),
     ...(threadCount > 0
-      ? ["This permanently clears conversation history for those threads and any archived threads."]
-      : ["This permanently clears any archived conversation history."]),
+      ? [
+          t?.("project.remove.history") ??
+            "This permanently clears conversation history for those threads and any archived threads.",
+        ]
+      : [
+          t?.("project.remove.archive") ??
+            "This permanently clears any archived conversation history.",
+        ]),
     isWholeGroup && !hasOtherMembers
-      ? "This removes only the project entries, not the files on disk."
-      : "Other entries in this grouped project are unaffected.",
-    "This action cannot be undone.",
+      ? (t?.("project.remove.keepFiles") ??
+        "This removes only the project entries, not the files on disk.")
+      : (t?.("project.remove.keepOthers") ??
+        "Other entries in this grouped project are unaffected."),
+    t?.("project.remove.irreversible") ?? "This action cannot be undone.",
   ].join("\n");
 
   return { projectThreads, isWholeGroup, targetKind, confirmationMessage };

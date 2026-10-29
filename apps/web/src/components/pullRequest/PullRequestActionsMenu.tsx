@@ -1,3 +1,6 @@
+import { Trans } from "react-i18next";
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import type { ChangeRequestTerminology } from "@t3tools/client-runtime/source-control-clients";
 import type {
@@ -129,6 +132,7 @@ export function PullRequestActionsMenu({
   openOnHostText: string;
   copyReference: (value: string, label: string) => void;
 }) {
+  const t = useTranslate();
   const keybindings = useAtomValue(primaryServerKeybindingsAtom);
   const inlineConfirm = useInlineActionConfirm(pullRequestKey);
   const actionPending = pendingAction !== null;
@@ -142,8 +146,12 @@ export function PullRequestActionsMenu({
                 <Button
                   aria-label={
                     refreshing
-                      ? `Refreshing ${terminology.singular}`
-                      : `More ${terminology.singular} actions`
+                      ? t("web.dynamic.PullRequestActionsMenu.refreshing-param", {
+                          singular: sourceControlTerm(t, terminology.singular),
+                        })
+                      : t("web.dynamic.PullRequestActionsMenu.more-param-actions", {
+                          singular: sourceControlTerm(t, terminology.singular),
+                        })
                   }
                   size="icon-xs"
                   variant="ghost-muted"
@@ -160,8 +168,12 @@ export function PullRequestActionsMenu({
         />
         <TooltipPopup>
           {refreshing
-            ? `Refreshing ${terminology.singular}`
-            : `More ${terminology.singular} actions`}
+            ? t("web.dynamic.PullRequestActionsMenu.refreshing-param", {
+                singular: sourceControlTerm(t, terminology.singular),
+              })
+            : t("web.dynamic.PullRequestActionsMenu.more-param-actions", {
+                singular: sourceControlTerm(t, terminology.singular),
+              })}
         </TooltipPopup>
       </Tooltip>
       <MenuPopup align="end" side="bottom">
@@ -175,16 +187,25 @@ export function PullRequestActionsMenu({
         />
         <MenuItem disabled={refreshing} onClick={() => void refreshFromHost()}>
           <RefreshIcon size="sm" refreshing={refreshing} />
-          Refresh
+          {t("web.ui.PullRequestActionsMenu.refresh")}
         </MenuItem>
         <MenuItem disabled={handoff !== null} onClick={askAboutPullRequest}>
           <MessageCircleQuestionIcon className="mt-1 size-3.5 shrink-0 self-start" />
           <span className="flex min-w-0 flex-col">
-            <span>{handoff === "ask" ? "Opening..." : "Ask a question"}</span>
+            <span>
+              {handoff === "ask"
+                ? t("web.dynamic.PullRequestActionsMenu.opening")
+                : t("web.dynamic.PullRequestActionsMenu.ask-a-question")}
+            </span>
             <span className="text-xs text-muted-foreground">
               {attachesToComposer
-                ? `Adds the ${terminology.singular} to this thread's composer.`
-                : `Opens a thread that knows which ${terminology.singular} you mean.`}
+                ? t("web.dynamic.PullRequestActionsMenu.adds-the-param-to-this-thread-s-composer", {
+                    singular: sourceControlTerm(t, terminology.singular),
+                  })
+                : t(
+                    "web.dynamic.PullRequestActionsMenu.opens-a-thread-that-knows-which-param-you-mean",
+                    { singular: sourceControlTerm(t, terminology.singular) },
+                  )}
             </span>
           </span>
         </MenuItem>
@@ -192,21 +213,31 @@ export function PullRequestActionsMenu({
           <BookOpenIcon className="mt-1 size-3.5 shrink-0 self-start" />
           <span className="flex min-w-0 flex-col">
             <span>
-              {handoff === "explain" ? "Opening..." : `Explain this ${terminology.shortLabel}`}
+              {handoff === "explain"
+                ? t("web.dynamic.PullRequestActionsMenu.opening")
+                : t("web.dynamic.PullRequestActionsMenu.explain-this-param", {
+                    shortLabel: terminology.shortLabel,
+                  })}
             </span>
             <span className="text-xs text-muted-foreground">
-              A walk through the diff and what to read closely.
+              {t("web.ui.PullRequestActionsMenu.a-walk-through-the-diff-and-what-to-read-closely")}
             </span>
           </span>
         </MenuItem>
         <MenuItem disabled={handoff !== null || !canFixFindings} onClick={startFixFindings}>
           <HammerIcon className="size-3.5" />
-          {handoff === "findings" ? "Preparing..." : handoffLabels.fixFindings}
+          {handoff === "findings"
+            ? t("web.dynamic.PullRequestActionsMenu.preparing")
+            : handoffLabels.fixFindings}
         </MenuItem>
         {canWriteGuide ? (
           <MenuItem disabled={guideRunning} onClick={writeGuide}>
             <SparklesIcon className="size-3.5" />
-            {guideRunning ? "Writing guide..." : !guideWritten ? "Write guide" : "Rewrite guide"}
+            {guideRunning
+              ? t("web.dynamic.PullRequestActionsMenu.writing-guide")
+              : !guideWritten
+                ? t("web.dynamic.PullRequestActionsMenu.write-guide")
+                : t("web.dynamic.PullRequestActionsMenu.rewrite-guide")}
           </MenuItem>
         ) : null}
         {pickableEnvironments.length > 0 ? (
@@ -230,32 +261,40 @@ export function PullRequestActionsMenu({
                 ) : (
                   <PullRequestGlyph.draft className="size-3.5" />
                 )}
-                {detail.isDraft ? "Ready for review" : "Convert to draft"}
+                {detail.isDraft
+                  ? t("web.dynamic.PullRequestActionsMenu.ready-for-review")
+                  : t("web.dynamic.PullRequestActionsMenu.convert-to-draft")}
               </MenuItem>
             ) : null}
             {showsMergeNow ? (
               <MenuItem
                 closeOnClick={inlineConfirm.isArmed("merge")}
-                aria-label={inlineConfirm.isArmed("merge") ? "Confirm merge?" : "Merge now"}
+                aria-label={
+                  inlineConfirm.isArmed("merge")
+                    ? t("web.dynamic.PullRequestActionsMenu.confirm-merge")
+                    : t("web.dynamic.PullRequestActionsMenu.merge-now")
+                }
                 disabled={actionPending}
                 {...inlineConfirm.props("merge", () => void perform("merge", selectedMergeMethod))}
               >
                 <PullRequestGlyph.merged className="size-3.5" />
-                {inlineConfirm.isArmed("merge") ? "Confirm merge?" : "Merge now"}
+                {inlineConfirm.isArmed("merge")
+                  ? t("web.dynamic.PullRequestActionsMenu.confirm-merge")
+                  : t("web.dynamic.PullRequestActionsMenu.merge-now")}
               </MenuItem>
             ) : null}
             {autoMergeArmed && can("disable-auto-merge") ? (
               <MenuItem disabled={actionPending} onClick={() => void perform("disable-auto-merge")}>
                 <PullRequestGlyph.merged className="size-3.5" />
-                Disable auto-merge
+                {t("web.ui.PullRequestActionsMenu.disable-auto-merge")}
               </MenuItem>
             ) : showsAutoMerge ? (
               <MenuItem
                 closeOnClick={inlineConfirm.isArmed("enable-auto-merge")}
                 aria-label={
                   inlineConfirm.isArmed("enable-auto-merge")
-                    ? "Confirm auto-merge?"
-                    : "Enable auto-merge"
+                    ? t("web.dynamic.PullRequestActionsMenu.confirm-auto-merge")
+                    : t("web.dynamic.PullRequestActionsMenu.enable-auto-merge")
                 }
                 disabled={actionPending}
                 {...inlineConfirm.props(
@@ -265,8 +304,8 @@ export function PullRequestActionsMenu({
               >
                 <PullRequestGlyph.merged className="size-3.5" />
                 {inlineConfirm.isArmed("enable-auto-merge")
-                  ? "Confirm auto-merge?"
-                  : "Enable auto-merge"}
+                  ? t("web.dynamic.PullRequestActionsMenu.confirm-auto-merge")
+                  : t("web.dynamic.PullRequestActionsMenu.enable-auto-merge")}
               </MenuItem>
             ) : null}
             {showsMergeMethods ? (
@@ -307,7 +346,7 @@ export function PullRequestActionsMenu({
         </MenuItem>
         <MenuItem onClick={() => copyReference(detail.url, `${terminology.shortLabel} link`)}>
           <LinkIcon className="size-3.5" />
-          Copy link
+          {t("web.ui.PullRequestActionsMenu.copy-link")}
           <MenuShortcut>
             {shortcutLabelForCommand(keybindings, "thread.copyReference")}
           </MenuShortcut>
@@ -316,7 +355,7 @@ export function PullRequestActionsMenu({
           onClick={() => copyReference(`#${reference.number}`, `${terminology.shortLabel} number`)}
         >
           <CopyIcon className="size-3.5" />
-          Copy {terminology.shortLabel} number
+          {t("misc.copyRequestNumber", { shortLabel: terminology.shortLabel })}
           <MenuShortcut>
             {shortcutLabelForCommand(keybindings, "pullRequest.copyNumber")}
           </MenuShortcut>
@@ -327,22 +366,36 @@ export function PullRequestActionsMenu({
             <MenuItem
               closeOnClick={inlineConfirm.isArmed("close")}
               aria-label={
-                inlineConfirm.isArmed("close") ? "Confirm close?" : `Close ${terminology.singular}`
+                inlineConfirm.isArmed("close")
+                  ? t("web.dynamic.PullRequestActionsMenu.confirm-close")
+                  : t("web.dynamic.PullRequestActionsMenu.close-param", {
+                      singular: sourceControlTerm(t, terminology.singular),
+                    })
               }
               variant="destructive"
               disabled={actionPending}
               {...inlineConfirm.props("close", () => void perform("close"))}
             >
               <PullRequestGlyph.closed className="size-3.5" />
-              {inlineConfirm.isArmed("close") ? "Confirm close?" : `Close ${terminology.singular}`}
+              {inlineConfirm.isArmed("close")
+                ? t("web.dynamic.PullRequestActionsMenu.confirm-close")
+                : t("web.dynamic.PullRequestActionsMenu.close-param", {
+                    singular: sourceControlTerm(t, terminology.singular),
+                  })}
             </MenuItem>
           </>
         ) : detail.state === "closed" && can("reopen") ? (
           <>
             <MenuSeparator />
             <MenuItem disabled={actionPending} onClick={() => void perform("reopen")}>
-              <PullRequestGlyph.reopen className="size-3.5" />
-              Reopen {terminology.singular}
+              <Trans
+                t={t}
+                i18nKey="web.rich.PullRequestActionsMenu.part-reopen-part"
+                components={{
+                  part0: <PullRequestGlyph.reopen className="size-3.5" />,
+                  value1: <>{terminology.singular}</>,
+                }}
+              />
             </MenuItem>
           </>
         ) : detail.state === "merged" && can("revert") ? (
@@ -350,13 +403,19 @@ export function PullRequestActionsMenu({
             <MenuSeparator />
             <MenuItem
               closeOnClick={inlineConfirm.isArmed("revert")}
-              aria-label={inlineConfirm.isArmed("revert") ? "Confirm revert?" : "Revert changes"}
+              aria-label={
+                inlineConfirm.isArmed("revert")
+                  ? t("web.dynamic.PullRequestActionsMenu.confirm-revert")
+                  : t("web.dynamic.PullRequestActionsMenu.revert-changes")
+              }
               variant={inlineConfirm.isArmed("revert") ? "destructive" : "default"}
               disabled={actionPending}
               {...inlineConfirm.props("revert", () => void perform("revert"))}
             >
               <RotateCcwIcon className="size-3.5" />
-              {inlineConfirm.isArmed("revert") ? "Confirm revert?" : "Revert changes"}
+              {inlineConfirm.isArmed("revert")
+                ? t("web.dynamic.PullRequestActionsMenu.confirm-revert")
+                : t("web.dynamic.PullRequestActionsMenu.revert-changes")}
             </MenuItem>
           </>
         ) : null}
@@ -371,10 +430,14 @@ export function PullRequestActionsMenu({
               <Trash2Icon className="mt-1 size-3.5 shrink-0 self-start" />
               <span className="flex min-w-0 flex-col">
                 <span>
-                  {pendingAction === "delete-branch" ? "Deleting branch..." : "Delete branch"}
+                  {pendingAction === "delete-branch"
+                    ? t("web.dynamic.PullRequestActionsMenu.deleting-branch")
+                    : t("web.dynamic.PullRequestActionsMenu.delete-branch")}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {environmentConnected ? detail.headBranch : "Reconnect to delete this branch"}
+                  {environmentConnected
+                    ? detail.headBranch
+                    : t("web.dynamic.PullRequestActionsMenu.reconnect-to-delete-this-branch")}
                 </span>
               </span>
             </MenuItem>

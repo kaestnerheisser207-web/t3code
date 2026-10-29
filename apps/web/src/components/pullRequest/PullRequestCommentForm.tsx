@@ -1,3 +1,5 @@
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { useAtomCommand } from "~/state/use-atom-command";
 import type { EnvironmentId, PullRequestDetailView, PullRequestRef } from "@t3tools/contracts";
@@ -35,6 +37,7 @@ export function PullRequestCommentForm({
   onCommented: () => void;
   onClose: () => void;
 }) {
+  const t = useTranslate();
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState<"comment" | "close" | "reopen" | null>(null);
   const postComment = useAtomCommand(pullRequestEnvironment.comment, {
@@ -91,8 +94,13 @@ export function PullRequestCommentForm({
         disabled={submitting !== null || actionPending}
         value={body}
         rows={3}
-        placeholder="Leave a comment"
-        aria-label={`Comment on this ${sourceControlClients.get(detail.provider).changeRequest.singular}`}
+        placeholder={t("web.ui.PullRequestCommentForm.leave-a-comment")}
+        aria-label={t("web.dynamic.PullRequestCommentForm.comment-on-this-param", {
+          singular: sourceControlTerm(
+            t,
+            sourceControlClients.get(detail.provider).changeRequest.singular,
+          ),
+        })}
         onChange={(event) => setBody(event.target.value)}
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing || event.keyCode === 229) return;
@@ -127,20 +135,20 @@ export function PullRequestCommentForm({
               // The longest label holds the width, so the confirming click lands on the button.
               <span className="inline-grid">
                 <span aria-hidden className="invisible col-start-1 row-start-1">
-                  Close with comment
+                  {t("web.ui.PullRequestCommentForm.close-with-comment")}
                 </span>
                 <span className="col-start-1 row-start-1">
                   {submitting === "close"
-                    ? "Closing..."
+                    ? t("web.dynamic.PullRequestCommentForm.closing")
                     : inlineConfirm.isArmed("close")
-                      ? "Confirm close?"
-                      : "Close with comment"}
+                      ? t("web.dynamic.PullRequestCommentForm.confirm-close")
+                      : t("web.dynamic.PullRequestCommentForm.close-with-comment")}
                 </span>
               </span>
             ) : submitting === "reopen" ? (
-              "Reopening..."
+              t("web.dynamic.PullRequestCommentForm.reopening")
             ) : (
-              "Reopen with comment"
+              t("web.dynamic.PullRequestCommentForm.reopen-with-comment")
             )}
           </Button>
         )}
@@ -151,7 +159,9 @@ export function PullRequestCommentForm({
           onClick={() => void submit("comment")}
         >
           <SendIcon className="size-3.5" />
-          {submitting === "comment" ? "Posting..." : "Comment"}
+          {submitting === "comment"
+            ? t("web.dynamic.PullRequestCommentForm.posting")
+            : t("web.dynamic.PullRequestCommentForm.comment")}
         </Button>
       </div>
     </div>

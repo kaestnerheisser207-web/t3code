@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import type { ChangeRequestTerminology } from "@t3tools/client-runtime/source-control-clients";
 import type { PullRequestActor } from "@t3tools/contracts";
@@ -15,11 +16,14 @@ export function PullRequestReadStatus(props: {
   readonly error: string | null;
   readonly terminology: ChangeRequestTerminology;
 }) {
+  const t = useTranslate();
   return props.pending ? (
     <AppActivityIndicator className="my-12" colorClassName="accent-icon" />
   ) : props.error ? (
     <EmptyState
-      title={`Couldn't load this ${props.terminology.singular}`}
+      title={t("mobile.dynamic.PullRequestPresentation.couldn-t-load-this-param", {
+        singular: props.terminology.singular,
+      })}
       detail={props.error}
       variant="plain"
     />

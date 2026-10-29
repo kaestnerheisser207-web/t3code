@@ -1,3 +1,6 @@
+import type { TFunction } from "i18next";
+import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../i18n";
 import { useAtomCommand } from "~/state/use-atom-command";
 import { scopeProjectRef } from "@t3tools/client-runtime/environment";
 import {
@@ -14,7 +17,6 @@ import type {
 } from "@t3tools/contracts";
 import { useRef, useState } from "react";
 import {
-  capitalizeTerm,
   sourceControlClients,
   type ChangeRequestTerminology,
 } from "@t3tools/client-runtime/source-control-clients";
@@ -75,52 +77,54 @@ export function usePullRequestDefaultMergeMethodResolver(
   };
 }
 
-const actionSuccessLabels = (term: string): Record<PullRequestAction, string> => ({
-  merge: "Merge requested",
-  ready: "Marked ready for review",
-  draft: "Converted to draft",
-  close: `${capitalizeTerm(term)} closed`,
-  reopen: `${capitalizeTerm(term)} reopened`,
-  "update-branch": "Branch updated with the base branch",
-  "enable-auto-merge": "Auto-merge enabled",
-  "disable-auto-merge": "Auto-merge disabled",
-  revert: `Revert ${term} opened`,
-  "delete-branch": "Branch deleted",
-  "approve-workflows": "Workflows approved",
+const actionSuccessLabels = (term: string, t: TFunction): Record<PullRequestAction, string> => ({
+  merge: t("pr.quick.success.merge", { kind: sourceControlTerm(t, term) }),
+  ready: t("pr.quick.success.ready", { kind: sourceControlTerm(t, term) }),
+  draft: t("pr.quick.success.draft", { kind: sourceControlTerm(t, term) }),
+  close: t("pr.quick.success.close", { kind: sourceControlTerm(t, term) }),
+  reopen: t("pr.quick.success.reopen", { kind: sourceControlTerm(t, term) }),
+  "update-branch": t("pr.quick.success.update-branch", { kind: sourceControlTerm(t, term) }),
+  "enable-auto-merge": t("pr.quick.success.enable-auto-merge", {
+    kind: sourceControlTerm(t, term),
+  }),
+  "disable-auto-merge": t("pr.quick.success.disable-auto-merge", {
+    kind: sourceControlTerm(t, term),
+  }),
+  revert: t("pr.quick.success.revert", { kind: sourceControlTerm(t, term) }),
+  "delete-branch": t("web.pr.notice.branchDeleted"),
+  "approve-workflows": t("pr.quick.success.approve-workflows", {
+    kind: sourceControlTerm(t, term),
+  }),
 });
 
-const actionFailureLabels = (term: string): Record<PullRequestAction, string> => ({
-  merge: `Could not merge this ${term}`,
-  ready: "Could not mark this ready for review",
-  draft: "Could not convert this to a draft",
-  close: `Could not close this ${term}`,
-  reopen: `Could not reopen this ${term}`,
-  "update-branch": "Could not update this branch",
-  "enable-auto-merge": "Could not enable auto-merge",
-  "disable-auto-merge": "Could not disable auto-merge",
-  revert: `Could not open a revert ${term}`,
-  "delete-branch": "Could not delete this branch",
-  "approve-workflows": "Could not approve workflows",
+const actionFailureLabels = (term: string, t: TFunction): Record<PullRequestAction, string> => ({
+  merge: t("web.pr.failure.merge", { kind: sourceControlTerm(t, term) }),
+  ready: t("web.pr.failure.ready", { kind: sourceControlTerm(t, term) }),
+  draft: t("web.pr.failure.draft", { kind: sourceControlTerm(t, term) }),
+  close: t("web.pr.failure.close", { kind: sourceControlTerm(t, term) }),
+  reopen: t("web.pr.failure.reopen", { kind: sourceControlTerm(t, term) }),
+  "update-branch": t("web.pr.failure.update-branch", { kind: sourceControlTerm(t, term) }),
+  "enable-auto-merge": t("web.pr.failure.enable-auto-merge", { kind: sourceControlTerm(t, term) }),
+  "disable-auto-merge": t("web.pr.failure.disable-auto-merge", {
+    kind: sourceControlTerm(t, term),
+  }),
+  revert: t("web.pr.failure.revert", { kind: sourceControlTerm(t, term) }),
+  "delete-branch": t("web.pr.failure.delete-branch", { kind: sourceControlTerm(t, term) }),
+  "approve-workflows": t("web.pr.failure.approve-workflows", { kind: sourceControlTerm(t, term) }),
 });
 
-const actionFailureHints = (term: string): Record<PullRequestAction, string> => ({
-  merge:
-    "The host refused the merge. Check that you have write access, that the checks it requires have passed, and that the branch is not conflicting.",
-  ready: "The host refused it. Check that you have write access to this repository.",
-  draft: "The host refused it. Check that you have write access to this repository.",
-  close: "The host refused it. Check that you have write access, or that you opened it.",
-  reopen:
-    "The host refused it. Check that you have write access, and that the branch still exists.",
-  "update-branch":
-    "The host refused it. Check that you have write access, and that the base branch has not diverged in a way the host cannot merge.",
-  "enable-auto-merge":
-    "The host refused it. Check that auto-merge is enabled for this repository and that you have write access.",
-  "disable-auto-merge": "The host refused it. Check that you have write access to this repository.",
-  revert: `The host refused it. Check that you have write access and that this ${term} was merged on the host.`,
-  "delete-branch":
-    "The host refused it. Check that you have write access to the source repository and that the branch has not moved since this page loaded.",
-  "approve-workflows":
-    "The host refused it. Check that you have Actions write access and that these workflow runs are still awaiting approval.",
+const actionFailureHints = (term: string, t: TFunction): Record<PullRequestAction, string> => ({
+  merge: t("web.pr.hint.merge", { kind: sourceControlTerm(t, term) }),
+  ready: t("web.pr.hint.ready", { kind: sourceControlTerm(t, term) }),
+  draft: t("web.pr.hint.draft", { kind: sourceControlTerm(t, term) }),
+  close: t("web.pr.hint.close", { kind: sourceControlTerm(t, term) }),
+  reopen: t("web.pr.hint.reopen", { kind: sourceControlTerm(t, term) }),
+  "update-branch": t("pr.quick.hint.update-branch", { kind: sourceControlTerm(t, term) }),
+  "enable-auto-merge": t("pr.quick.hint.enable-auto-merge", { kind: sourceControlTerm(t, term) }),
+  "disable-auto-merge": t("web.pr.hint.ready", { kind: sourceControlTerm(t, term) }),
+  revert: t("web.pr.hint.revert", { kind: sourceControlTerm(t, term) }),
+  "delete-branch": t("web.pr.hint.delete-branch", { kind: sourceControlTerm(t, term) }),
+  "approve-workflows": t("web.pr.hint.approve-workflows", { kind: sourceControlTerm(t, term) }),
 });
 
 export function usePullRequestActionRunner({
@@ -137,6 +141,7 @@ export function usePullRequestActionRunner({
   /** Resolve repository settings on click to avoid per-row reads. */
   resolveMergeMethod?: (detail: PullRequestDetail) => PullRequestMergeMethod;
 }) {
+  const t = useTranslate();
   const runAction = useAtomCommand(pullRequestEnvironment.runAction, {
     reportFailure: false,
   });
@@ -160,15 +165,18 @@ export function usePullRequestActionRunner({
     if (result._tag === "Failure") {
       toastManager.add({
         type: "error",
-        title: actionFailureLabels(terminology.singular)[action],
+        title: actionFailureLabels(terminology.singular, t)[action],
         description: readableFailure(
           squashAtomCommandFailure(result),
-          actionFailureHints(terminology.singular)[action],
+          actionFailureHints(terminology.singular, t)[action],
         ),
       });
       return;
     }
-    toastManager.add({ type: "success", title: actionSuccessLabels(terminology.singular)[action] });
+    toastManager.add({
+      type: "success",
+      title: actionSuccessLabels(terminology.singular, t)[action],
+    });
     onSuccess?.(action);
   };
 
@@ -176,6 +184,7 @@ export function usePullRequestActionRunner({
 }
 
 export function usePullRequestCloseBatch(onClosed: (entry: EnvironmentPullRequestEntry) => void) {
+  const t = useTranslate();
   const runAction = useAtomCommand(pullRequestEnvironment.runAction, { reportFailure: false });
   const pending = useRef(new Set<string>());
   const [closingKeys, setClosingKeys] = useState<ReadonlySet<string>>(() => new Set());
@@ -205,7 +214,7 @@ export function usePullRequestCloseBatch(onClosed: (entry: EnvironmentPullReques
         setClosingKeys(new Set(pending.current));
         if (result._tag === "Failure") {
           failures.push(
-            `#${entry.number}: ${readableFailure(squashAtomCommandFailure(result), actionFailureHints(sourceControlClients.get(entry.provider).changeRequest.singular).close)}`,
+            `#${entry.number}: ${readableFailure(squashAtomCommandFailure(result), actionFailureHints(sourceControlClients.get(entry.provider).changeRequest.singular, t).close)}`,
           );
           return;
         }
@@ -245,6 +254,7 @@ export function usePullRequestHandoffs({
   environmentId: EnvironmentId;
   detail: PullRequestHandoffDetail | null;
 }) {
+  const t = useTranslate();
   const newThread = useNewThreadHandler();
   const prepareThread = usePreparePullRequestThreadAction({
     environmentId,
@@ -301,18 +311,18 @@ export function usePullRequestHandoffs({
     if (opened === null) {
       toastManager.add({
         type: "error",
-        title: "Could not open a thread",
-        description: "Try again from the project, or open a thread first.",
+        title: t("web.pr.notice.threadFailed"),
+        description: t("web.pr.notice.retryFromProject"),
       });
       return;
     }
     toastManager.add({
       type: "success",
-      title: "Asked in a thread",
+      title: t("web.pr.notice.askedThread"),
       description:
         task.prompt.length > 0
-          ? "The question is in the composer. Read it over, then send."
-          : `The ${terminology.singular} is in the composer. Type your question, then send.`,
+          ? t("web.pr.notice.questionReady")
+          : t("web.pr.notice.requestReady", { kind: sourceControlTerm(t, terminology.singular) }),
     });
   };
 
@@ -326,7 +336,9 @@ export function usePullRequestHandoffs({
     // Explicit timeouts survive toast updates and would pin the result after loading.
     const toastId = toastManager.add({
       type: "loading",
-      title: `Preparing the ${terminology.singular} checkout...`,
+      title: t("web.pr.notice.preparingCheckout", {
+        kind: sourceControlTerm(t, terminology.singular),
+      }),
     });
     const projectRef = scopeProjectRef(environmentId, detail.projectId);
     // Checkout setup requires the thread to exist first.
@@ -338,8 +350,8 @@ export function usePullRequestHandoffs({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: "Could not open a thread for the checkout",
-        description: "Try again from the project, or open a thread first.",
+        title: t("web.pr.notice.checkoutThreadFailed"),
+        description: t("web.pr.notice.retryFromProject"),
       });
       return;
     }
@@ -352,7 +364,9 @@ export function usePullRequestHandoffs({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: `Could not prepare the ${terminology.singular} checkout`,
+        title: t("web.pr.notice.prepareFailed", {
+          kind: sourceControlTerm(t, terminology.singular),
+        }),
         description: checkoutFailureDescription(
           isAtomCommandInterrupted(prepared) ? undefined : squashAtomCommandFailure(prepared),
         ),
@@ -371,8 +385,8 @@ export function usePullRequestHandoffs({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: "Checked out, but the thread stayed where it was",
-        description: `The checkout is ready on \`${prepared.value.branch}\`. Point a thread at it from the branch picker, then ask again.`,
+        title: t("web.pr.notice.threadNotMoved"),
+        description: t("web.pr.notice.pointThread", { branch: prepared.value.branch }),
       });
       return;
     }
@@ -383,13 +397,20 @@ export function usePullRequestHandoffs({
         prepared.value.isOnPullRequestHead
           ? {
               type: "success",
-              title: mode === "local" ? "Checked out here" : "Checked out",
+              title:
+                mode === "local"
+                  ? t("web.pr.notice.checkedOutHere")
+                  : t("web.pr.notice.checkedOut"),
               description:
                 mode === "local"
-                  ? `This repository is on the ${terminology.singular}'s branch, with a thread open on it.`
-                  : `The ${terminology.singular} is in its own worktree, with a thread open on it.`,
+                  ? t("web.pr.notice.localCheckoutReady", {
+                      kind: sourceControlTerm(t, terminology.singular),
+                    })
+                  : t("web.pr.notice.worktreeReady", {
+                      kind: sourceControlTerm(t, terminology.singular),
+                    }),
             }
-          : offHeadPullRequestCheckoutToast(terminology),
+          : offHeadPullRequestCheckoutToast(terminology, t),
       );
       return;
     }
@@ -399,10 +420,10 @@ export function usePullRequestHandoffs({
       prepared.value.isOnPullRequestHead
         ? {
             type: "success",
-            title: "Checkout ready",
-            description: "The task is in the composer. Read it over, then send.",
+            title: t("web.pr.notice.checkoutReady"),
+            description: t("web.pr.notice.taskReady"),
           }
-        : offHeadPullRequestCheckoutToast(terminology),
+        : offHeadPullRequestCheckoutToast(terminology, t),
     );
   };
 

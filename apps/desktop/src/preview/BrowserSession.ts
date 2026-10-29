@@ -1,3 +1,4 @@
+import { desktopI18n } from "../i18n.ts";
 import type { Session, WebContents } from "electron";
 import { BrowserWindow, session } from "electron";
 import * as Context from "effect/Context";
@@ -244,9 +245,11 @@ export const make = Effect.gen(function* BrowserSessionMake() {
     promptPermission(
       requester,
       {
-        buttons: ["Open", "Cancel"],
-        message: `Open this ${new URL(url).protocol.slice(0, -1)} link?`,
-        detail: `A page in the browser wants to open another application:\n\n${truncateForPrompt(url)}`,
+        buttons: [desktopI18n.t("desktop.prompt.open"), desktopI18n.t("desktop.prompt.cancel")],
+        message: desktopI18n.t("desktop.prompt.openProtocol", {
+          protocol: new URL(url).protocol.slice(0, -1),
+        }),
+        detail: desktopI18n.t("desktop.prompt.externalApp", { url: truncateForPrompt(url) }),
       },
       (answer) => callback(answer === true),
     );
@@ -303,8 +306,13 @@ export const make = Effect.gen(function* BrowserSessionMake() {
             promptPermission(
               requester,
               {
-                buttons: ["Allow", "Block"],
-                message: `${truncateForPrompt(origin)} wants to see text and images copied to the clipboard`,
+                buttons: [
+                  desktopI18n.t("desktop.prompt.allow"),
+                  desktopI18n.t("desktop.prompt.block"),
+                ],
+                message: desktopI18n.t("desktop.prompt.clipboard", {
+                  origin: truncateForPrompt(origin),
+                }),
               },
               (answer) => {
                 if (answer !== undefined) clipboardReadDecisions.set(origin, answer);

@@ -1,3 +1,4 @@
+import { resources, type InterfaceLanguage } from "@t3tools/client-runtime/i18n";
 import Constants from "expo-constants";
 import { requireOptionalNativeModule } from "expo";
 import { Linking, Platform } from "react-native";
@@ -5,6 +6,7 @@ import { Linking, Platform } from "react-native";
 interface AndroidAgentNotifications {
   configure(deviceId: string, userId: string, scheme: string, ongoingEnabled: boolean): void;
   clear(): void;
+  setPresentationLabels?(labels: Record<string, string>): void;
   setThreadOnScreen?(path: string | null): void;
   openLiveUpdateSettings?(): boolean;
   showShowcaseActivity?(scheme: string, data: Record<string, string>): void;
@@ -54,4 +56,14 @@ export async function openAndroidLiveUpdateSettings(): Promise<void> {
   if (!native?.openLiveUpdateSettings?.()) {
     await Linking.openSettings();
   }
+}
+
+export function setAndroidNotificationLanguage(language: InterfaceLanguage): void {
+  native?.setPresentationLabels?.(
+    Object.fromEntries(
+      Object.entries(resources[language].translation).filter(([key]) =>
+        key.startsWith("activity."),
+      ),
+    ),
+  );
 }

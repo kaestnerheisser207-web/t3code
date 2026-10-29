@@ -76,10 +76,12 @@ describe("mobile preferences state", () => {
 
       registry.set(state.updatePreferencesAtom, {
         collapsedProjectGroups: ["project:new"],
+        languagePreference: "zh-CN",
       });
       pendingLoad.resolve({
         baseFontSize: 18,
         collapsedProjectGroups: ["project:old"],
+        languagePreference: "en",
       });
 
       const preferences = yield* AtomRegistry.getResult(registry, state.preferencesAtom, {
@@ -88,9 +90,11 @@ describe("mobile preferences state", () => {
       expect(preferences).toEqual({
         baseFontSize: 18,
         collapsedProjectGroups: ["project:new"],
+        languagePreference: "zh-CN",
       });
       expect(savePatch).toHaveBeenCalledWith({
         collapsedProjectGroups: ["project:new"],
+        languagePreference: "zh-CN",
       });
       expect(AsyncResult.isFailure(registry.get(state.updatePreferencesAtom))).toBe(false);
 

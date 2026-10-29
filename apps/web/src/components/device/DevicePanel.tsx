@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { DeviceHostUpdates } from "./DeviceHostUpdates";
 import type {
   DevicePlatform,
@@ -48,6 +50,7 @@ export function DevicePanel(props: {
   readonly visible: boolean;
   readonly onDismissSetup: () => void;
 }) {
+  const t = useTranslate();
   const { environmentId, threadId } = props.threadRef;
   const { state, loaded } = useDeviceState(environmentId);
   const list = useAtomCommand(deviceEnvironment.list, { reportFailure: false });
@@ -218,8 +221,13 @@ export function DevicePanel(props: {
           <DeviceHostUpdates state={state} environmentId={environmentId} />
           {bootingDevices.length > 0 ? (
             <div role="status" className="border-b px-3 py-2 text-xs text-muted-foreground">
-              Starting {bootingDevices.map((device) => device.name).join(", ")}… This can take a
-              minute.
+              <Trans
+                t={t}
+                i18nKey="web.rich.DevicePanel.starting-part-this-can-take-a-minute"
+                components={{
+                  value0: <>{bootingDevices.map((device) => device.name).join(", ")}</>,
+                }}
+              />
             </div>
           ) : null}
           {operationError ? (
@@ -280,8 +288,11 @@ export function DevicePanel(props: {
                       tabIndex={state.hostStatus === "failed" ? 0 : undefined}
                     >
                       {state.hostStatus === "failed"
-                        ? (state.hostStatusDetail ?? "The device hub failed to start.")
-                        : "No simulators or emulators were found on this environment."}
+                        ? (state.hostStatusDetail ??
+                          t("web.dynamic.DevicePanel.the-device-hub-failed-to-start"))
+                        : t(
+                            "web.dynamic.DevicePanel.no-simulators-or-emulators-were-found-on-this-environment",
+                          )}
                     </p>
                   </>
                 ) : null}
@@ -324,7 +335,9 @@ export function DevicePanel(props: {
                                 ) : (
                                   <Play />
                                 )}
-                                {device.booted ? "Open" : "Start"}
+                                {device.booted
+                                  ? t("web.dynamic.DevicePanel.open")
+                                  : t("web.dynamic.DevicePanel.start")}
                               </Button>
                             </div>
                           ))}
@@ -338,8 +351,9 @@ export function DevicePanel(props: {
                 !state.devices.some((device) => device.platform === "android") &&
                 !unavailablePlatforms.some((platform) => platform.platform === "android") ? (
                   <p className="max-w-sm text-xs">
-                    No Android virtual devices found. Create one in Android Studio's Device Manager,
-                    then refresh.
+                    {t(
+                      "web.ui.DevicePanel.no-android-virtual-devices-found-create-one-in-android-studio-s-device-manager-then-refresh",
+                    )}
                   </p>
                 ) : null}
                 {loaded && !hostBusy ? (
@@ -349,7 +363,7 @@ export function DevicePanel(props: {
                     size="sm"
                     onClick={() => void list({ environmentId, input: {} })}
                   >
-                    Refresh devices
+                    {t("web.ui.DevicePanel.refresh-devices")}
                   </Button>
                 ) : null}
               </div>
@@ -366,6 +380,7 @@ function DeviceNotice(props: {
   readonly onDismiss: () => void;
   readonly children: ReactNode;
 }) {
+  const t = useTranslate();
   return (
     <div
       role="alert"
@@ -386,7 +401,11 @@ function DeviceNotice(props: {
       <Button
         size="icon-xs"
         variant="ghost"
-        aria-label={props.tone === "warning" ? "Dismiss device warning" : "Dismiss device error"}
+        aria-label={
+          props.tone === "warning"
+            ? t("web.dynamic.DevicePanel.dismiss-device-warning")
+            : t("web.dynamic.DevicePanel.dismiss-device-error")
+        }
         onClick={props.onDismiss}
       >
         <X />
@@ -396,11 +415,18 @@ function DeviceNotice(props: {
 }
 
 function DeviceDiscoveryWarning(props: { readonly label: string; readonly detail: string }) {
+  const t = useTranslate();
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
   return (
     <DeviceNotice tone="warning" onDismiss={() => setDismissed(true)}>
-      <p className="font-medium">Device discovery warning · {props.label}</p>
+      <p className="font-medium">
+        <Trans
+          t={t}
+          i18nKey="web.rich.DevicePanel.device-discovery-warning-part"
+          components={{ value0: <>{props.label}</> }}
+        />
+      </p>
       {props.detail}
     </DeviceNotice>
   );

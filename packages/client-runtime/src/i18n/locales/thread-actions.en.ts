@@ -1,0 +1,23 @@
+export const threadActionsEn = {
+  "thread.action.archiveFailed": "Could not archive thread",
+  "thread.action.unarchiveFailed": "Could not unarchive thread",
+  "thread.action.settleFailed": "Could not settle thread",
+  "thread.action.unsettleFailed": "Could not un-settle thread",
+  "thread.action.deleteFailed": "Could not delete thread",
+  "thread.action.noPermission": "This connection cannot change threads.",
+  "thread.action.deleteTitle": "Delete thread?",
+  "thread.action.deleteDescription":
+    "“{{thread}}” will be permanently deleted, including its terminal history.",
+  "thread.action.delete": "Delete",
+  "thread.action.renameFailed": "Could not rename thread",
+  "thread.action.renameError": "The thread could not be renamed.",
+  "thread.action.renameTitle": "Rename thread",
+  "thread.action.rename": "Rename",
+  "thread.action.undoUnpinFailed": "Could not undo unpin",
+  "thread.action.undoSettleFailed": "Could not undo settle",
+  "thread.action.restoreSnoozeFailed": "Could not restore snooze",
+  "thread.action.snoozeFailed": "Could not snooze thread",
+  "thread.action.snoozeError": "The thread could not be snoozed.",
+  "thread.action.undoFailed": "Could not undo thread action",
+  "thread.action.tryAgain": "Try again.",
+} as const;

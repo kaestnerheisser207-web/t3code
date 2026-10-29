@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { BackHandler, Keyboard, View, type TextInputInstance } from "react-native";
@@ -16,6 +17,7 @@ export function PullRequestToolbar(props: {
   readonly filters: PullRequestFilterMenu | null;
   readonly onRequestVisibility?: () => void;
 }) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const { filters } = props;
   const workspace = useWorkspaceTabs()!;
@@ -64,9 +66,9 @@ export function PullRequestToolbar(props: {
         searchField={
           <SearchField
             inputRef={input}
-            accessibilityLabel="Search pull requests"
+            accessibilityLabel={t("mobile.review.PullRequestToolbar.android.search-pull-requests")}
             clearAccessibilityLabel="Clear search"
-            placeholder="Search pull requests"
+            placeholder={t("mobile.review.PullRequestToolbar.android.search-pull-requests")}
             value={tab.query}
             onChangeText={(query) => dispatch({ type: "query", tab: "pullRequests", query })}
           />
@@ -84,7 +86,9 @@ export function PullRequestToolbar(props: {
             >
               {(open) => (
                 <AndroidHeaderIconButton
-                  accessibilityLabel="Filter pull requests"
+                  accessibilityLabel={t(
+                    "mobile.review.PullRequestToolbar.android.filter-pull-requests",
+                  )}
                   icon={
                     filters.customized
                       ? "line.3.horizontal.decrease.circle.fill"

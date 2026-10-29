@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import type { EnvironmentId, ProviderInstanceId } from "@t3tools/contracts";
 
@@ -20,6 +21,7 @@ export function ProviderWizardAuthenticationStep({
   readonly instanceId: ProviderInstanceId;
   readonly onFinish: () => void;
 }) {
+  const t = useTranslate();
   const providers =
     useAtomValue(serverEnvironment.providersValueAtom(environmentId)) ?? EMPTY_SERVER_PROVIDERS;
   const provider = providers.find((candidate) => candidate.instanceId === instanceId);
@@ -56,18 +58,20 @@ export function ProviderWizardAuthenticationStep({
             />
           ) : (
             <SettingsRow
-              title="Account"
+              title={t("settings.pages.ProviderWizardAuthenticationStep.account")}
               description={
                 isDiscovering
-                  ? "Discovering sign-in methods…"
+                  ? t("web.dynamic.ProviderWizardAuthenticationStep.discovering-sign-in-methods")
                   : (query.error ??
                     auth?.message ??
-                    "No in-app sign-in advertised. Follow the provider's docs to finish setup.")
+                    t(
+                      "web.dynamic.ProviderWizardAuthenticationStep.no-in-app-sign-in-advertised-follow-the-provider-s-docs-to-finish-setup",
+                    ))
               }
               control={
                 isDiscovering ? (
                   <Button disabled size="sm" variant="outline">
-                    Sign in
+                    {t("settings.pages.ProviderWizardAuthenticationStep.sign-in")}
                   </Button>
                 ) : provider?.setup?.documentationUrl ? (
                   <Button
@@ -77,7 +81,7 @@ export function ProviderWizardAuthenticationStep({
                       <a href={provider.setup.documentationUrl} target="_blank" rel="noreferrer" />
                     }
                   >
-                    Open docs
+                    {t("settings.pages.ProviderWizardAuthenticationStep.open-docs")}
                   </Button>
                 ) : undefined
               }
@@ -92,7 +96,9 @@ export function ProviderWizardAuthenticationStep({
           disabled={active}
           onClick={onFinish}
         >
-          {signedIn ? "Done" : "Skip for now"}
+          {signedIn
+            ? t("web.dynamic.ProviderWizardAuthenticationStep.done")
+            : t("web.dynamic.ProviderWizardAuthenticationStep.skip-for-now")}
         </Button>
       </WizardFooter>
     </>

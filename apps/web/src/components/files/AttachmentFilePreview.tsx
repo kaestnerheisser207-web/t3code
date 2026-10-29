@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { filePreviewDelimiter } from "@t3tools/shared/delimitedPreview";
 import type { AssetResource, EnvironmentId, ScopedThreadRef } from "@t3tools/contracts";
 import { formatAttachmentSize } from "@t3tools/client-runtime/state/attachments";
@@ -90,6 +92,7 @@ export function AttachmentFilePreview(props: {
   onRemove?: () => void;
   onClose?: () => void;
 }) {
+  const t = useTranslate();
   const kind = filePreviewKind(props);
   const officeKind = officePreviewKind(props);
   const delimiter = filePreviewDelimiter(props);
@@ -346,10 +349,21 @@ export function AttachmentFilePreview(props: {
     />
   ) : (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 px-6 text-center">
-      <p className="text-sm font-medium">No preview for this file</p>
+      <p className="text-sm font-medium">
+        {t("web.ui.AttachmentFilePreview.no-preview-for-this-file")}
+      </p>
       <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-        Save it to open in an app that supports {props.name.split(".").at(-1) || "this format"}{" "}
-        files.
+        <Trans
+          t={t}
+          i18nKey="web.rich.AttachmentFilePreview.save-it-to-open-in-an-app-that-supports-part-files"
+          components={{
+            value0: (
+              <>
+                {props.name.split(".").at(-1) || t("web.dynamic.AttachmentFilePreview.this-format")}
+              </>
+            ),
+          }}
+        />
       </p>
     </div>
   );
@@ -359,7 +373,7 @@ export function AttachmentFilePreview(props: {
       <div className={cn(FILE_SURFACE_SUBHEADER_CLASS)} data-surface-subheader>
         <div className="flex min-w-0 flex-1 items-center text-xs">
           <span className="shrink-0 px-0.5 text-muted-foreground">
-            {props.origin ?? "Attachment"}
+            {props.origin ?? t("web.dynamic.AttachmentFilePreview.attachment")}
           </span>
           <ChevronRightIcon className="mx-1 size-3.5 shrink-0 text-muted-foreground/60" />
           <span aria-current="page" className="min-w-0 truncate px-0.5 font-medium text-foreground">
@@ -385,7 +399,11 @@ export function AttachmentFilePreview(props: {
         ) : null}
         {showsRawText ? (
           <FileSurfaceAction
-            label={wordWrap ? "Disable word wrap" : "Enable word wrap"}
+            label={
+              wordWrap
+                ? t("web.dynamic.AttachmentFilePreview.disable-word-wrap")
+                : t("web.dynamic.AttachmentFilePreview.enable-word-wrap")
+            }
             pressed={wordWrap}
             onPress={() => updateClientSettings({ wordWrap: !wordWrap })}
           >
@@ -394,7 +412,13 @@ export function AttachmentFilePreview(props: {
         ) : null}
         {content || streamsText ? (
           <FileSurfaceAction
-            label={isCopied ? "Copied" : content?.truncated ? "Copy preview" : "Copy contents"}
+            label={
+              isCopied
+                ? t("web.dynamic.AttachmentFilePreview.copied")
+                : content?.truncated
+                  ? t("web.dynamic.AttachmentFilePreview.copy-preview")
+                  : t("web.dynamic.AttachmentFilePreview.copy-contents")
+            }
             onPress={() => {
               if (content) {
                 void copyToClipboard(content.text, undefined);
@@ -425,7 +449,11 @@ export function AttachmentFilePreview(props: {
         ) : null}
         {url ? (
           <FileSurfaceAction
-            label={saving ? "Preparing file…" : "Save file"}
+            label={
+              saving
+                ? t("web.dynamic.AttachmentFilePreview.preparing-file")
+                : t("web.dynamic.AttachmentFilePreview.save-file")
+            }
             disabled={saving}
             onPress={save}
           >
@@ -433,21 +461,27 @@ export function AttachmentFilePreview(props: {
           </FileSurfaceAction>
         ) : null}
         {props.onRemove ? (
-          <FileSurfaceAction label="Remove from draft" onPress={props.onRemove}>
+          <FileSurfaceAction
+            label={t("web.ui.AttachmentFilePreview.remove-from-draft")}
+            onPress={props.onRemove}
+          >
             <Trash2Icon className="size-3.5" />
           </FileSurfaceAction>
         ) : null}
         {props.onClose ? (
-          <FileSurfaceAction label="Close" onPress={props.onClose}>
+          <FileSurfaceAction
+            label={t("web.ui.AttachmentFilePreview.close")}
+            onPress={props.onClose}
+          >
             <XIcon className="size-3.5" />
           </FileSurfaceAction>
         ) : null}
       </div>
       {content?.truncated ? (
         <FileSurfaceNotice>
-          Preview limited to the first 1 MB
-          {props.sizeBytes > 0 ? ` of a ${props.sizeBytes.toLocaleString()} byte file` : ""}. Save
-          the file to read it in full.
+          {props.sizeBytes > 0
+            ? t("files.preview.limitedSize", { bytes: props.sizeBytes.toLocaleString() })
+            : t("files.preview.limited")}
         </FileSurfaceNotice>
       ) : null}
       {body}

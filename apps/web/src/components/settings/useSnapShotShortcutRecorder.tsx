@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   isModifierPairShortcut,
   type SnapShotModifier,
@@ -47,6 +48,7 @@ export function useSnapShotShortcutRecorder({
   onStart?: () => void;
   onError: (message: string) => void;
 }) {
+  const t = useTranslate();
   const bridge = getDesktopSnapShotBridge();
   const displayShortcut = shortcutLabel ? parseDesktopSnapShotShortcut(shortcutLabel) : shortcut;
   const [recording, setRecording] = useState(false);
@@ -127,8 +129,10 @@ export function useSnapShotShortcutRecorder({
         disabled={disabled}
         aria-label={
           displayShortcut
-            ? `Record snapshot shortcut, currently ${formatSnapShotShortcutLabel(displayShortcut)}`
-            : "Change snapshot shortcut"
+            ? t("shortcut.recordCurrent", {
+                shortcut: formatSnapShotShortcutLabel(displayShortcut),
+              })
+            : t("shortcut.changeSnapshot")
         }
         aria-pressed={recording}
         data-keybinding-capture=""
@@ -138,11 +142,11 @@ export function useSnapShotShortcutRecorder({
         onBlur={stopRecording}
       >
         {recording ? (
-          "Press shortcut…"
+          t("shortcut.press")
         ) : !displayShortcut ? (
-          "Change shortcut"
+          t("shortcut.change")
         ) : !allowModifierPairs && isModifierPairShortcut(displayShortcut) ? (
-          "Choose shortcut"
+          t("shortcut.choose")
         ) : (
           <SnapShotShortcutKeys shortcut={displayShortcut} />
         )}

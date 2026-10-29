@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { AppText as Text } from "../../components/ui/AppText";
 import { cn } from "../../lib/cn";
 import { copyTextWithHaptic } from "../../lib/copyTextWithHaptic";
@@ -11,15 +12,20 @@ export function ConnectionTraceId({
   readonly tone?: "muted" | "danger";
   readonly activation?: "press" | "longPress";
 }) {
+  const t = useTranslate();
   const copy = () => copyTextWithHaptic(traceId, { target: "connection-trace-id" });
   return (
     <>
-      {" Trace ID: "}
+      {t("mobile.dynamic.ConnectionTraceId.trace-id")}
       <Text
         accessibilityHint={
-          activation === "longPress" ? "Long press to copy the trace ID" : "Copies the trace ID"
+          activation === "longPress"
+            ? t("mobile.dynamic.ConnectionTraceId.long-press-to-copy-the-trace-id")
+            : t("mobile.dynamic.ConnectionTraceId.copies-the-trace-id")
         }
-        accessibilityLabel={`Copy trace ID ${traceId}`}
+        accessibilityLabel={t("mobile.dynamic.ConnectionTraceId.copy-trace-id-param", {
+          traceId: traceId,
+        })}
         accessibilityRole="button"
         accessibilityActions={[{ name: "activate", label: "Copy trace ID" }]}
         onAccessibilityAction={(event) => {

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { LoaderCircleIcon, PauseIcon, PlayIcon, TriangleAlertIcon } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 
@@ -71,6 +72,7 @@ function audioTime(seconds: number) {
 }
 
 function AudioChip(props: AudioPreviewProps) {
+  const t = useTranslate();
   const audio = useRef<HTMLAudioElement | null>(null);
   const onUnmount = useContext(AudioPreviewUnmountContext);
   const [loadedSource, setLoadedSource] = useState<string | null>(null);
@@ -112,7 +114,11 @@ function AudioChip(props: AudioPreviewProps) {
       kind="file"
       {...(props.failed ? { state: "invalid" as const } : {})}
       className="relative isolate overflow-hidden"
-      title={props.failed ? "Audio unavailable. Open the file or retry playback." : props.name}
+      title={
+        props.failed
+          ? t("web.dynamic.AudioPreview.audio-unavailable-open-the-file-or-retry-playback")
+          : props.name
+      }
     >
       <span
         aria-hidden
@@ -156,7 +162,7 @@ function AudioChip(props: AudioPreviewProps) {
       </ContextChipLabel>
       <span className="shrink-0 self-baseline text-3xs text-current">
         {props.failed
-          ? "Unavailable"
+          ? t("web.dynamic.AudioPreview.unavailable")
           : loading
             ? "..."
             : duration > 0

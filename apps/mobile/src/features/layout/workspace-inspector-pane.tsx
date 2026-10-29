@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Animated, {
   cubicBezier,
@@ -27,6 +28,7 @@ export function WorkspaceInspectorPane(props: {
   readonly renderInspector?: () => ReactNode;
   readonly setAuxiliaryPaneWidth: (width: number) => void;
 }) {
+  const t = useTranslate();
   const { panes, setAuxiliaryPaneWidth } = props;
   const inspectorWidth = panes.auxiliaryPaneWidth;
   const inspectorSupported = props.renderInspector !== undefined && inspectorWidth !== null;
@@ -98,7 +100,7 @@ export function WorkspaceInspectorPane(props: {
     <>
       {inspectorVisible ? (
         <WorkspacePaneDivider
-          accessibilityLabel="Resize detail pane"
+          accessibilityLabel={t("mobile.surfaces.workspace-inspector-pane.resize-detail-pane")}
           currentWidth={inspectorWidth ?? 0}
           resizeDirection={-1}
           onResizeStart={beginResize}
@@ -119,7 +121,12 @@ export function WorkspaceInspectorPane(props: {
             <RenderErrorBoundary
               resetKeys={[props.pathname]}
               renderFallback={(fallback) => (
-                <RenderFailureView {...fallback} title="The inspector couldn't be displayed" />
+                <RenderFailureView
+                  {...fallback}
+                  title={t(
+                    "mobile.surfaces.workspace-inspector-pane.the-inspector-couldn-t-be-displayed",
+                  )}
+                />
               )}
             >
               <InspectorRenderer render={props.renderInspector} />

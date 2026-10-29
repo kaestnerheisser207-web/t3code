@@ -1,10 +1,11 @@
+import type { TFunction } from "i18next";
+import { useTranslate, webI18n } from "../../i18n";
 import {
   DEFAULT_SERVER_SETTINGS,
   PROJECT_FILE_BACKED_SETTINGS,
   type ProjectFileBackedSettingKey,
   resolveEnvironmentMachineKind,
   type ServerSettings,
-  type WorktreeSubmodules,
 } from "@t3tools/contracts";
 import { CheckIcon, ChevronRightIcon, LayersIcon } from "lucide-react";
 import * as Equal from "effect/Equal";
@@ -12,8 +13,6 @@ import * as Equal from "effect/Equal";
 import { cn } from "../../lib/utils";
 import type { EnvironmentPresentation } from "../../state/environments";
 import { EnvironmentMachineIcon } from "../EnvironmentMachineIcon";
-import { resolveEnvModeLabel, WORKTREE_SUBMODULES_LABELS } from "../BranchToolbar.logic";
-import { PULL_REQUEST_MERGE_METHOD_LABELS } from "../pullRequest/pullRequestDetail.logic";
 import { Button, InlineButton } from "../ui/button";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "../ui/collapsible";
 import { Popover, PopoverPopup, PopoverTrigger } from "../ui/popover";
@@ -31,56 +30,63 @@ interface InheritanceLayer {
   readonly set: boolean;
 }
 
-const WRITING_STYLE_LABELS: Record<string, string> = {
-  repo_conventions: "Repository conventions",
-  conventional_commits: "Conventional Commits",
-  custom: "Custom instructions",
-};
+const WRITING_STYLE_KEYS = {
+  repo_conventions: "settings.dynamic.repositoryConventions",
+  conventional_commits: "settings.dynamic.conventionalCommits",
+  custom: "settings.dynamic.customInstructions",
+} as const;
+const SUBMODULE_KEYS = {
+  recursive: "settings.dynamic.submodulesRecursive",
+  "top-level": "settings.dynamic.submodulesTopLevel",
+  none: "settings.dynamic.submodulesNone",
+} as const;
+const MERGE_KEYS = {
+  merge: "settings.dynamic.merge",
+  squash: "settings.dynamic.squashMerge",
+  rebase: "settings.dynamic.rebaseMerge",
+} as const;
 
-function formatValue(key: keyof ServerSettings, value: unknown): string {
+function formatValue(key: keyof ServerSettings, value: unknown, t: TFunction): string {
   if (value === null || value === undefined) {
-    return key === "pullRequestMergeMethod"
-      ? "Last selected"
-      : key === "sidebarAutoSettleAfterDays"
-        ? "Never"
-        : key === "defaultModelSelection"
-          ? "Automatic"
-          : key === "sourceControlWriterModelSelection"
-            ? "Text generation model"
-            : key === "reviewGuideModelSelection"
-              ? "Source control writer model"
-              : key === "defaultThreadEnvMode" || key === "worktreeSubmodules"
-                ? "Inherit"
-                : "Not set";
+    return t(
+      key === "pullRequestMergeMethod"
+        ? "settings.dynamic.lastSelected"
+        : key === "sidebarAutoSettleAfterDays"
+          ? "settings.dynamic.never"
+          : key === "defaultModelSelection"
+            ? "settings.dynamic.automatic"
+            : key === "sourceControlWriterModelSelection"
+              ? "settings.dynamic.textGenerationModel"
+              : key === "reviewGuideModelSelection"
+                ? "settings.dynamic.sourceControlWriterModel"
+                : key === "defaultThreadEnvMode" || key === "worktreeSubmodules"
+                  ? "settings.dynamic.inherit"
+                  : "settings.dynamic.notSet",
+    );
   }
-  if (typeof value === "boolean") return value ? "On" : "Off";
-  if (typeof value === "number") {
+  if (typeof value === "boolean") return t(value ? "settings.dynamic.on" : "settings.dynamic.off");
+  if (typeof value === "number")
     return key === "sidebarAutoSettleAfterDays"
-      ? `${value} ${value === 1 ? "day" : "days"}`
+      ? t("settings.dynamic.days", { count: value })
       : String(value);
-  }
   if (typeof value === "string") {
-    if (key === "defaultThreadEnvMode" && (value === "local" || value === "worktree")) {
-      return resolveEnvModeLabel(value);
-    }
-    if (key === "worktreeSubmodules" && value in WORKTREE_SUBMODULES_LABELS) {
-      return WORKTREE_SUBMODULES_LABELS[value as WorktreeSubmodules];
-    }
-    if (key === "pullRequestMergeMethod" && value in PULL_REQUEST_MERGE_METHOD_LABELS) {
-      return PULL_REQUEST_MERGE_METHOD_LABELS[
-        value as keyof typeof PULL_REQUEST_MERGE_METHOD_LABELS
-      ];
-    }
-    return value === "" ? "Empty" : value;
+    if (key === "defaultThreadEnvMode" && (value === "local" || value === "worktree"))
+      return t(value === "local" ? "settings.dynamic.local" : "settings.dynamic.worktree");
+    if (key === "worktreeSubmodules" && Object.hasOwn(SUBMODULE_KEYS, value))
+      return t(SUBMODULE_KEYS[value as keyof typeof SUBMODULE_KEYS]);
+    if (key === "pullRequestMergeMethod" && Object.hasOwn(MERGE_KEYS, value))
+      return t(MERGE_KEYS[value as keyof typeof MERGE_KEYS]);
+    return value === "" ? t("settings.dynamic.empty") : value;
   }
-  if (Array.isArray(value)) return `${value.length} ${value.length === 1 ? "item" : "items"}`;
+  if (Array.isArray(value)) return t("settings.dynamic.items", { count: value.length });
   if (typeof value === "object") {
     if ("model" in value && typeof value.model === "string") return value.model;
-    if ("mode" in value && typeof value.mode === "string") {
-      return WRITING_STYLE_LABELS[value.mode] ?? value.mode;
-    }
+    if ("mode" in value && typeof value.mode === "string")
+      return Object.hasOwn(WRITING_STYLE_KEYS, value.mode)
+        ? t(WRITING_STYLE_KEYS[value.mode as keyof typeof WRITING_STYLE_KEYS])
+        : value.mode;
   }
-  return "Custom";
+  return t("settings.dynamic.custom");
 }
 
 /** Matches resolveProjectSettings order. */
@@ -88,6 +94,7 @@ export function settingInheritanceLayers(
   target: ScopedSettingsTarget,
   environmentSettings: ServerSettings,
   key: keyof ServerSettings,
+  t: TFunction = webI18n.getFixedT("en"),
 ): readonly InheritanceLayer[] {
   const environmentValue = environmentSettings[key];
   const source = isProjectScopedSettingKey(key) ? target.sources[key] : "environment";
@@ -97,8 +104,11 @@ export function settingInheritanceLayers(
   if (target.projectId !== null && isProjectScopedSettingKey(key)) {
     layers.push({
       key: "project",
-      label: "Project",
-      value: source === "project" ? formatValue(key, target.settings[key]) : "Inherits",
+      label: t("settings.dynamic.project"),
+      value:
+        source === "project"
+          ? formatValue(key, target.settings[key], t)
+          : t("settings.dynamic.inherits"),
       effective: source === "project",
       set: source === "project",
     });
@@ -106,7 +116,7 @@ export function settingInheritanceLayers(
   layers.push({
     key: "environment",
     label: target.label,
-    value: environmentSet ? formatValue(key, environmentValue) : "Inherits",
+    value: environmentSet ? formatValue(key, environmentValue, t) : t("settings.dynamic.inherits"),
     effective: source === "environment" && environmentSet,
     set: environmentSet,
   });
@@ -114,7 +124,10 @@ export function settingInheritanceLayers(
     layers.push({
       key: "t3.json",
       label: "t3.json",
-      value: source === "t3.json" ? formatValue(key, target.settings[key]) : "Inherits",
+      value:
+        source === "t3.json"
+          ? formatValue(key, target.settings[key], t)
+          : t("settings.dynamic.inherits"),
       effective: source === "t3.json",
       set: source === "t3.json",
     });
@@ -125,8 +138,8 @@ export function settingInheritanceLayers(
     : DEFAULT_SERVER_SETTINGS[key];
   layers.push({
     key: "built-in",
-    label: "Default",
-    value: formatValue(key, builtIn),
+    label: t("settings.dynamic.default"),
+    value: formatValue(key, builtIn, t),
     effective: source === "environment" && !environmentSet,
     set: true,
   });
@@ -171,13 +184,14 @@ export function SettingInheritance({
   overridingProjects?: readonly SettingOverridingProject[];
   onClearOverrides?: (entries: readonly ProjectOverrideEntry[]) => void;
 }) {
+  const t = useTranslate();
   const scopeContext = useOptionalSettingsScope();
   const key = keys[0];
   if (!key || targets.length === 0) return null;
   const hasMultipleEnvironments = new Set(targets.map((target) => target.environmentId)).size > 1;
   const overrideSummary =
     overridingProjects.length > 0
-      ? `${summary} · ${overridingProjects.length} project ${overridingProjects.length === 1 ? "override" : "overrides"}`
+      ? t("settings.dynamic.overrideSummary", { summary, count: overridingProjects.length })
       : summary;
   const chains = targets.flatMap((target) => {
     const environment = environments.find(
@@ -191,7 +205,7 @@ export function SettingInheritance({
     const secondary = [labels.secondary, path?.split(/[\\/]/).filter(Boolean).slice(-2).join("/")]
       .filter(Boolean)
       .join(" · ");
-    const layers = settingInheritanceLayers(target, environment.serverConfig.settings, key);
+    const layers = settingInheritanceLayers(target, environment.serverConfig.settings, key, t);
     const winningLayer = layers.find((layer) => layer.effective);
     return [
       {
@@ -239,7 +253,7 @@ export function SettingInheritance({
                 <Button
                   size="icon-micro"
                   variant="ghost-muted"
-                  aria-label={`${overrideSummary}. Show where this value comes from`}
+                  aria-label={t("settings.dynamic.showSource", { summary: overrideSummary })}
                 />
               }
             />
@@ -277,7 +291,9 @@ export function SettingInheritance({
                         layer.effective ? "font-medium text-foreground" : "text-muted-foreground",
                       )}
                     >
-                      {layer.key === "environment" ? "Environment" : layer.label}
+                      {layer.key === "environment"
+                        ? t("settings.dynamic.environment")
+                        : layer.label}
                     </span>
                     <span
                       className={cn(
@@ -330,7 +346,7 @@ export function SettingInheritance({
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {winningLayer?.key === "environment"
-                              ? "Environment"
+                              ? t("settings.dynamic.environment")
                               : winningLayer?.label}
                           </span>
                           <ChevronRightIcon
@@ -364,7 +380,7 @@ export function SettingInheritance({
                     {chain}
                     {hasMultipleEnvironments ? (
                       <p className="px-2 pt-1.5 text-xs text-muted-foreground">
-                        Same on all machines
+                        {t("settings.pages.SettingInheritance.same-on-all-machines")}
                       </p>
                     ) : null}
                   </>
@@ -383,14 +399,18 @@ export function SettingInheritance({
                             aria-hidden
                             className="size-3 [[data-panel-open]_&]:rotate-90"
                           />
-                          Overridden by
+                          {t("settings.pages.SettingInheritance.overridden-by")}
                         </CollapsibleTrigger>
                       ) : (
-                        <span>Overridden by</span>
+                        <span>{t("settings.pages.SettingInheritance.overridden-by")}</span>
                       )}
                       {onClearOverrides ? (
                         <InlineButton onClick={() => onClearOverrides(overriding)}>
-                          Reset {overriding.length === 1 ? "it" : "all"}
+                          {t(
+                            overriding.length === 1
+                              ? "settings.dynamic.resetOne"
+                              : "settings.dynamic.resetAll",
+                          )}
                         </InlineButton>
                       ) : null}
                     </div>
@@ -426,6 +446,7 @@ export function SettingInheritance({
                                     (member) =>
                                       member.target.environmentId === project.environmentId,
                                   )?.overrides[project.projectId]?.[key],
+                                  t,
                                 )
                               : null}
                           </span>

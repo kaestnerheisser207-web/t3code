@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { DesktopBridge, DesktopUpdateState } from "@t3tools/contracts";
 import { ExternalLinkIcon } from "lucide-react";
 
@@ -28,13 +29,14 @@ function ReleaseLink({
   readonly releaseUrl: string;
   readonly shell: DesktopUpdateShell | undefined;
 }) {
+  const t = useTranslate();
   return (
     <a
       className="mt-2 inline-flex items-center gap-1 rounded-sm text-xs leading-5 text-muted-foreground underline decoration-dotted underline-offset-4 outline-none transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       href={releaseUrl}
       onClick={(event) => {
         event.preventDefault();
-        void openDesktopUpdateReleaseNotes(shell, releaseUrl);
+        void openDesktopUpdateReleaseNotes(shell, releaseUrl, t);
       }}
     >
       {children}
@@ -52,6 +54,7 @@ export function SidebarUpdateReleaseNotes({
   readonly state: DesktopUpdateState;
   readonly tooltip: string;
 }) {
+  const t = useTranslate();
   if (state.channel !== "nightly" || state.releaseNotes.length === 0) {
     return <>{tooltip}</>;
   }
@@ -62,7 +65,7 @@ export function SidebarUpdateReleaseNotes({
         {state.status === "available" ? (
           <div>
             <div className="whitespace-nowrap text-sm leading-5 font-medium">
-              Update ready to download
+              {t("web.ui.SidebarUpdateReleaseNotes.update-ready-to-download")}
             </div>
             {state.availableVersion ? (
               <div className="mt-0.5 text-xs leading-4 text-muted-foreground">
@@ -88,7 +91,11 @@ export function SidebarUpdateReleaseNotes({
               {index > 0 && <Separator className="my-3" />}
               <section>
                 <h3 className="text-foreground text-xs leading-4 font-semibold">
-                  {index === 0 ? "What's changed" : `Changes in ${releaseNote.version}`}
+                  {index === 0
+                    ? t("web.dynamic.SidebarUpdateReleaseNotes.what-s-changed")
+                    : t("web.dynamic.SidebarUpdateReleaseNotes.changes-in-param", {
+                        version: releaseNote.version,
+                      })}
                 </h3>
                 <ul className="mt-2 space-y-1.5 pl-4 text-xs leading-5 text-popover-foreground/90">
                   {keyReleaseNoteItems(releaseNote.items).map(({ item, key }) => (
@@ -110,7 +117,9 @@ export function SidebarUpdateReleaseNotes({
           <div>
             <Separator className="my-3" />
             <ReleaseLink releaseUrl={getDesktopUpdateReleaseHistoryUrl()} shell={shell}>
-              {`${state.omittedReleaseCount} older ${state.omittedReleaseCount === 1 ? "release" : "releases"} on GitHub`}
+              {t("web.dynamic.SidebarUpdateReleaseNotes.olderCount", {
+                count: state.omittedReleaseCount,
+              })}
             </ReleaseLink>
           </div>
         ) : null}

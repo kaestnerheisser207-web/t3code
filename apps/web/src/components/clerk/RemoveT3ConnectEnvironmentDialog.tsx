@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useState } from "react";
 
 import {
@@ -21,6 +23,7 @@ export function RemoveT3ConnectEnvironmentDialog({
   readonly onCancel: () => void;
   readonly onConfirm: () => void;
 }) {
+  const t = useTranslate();
   const accountPage = useT3ConnectAccountPage();
   const [shownLabel, setShownLabel] = useState(environmentLabel);
   if (environmentLabel !== null && environmentLabel !== shownLabel) setShownLabel(environmentLabel);
@@ -36,31 +39,49 @@ export function RemoveT3ConnectEnvironmentDialog({
       >
         <AlertDialogPopup>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove {shownLabel} from this device?</AlertDialogTitle>
+            <AlertDialogTitle>
+              <Trans
+                t={t}
+                i18nKey="web.rich.RemoveT3ConnectEnvironmentDialog.remove-part-from-this-device"
+                components={{ value0: <>{shownLabel}</> }}
+              />
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This forgets its pairing, credentials, and cached threads here.
+              {t(
+                "web.ui.RemoveT3ConnectEnvironmentDialog.this-forgets-its-pairing-credentials-and-cached-threads-here",
+              )}
             </AlertDialogDescription>
             <AlertDialogDescription>
-              It stays on your T3 Connect account and keeps its host space. Deregister it in{" "}
-              {openAccountPage ? (
-                <InlineButton
-                  onClick={() => {
-                    onCancel();
-                    openAccountPage();
-                  }}
-                >
-                  T3 Connect settings
-                </InlineButton>
-              ) : (
-                "T3 Connect settings"
-              )}{" "}
-              to free it.
+              <Trans
+                t={t}
+                i18nKey="web.rich.RemoveT3ConnectEnvironmentDialog.it-stays-on-your-t3-connect-account-and-keeps-its-host-space-deregister-it-in-part-to-free-it"
+                components={{
+                  value0: (
+                    <>
+                      {openAccountPage ? (
+                        <InlineButton
+                          onClick={() => {
+                            onCancel();
+                            openAccountPage();
+                          }}
+                        >
+                          {t("web.ui.RemoveT3ConnectEnvironmentDialog.t3-connect-settings")}
+                        </InlineButton>
+                      ) : (
+                        t("web.dynamic.RemoveT3ConnectEnvironmentDialog.t3-connect-settings")
+                      )}
+                    </>
+                  ),
+                }}
+              />
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {t("web.ui.RemoveT3ConnectEnvironmentDialog.cancel")}
+            </AlertDialogClose>
             <Button variant="destructive" onClick={onConfirm}>
-              Remove from this device
+              {t("web.ui.RemoveT3ConnectEnvironmentDialog.remove-from-this-device")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogPopup>

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { Pressable, ScrollView } from "react-native";
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { ListFilterMenu } from "../workspace/ListFilterMenu";
@@ -17,6 +18,7 @@ export function ThreadListFilters(
     readonly gutter: number;
   },
 ) {
+  const t = useTranslate();
   const selectedEnvironment = props.environments.find(
     (environment) => environment.environmentId === props.selectedEnvironmentId,
   );
@@ -31,8 +33,8 @@ export function ThreadListFilters(
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 2, paddingBottom: 10, gap: 8 }}
     >
       <ListFilterMenu
-        label={selectedEnvironment?.label ?? "All environments"}
-        accessibilityLabel="Filter threads by environment"
+        label={selectedEnvironment?.label ?? t("mobile.dynamic.ThreadListFilters.all-environments")}
+        accessibilityLabel={t("mobile.surfaces.ThreadListFilters.filter-threads-by-environment")}
         active={selectedEnvironment !== undefined}
         actions={[
           {
@@ -60,8 +62,8 @@ export function ThreadListFilters(
         }}
       />
       <ListFilterMenu
-        label={selectedProject?.label ?? "All projects"}
-        accessibilityLabel="Filter threads by project"
+        label={selectedProject?.label ?? t("mobile.dynamic.ThreadListFilters.all-projects")}
+        accessibilityLabel={t("mobile.surfaces.ThreadListFilters.filter-threads-by-project")}
         active={selectedProject !== undefined}
         actions={[
           {
@@ -88,7 +90,7 @@ export function ThreadListFilters(
       {props.selectedEnvironmentId !== null || props.selectedProjectKey !== null ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Reset thread filters"
+          accessibilityLabel={t("mobile.surfaces.ThreadListFilters.reset-thread-filters")}
           className="h-8 w-8 items-center justify-center"
           onPress={() => {
             props.onEnvironmentChange(null);

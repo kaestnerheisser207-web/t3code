@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { EnvironmentId } from "@t3tools/contracts";
 import { Atom } from "effect/reactivity";
@@ -90,6 +92,7 @@ function UpdateEverythingDialogContent({
   onConfirm,
   cancelRef,
 }: UpdateEverythingDialogContentProps) {
+  const t = useTranslate();
   const stopped = useAtomValue(
     runningThreadCountAtom(
       restarts
@@ -116,7 +119,20 @@ function UpdateEverythingDialogContent({
     <>
       <AlertDialogHeader className="shrink-0">
         <AlertDialogTitle>
-          Update {updating.length} {updating.length === 1 ? "machine" : "machines"}?
+          <Trans
+            t={t}
+            i18nKey="web.rich.UpdateEverythingDialog.update-part-part"
+            components={{
+              value0: <>{updating.length}</>,
+              value1: (
+                <>
+                  {updating.length === 1
+                    ? t("web.dynamic.UpdateEverythingDialog.machine")
+                    : t("web.dynamic.UpdateEverythingDialog.machines")}
+                </>
+              ),
+            }}
+          />
         </AlertDialogTitle>
         <AlertDialogDescription>
           {version !== null ? (
@@ -126,7 +142,7 @@ function UpdateEverythingDialogContent({
           ) : null}
           {version !== null && providerCount > 0 ? " · " : null}
           {providerCount > 0
-            ? `${providerCount} provider ${providerCount === 1 ? "update" : "updates"}`
+            ? t("web.dynamic.UpdateEverythingDialog.providerUpdateCount", { count: providerCount })
             : null}
         </AlertDialogDescription>
       </AlertDialogHeader>
@@ -135,9 +151,9 @@ function UpdateEverythingDialogContent({
           {/* Machine names truncate first. Provider lists wrap between names, never inside one. */}
           <div className="grid grid-cols-[minmax(4rem,max-content)_max-content_minmax(min-content,1fr)_max-content] gap-x-4 text-sm">
             <div className="col-span-full grid grid-cols-subgrid border-b pb-1.5 text-muted-foreground text-xs">
-              <span>Machine</span>
+              <span>{t("web.ui.UpdateEverythingDialog.machine")}</span>
               <span>T3 Code</span>
-              <span>Providers</span>
+              <span>{t("web.ui.UpdateEverythingDialog.providers")}</span>
               <span />
             </div>
             {updating.map((row) => (
@@ -151,10 +167,14 @@ function UpdateEverythingDialogContent({
                 <span>
                   {row.app !== null ? APP_LABELS[row.app] : null}
                   {row.app === null && row.skipped !== null ? (
-                    <span className="text-muted-foreground">Skipped</span>
+                    <span className="text-muted-foreground">
+                      {t("web.ui.UpdateEverythingDialog.skipped")}
+                    </span>
                   ) : null}
                   {row.app === "this-app" ? (
-                    <span className="block text-muted-foreground text-xs">restarts last</span>
+                    <span className="block text-muted-foreground text-xs">
+                      {t("web.ui.UpdateEverythingDialog.restarts-last")}
+                    </span>
                   ) : null}
                 </span>
                 <span>
@@ -199,22 +219,39 @@ function UpdateEverythingDialogContent({
         {running > 0 ? (
           <p className="self-center text-muted-foreground text-sm max-sm:order-1 max-sm:text-center sm:mr-auto">
             {stopped === 0
-              ? `${threads} will be interrupted and can resume after the restart.`
+              ? t(
+                  "web.dynamic.UpdateEverythingDialog.param-will-be-interrupted-and-can-resume-after-the-restart",
+                  { threads: threads },
+                )
               : continuing === 0
-                ? `${threads} will be interrupted.`
-                : `${threads} will be interrupted. ${continuing} can resume after the restart.`}
+                ? t("web.dynamic.UpdateEverythingDialog.param-will-be-interrupted", {
+                    threads: threads,
+                  })
+                : t(
+                    "web.dynamic.UpdateEverythingDialog.param-will-be-interrupted-param-can-resume-after-the-restart",
+                    { threads: threads, continuing: continuing },
+                  )}
           </p>
         ) : null}
         <AlertDialogClose ref={cancelRef} render={<Button variant="outline" />}>
-          Cancel
+          {t("web.ui.UpdateEverythingDialog.cancel")}
         </AlertDialogClose>
-        <Button onClick={onConfirm}>Update</Button>
+        <Button onClick={onConfirm}>{t("web.ui.UpdateEverythingDialog.update")}</Button>
       </AlertDialogFooter>
     </>
   );
 }
 
 function RunningThreads({ environmentId }: { readonly environmentId: EnvironmentId }) {
+  const t = useTranslate();
   const count = useAtomValue(runningThreadCountAtom(environmentId));
-  return count > 0 ? <span className="whitespace-nowrap text-warning">{count} running</span> : null;
+  return count > 0 ? (
+    <span className="whitespace-nowrap text-warning">
+      <Trans
+        t={t}
+        i18nKey="web.rich.UpdateEverythingDialog.part-running"
+        components={{ value0: <>{count}</> }}
+      />
+    </span>
+  ) : null;
 }

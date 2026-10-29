@@ -1,3 +1,5 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
+import { I18nextProvider, useTranslation } from "react-i18next";
 import type { NativeStackHeaderItem } from "@react-navigation/native-stack";
 import { NavigationContext } from "@react-navigation/native";
 import { act, createContext, startTransition, Suspense, type ReactElement } from "react";
@@ -258,4 +260,37 @@ it("isolates toolbar handlers and ignores retained actions after their toolbar u
   act(() => root!.render(null));
   second.onPress?.();
   expect(onPress).not.toHaveBeenCalled();
+});
+
+function LocalizedNativeOptions() {
+  const { t } = useTranslation();
+  return (
+    <NativeStackScreenOptions
+      options={{
+        unstable_headerRightItems: () => [
+          { type: "button", label: t("settings.title"), onPress: () => {} },
+        ],
+      }}
+    />
+  );
+}
+
+it("refreshes retained native labels when language changes without reapplying unchanged options", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  root = createRoot(document.createElement("div"));
+  const i18n = createI18n("en");
+  const view = () => (
+    <I18nextProvider i18n={i18n}>
+      <LocalizedNativeOptions />
+    </I18nextProvider>
+  );
+  act(() => root!.render(view()));
+  expect(harness.renderedItems[0]).toMatchObject({ type: "button", label: "Settings" });
+  await act(async () => {
+    await i18n.changeLanguage("zh-CN");
+  });
+  expect(harness.renderedItems[0]).toMatchObject({ type: "button", label: "设置" });
+  const registrations = harness.setOptionsCalls;
+  act(() => root!.render(view()));
+  expect(harness.setOptionsCalls).toBe(registrations);
 });

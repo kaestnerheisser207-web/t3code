@@ -1,0 +1,18 @@
+export const snoozeModelZhCN = {
+  "snooze.now": "现在",
+  "snooze.remaining": "已稍后处理，剩余 {{time}}",
+  "snooze.state": "已稍后处理",
+  "snooze.settledAt": "已于 {{time}} 收起",
+  "modelFilter.all": "所有提供方",
+  "modelFilter.favorites": "收藏",
+  "modelFilter.filters": "模型筛选",
+  "modelFilter.provider": "提供方",
+  "modelFilter.legacy": "显示旧版模型",
+  "modelFilter.save": "保存",
+  "modelFilter.find": "查找模型",
+  "modelFilter.runtime": "运行模式",
+  "modelFilter.option": "选项",
+  "modelFilter.saveSettings": "保存会话设置",
+  "modelFilter.done": "完成",
+  "modelFilter.settings": "会话设置",
+} as const;

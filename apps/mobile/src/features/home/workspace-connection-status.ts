@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { WorkspaceState } from "../../state/workspaceModel";
 
 export interface WorkspaceConnectionStatusPresentation {
@@ -16,30 +17,50 @@ function shouldShowWorkspaceConnectionStatus(state: WorkspaceState): boolean {
   );
 }
 
-function workspaceConnectionStatusLabel(state: WorkspaceState): string {
-  if (state.networkStatus === "offline") return "You are offline";
+function workspaceConnectionStatusLabel(state: WorkspaceState, t?: TFunction): string {
+  if (state.networkStatus === "offline")
+    return t ? t("workspace.status.offline") : "You are offline";
   if (state.hasReadyEnvironment && state.hasSyncingConnectedEnvironment) {
-    return state.hasLoadedShellSnapshot ? "Syncing threads..." : "Loading threads...";
+    return state.hasLoadedShellSnapshot
+      ? t
+        ? t("workspace.status.syncing")
+        : "Syncing threads..."
+      : t
+        ? t("workspace.status.loading")
+        : "Loading threads...";
   }
   if (state.connectingEnvironments.length === 1) {
-    return `Reconnecting to ${state.connectingEnvironments[0]!.environmentLabel}`;
+    return t
+      ? t("workspace.status.reconnecting", {
+          environment: state.connectingEnvironments[0]!.environmentLabel,
+        })
+      : `Reconnecting to ${state.connectingEnvironments[0]!.environmentLabel}`;
   }
   if (state.connectingEnvironments.length > 1) {
-    return `Reconnecting ${state.connectingEnvironments.length} environments`;
+    return t
+      ? t("workspace.status.reconnectingCount", { count: state.connectingEnvironments.length })
+      : `Reconnecting ${state.connectingEnvironments.length} environments`;
   }
   if (state.connectionError !== null) return state.connectionError;
   if (state.hasPendingShellSnapshot) {
-    return state.hasLoadedShellSnapshot ? "Syncing threads..." : "Loading threads...";
+    return state.hasLoadedShellSnapshot
+      ? t
+        ? t("workspace.status.syncing")
+        : "Syncing threads..."
+      : t
+        ? t("workspace.status.loading")
+        : "Loading threads...";
   }
-  return "Not connected";
+  return t ? t("workspace.status.disconnected") : "Not connected";
 }
 
 export function workspaceConnectionStatusPresentation(
   state: WorkspaceState,
+  t?: TFunction,
 ): WorkspaceConnectionStatusPresentation | null {
   if (!shouldShowWorkspaceConnectionStatus(state)) return null;
   return {
-    label: workspaceConnectionStatusLabel(state),
+    label: workspaceConnectionStatusLabel(state, t),
     showsProgress:
       state.networkStatus !== "offline" &&
       (state.hasReadyEnvironment || state.connectionError === null) &&

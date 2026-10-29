@@ -1,4 +1,6 @@
 import { SettingsGroup } from "./SettingsGroup";
+import { useTranslate } from "../../i18n";
+import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import { AuthSettingsWriteScope } from "@t3tools/contracts";
 import { usePrimaryEnvironmentId, usePrimaryEnvironment } from "../../state/environments";
 import { useEnvironmentScope, useEnvironmentsWithScope } from "../../state/session";
@@ -181,12 +183,17 @@ export const SETTINGS_PICKER_TRIGGER_CLASSNAME =
   "min-w-0 max-w-none shrink-0 border-input bg-background font-normal text-foreground shadow-xs/5 hover:bg-accent/50 dark:bg-input/32 [&_svg[data-composer-control-chevron]]:stroke-[1.75] [&_svg[data-composer-control-chevron]]:opacity-70";
 
 export function PolicyTooltip({ children }: { readonly children: string }) {
+  const t = useTranslate();
   return (
     <Tooltip>
       <TooltipTrigger
         delay={200}
         render={
-          <Button size="icon-micro" variant="ghost-muted" aria-label="Background policy details">
+          <Button
+            size="icon-micro"
+            variant="ghost-muted"
+            aria-label={t("settings.support.background-policy-details")}
+          >
             <InfoIcon className="size-3.5" />
           </Button>
         }
@@ -196,8 +203,13 @@ export function PolicyTooltip({ children }: { readonly children: string }) {
   );
 }
 
+type SettingsTitleProps<Title> =
+  | { title: Title; titleKey?: TranslationKey }
+  | { title?: never; titleKey: TranslationKey };
+
 export function SettingsSection({
-  title,
+  title: explicitTitle,
+  titleKey,
   hideTitle = false,
   icon,
   titleAction,
@@ -206,15 +218,17 @@ export function SettingsSection({
   children,
   className,
   ...sectionProps
-}: ComponentPropsWithoutRef<"section"> & {
-  title: string;
-  hideTitle?: boolean;
-  icon?: ReactNode;
-  titleAction?: ReactNode;
-  headerAction?: ReactNode;
-  variant?: "grouped" | "plain";
-  children: ReactNode;
-}) {
+}: Omit<ComponentPropsWithoutRef<"section">, "title"> &
+  SettingsTitleProps<string> & {
+    hideTitle?: boolean;
+    icon?: ReactNode;
+    titleAction?: ReactNode;
+    headerAction?: ReactNode;
+    variant?: "grouped" | "plain";
+    children: ReactNode;
+  }) {
+  const t = useTranslate();
+  const title = explicitTitle ?? (titleKey ? t(titleKey) : "");
   const targetRef = useSettingsSearchTarget<HTMLElement>(sectionProps.id);
 
   return (
@@ -295,7 +309,8 @@ function projectOverrides(
 }
 
 export function SettingsRow({
-  title,
+  title: explicitTitle,
+  titleKey,
   description,
   status,
   resetAction,
@@ -307,18 +322,20 @@ export function SettingsRow({
   children,
   className,
   ...rowProps
-}: Omit<ComponentPropsWithoutRef<"div">, "title"> & {
-  title: ReactNode;
-  description?: ReactNode;
-  status?: ReactNode;
-  resetAction?: ReactNode;
-  onResetOverride?: () => void;
-  control?: ReactNode;
-  serverScoped?: boolean;
-  settingKeys?: readonly (keyof ServerSettings)[];
-  mixed?: boolean;
-  children?: ReactNode;
-}) {
+}: Omit<ComponentPropsWithoutRef<"div">, "title"> &
+  SettingsTitleProps<ReactNode> & {
+    description?: ReactNode;
+    status?: ReactNode;
+    resetAction?: ReactNode;
+    onResetOverride?: () => void;
+    control?: ReactNode;
+    serverScoped?: boolean;
+    settingKeys?: readonly (keyof ServerSettings)[];
+    mixed?: boolean;
+    children?: ReactNode;
+  }) {
+  const t = useTranslate();
+  const title = explicitTitle ?? (titleKey ? t(titleKey) : undefined);
   const targetRef = useSettingsSearchTarget<HTMLDivElement>(rowProps.id);
   const primarySettingsAvailable = usePrimarySettingsAvailable();
   const context = useOptionalSettingsScope();
@@ -351,8 +368,8 @@ export function SettingsRow({
     source === "environment" && context?.scope.environmentIds.length === 1
       ? (context.environments.find(
           (environment) => environment.environmentId === context.scope.environmentIds[0],
-        )?.label ?? "environment")
-      : "environment";
+        )?.label ?? t("settings.scope.environment"))
+      : t("settings.scope.environment");
   const environmentSettingsById = new Map(
     (context?.connectedEnvironments ?? []).flatMap((environment) =>
       environment.serverConfig
@@ -364,8 +381,8 @@ export function SettingsRow({
   const renderedReset = unavailable ? null : isProjectScope && scopedKeys.length > 0 ? (
     source === "project" || source === "mixed" ? (
       <SettingResetButton
-        label={typeof title === "string" ? title : "override"}
-        tooltip="Reset to inherited value"
+        label={typeof title === "string" ? title : t("settings.scope.override")}
+        tooltip={t("settings.support.reset-to-inherited-value")}
         onClick={() => (onResetOverride ? onResetOverride() : clearOverrides(scopedKeys))}
       />
     ) : null
@@ -396,20 +413,22 @@ export function SettingsRow({
     unavailable && control
       ? inertControl(
           !canWriteSettings
-            ? `This connection lacks permission to change settings on ${
-                context
+            ? t("settings.scope.noPermission", {
+                environments: context
                   ? context.connectedEnvironments
                       .filter((target) => !writableIds.has(target.environmentId))
                       .map((target) => target.label)
-                      .join(", ") || "the selected environment"
-                  : (primaryEnvironment?.label ?? "the primary environment")
-              }.`
+                      .join(", ") || t("settings.scope.selectedEnvironment")
+                  : (primaryEnvironment?.label ?? t("settings.scope.primaryEnvironment")),
+              })
             : context
-              ? "Reconnect the selected environment to change this setting."
+              ? t("settings.support.reconnect-the-selected-environment-to-change-this-setting")
               : PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE,
         )
       : environmentWide && control
-        ? inertControl("Environment-wide setting. Select an environment to change it.")
+        ? inertControl(
+            t("settings.support.environment-wide-setting-select-an-environment-to-change-it"),
+          )
         : control;
   const customized =
     context !== null &&
@@ -423,16 +442,22 @@ export function SettingsRow({
       }),
     );
   const inheritance: { state: SettingInheritanceState; summary: string } = mixed
-    ? { state: "mixed", summary: "Mixed across selected environments" }
+    ? { state: "mixed", summary: t("settings.support.mixed-across-selected-environments") }
     : source === "project"
-      ? { state: "overridden", summary: "Overridden for this project" }
+      ? { state: "overridden", summary: t("settings.support.overridden-for-this-project") }
       : source === "t3.json"
-        ? { state: "inherited", summary: "Inherited from the repository's t3.json" }
+        ? {
+            state: "inherited",
+            summary: t("settings.support.inherited-from-the-repository-s-t3-json"),
+          }
         : source === "environment" && scopedKeys.length > 0
-          ? { state: "inherited", summary: `Inherited from ${inheritedFrom}` }
+          ? {
+              state: "inherited",
+              summary: t("settings.scope.inherited", { environment: inheritedFrom }),
+            }
           : customized
-            ? { state: "environment", summary: "Set on the environment" }
-            : { state: "default", summary: "Built-in default" };
+            ? { state: "environment", summary: t("settings.support.set-on-the-environment") }
+            : { state: "default", summary: t("settings.support.built-in-default") };
   const renderedInheritance =
     context && serverScoped && settingKeys.length > 0 ? (
       <SettingInheritance
@@ -513,7 +538,7 @@ export function SettingsRow({
 
 export function SettingResetButton({
   label,
-  tooltip = "Reset to default",
+  tooltip,
   disabled = false,
   onClick,
 }: {
@@ -522,6 +547,7 @@ export function SettingResetButton({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslate();
   return (
     <Tooltip>
       <TooltipTrigger
@@ -529,7 +555,7 @@ export function SettingResetButton({
           <Button
             size="icon-micro"
             variant="ghost-muted"
-            aria-label={`Reset ${label} to default`}
+            aria-label={t("settings.reset.defaultAction", { label })}
             disabled={disabled}
             onClick={(event) => {
               event.stopPropagation();
@@ -540,7 +566,7 @@ export function SettingResetButton({
           </Button>
         }
       />
-      <TooltipPopup side="top">{tooltip}</TooltipPopup>
+      <TooltipPopup side="top">{tooltip ?? t("settings.support.reset-to-default")}</TooltipPopup>
     </Tooltip>
   );
 }
