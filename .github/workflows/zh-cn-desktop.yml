@@ -65,8 +65,11 @@ jobs:
           toolchain: stable
           targets: aarch64-apple-darwin
 
+      # Package-level runs skip the root workspace, which loads every app's config.
       - name: Test localization
-        run: vp test run packages/client-runtime/src/i18n apps/desktop/src/updates/updateChannels.test.ts
+        run: |
+          (cd packages/client-runtime && vp test run src/i18n)
+          (cd apps/desktop && vp test run src/updates/updateChannels.test.ts)
 
       - name: Import signing certificate
         shell: bash
