@@ -1,0 +1,132 @@
+name: zh-CN desktop
+
+# Fork-only: builds the Simplified Chinese macOS client. Branch pushes verify the build;
+# tags such as v0.1.4-nightly.20261029.3853.zh.2 publish an in-app update.
+on:
+  push:
+    branches: [feat/i18n-zh-cn]
+    tags: ["v*-nightly.*.zh.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zh-cn-desktop-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    if: github.repository == 'kaestnerheisser207-web/t3code'
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        shell: bash
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          git fetch --no-tags origin "$GITHUB_SHA"
+          git sparse-checkout set --no-cone '/*' '!/.repos/'
+          git -c checkout.workers=0 checkout --detach FETCH_HEAD
+          git fetch --no-tags https://github.com/pingdotgg/t3code.git '+refs/tags/*:refs/tags/*'
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            tag="${GITHUB_REF#refs/tags/v}"
+            [[ "$tag" =~ ^(.+-nightly\.[0-9]{8}\.[0-9]+)\.zh\.([1-9][0-9]*)$ ]] || { echo "Bad tag $tag" >&2; exit 1; }
+            echo "base=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "build=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            base="$(git describe --tags --abbrev=0 --match 'v*-nightly.*' HEAD)"
+            echo "base=${base#v}" >> "$GITHUB_OUTPUT"
+            echo "build=" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-ci-deps
+        with:
+          install-args: --filter=@t3tools/desktop... --filter=t3... --filter=@t3tools/scripts... --filter=@t3tools/client-runtime...
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          toolchain: stable
+          targets: aarch64-apple-darwin
+
+      - name: Test localization
+        run: vp test run packages/client-runtime/src/i18n apps/desktop/src/updates/updateChannels.test.ts
+
+      - name: Import signing certificate
+        shell: bash
+        env:
+          P12_BASE64: ${{ secrets.ZH_MAC_SIGNING_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.ZH_MAC_SIGNING_P12_PASSWORD }}
+          IDENTITY: ${{ secrets.ZH_MAC_SIGNING_IDENTITY }}
+        run: |
+          set -euo pipefail
+          keychain="$RUNNER_TEMP/zh-signing.keychain-db"
+          password="$(openssl rand -hex 16)"
+          printf '%s' "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/zh-signing.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/zh-signing.p12" -k "$keychain" -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" > /dev/null
+          rm -f "$RUNNER_TEMP/zh-signing.p12"
+          echo "T3CODE_ZH_SIGN_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          echo "T3CODE_ZH_SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+
+      - name: Build
+        shell: bash
+        env:
+          BASE: ${{ steps.version.outputs.base }}
+          BUILD: ${{ steps.version.outputs.build }}
+          PUBLISH: ${{ steps.version.outputs.publish }}
+        run: |
+          set -euo pipefail
+          args=("$BASE" --platform mac --arch arm64 --target dmg)
+          if [[ "$PUBLISH" == "true" ]]; then
+            export T3CODE_ZH_UPDATE_REPOSITORY="$GITHUB_REPOSITORY"
+            args+=(--zh-build "$BUILD")
+          fi
+          node scripts/build-localized-desktop.mjs "${args[@]}"
+          echo "OUTPUT_DIR=$(ls -d "$PWD"/release/zh-CN-*)" >> "$GITHUB_ENV"
+
+      - name: Upload build
+        if: steps.version.outputs.publish != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: zh-cn-desktop-${{ steps.version.outputs.base }}
+          path: ${{ env.OUTPUT_DIR }}/*.dmg
+          retention-days: 7
+
+      - name: Publish update
+        if: steps.version.outputs.publish == 'true'
+        shell: bash
+        env:
+          BASE: ${{ steps.version.outputs.base }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF#refs/tags/}"
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --verify-tag --prerelease \
+            --title "T3 Code 中文版 ${tag#v}" \
+            --notes "简体中文汉化版，基于官方 $BASE。" \
+            "$OUTPUT_DIR"/*.zip "$OUTPUT_DIR"/*.dmg "$OUTPUT_DIR"/nightly-mac.yml \
+            "$OUTPUT_DIR"/localization-build.json
+
+      - name: Remove signing keychain
+        if: always()
+        shell: bash
+        run: security delete-keychain "$RUNNER_TEMP/zh-signing.keychain-db" 2>/dev/null || true

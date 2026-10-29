@@ -1,4 +1,5 @@
 import * as MacPermissions from "./permissions/MacPermissions.ts";
+import { officialReleaseVersion } from "./updates/updateChannels.ts";
 for (const stream of [process.stdout, process.stderr]) {
   stream.on("error", (err: NodeJS.ErrnoException) => {
     if (err.code !== "EPIPE") throw err;
@@ -113,7 +114,7 @@ const resolveDesktopSshCliRunner = (
       nodeEngineRange: serverPackageJson.engines.node,
     };
   }
-  return { archiveVersion: environment.appVersion };
+  return { archiveVersion: officialReleaseVersion(environment.appVersion) };
 };
 
 const layerDesktopSshEnvironment = Layer.unwrap(
