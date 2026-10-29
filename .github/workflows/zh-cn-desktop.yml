@@ -128,7 +128,7 @@ jobs:
           tag="${GITHUB_REF#refs/tags/}"
           gh release create "$tag" --repo "$GITHUB_REPOSITORY" --verify-tag --prerelease \
             --title "T3 Code 中文版 ${tag#v}" \
-            --notes "简体中文汉化版，基于官方 $BASE。" \
+            --notes "简体中文汉化版，基于官方 ${BASE}。" \
             "$OUTPUT_DIR"/*.zip "$OUTPUT_DIR"/*.dmg "$OUTPUT_DIR"/nightly-mac.yml \
             "$OUTPUT_DIR"/localization-build.json
 
