@@ -83,8 +83,8 @@ export function SidebarUpdateReleaseNotes({
           const omittedItemCount = Math.max(0, releaseNote.totalItems - releaseNote.items.length);
           const linkLabel =
             omittedItemCount === 0
-              ? "View release on GitHub"
-              : `${omittedItemCount} more ${omittedItemCount === 1 ? "change" : "changes"} on GitHub`;
+              ? t("web.dynamic.SidebarUpdateReleaseNotes.viewRelease")
+              : t("web.dynamic.SidebarUpdateReleaseNotes.moreChanges", { count: omittedItemCount });
 
           return (
             <div key={releaseNote.version}>

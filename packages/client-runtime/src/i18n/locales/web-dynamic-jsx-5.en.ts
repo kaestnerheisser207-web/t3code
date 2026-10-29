@@ -262,6 +262,9 @@ export const webDynamicJsx5En = {
   "web.dynamic.ThemeSearchSection.supportedCount_other": "{{count}} supported themes found.",
   "web.dynamic.SidebarUpdateReleaseNotes.olderCount_one": "{{count}} older release on GitHub",
   "web.dynamic.SidebarUpdateReleaseNotes.olderCount_other": "{{count}} older releases on GitHub",
+  "web.dynamic.SidebarUpdateReleaseNotes.viewRelease": "View release on GitHub",
+  "web.dynamic.SidebarUpdateReleaseNotes.moreChanges_one": "{{count}} more change on GitHub",
+  "web.dynamic.SidebarUpdateReleaseNotes.moreChanges_other": "{{count}} more changes on GitHub",
   "web.dynamic.UpdateEverythingDialog.providerUpdateCount_one": "{{count}} provider update",
   "web.dynamic.UpdateEverythingDialog.providerUpdateCount_other": "{{count}} provider updates",
 } as const;
