@@ -258,9 +258,6 @@ export const webDynamicJsx5ZhCN = {
   "web.dynamic.ThemeSearchSection.supportedCount_other": "找到 {{count}} 个支持的主题。",
   "web.dynamic.SidebarUpdateReleaseNotes.olderCount_one": "GitHub 上还有 {{count}} 个更早的版本",
   "web.dynamic.SidebarUpdateReleaseNotes.olderCount_other": "GitHub 上还有 {{count}} 个更早的版本",
-  "web.dynamic.SidebarUpdateReleaseNotes.viewRelease": "在 GitHub 上查看此版本",
-  "web.dynamic.SidebarUpdateReleaseNotes.moreChanges_one": "GitHub 上还有 {{count}} 项更改",
-  "web.dynamic.SidebarUpdateReleaseNotes.moreChanges_other": "GitHub 上还有 {{count}} 项更改",
   "web.dynamic.UpdateEverythingDialog.providerUpdateCount_one": "{{count}} 个提供方更新",
   "web.dynamic.UpdateEverythingDialog.providerUpdateCount_other": "{{count}} 个提供方更新",
 } as const satisfies Record<keyof typeof webDynamicJsx5En, string>;
