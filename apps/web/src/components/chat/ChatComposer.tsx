@@ -242,7 +242,7 @@ import {
   type ThreadShell,
 } from "../../types";
 import { type ComposerPromptHistoryPosition } from "./composerPromptHistory";
-import type { PendingUserInputDraftAnswer } from "../../pendingUserInput";
+import type { PendingUserInputDraftAnswer } from "@t3tools/client-runtime/state/pending-user-input";
 import type {
   LatestProposedPlanState,
   PendingApproval,
@@ -1233,10 +1233,10 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     environmentUnavailable !== null ||
     (!composerSendState.hasSendableContent && !showResumeAction);
   const collapsedComposerPrimaryActionLabel = showResumeAction
-    ? "Resume thread"
+    ? t("chat.dynamic.resume-thread")
     : props.resumeCompactionTokens !== null && !props.keepFullHistory
       ? "Open composer to compact and send"
-      : "Send message";
+      : t("options.sendMessage");
   const showMobilePendingAnswerActions =
     isMobileViewport && !isComposerCollapsedMobile && pendingPrimaryAction !== null;
 

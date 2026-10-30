@@ -16,11 +16,17 @@ import {
   isSettingsSearchScopeAvailable,
   movedSettingsPath,
   searchSettings,
+  SETTINGS_NAV_GROUPS,
   SETTINGS_SEARCH_ITEMS,
   sourceControlHostSearchItems,
   sourceControlHostSettingsSearchId,
   type SettingsSearchItem,
 } from "./settingsSearch";
+
+vi.mock("~/env", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("~/env")>()),
+  isSecretsFeatureEnabled: false,
+}));
 
 const ITEMS: ReadonlyArray<SettingsSearchItem> = [
   {
@@ -70,6 +76,11 @@ describe("searchSettings", () => {
         (item) => item.id,
       ),
     ).toContain("word-wrap");
+  });
+
+  it("hides the Secrets page from nav and search while the secrets feature is disabled", () => {
+    expect(SETTINGS_NAV_GROUPS.flatMap((group) => group.paths)).not.toContain("/settings/secrets");
+    expect(searchSettings("1password").map((item) => item.to)).not.toContain("/settings/secrets");
   });
 
   it("matches normalized title substrings", () => {

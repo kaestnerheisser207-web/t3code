@@ -57,7 +57,7 @@ jobs:
       - name: Setup dependencies
         uses: ./.github/actions/setup-ci-deps
         with:
-          install-args: --filter=@t3tools/desktop... --filter=t3... --filter=@t3tools/scripts... --filter=@t3tools/client-runtime...
+          install-args: --filter=@t3tools/desktop... --filter=@t3tools/web... --filter=t3... --filter=@t3tools/scripts... --filter=@t3tools/client-runtime...
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
@@ -69,7 +69,9 @@ jobs:
       - name: Test localization
         run: |
           (cd packages/client-runtime && vp test run src/i18n)
+          (cd packages/shared && vp test run src/cliRelease.test.ts)
           (cd apps/desktop && vp test run src/updates/updateChannels.test.ts)
+          (cd apps/web && vp test run src/versionSkew.test.ts src/components/sidebar/updateEverything.logic.test.ts)
 
       - name: Import signing certificate
         shell: bash

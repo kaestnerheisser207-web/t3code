@@ -245,8 +245,8 @@ export function DevicePanel(props: {
               key={`${environmentId}\u0000${deviceKey(activeDevice)}`}
               environmentId={environmentId}
               device={activeDevice}
-              hostLabel={activeHost?.label ?? "Device host"}
-              simlock={activeHost?.kind === "simlock"}
+              hostLabel={activeHost?.label ?? t("web.dynamic.RightPanelTabs.device-host")}
+              hostKind={activeHost?.kind}
               hostDiagnostics={
                 diagnostics.find(({ hostId }) => hostId === activeDevice.hostId)?.detail
               }
@@ -257,10 +257,10 @@ export function DevicePanel(props: {
             />
           ) : loading ? (
             <DeviceLoadingView
-              name={pendingDevice?.name ?? "Devices"}
+              name={pendingDevice?.name ?? t("settings.pages.ProviderSettingsPanel.devices")}
               description={
                 pendingDevice
-                  ? `${state.hosts.find((host) => host.id === pendingDevice.hostId)?.label ?? "Device host"} · ${pendingDevice.version}`
+                  ? `${state.hosts.find((host) => host.id === pendingDevice.hostId)?.label ?? t("web.dynamic.RightPanelTabs.device-host")} · ${pendingDevice.version}`
                   : ""
               }
               stage="opening"
@@ -270,7 +270,7 @@ export function DevicePanel(props: {
                     ? "Opening device…"
                     : "Starting device…"
                   : state.hostStatus === "installing"
-                    ? (state.hostStatusDetail ?? "Installing device support…")
+                    ? (state.hostStatusDetail ?? t("settings.status.installingDevice"))
                     : "Finding devices…"
               }
             />
@@ -320,14 +320,14 @@ export function DevicePanel(props: {
                                   {device.name}
                                 </span>
                                 <span className="truncate text-xs text-muted-foreground">
-                                  {`${state.hosts.find((host) => host.id === device.hostId)?.label} · ${device.version} · ${device.booted ? "Running" : "Stopped"}`}
+                                  {`${state.hosts.find((host) => host.id === device.hostId)?.label} · ${device.version} · ${device.booted ? t("web.ui.DeviceToolVersions.running") : t("lifecycle.interrupted")}`}
                                 </span>
                               </div>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 disabled={pendingDeviceKey !== null}
-                                aria-label={`${device.booted ? "Open" : "Start"} ${device.name}`}
+                                aria-label={`${device.booted ? t("web.dynamic.PullRequestReviewAnnotation.open") : t("web.dynamic.DevicePanel.start")} ${device.name}`}
                                 onClick={() => void selectDevice(deviceKey(device))}
                               >
                                 {pendingDeviceKey === deviceKey(device) ? (

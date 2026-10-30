@@ -1,3 +1,4 @@
+import { release3904En } from "./release-3904.en.ts";
 import { nightlyMergeEn } from "./nightly-merge.en.ts";
 import { prQuickEn } from "./pr-quick.en.ts";
 import { prSaveEn } from "./pr-save.en.ts";
@@ -128,6 +129,8 @@ import { settingsEn } from "./settings.en.ts";
 import { wizardEn } from "./wizard.en.ts";
 
 export const en = {
+  "settings.secrets": "Secrets",
+  ...release3904En,
   ...nightlyMergeEn,
   ...prQuickEn,
   ...prSaveEn,

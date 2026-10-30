@@ -1,7 +1,7 @@
 import { resources, type TranslationKey } from "@t3tools/client-runtime/i18n";
 import type { TFunction } from "i18next";
 import { HOSTED_APP_CHANNEL } from "~/branding";
-import { isElectron } from "~/env";
+import { isElectron, isSecretsFeatureEnabled } from "~/env";
 import { isMacPlatform, isWindowsPlatform, normalizeSearchText } from "~/lib/utils";
 import { STATIC_KEYBINDING_COMMANDS, type KeybindingCommand } from "@t3tools/contracts";
 import type { EnvironmentId } from "@t3tools/contracts";
@@ -35,6 +35,7 @@ export type SettingsPath =
   | "/settings/worktrees"
   | "/settings/connections"
   | "/settings/access"
+  | "/settings/secrets"
   | "/settings/maintenance"
   | "/settings/labs"
   | "/settings/about"
@@ -60,6 +61,7 @@ export interface SettingsSearchItem {
   readonly macOnly?: boolean;
   readonly windowsOnly?: boolean;
   readonly releaseChannelOnly?: boolean;
+  readonly secretsFeatureOnly?: boolean;
   readonly cloudOnly?: boolean;
   readonly environmentOnly?: boolean;
   readonly providerSettingsOnly?: boolean;
@@ -102,6 +104,7 @@ export const SETTINGS_SECTION_KEYS = {
   "/settings/worktrees": "settings.worktrees",
   "/settings/connections": "settings.environments",
   "/settings/access": "settings.access",
+  "/settings/secrets": "settings.secrets",
   "/settings/maintenance": "settings.maintenance",
   "/settings/labs": "settings.labs",
   "/settings/about": "settings.about",
@@ -144,7 +147,14 @@ export const SETTINGS_NAV_GROUPS: ReadonlyArray<{
     heading: "Code",
     paths: ["/settings/projects", "/settings/source-control", "/settings/worktrees"],
   },
-  { heading: "Connections", paths: ["/settings/connections", "/settings/access"] },
+  {
+    heading: "Connections",
+    paths: [
+      "/settings/connections",
+      "/settings/access",
+      ...(isSecretsFeatureEnabled ? (["/settings/secrets"] as const) : []),
+    ],
+  },
   {
     heading: null,
     paths: ["/settings/maintenance", "/settings/labs", "/settings/about", "/settings/archived"],
@@ -327,6 +337,14 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     titleKey: "settings.items.chat-width.title",
     to: "/settings/appearance",
     searchTerms: ["wide full width column layout messages composer monitor"],
+  },
+  {
+    id: "thread-details-items",
+    titleKey: "release3904.thread-details",
+    to: "/settings/appearance",
+    searchTerms: [
+      "customize show hide panel card environment editor scripts branch pull request git changes servers automations lineage usage limits 5 hour weekly quota tokens context window 对话详情 显示 隐藏 用量 上下文",
+    ],
   },
   {
     id: "effort-display",
@@ -1148,6 +1166,21 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     ],
   },
   {
+    id: "secret-providers",
+    titleKey: "release3904.secret-providers",
+    to: "/settings/secrets",
+    searchTerms: ["1password vault credentials api key 凭证 密钥 密码 保险库"],
+    secretsFeatureOnly: true,
+  },
+  {
+    id: "secret-providers-add",
+    titleKey: "release3904.add-secret-provider",
+    to: "/settings/secrets",
+    targetId: "secret-providers",
+    searchTerms: ["new 1password vault op cli account 添加 凭证 账户"],
+    secretsFeatureOnly: true,
+  },
+  {
     id: "archive",
     titleKey: "settings.items.archive.title",
     to: "/settings/archived",
@@ -1183,6 +1216,7 @@ const SETTINGS_CATEGORY_SCOPES: Readonly<Record<SettingsPath, SettingsSearchScop
   "/settings/worktrees": "project-defaults",
   "/settings/connections": "connections",
   "/settings/access": "connections",
+  "/settings/secrets": null,
   "/settings/scheduled-tasks": null,
   "/settings/maintenance": null,
   "/settings/labs": null,
@@ -1334,6 +1368,7 @@ export function settingsForThisPlatform(
     (item) =>
       (isElectron || item.desktopOnly !== true) &&
       (!item.releaseChannelOnly || isElectron || HOSTED_APP_CHANNEL !== null) &&
+      (!item.secretsFeatureOnly || isSecretsFeatureEnabled) &&
       (!item.macOnly || isMacPlatform(platform)) &&
       (!item.windowsOnly || isWindowsPlatform(platform)),
   );

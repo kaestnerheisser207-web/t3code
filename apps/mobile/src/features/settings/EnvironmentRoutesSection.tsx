@@ -1,3 +1,4 @@
+import { sessionPermissionsText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import * as Dialog from "../../components/ui/Dialog";
@@ -115,9 +116,9 @@ export function EnvironmentRoutesSection({
       `Remove ${connectionRouteLabel(route)}?`,
       connectionRouteAddress(route) ?? undefined,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("web.remaining.ServerBrowserSurface.cancel"), style: "cancel" },
         {
-          text: "Remove",
+          text: t("web.dynamic.CliCommandSettingsRow.remove"),
           style: "destructive",
           onPress: () =>
             void removeRoute({ environmentId, routeId: connectionRouteId(route.target) }),
@@ -173,8 +174,16 @@ export function EnvironmentRoutesSection({
             </>
           ) : (
             <Text className="text-sm text-foreground-muted">
-              {t(
-                "mobile.settings.EnvironmentRoutesSection.permissions-not-checked-connect-to-this-environment-to-view-this-session-s-permissions",
+              {sessionPermissionsText(
+                {
+                  connected: activeRouteId !== null,
+                  failed: sessionResult._tag === "Failure",
+                  rejected:
+                    sessionResult._tag !== "Failure" &&
+                    !sessionResult.waiting &&
+                    session?.authenticated === false,
+                },
+                t,
               )}
             </Text>
           )}
@@ -291,7 +300,7 @@ function RouteRow(props: {
           label,
           address,
           isLearned(route) ? "Found automatically" : null,
-          props.inUse ? "In use" : null,
+          props.inUse ? t("settings.pages.EnvironmentRoutesList.in-use") : null,
           `Route ${props.position} of ${props.count}`,
         ]
           .filter((part) => part !== null)

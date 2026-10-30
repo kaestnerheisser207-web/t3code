@@ -30,7 +30,7 @@ export function GitBranchesSheet(_props: GitBranchesSheetProps) {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const { selectedThread } = useThreadSelection();
-  const { selectedThreadCwd, selectedThreadWorktreePath } = useSelectedThreadWorktree();
+  const { selectedThreadCwd } = useSelectedThreadWorktree();
   const gitState = useSelectedThreadGitState();
   const gitActions = useSelectedThreadGitActions();
   const { canChangeThreadBranch } = gitActions;
@@ -44,15 +44,16 @@ export function GitBranchesSheet(_props: GitBranchesSheetProps) {
       : null,
   );
 
-  const currentBranchLabel = gitStatus.data?.refName ?? selectedThread?.branch ?? "Detached HEAD";
-  const currentWorktreePath = selectedThreadWorktreePath;
+  const currentBranchLabel =
+    gitStatus.data?.refName ?? selectedThread?.branch ?? t("mobile.git.detached");
+  const currentWorktreePath = selectedThreadCwd;
   const availableBranches = gitState.selectedThreadBranches;
   const branchesLoading = gitState.selectedThreadBranchesLoading;
   const busy = gitState.gitOperationLabel !== null;
 
   const [newBranchName, setNewBranchName] = useState("");
   const [worktreeBaseBranch, setWorktreeBaseBranch] = useState(
-    currentBranchLabel === "Detached HEAD" ? "main" : currentBranchLabel,
+    currentBranchLabel === t("mobile.git.detached") ? "main" : currentBranchLabel,
   );
   const [worktreeBranchName, setWorktreeBranchName] = useState("");
 
@@ -208,7 +209,7 @@ export function GitBranchesSheet(_props: GitBranchesSheetProps) {
                   ? "Checked out in this thread"
                   : "Checked out in another worktree"
                 : branch.isDefault
-                  ? "Default branch"
+                  ? t("web.ui.GitActionsControl.default-branch")
                   : "Local branch";
 
               return (

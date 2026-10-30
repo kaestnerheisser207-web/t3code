@@ -1,3 +1,4 @@
+import { sessionPermissionsText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { type EnvironmentId, sessionGrantsScope } from "@t3tools/contracts";
 import { AUTH_SCOPE_OPTIONS } from "@t3tools/shared/authScopeOptions";
@@ -40,8 +41,14 @@ export function SessionPermissions({
     </div>
   ) : (
     <p className="py-3 text-xs text-muted-foreground">
-      {t(
-        "settings.pages.SessionPermissions.permissions-not-checked-connect-to-this-environment-to-view-this-session-s-permissions",
+      {sessionPermissionsText(
+        {
+          connected,
+          failed: session.hasError,
+          rejected:
+            !session.hasError && !session.isPending && session.data?.authenticated === false,
+        },
+        t,
       )}
     </p>
   );

@@ -21,6 +21,9 @@ const MISMATCH_HINT =
 
 describe("versionSkew", () => {
   it("updates only the proven npm prefix and safely quotes its path", () => {
+    expect(manualServerUpdateCommand("0.1.6-nightly.20261030.3904.zh.1")).toBe(
+      "npx t3@0.1.6-nightly.20261030.3904",
+    );
     expect(manualServerUpdateCommand("0.0.45", { kind: "npm-global", prefix: "/opt/node" })).toBe(
       "npm install --global --prefix '/opt/node' t3@0.0.45",
     );
@@ -56,6 +59,17 @@ describe("versionSkew", () => {
     expect(resolveVersionMismatch("0.0.33")).toEqual({
       clientVersion: "0.0.34",
       serverVersion: "0.0.33",
+      hint: MISMATCH_HINT,
+    });
+  });
+
+  it("compares localized clients and update targets against the official release", () => {
+    branding.APP_VERSION = "0.1.4-nightly.20261029.3853.zh.2";
+    expect(resolveVersionMismatch("0.1.4-nightly.20261029.3853")).toBeNull();
+    expect(resolveVersionMismatch("0.1.4-nightly.20261029.3853.zh.1")).toBeNull();
+    expect(resolveVersionMismatch("0.1.4-nightly.20261029.3852")).toEqual({
+      clientVersion: "0.1.4-nightly.20261029.3853",
+      serverVersion: "0.1.4-nightly.20261029.3852",
       hint: MISMATCH_HINT,
     });
   });

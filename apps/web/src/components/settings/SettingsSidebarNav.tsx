@@ -22,6 +22,7 @@ import {
   MessagesSquareIcon,
   PanelsTopLeftIcon,
   KeyboardIcon,
+  KeyRoundIcon,
   PaletteIcon,
   SearchIcon,
   ServerIcon,
@@ -104,6 +105,7 @@ const SETTINGS_SECTION_ICONS: Readonly<
   "/settings/worktrees": FolderTreeIcon,
   "/settings/connections": ServerIcon,
   "/settings/access": ShieldCheckIcon,
+  "/settings/secrets": KeyRoundIcon,
   "/settings/maintenance": WrenchIcon,
   "/settings/labs": FlaskConicalIcon,
   "/settings/about": InfoIcon,
@@ -127,7 +129,12 @@ function SettingsSectionIcon({ to }: { to: SettingsPath }) {
 }
 
 export function SettingsSidebarNav({ pathname }: { pathname: string }) {
-  const navArea = workspaceAreaProps("settings-nav", 0, "Settings sections");
+  const t = useTranslate();
+  const navArea = workspaceAreaProps(
+    "settings-nav",
+    0,
+    t("settings.pages.SettingsSidebarNav.settings-sections"),
+  );
   const navigate = useNavigate();
   const currentHash = useLocation({ select: (location) => location.hash });
   const currentSearch = useLocation({ select: (location) => location.search });
@@ -144,7 +151,7 @@ export function SettingsSidebarNav({ pathname }: { pathname: string }) {
   // Below md the nav is an icon rail; searching expands it over the page.
   const [compactSearchOpen, setCompactSearchOpen] = useState(false);
   const [activeResultIndex, setActiveResultIndex] = useState(0);
-  const t = useTranslate();
+
   const searchableItems = localizeSettingsSearchItems(
     useAvailableSettingsSearchItems(scopeSearch),
     t,

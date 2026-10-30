@@ -1,3 +1,4 @@
+import { updateReasonText } from "./updateEverything.i18n";
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
@@ -49,6 +50,14 @@ interface UpdateEverythingDialogProps {
   readonly rows: ReadonlyArray<UpdateEverythingRow>;
   readonly restarts: ReadonlyArray<RestartingMachine>;
   readonly onConfirm: () => void;
+  /** Overrides the "Update N machines?" title, for an update-track switch. */
+  readonly title?: string;
+  readonly confirmLabel?: string;
+  readonly notes?: ReadonlyArray<string>;
+  /** Shown in place of running-thread counts; disables the confirm button. */
+  readonly disabledReason?: string | null;
+  /** The confirmed work is starting; it cannot be cancelled from here. */
+  readonly busy?: boolean;
 }
 
 type UpdateEverythingDialogContentProps = Omit<
@@ -91,6 +100,11 @@ function UpdateEverythingDialogContent({
   restarts,
   onConfirm,
   cancelRef,
+  title,
+  confirmLabel,
+  notes = [],
+  disabledReason = null,
+  busy = false,
 }: UpdateEverythingDialogContentProps) {
   const t = useTranslate();
   const stopped = useAtomValue(
@@ -119,20 +133,22 @@ function UpdateEverythingDialogContent({
     <>
       <AlertDialogHeader className="shrink-0">
         <AlertDialogTitle>
-          <Trans
-            t={t}
-            i18nKey="web.rich.UpdateEverythingDialog.update-part-part"
-            components={{
-              value0: <>{updating.length}</>,
-              value1: (
-                <>
-                  {updating.length === 1
-                    ? t("web.dynamic.UpdateEverythingDialog.machine")
-                    : t("web.dynamic.UpdateEverythingDialog.machines")}
-                </>
-              ),
-            }}
-          />
+          {title ?? (
+            <Trans
+              t={t}
+              i18nKey="web.rich.UpdateEverythingDialog.update-part-part"
+              components={{
+                value0: <>{updating.length}</>,
+                value1: (
+                  <>
+                    {updating.length === 1
+                      ? t("web.dynamic.UpdateEverythingDialog.machine")
+                      : t("web.dynamic.UpdateEverythingDialog.machines")}
+                  </>
+                ),
+              }}
+            />
+          )}
         </AlertDialogTitle>
         <AlertDialogDescription>
           {version !== null ? (
@@ -148,6 +164,11 @@ function UpdateEverythingDialogContent({
       </AlertDialogHeader>
       <ScrollArea scrollFade>
         <div className="flex flex-col gap-3 px-6 pb-4">
+          {notes.map((note) => (
+            <p key={note} className="text-muted-foreground text-sm">
+              {note}
+            </p>
+          ))}
           {/* Machine names truncate first. Provider lists wrap between names, never inside one. */}
           <div className="grid grid-cols-[minmax(4rem,max-content)_max-content_minmax(min-content,1fr)_max-content] gap-x-4 text-sm">
             <div className="col-span-full grid grid-cols-subgrid border-b pb-1.5 text-muted-foreground text-xs">
@@ -197,7 +218,7 @@ function UpdateEverythingDialogContent({
             <Collapsible>
               <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground text-xs hover:text-foreground data-panel-open:[&_svg]:rotate-90">
                 <ChevronRightIcon className="size-3.5 transition-transform" aria-hidden />
-                {skipped.length} skipped
+                {t("release3904.skipped-count", { count: skipped.length })}
               </CollapsibleTrigger>
               <CollapsiblePanel>
                 <div className="grid grid-cols-[minmax(0,max-content)_1fr] gap-x-3 gap-y-0.5 pt-1.5 ps-4.5 text-muted-foreground text-xs">
@@ -206,7 +227,7 @@ function UpdateEverythingDialogContent({
                       <span className="max-w-32 min-w-0">
                         <MiddleTruncate value={row.label} />
                       </span>
-                      <span className="wrap-anywhere">{row.skipped}</span>
+                      <span className="wrap-anywhere">{updateReasonText(row.skipped!, t)}</span>
                     </Fragment>
                   ))}
                 </div>
@@ -216,7 +237,11 @@ function UpdateEverythingDialogContent({
         </div>
       </ScrollArea>
       <AlertDialogFooter>
-        {running > 0 ? (
+        {disabledReason !== null ? (
+          <p className="self-center text-sm max-sm:order-1 max-sm:text-center sm:mr-auto">
+            {disabledReason}
+          </p>
+        ) : running > 0 ? (
           <p className="self-center text-muted-foreground text-sm max-sm:order-1 max-sm:text-center sm:mr-auto">
             {stopped === 0
               ? t(
@@ -233,10 +258,12 @@ function UpdateEverythingDialogContent({
                   )}
           </p>
         ) : null}
-        <AlertDialogClose ref={cancelRef} render={<Button variant="outline" />}>
+        <AlertDialogClose ref={cancelRef} render={<Button variant="outline" disabled={busy} />}>
           {t("web.ui.UpdateEverythingDialog.cancel")}
         </AlertDialogClose>
-        <Button onClick={onConfirm}>{t("web.ui.UpdateEverythingDialog.update")}</Button>
+        <Button disabled={disabledReason !== null || busy} onClick={onConfirm}>
+          {confirmLabel ?? t("web.dynamic.SavedEnvironmentRows.update")}
+        </Button>
       </AlertDialogFooter>
     </>
   );

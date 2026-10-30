@@ -46,12 +46,13 @@ import { threadRuntimeCanArchive } from "@t3tools/client-runtime/state/models";
 import { useCopyToClipboard } from "./useCopyToClipboard";
 import { useNewThreadHandler } from "./useHandleNewThread";
 import { useClientSettings } from "./useSettings";
-import { useThreadActions } from "./useThreadActions";
+import { canTurnThreadIntoProject, useThreadActions } from "./useThreadActions";
 
 export function useThreadActionMenu(input: {
   readonly threadRef: ScopedThreadRef | null;
   readonly projectCwd: string | null;
   readonly onStartRename: () => void;
+  readonly onFind?: ((threadRef: ScopedThreadRef) => void) | undefined;
   readonly canShareWithGuest: boolean;
 }) {
   const t = useTranslate();
@@ -64,7 +65,7 @@ export function useThreadActionMenu(input: {
       }),
     );
   }
-  const { threadRef, projectCwd, onStartRename, canShareWithGuest } = input;
+  const { threadRef, projectCwd, onStartRename, onFind, canShareWithGuest } = input;
   const router = useRouter();
   const projects = useProjects();
   const primaryEnvironmentId = usePrimaryEnvironmentId();
@@ -85,6 +86,7 @@ export function useThreadActionMenu(input: {
     archiveThread,
     deleteThread,
     markThreadUnread,
+    turnThreadIntoProject,
   } = useThreadActions();
   const updateThreadMetadata = useOrchestrationCommand(threadEnvironment.updateMetadata, {
     reportFailure: false,
@@ -141,6 +143,8 @@ export function useThreadActionMenu(input: {
       const snoozePresets = resolveSnoozePresets(now, timestampFormat, threadRef.environmentId, t);
       const items = buildThreadActionMenuItems(
         {
+          canFind: onFind !== undefined,
+          canTurnIntoProject: canTurnThreadIntoProject(threadRef),
           canOperate: readEnvironmentScope(threadRef.environmentId, AuthOrchestrationOperateScope),
           branch: thread.branch ?? null,
           projectFilter: null,
@@ -195,6 +199,9 @@ export function useThreadActionMenu(input: {
         }
       };
       switch (action) {
+        case "find":
+          onFind?.(threadRef);
+          return;
         case "project-settings": {
           const project = projects.find(
             (candidate) =>
@@ -266,6 +273,22 @@ export function useThreadActionMenu(input: {
         case "share-guest":
           openGuestShareDialog(threadRef);
           return;
+        case "turn-into-project": {
+          const result = await turnThreadIntoProject(threadRef);
+          if (result._tag === "Success") {
+            toastManager.add({
+              type: "success",
+              title: t("release3904.project-created"),
+              description: thread.title,
+            });
+          } else if (!isAtomCommandInterrupted(result)) {
+            failureToast(
+              t("release3904.could-not-turn-thread-into-a-project"),
+              squashAtomCommandFailure(result),
+            );
+          }
+          return;
+        }
         case "copy-path": {
           const workspacePath = thread.worktreePath ?? projectCwd;
           if (!workspacePath) {

@@ -6,6 +6,7 @@ import type {
 } from "@t3tools/contracts";
 import type { ServerUpdateState } from "@t3tools/client-runtime/state/server";
 import { compareSemverVersions, parseSemver } from "@t3tools/shared/semver";
+import { officialReleaseVersion } from "@t3tools/shared/cliRelease";
 import * as Schema from "effect/Schema";
 
 import { APP_VERSION } from "./branding";
@@ -37,7 +38,7 @@ type VersionMismatchDismissals = typeof VersionMismatchDismissalsSchema.Type;
 
 function normalizeVersion(version: string | null | undefined): string | null {
   const trimmed = version?.trim();
-  return trimmed && trimmed.length > 0 ? trimmed : null;
+  return trimmed && trimmed.length > 0 ? officialReleaseVersion(trimmed) : null;
 }
 
 function versionCore(version: string): string {
@@ -99,6 +100,7 @@ export function manualServerUpdateCommand(
   targetVersion: string,
   installation?: ServerInstallation,
 ): string {
+  targetVersion = officialReleaseVersion(targetVersion);
   if (installation?.kind === "npm-global") {
     const prefix = `'${installation.prefix.replaceAll("'", "'\\''")}'`;
     return `npm install --global --prefix ${prefix} t3@${targetVersion}`;

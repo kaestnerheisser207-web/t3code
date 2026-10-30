@@ -120,6 +120,8 @@ interface GitActionsControlProps {
   activeThreadRef: ScopedThreadRef | null;
   draftId?: DraftId;
   compact?: boolean;
+  showActions?: boolean;
+  showChanges?: boolean;
   onOpenChanges?: () => void;
 }
 
@@ -299,6 +301,7 @@ function GitQuickActionIcon({
   className?: string;
   SourceControlIcon: ReturnType<typeof getSourceControlPresentation>["Icon"];
 }) {
+  const t = useTranslate();
   if (quickAction.kind === "open_publish") return <CloudUploadIcon className={className} />;
   if (quickAction.kind === "run_pull") return <CloudDownloadIcon className={className} />;
   if (quickAction.kind === "run_action") {
@@ -308,8 +311,9 @@ function GitQuickActionIcon({
     }
     return <SourceControlIcon className={className} />;
   }
-  if (quickAction.label === "Commit") return <GitCommitIcon className={className} />;
-  if (quickAction.label === "Push") return <CloudUploadIcon className={className} />;
+  if (quickAction.label === t("web.ui.GitActionsControl.commit"))
+    return <GitCommitIcon className={className} />;
+  if (quickAction.label === t("git.labels.push")) return <CloudUploadIcon className={className} />;
   return <InfoIcon className={className} />;
 }
 
@@ -510,7 +514,11 @@ function PublishRepositoryDialog(props: PublishRepositoryDialogProps) {
   );
   const publishPathPlaceholder = currentPublishProvider.pathPlaceholder;
   const publishProviderLabel = currentPublishProvider.label;
-  const publishWizardSteps = ["Provider", "Repository", "Summary"] as const;
+  const publishWizardSteps = [
+    t("web.ui.GitActionsControl.provider"),
+    t("web.ui.GitActionsControl.repository"),
+    t("web.pr.tab.summary"),
+  ] as const;
   const publishWizardStepSummaries = [
     publishProviderLabel,
     publishResult?.repository.nameWithOwner ?? null,
@@ -956,6 +964,8 @@ export default function GitActionsControl({
   activeThreadRef,
   draftId,
   compact = false,
+  showActions = true,
+  showChanges = true,
   onOpenChanges,
 }: GitActionsControlProps) {
   const t = useTranslate();
@@ -1523,7 +1533,7 @@ export default function GitActionsControl({
 
   return (
     <>
-      {!isRepo ? (
+      {!showActions ? null : !isRepo ? (
         <ThreadDetailsControl
           size="xs"
           variant="ghost"
@@ -1667,7 +1677,7 @@ export default function GitActionsControl({
         </div>
       )}
 
-      {isRepo && !quietEmptyDraft ? (
+      {showChanges && isRepo && !quietEmptyDraft ? (
         <ThreadDetailsControl
           type="button"
           variant="ghost"
@@ -1906,13 +1916,16 @@ export default function GitActionsControl({
         </DialogPopup>
       </Dialog>
 
-      <PublishRepositoryDialog
-        open={isPublishDialogOpen}
-        onOpenChange={setIsPublishDialogOpen}
-        environmentId={activeEnvironmentId}
-        threadRef={activeThreadRef}
-        gitCwd={gitCwd}
-      />
+      {/* Its discovery query should stop when the Git actions row that opens it is hidden. */}
+      {showActions ? (
+        <PublishRepositoryDialog
+          open={isPublishDialogOpen}
+          onOpenChange={setIsPublishDialogOpen}
+          environmentId={activeEnvironmentId}
+          threadRef={activeThreadRef}
+          gitCwd={gitCwd}
+        />
+      ) : null}
 
       <Dialog
         open={pendingDefaultBranchAction !== null}

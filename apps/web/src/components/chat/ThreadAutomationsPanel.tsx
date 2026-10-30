@@ -110,7 +110,7 @@ export function ThreadAutomationsPanel(props: {
     });
     setBusyTaskId(null);
     if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
-      reportFailure("Could not update automation", squashAtomCommandFailure(result));
+      reportFailure(t("release3904.could-not-update-automation"), squashAtomCommandFailure(result));
     }
   };
 
@@ -127,7 +127,7 @@ export function ThreadAutomationsPanel(props: {
     });
     setBusyTaskId(null);
     if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
-      reportFailure("Could not run automation", squashAtomCommandFailure(result));
+      reportFailure(t("release3904.could-not-run-automation"), squashAtomCommandFailure(result));
     }
   };
 
@@ -160,16 +160,6 @@ export function ThreadAutomationsPanel(props: {
         </Tooltip>
       }
     >
-      {tasksQuery.error !== null ? (
-        <p className="px-2.5 py-1.5 text-2xs text-destructive">
-          <Trans
-            t={t}
-            i18nKey="web.rich.ThreadAutomationsPanel.could-not-load-automations-part"
-            components={{ value0: <>{tasksQuery.error}</> }}
-          />
-        </p>
-      ) : null}
-
       <ul className="m-0 list-none p-0">
         {boundTasks.map((task) => (
           <li
@@ -263,6 +253,12 @@ export function ThreadAutomationsPanel(props: {
           </li>
         ))}
       </ul>
+      {/* Kept last: the details card treats a section whose last child is empty as empty. */}
+      {tasksQuery.error !== null ? (
+        <p className="px-2.5 py-1.5 text-2xs text-destructive">
+          Could not load automations: {tasksQuery.error}
+        </p>
+      ) : null}
     </ThreadDetailsSection>
   );
 }

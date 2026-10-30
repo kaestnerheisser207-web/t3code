@@ -3,6 +3,7 @@ import { useTranslate } from "../../i18n";
 import {
   AuthOrchestrationOperateScope,
   type EnvironmentId,
+  type ScopedThreadRef,
   type ThreadId,
 } from "@t3tools/contracts";
 import { scopeThreadRef } from "@t3tools/client-runtime/environment";
@@ -56,6 +57,7 @@ interface ChatHeaderProps {
   rightPanelOpen: boolean;
   onNewThreadInProject: () => void;
   onOpenProjectSettings?: (() => void) | undefined;
+  onFindInThread?: ((threadRef: ScopedThreadRef) => void) | undefined;
 }
 
 function resolveRenameCommit(input: {
@@ -82,9 +84,12 @@ export const ChatHeader = memo(function ChatHeader({
   rightPanelOpen,
   onNewThreadInProject,
   onOpenProjectSettings,
+  onFindInThread,
 }: ChatHeaderProps) {
   const t = useTranslate();
-  const activeProjectName = activeProject?.isScratch ? "No project" : activeProject?.title;
+  const activeProjectName = activeProject?.isScratch
+    ? t("web.palette.no-project")
+    : activeProject?.title;
   const activeProjectCwd = activeProject?.workspaceRoot ?? null;
   const interfaceFont = useClientSettings((settings) => settings.fontFamilySans);
   const breadcrumbContainerRef = useRef<HTMLDivElement>(null);
@@ -189,8 +194,9 @@ export const ChatHeader = memo(function ChatHeader({
         const error = squashAtomCommandFailure(result);
         toastManager.add({
           type: "error",
-          title: "Failed to rename thread",
-          description: error instanceof Error ? error.message : "An error occurred.",
+          title: t("sidebar.extra.renameFailed"),
+          description:
+            error instanceof Error ? error.message : t("mobile.project.an-error-occurred"),
         });
       }
     });
@@ -199,6 +205,7 @@ export const ChatHeader = memo(function ChatHeader({
     threadRef: isServerThread ? activeThreadRef : null,
     projectCwd: activeProjectCwd,
     onStartRename: startRename,
+    onFind: onFindInThread,
     canShareWithGuest,
   });
   const titleButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -254,10 +261,13 @@ export const ChatHeader = memo(function ChatHeader({
       const api = readLocalApi();
       if (!api) return;
       void api.contextMenu
-        .show([{ id: "project-settings", label: "Project settings", icon: "settings" }], {
-          x: event.clientX,
-          y: event.clientY,
-        })
+        .show(
+          [{ id: "project-settings", label: t("web.palette.project-settings"), icon: "settings" }],
+          {
+            x: event.clientX,
+            y: event.clientY,
+          },
+        )
         .then((action) => {
           if (action === "project-settings") onOpenProjectSettings?.();
         });

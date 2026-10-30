@@ -119,6 +119,7 @@ function SidebarBrand({ onBackdrop }: { onBackdrop: boolean }) {
 }
 
 function SidebarBrandMark({ onBackdrop }: { onBackdrop: boolean }) {
+  const t = useTranslate();
   return (
     <span className="inline-flex min-w-0 items-baseline gap-1 text-sm font-medium tracking-tight">
       <T3Wordmark aria-label="T3" className="h-[1cap] w-auto shrink-0" />
@@ -128,7 +129,7 @@ function SidebarBrandMark({ onBackdrop }: { onBackdrop: boolean }) {
           onBackdrop ? "text-white/70" : "text-muted-foreground",
         )}
       >
-        Code
+        {t("web.pr.tab.code")}
       </span>
     </span>
   );
@@ -227,19 +228,15 @@ const SidebarUtilityMenu = memo(function SidebarUtilityMenu() {
           />
         </>
       )}
+      <SidebarThreadUndoNotice />
       <SidebarUpdatePill />
     </SidebarMenu>
   );
 });
 
-export const SidebarChromeFooter = memo(function SidebarChromeFooter({
-  showUndoNotice = false,
-}: {
-  showUndoNotice?: boolean;
-}) {
+export const SidebarChromeFooter = memo(function SidebarChromeFooter() {
   return (
     <SidebarFooter>
-      {showUndoNotice ? <SidebarThreadUndoNotice /> : null}
       <SidebarProviderUpdatePill />
       <SidebarUpdateArchitectureWarning />
       <SidebarUtilityMenu />

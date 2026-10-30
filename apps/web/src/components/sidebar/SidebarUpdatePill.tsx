@@ -55,7 +55,7 @@ function shouldUseSidebarUpdateReleaseNotesPopover(
   showUpdateDetails: boolean,
   state: DesktopUpdateState | null,
 ): boolean {
-  return showUpdateDetails && state?.channel === "nightly" && state.releaseNotes.length > 0;
+  return showUpdateDetails && (state?.releaseNotes.length ?? 0) > 0;
 }
 
 function handleSidebarUpdateReleaseNotesPopoverOpenChange(
@@ -137,7 +137,7 @@ const toastUpdateError: ReportLocalUpdateError = (title, description) => {
   toastManager.add(stackedThreadToast({ type: "error", title, description }));
 };
 
-async function downloadLocalUpdate(
+export async function downloadLocalUpdate(
   bridge: DesktopBridge,
   {
     notifyDownloaded,
@@ -164,13 +164,14 @@ async function downloadLocalUpdate(
   }
 }
 
-async function installLocalUpdate(
+export async function installLocalUpdate(
   bridge: DesktopBridge,
   reportError: ReportLocalUpdateError = toastUpdateError,
+  expectedVersion?: string,
   t?: TFunction,
 ): Promise<boolean> {
   try {
-    const result = await bridge.installUpdate();
+    const result = await bridge.installUpdate(expectedVersion);
     if (!result.accepted) {
       showDesktopUpdateDownloadedToast(bridge, result.state, t);
       return false;
@@ -250,10 +251,11 @@ function SidebarUpdateControl() {
     : showUpdateDetails
       ? state
         ? getDesktopUpdateButtonTooltip(state)
-        : "Update available"
+        : t("provider.summary.updateAvailable")
       : showCheckIcon
         ? "Checking for updates…"
-        : (idleTooltip?.title ?? "Check for updates");
+        : (idleTooltip?.title ??
+          t("mobile.settings.SettingsEnvironmentDetailRouteScreen.check-for-updates"));
   const disabled = showCheckIcon
     ? true
     : runsEverything
@@ -305,8 +307,11 @@ function SidebarUpdateControl() {
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Could not confirm update",
-            description: error instanceof Error ? error.message : "Update confirmation failed.",
+            title: t("settings.support.could-not-confirm-update"),
+            description:
+              error instanceof Error
+                ? error.message
+                : t("settings.support.update-confirmation-failed"),
           }),
         );
         return;
@@ -315,7 +320,9 @@ function SidebarUpdateControl() {
         setIsActionPending(false);
         return;
       }
-      void installLocalUpdate(bridge, undefined, t).finally(() => setIsActionPending(false));
+      void installLocalUpdate(bridge, undefined, undefined, t).finally(() =>
+        setIsActionPending(false),
+      );
       return;
     }
 
@@ -330,9 +337,10 @@ function SidebarUpdateControl() {
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Could not check for updates",
+            title: t("settings.support.could-not-check-for-updates"),
             description:
-              result.state.message ?? "Automatic updates are not available in this build.",
+              result.state.message ??
+              t("settings.support.automatic-updates-are-not-available-in-this-build"),
           }),
         );
       })
@@ -340,8 +348,9 @@ function SidebarUpdateControl() {
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Could not check for updates",
-            description: error instanceof Error ? error.message : "Update check failed.",
+            title: t("settings.support.could-not-check-for-updates"),
+            description:
+              error instanceof Error ? error.message : t("settings.support.update-check-failed"),
           }),
         );
       })
@@ -361,7 +370,7 @@ function SidebarUpdateControl() {
             }
           : {}),
         ...(bridge && action !== "none"
-          ? { installLocal: (reportError) => installLocalUpdate(bridge, reportError, t) }
+          ? { installLocal: (reportError) => installLocalUpdate(bridge, reportError, undefined, t) }
           : {}),
       }),
     );
@@ -371,7 +380,8 @@ function SidebarUpdateControl() {
         stackedThreadToast({
           type: "error",
           title: "Could not update everything",
-          description: error instanceof Error ? error.message : "An unexpected error occurred.",
+          description:
+            error instanceof Error ? error.message : t("release3904.an-unexpected-error-occurred"),
         }),
       );
     }
@@ -433,7 +443,7 @@ function SidebarUpdateControl() {
                     failures: [],
                     restarting: [],
                   });
-                  if (!(await installLocalUpdate(window.desktopBridge!, undefined, t))) {
+                  if (!(await installLocalUpdate(window.desktopBridge!, undefined, undefined, t))) {
                     clearSavedUpdateEverythingResult();
                   }
                 },
@@ -547,7 +557,7 @@ function SidebarUpdateControl() {
         {showReleaseNotesPopover && state ? (
           <PopoverPopup
             align="center"
-            aria-label={t("web.ui.SidebarUpdatePill.nightly-update-release-notes")}
+            aria-label={t("release3904.update-release-notes")}
             initialFocus={false}
             onKeyDownCapture={(event) => {
               if (

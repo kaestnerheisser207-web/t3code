@@ -65,6 +65,8 @@ import { useThreadPr } from "../../state/use-thread-pr";
 import { useSwipeRowDormant } from "../home/swipe-row-activation";
 import { ThreadSwipeable } from "../home/thread-swipe-actions";
 import { buildThreadTitleRegenerationMenuItems } from "./thread-title-regeneration-menu";
+import { canTurnThreadIntoProject, turnThreadIntoProject } from "./turnThreadIntoProject";
+import { threadCanArchive } from "../home/threadArchive";
 import {
   THREAD_LIST_V2_SETTLED_PAGE_COUNT,
   resolveThreadListV2SnoozeGateExpiryMs,
@@ -336,9 +338,9 @@ export const ThreadListV2ShowMoreRow = memo(function ThreadListV2ShowMoreRow(pro
   const t = useTranslate();
   const label =
     props.state === "loading"
-      ? "Loading"
+      ? t("web.dynamic.AcpSessionManagementSection.loading")
       : props.state === "failed"
-        ? "Could not load older threads. Retry"
+        ? t("web.dynamic.Sidebar.could-not-load-older-threads-retry")
         : `Show more (${props.hiddenCount} settled hidden)`;
   return (
     <Pressable
@@ -412,7 +414,9 @@ export const ThreadListV2PendingRow = memo(function ThreadListV2PendingRow(props
   const sidebarPane = props.pane === "sidebar";
   const rowAppearance = getThreadListV2RowAppearance(theme, sidebarPane, props.selected ?? false);
   const isDraft = pendingTask.kind === "draft";
-  const deleteLabel = isDraft ? "Discard" : "Delete";
+  const deleteLabel = isDraft
+    ? t("thread.menu.discard")
+    : t("web.dynamic.AcpSessionManagementSection.delete");
   const handleDelete = useCallback(
     () => onDeletePendingTask(pendingTask),
     [onDeletePendingTask, pendingTask],
@@ -897,6 +901,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
         : [],
     [t, props.autoSettleOptOutSupported, thread.autoSettleDisabledAt],
   );
+  const canTurnIntoProject = canTurnThreadIntoProject(thread);
   const titleMenuItems = useMemo<MenuAction[]>(
     () => [
       { id: "rename", title: t("thread.menu.rename"), image: "square.and.pencil" },
@@ -907,8 +912,24 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
         },
         t,
       ),
+      ...(canTurnIntoProject
+        ? [
+            {
+              id: "turn-into-project",
+              title: t("release3904.turn-into-project"),
+              image: "folder.badge.plus",
+              attributes: { disabled: !threadCanArchive(thread.runtime) },
+            } satisfies MenuAction,
+          ]
+        : []),
     ],
-    [t, props.titleRegenerationSupported, thread.titleRegeneration],
+    [
+      t,
+      canTurnIntoProject,
+      props.titleRegenerationSupported,
+      thread.runtime,
+      thread.titleRegeneration,
+    ],
   );
   const snoozableCardMenuActions = useMemo<MenuAction[]>(
     () => [
@@ -991,6 +1012,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
       if (nativeEvent.event === "archive") handleArchive();
       if (nativeEvent.event === "rename") handleRename();
       if (nativeEvent.event === "regenerate-title") handleRegenerateTitle();
+      if (nativeEvent.event === "turn-into-project") void turnThreadIntoProject(thread);
       if (nativeEvent.event === "copy-thread") {
         const target = threadChipCopyTarget(
           { environmentId: thread.environmentId, threadId: thread.id },

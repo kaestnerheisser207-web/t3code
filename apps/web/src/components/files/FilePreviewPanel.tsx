@@ -86,6 +86,7 @@ import { BrowserDocumentFrame, isPdfPreviewFile } from "./BrowserDocumentFrame";
 import { DelimitedTablePreview } from "./DelimitedTablePreview";
 import { PreviewImage } from "./PreviewImage";
 import FileBrowserPanel from "./FileBrowserPanel";
+import { FileExplorerPane } from "./FileExplorerPane";
 import { FileBreadcrumbs } from "./FileBreadcrumbs";
 import { breadcrumbPathOf, retainedBreadcrumbTrail, trailChildOf } from "./filePath";
 import { FileMarkdownPreview } from "./FileMarkdownPreview";
@@ -1213,8 +1214,9 @@ export default function FilePreviewPanel({
       toastManager.add(
         stackedThreadToast({
           type: "error",
-          title: "Unable to open file in browser",
-          description: error instanceof Error ? error.message : "An error occurred.",
+          title: t("files.action.browserFailed"),
+          description:
+            error instanceof Error ? error.message : t("mobile.project.an-error-occurred"),
         }),
       );
     })();
@@ -1450,7 +1452,7 @@ export default function FilePreviewPanel({
                         ...(isDocument ? {} : { disposition: "attachment" as const }),
                       },
               }}
-              origin="File"
+              origin={t("mobile.common.ComposerContextSheet.file")}
             />
           ) : relativePath && file.error && file.data === null ? (
             <div
@@ -1549,14 +1551,7 @@ export default function FilePreviewPanel({
           ) : null}
         </div>
         {showExplorer ? (
-          <aside
-            className={cn(
-              "flex min-h-0 shrink-0 bg-background",
-              previewPath
-                ? "w-[min(22rem,46%)] min-w-64 border-l border-border/60"
-                : "min-w-0 flex-1",
-            )}
-          >
+          <FileExplorerPane resizable={Boolean(previewPath)}>
             <FileBrowserPanel
               key={`${environmentId}:${hostFolderPath ?? cwd}`}
               environmentId={environmentId}
@@ -1580,7 +1575,7 @@ export default function FilePreviewPanel({
                   }
                 : {})}
             />
-          </aside>
+          </FileExplorerPane>
         ) : null}
       </div>
     </div>
@@ -1614,7 +1609,7 @@ export function WorkspaceLargeTextPreview(props: {
     toastManager.add({
       type: "error",
       title: "Could not read file",
-      description: cause instanceof Error ? cause.message : "Try again.",
+      description: cause instanceof Error ? cause.message : t("thread.action.tryAgain"),
     });
   };
   // Each workspace mutation re-mints the URL, so an edited file loads its new bytes.
@@ -1637,7 +1632,7 @@ export function WorkspaceLargeTextPreview(props: {
   if (assetUrl._tag === "Failure")
     return (
       <FileSurfaceFailure
-        message="Unable to load file preview."
+        message={t("web.ui.FilePreviewPanel.unable-to-load-file-preview")}
         onRetry={() => {
           setRevision((value) => value + 1);
           void refreshAssetUrl().catch(showError);

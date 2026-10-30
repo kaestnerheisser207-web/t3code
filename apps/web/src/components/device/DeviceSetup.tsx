@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { useTranslate } from "../../i18n";
 import { DeviceHostUpdates } from "./DeviceHostUpdates";
 import type { DevicePlatform, DeviceServiceState, EnvironmentId } from "@t3tools/contracts";
@@ -76,7 +77,11 @@ function DeviceHostDiagnostics(props: {
   );
 }
 
-export function platformSetupStatus(state: DeviceServiceState, platform: DevicePlatform) {
+export function platformSetupStatus(
+  state: DeviceServiceState,
+  platform: DevicePlatform,
+  t?: TFunction,
+) {
   const hasDevices = state.devices.some((device) => device.platform === platform);
   if (platform === "android" && !hasDevices && isAndroidDiscoveryUncertain(state)) {
     return {
@@ -120,7 +125,11 @@ export function platformSetupStatus(state: DeviceServiceState, platform: DeviceP
     ready: true,
     message:
       remoteHost?.kind === "eas"
-        ? `${remoteHost.label} starts iOS Simulators in the cloud with EAS Simulator.`
+        ? (t?.("release3904.eas-device", {
+            host: remoteHost.label,
+            platform: platform === "ios" ? "iOS" : "Android",
+          }) ??
+          `${remoteHost.label} starts ${platform === "ios" ? "iOS Simulators" : "Android emulators"} in the cloud with EAS Simulator.`)
         : platform === "ios"
           ? `Xcode and iOS Simulator are available${location}.`
           : `The Android SDK and Emulator are available${location}.`,
@@ -166,7 +175,11 @@ export function DeviceSetup(props: {
         )}
       >
         <WizardSteps
-          steps={["Device hub", "Simulators", "Agent access"]}
+          steps={[
+            t("settings.items.device-hub.title"),
+            "Simulators",
+            t("settings.pages.IntegrationsSettings.agent-access"),
+          ]}
           currentStep={step}
           onStepChange={setStep}
           isStepDisabled={(requested) => busy || pending !== null || requested > step}
@@ -318,8 +331,8 @@ function DevicePlatformSetup(props: {
   const t = useTranslate();
   return (
     <div className="space-y-3">
-      <PlatformStatus platform="iOS" status={platformSetupStatus(props.state, "ios")} />
-      <PlatformStatus platform="Android" status={platformSetupStatus(props.state, "android")} />
+      <PlatformStatus platform="iOS" status={platformSetupStatus(props.state, "ios", t)} />
+      <PlatformStatus platform="Android" status={platformSetupStatus(props.state, "android", t)} />
       <DeviceHostDiagnostics hosts={props.state.hosts} hostStatuses={props.state.hostStatuses} />
       <p className="text-xs text-muted-foreground">
         {t(
@@ -346,14 +359,14 @@ export function AgentDeviceSetupStatus(props: {
     const label =
       props.state.hostStatus === "installing"
         ? props.compact
-          ? "Installing…"
+          ? t("web.dynamic.SnapShotSetupDialog.installing")
           : "Installing agent tools…"
         : props.state.hostStatus === "starting"
           ? props.compact
-            ? "Starting…"
+            ? t("workspace.starting")
             : "Starting agent tools…"
           : props.compact
-            ? "Updating…"
+            ? t("web.dynamic.IntegrationsSettings.updating")
             : "Updating agent access…";
     return (
       <p role="status" className="flex items-center gap-2 text-xs text-muted-foreground">

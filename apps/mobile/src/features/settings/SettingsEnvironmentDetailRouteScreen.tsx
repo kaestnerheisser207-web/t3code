@@ -1,3 +1,4 @@
+import { sessionPermissionsText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
 import { useAtom, useAtomValue } from "@effect/atom-react";
@@ -121,9 +122,9 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
       `Update ${environment?.environmentLabel ?? "environment"}?`,
       `Install T3 Code ${targetVersion}. ${capabilities.serverSelfUpdate === "desktop-managed" ? "The desktop app will close and relaunch." : "The server will restart and reconnect."} Running threads may be interrupted.`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("web.remaining.ServerBrowserSurface.cancel"), style: "cancel" },
         {
-          text: "Update",
+          text: t("web.dynamic.SavedEnvironmentRows.update"),
           onPress: () =>
             void run("server", async () => {
               if (
@@ -221,15 +222,19 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
               </Text>
             ) : !allowed ? (
               <Text className="px-2 text-sm text-foreground-muted">
-                {AsyncResult.isFailure(sessionResult)
-                  ? t(
-                      "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.could-not-verify-your-permissions-reconnect-to-try-again",
+                {AsyncResult.isFailure(sessionResult) || session === null || !session.authenticated
+                  ? sessionPermissionsText(
+                      {
+                        connected,
+                        failed: AsyncResult.isFailure(sessionResult),
+                        rejected:
+                          !AsyncResult.isFailure(sessionResult) && session?.authenticated === false,
+                      },
+                      t,
                     )
-                  : session === null
-                    ? t("mobile.dynamic.SettingsEnvironmentDetailRouteScreen.checking-permissions")
-                    : t(
-                        "mobile.dynamic.SettingsEnvironmentDetailRouteScreen.this-connection-does-not-have-permission-to-manage-the-environment",
-                      )}
+                  : t(
+                      "release3904.this-connection-does-not-have-permission-to-manage-the-environment",
+                    )}
               </Text>
             ) : null}
             {error ? (

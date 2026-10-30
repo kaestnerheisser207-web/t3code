@@ -158,10 +158,10 @@ import { appAtomRegistry } from "../../state/atom-registry";
 import { threadStreamHaptics } from "./threadStreamHaptics";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { useDelayedStatus } from "../../lib/useDelayedStatus";
+import type { PendingUserInputDraftAnswer } from "@t3tools/client-runtime/state/pending-user-input";
 import type {
   PendingApproval,
   PendingUserInput,
-  PendingUserInputDraftAnswer,
   ThreadFeedEntry,
   ThreadFeedLatestRun,
 } from "../../lib/threadActivity";
@@ -629,7 +629,9 @@ function ThreadDetailBody(props: ThreadDetailScreenProps) {
       if (props.worktreeSetup) return null;
       return {
         kind: "preparing",
-        label: props.creationState.preparingWorktree ? "Setting up worktree…" : "Starting…",
+        label: props.creationState.preparingWorktree
+          ? "Setting up worktree…"
+          : t("workspace.starting"),
       };
     }
     if (props.creationState?.kind === "failed") {

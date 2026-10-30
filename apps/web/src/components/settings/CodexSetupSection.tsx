@@ -937,7 +937,7 @@ function ManagedCodexSetup({
         title={t("settings.pages.CodexSetupSection.chatgpt-account")}
         description={accountDescription}
         control={
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex max-w-88 flex-wrap items-center justify-end gap-2">
             {authActive ? (
               <>
                 {waitingControl}
@@ -1022,6 +1022,16 @@ function ManagedCodexSetup({
                     onClick={() => void setup("chatgpt-change-account")}
                   >
                     {t("settings.pages.CodexSetupSection.use-a-different-account")}
+                  </Button>
+                ) : null}
+                {allowExistingCli ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={readOnly || busy}
+                    onClick={() => onModeChange("existing")}
+                  >
+                    {t("settings.pages.CodexSetupSection.use-existing-cli")}
                   </Button>
                 ) : null}
               </>

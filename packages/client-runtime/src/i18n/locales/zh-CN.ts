@@ -1,3 +1,4 @@
+import { release3904ZhCN } from "./release-3904.zh-CN.ts";
 import { nightlyMergeZhCN } from "./nightly-merge.zh-CN.ts";
 import { prQuickZhCN } from "./pr-quick.zh-CN.ts";
 import { prSaveZhCN } from "./pr-save.zh-CN.ts";
@@ -129,6 +130,8 @@ import { wizardZhCN } from "./wizard.zh-CN.ts";
 import type { en } from "./en.ts";
 
 export const zhCN = {
+  "settings.secrets": "凭证",
+  ...release3904ZhCN,
   ...nightlyMergeZhCN,
   ...prQuickZhCN,
   ...prSaveZhCN,
