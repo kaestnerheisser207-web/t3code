@@ -339,7 +339,7 @@ function AboutVersionSection() {
             unswitchedMachines > 0 ? (
               <>
                 {t("release3904.machines-remain", { count: unswitchedMachines })}{" "}
-                {channelSwitchLabel(selectedUpdateChannel === "nightly" ? "latest" : "nightly")}.{" "}
+                {channelSwitchLabel(selectedUpdateChannel === "nightly" ? "latest" : "nightly", t)}.{" "}
                 {/* The dialog moves what it can and says why it skips the rest. */}
                 <Button
                   size="xs"
@@ -371,7 +371,7 @@ function AboutVersionSection() {
                 aria-label={t("settings.items.update-track.controlLabel")}
                 disabled={switchChannel !== null || updateRun !== null}
               >
-                <SelectValue>{channelSwitchLabel(selectedUpdateChannel)}</SelectValue>
+                <SelectValue>{channelSwitchLabel(selectedUpdateChannel, t)}</SelectValue>
               </SelectTrigger>
               <SelectPopup align="end" alignItemWithTrigger={false}>
                 <SelectItem hideIndicator value="latest">

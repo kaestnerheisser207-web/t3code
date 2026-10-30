@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { ServerUpdateState } from "@t3tools/client-runtime/state/server";
 import type {
   DesktopUpdateChannel,
@@ -156,8 +157,10 @@ export interface ChannelSwitchRelease {
   readonly databaseMigration: number | undefined;
 }
 
-export const channelSwitchLabel = (channel: DesktopUpdateChannel) =>
-  channel === "nightly" ? "Nightly" : "Stable";
+export const channelSwitchLabel = (channel: DesktopUpdateChannel, t?: TFunction) =>
+  channel === "nightly"
+    ? (t?.("settings.support.nightly") ?? "Nightly")
+    : (t?.("settings.support.stable") ?? "Stable");
 
 /** Stable and Nightly each build their own commits, so either can hold migrations the other lacks.
  * Crossing tracks needs proof that the target release knows every migration the database holds. */

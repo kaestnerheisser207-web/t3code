@@ -14,20 +14,30 @@ const REASONS: Readonly<Record<string, TranslationKey>> = {
 };
 
 export function updateReasonText(reason: string, t: TFunction): string {
+  const track = (name: string) =>
+    name.toLowerCase() === "nightly"
+      ? t("settings.support.nightly")
+      : name.toLowerCase() === "stable"
+        ? t("settings.support.stable")
+        : name;
   const key = REASONS[reason];
   if (key) return t(key);
   let match = /^its server predates database checks; update it on (.+) first$/.exec(reason);
-  if (match) return t("release3904.old-server", { track: match[1]! });
+  if (match) return t("release3904.old-server", { track: track(match[1]!) });
   match = /^(.+) predates database checks; wait for a newer (.+) release$/.exec(reason);
-  if (match) return t("release3904.old-release", { version: match[1]!, track: match[2]! });
+  if (match) return t("release3904.old-release", { version: match[1]!, track: track(match[2]!) });
   match =
     /^its database has changes (.+) does not support yet; stay on (.+) until (.+) has them$/.exec(
       reason,
     );
   if (match)
-    return t("release3904.database-ahead", { version: match[1]!, from: match[2]!, to: match[3]! });
+    return t("release3904.database-ahead", {
+      version: match[1]!,
+      from: track(match[2]!),
+      to: track(match[3]!),
+    });
   match = /^on the (.+) channel$/.exec(reason);
-  if (match) return t("release3904.other-track", { track: match[1]! });
+  if (match) return t("release3904.other-track", { track: track(match[1]!) });
   match = /^run `(.+)` there$/.exec(reason);
   if (match) return t("release3904.run-command", { command: match[1]! });
   return reason;
