@@ -11,7 +11,7 @@ import { AsyncResult } from "effect/reactivity";
 import { APP_VERSION } from "~/branding";
 import { useDesktopUpdateState } from "~/state/desktopUpdate";
 import { useEnvironments } from "~/state/environments";
-import { npmReleaseAtom } from "~/state/npmRelease";
+import { npmReleaseAtom, npmReleaseFailureMessage } from "~/state/npmRelease";
 import { downloadLocalUpdate, installLocalUpdate } from "../sidebar/SidebarUpdatePill";
 import { UpdateEverythingDialog } from "../sidebar/UpdateEverythingDialog";
 import {
@@ -54,9 +54,11 @@ export function UpdateTrackSwitchDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>{t("release3904.switch-to", { channel: label })}</AlertDialogTitle>
           <AlertDialogDescription>
-            {AsyncResult.isFailure(release) || AsyncResult.isSuccess(release)
-              ? t("release3904.switch-missing", { channel: label })
-              : t("release3904.checking-releases")}
+            {AsyncResult.isFailure(release)
+              ? npmReleaseFailureMessage(release.cause)
+              : AsyncResult.isSuccess(release)
+                ? `Could not find the latest ${label} release in this environment's npm registry.`
+                : t("release3904.checking-releases")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

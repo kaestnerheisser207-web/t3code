@@ -125,6 +125,7 @@ function convertItems(items: NativeStackHeaderItem[], prefix: string): HeaderIte
           axisBehavior: item.axisBehavior,
           icon: convertIcon(item.icon),
           menu: item.disabled ? undefined : convertMenu(item.menu, `${id}:menu`),
+          disabled: item.disabled,
           variant: item.variant,
           tintColor: item.tintColor,
           hidesSharedBackground: item.hidesSharedBackground,
@@ -138,6 +139,7 @@ function convertItems(items: NativeStackHeaderItem[], prefix: string): HeaderIte
           axisBehavior: item.axisBehavior,
           icon: convertIcon(item.icon),
           onPress: item.disabled ? undefined : item.onPress,
+          disabled: item.disabled,
           visibilityPriority:
             item.visibilityPriority === "default" ? "standard" : item.visibilityPriority,
           variant: item.variant,
@@ -232,7 +234,7 @@ export function V5StackHeader(props: {
     const compose: HeaderItem = {
       type: "item",
       id: "workspace-compose",
-      title: "New task",
+      title: t("mobile.schedule.new"),
       icon: { type: "sfSymbol", name: "square.and.pencil" },
       onPress: props.onCompose,
     };
@@ -253,7 +255,7 @@ export function V5StackHeader(props: {
       {
         type: "item",
         id: "dismiss-keyboard",
-        title: "Dismiss keyboard",
+        title: t("mobile.tools.ThreadTerminalRouteScreen.dismiss-keyboard"),
         icon: { type: "sfSymbol", name: "keyboard.chevron.compact.down" },
         onPress: () => void KeyboardController.dismiss(),
         // The folded bar is short; keep this out of the overflow menu.

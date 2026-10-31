@@ -257,7 +257,7 @@ export function ComposerContextSheet(props: {
               <>
                 {record.pullRequest ? (
                   <ContextField
-                    label={`#${record.pullRequest.number} · ${record.pullRequest.isDraft ? "draft" : record.pullRequest.state}`}
+                    label={`#${record.pullRequest.number} · ${record.pullRequest.isDraft ? t("release3904.undo-draft") : record.pullRequest.state}`}
                     value={`${record.pullRequest.title}\n${record.pullRequest.headBranch} → ${record.pullRequest.baseBranch}`}
                   />
                 ) : null}
@@ -389,7 +389,10 @@ export function ComposerContextSheet(props: {
                 />
                 <ContextField
                   label={t("mobile.common.ComposerContextSheet.description")}
-                  value={props.skillDescription ?? "No description is available for this skill."}
+                  value={
+                    props.skillDescription ??
+                    t("web.dynamic.SkillInlineText.no-description-is-available-for-this-skill")
+                  }
                 />
                 {props.onOpenSkill ? (
                   <Button

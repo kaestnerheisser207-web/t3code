@@ -517,14 +517,15 @@ function MachineRow(props: {
   readonly disabled: boolean;
   readonly onPress: () => void;
 }) {
+  const t = useTranslate();
   const { machine } = props;
   const status = machine.linked
-    ? "Linked"
+    ? t("settings.pages.LinkMachineSelect.linked")
     : machine.connected
       ? null
       : machine.connectOnly
-        ? "T3 Connect"
-        : "Not connected";
+        ? t("settings.items.t3-connect.title")
+        : t("web.dynamic.LinkMachineSelect.not-connected");
   return (
     <Pressable
       accessibilityRole="radio"

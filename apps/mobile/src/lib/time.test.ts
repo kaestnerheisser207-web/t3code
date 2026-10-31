@@ -1,25 +1,47 @@
 import { createI18n } from "@t3tools/client-runtime/i18n";
-import { expect, it, vi } from "vite-plus/test";
-import { relativeTime } from "./time";
+import { describe, expect, it } from "vite-plus/test";
+import { msUntilRelativeTimeChange, relativeTime } from "./time";
 
-it("keeps elapsed-time boundaries and invalid dates consistent across languages", () => {
-  const now = Date.parse("2026-10-29T00:00:00Z");
-  using _clock = vi.spyOn(Date, "now").mockReturnValue(now);
-  const en = createI18n("en").t;
-  const zh = createI18n("zh-CN").t;
-  for (const [seconds, english, chinese] of [
-    [-60, "<1m", "<1分钟"],
-    [59, "<1m", "<1分钟"],
-    [60, "1m", "1分钟"],
-    [3599, "59m", "59分钟"],
-    [3600, "1h", "1小时"],
-    [86399, "23h", "23小时"],
-    [86400, "1d", "1天"],
-  ] as const) {
-    const input = new Date(now - seconds * 1000).toISOString();
-    expect(relativeTime(input)).toBe(english);
-    expect(relativeTime(input, en)).toBe(english);
-    expect(relativeTime(input, zh)).toBe(chinese);
-  }
-  expect(relativeTime("invalid", zh)).toBe("<1分钟");
+const at = "2026-10-19T12:00:00.000Z";
+const timestamp = Date.parse(at);
+
+describe("relative time", () => {
+  it.each([
+    [59_999, "<1m", "1m"],
+    [119_999, "1m", "2m"],
+    [3_599_999, "59m", "1h"],
+    [7_199_999, "1h", "2h"],
+    [86_399_999, "23h", "1d"],
+    [172_799_999, "1d", "2d"],
+  ] as const)("updates at the next boundary after %i ms", (elapsed, before, after) => {
+    const nowMs = timestamp + elapsed;
+    expect(relativeTime(at, nowMs)).toBe(before);
+    expect(msUntilRelativeTimeChange(at, nowMs)).toBe(1);
+    expect(relativeTime(at, nowMs + 1)).toBe(after);
+    const zh = createI18n("zh-CN").t;
+    const suffix = (value: string) =>
+      value.replace("m", "分钟").replace("h", "小时").replace("d", "天");
+    expect(relativeTime(at, nowMs, zh)).toBe(suffix(before));
+    expect(relativeTime(at, nowMs + 1, zh)).toBe(suffix(after));
+  });
+
+  it.each([
+    [0, 60_000],
+    [60_000, 60_000],
+    [3_600_000, 3_600_000],
+    [86_400_000, 86_400_000],
+  ])("waits a full label interval at %i ms", (elapsed, delay) => {
+    expect(msUntilRelativeTimeChange(at, timestamp + elapsed)).toBe(delay);
+  });
+
+  it("keeps invalid timestamps static", () => {
+    expect(relativeTime("invalid", timestamp)).toBe("<1m");
+    expect(msUntilRelativeTimeChange("invalid", timestamp)).toBeNull();
+  });
+
+  it("waits until a future timestamp is a minute old, with bounded timers", () => {
+    expect(relativeTime(at, timestamp - 30_000)).toBe("<1m");
+    expect(msUntilRelativeTimeChange(at, timestamp - 30_000)).toBe(90_000);
+    expect(msUntilRelativeTimeChange(at, timestamp - 30 * 86_400_000)).toBe(86_400_000);
+  });
 });

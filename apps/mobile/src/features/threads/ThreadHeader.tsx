@@ -38,7 +38,9 @@ export function ThreadHeader(
     if (props.hasThreadCwd) {
       const filesVisible = props.inspectorMode === "files" && panes.auxiliaryPaneVisible;
       actions.push({
-        accessibilityLabel: filesVisible ? "Close files" : "Open files",
+        accessibilityLabel: filesVisible
+          ? "Close files"
+          : t("mobile.threads.ThreadGitControls.open-files"),
         selected: filesVisible,
         icon: "folder",
         onPress: filesVisible ? toggleAuxiliaryPane : props.onOpenFilesInspector,
@@ -76,6 +78,7 @@ export function ThreadHeader(
     props.hasThreadCwd,
     props.hasWorkspaceRoot,
     props.gitControls.canOpenTerminal,
+    t,
   ]);
 
   return (

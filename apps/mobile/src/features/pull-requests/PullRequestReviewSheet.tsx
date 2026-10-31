@@ -162,7 +162,7 @@ export function PullRequestReviewSheet({
       {reviewing && offered.length > 1 ? (
         <SegmentedControl
           options={offered.map((option) => ({ value: option.value, label: option.title }))}
-          selected={verdict?.value ?? "comment"}
+          selected={verdict?.value ?? t("web.dynamic.PullRequestReviewAnnotation.comment")}
           onSelect={(value) => {
             if (!submission.busy) setRequestedVerdict(value);
           }}

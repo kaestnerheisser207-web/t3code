@@ -112,7 +112,10 @@ export function PullRequestFilterSearchScreen({
       },
     });
   };
-  const placeholder = kind === "labels" ? "Search labels" : "Search authors";
+  const placeholder =
+    kind === "labels"
+      ? t("mobile.review.PullRequestLabelsScreen.search-labels")
+      : t("web.ui.PullRequestListFilters.search-authors");
   return (
     <PullRequestSearchSheet
       title={
@@ -122,7 +125,9 @@ export function PullRequestFilterSearchScreen({
       }
       placeholder={placeholder}
       closeAccessibilityLabel={kind === "labels" ? "Close label filter" : "Close author filter"}
-      clearAccessibilityLabel={kind === "labels" ? "Clear label search" : "Clear author search"}
+      clearAccessibilityLabel={
+        kind === "labels" ? t("pr.actions.clearLabelSearch") : "Clear author search"
+      }
       searchTextChangeId="pr-filter-option-search"
       query={query}
       onQueryChange={setQuery}

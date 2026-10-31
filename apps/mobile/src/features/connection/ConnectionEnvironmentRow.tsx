@@ -121,7 +121,11 @@ export function ConnectionEnvironmentRow(props: {
         >
           <View className="flex-row items-center gap-1.5">
             <ConnectionStatusDot
-              state={enabled || unsupported ? props.environment.connectionState : "available"}
+              state={
+                enabled || unsupported
+                  ? props.environment.connectionState
+                  : t("web.dynamic.DeviceHostAvailability.available")
+              }
               pulse={isRetrying}
               size={8}
             />
@@ -314,6 +318,11 @@ export function ConnectionEnvironmentRow(props: {
               )}
 
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                  "mobile.connect.ConnectionEnvironmentRow.reconnect-environment",
+                )}
+                accessibilityState={{ disabled: !enabled }}
                 className="h-[42px] w-[42px] items-center justify-center rounded-[14px] border border-input-border bg-input active:opacity-70 disabled:opacity-40"
                 disabled={!enabled}
                 onPress={() => props.onReconnect(props.environment.environmentId)}
@@ -327,6 +336,8 @@ export function ConnectionEnvironmentRow(props: {
               </Pressable>
 
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("mobile.connect.ConnectionEnvironmentRow.remove-environment")}
                 className="h-[42px] w-[42px] items-center justify-center rounded-[14px] border border-danger-border bg-danger active:opacity-70"
                 onPress={() => props.onRemove(props.environment.environmentId)}
               >

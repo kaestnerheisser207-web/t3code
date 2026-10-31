@@ -111,7 +111,7 @@ function EnabledPullRequestThreadLinks({
     linking.mode === "multiple" ? ((relations.data ?? lastRelations)?.threads ?? []) : [];
   const linkedThreadsLabel =
     linkedThreads.length > 0
-      ? `Linked from ${linkedThreads.length} ${linkedThreads.length === 1 ? "thread" : "threads"}`
+      ? `Linked from ${linkedThreads.length} ${linkedThreads.length === 1 ? t("release3904.undo-thread") : t("release3904.undo-threads")}`
       : "Linked threads";
   return (
     <>
@@ -133,7 +133,7 @@ function EnabledPullRequestThreadLinks({
                 }
               >
                 <MessageSquareIcon aria-hidden className="size-3.5" />
-                <span aria-hidden>{linkedThreads.length || "?"}</span>
+                <span aria-hidden>{linkedThreads.length || t("hero.inlineSuffix")}</span>
               </Button>
             }
           />

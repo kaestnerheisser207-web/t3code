@@ -70,7 +70,7 @@ export function PullRequestRoutingSettings() {
                     {entry.target.label}
                   </Text>
                   <Text className="text-xs text-foreground-muted" numberOfLines={1}>
-                    {connectionCatalogDisplayUrl(entry) ?? "T3 Connect"}
+                    {connectionCatalogDisplayUrl(entry) ?? t("settings.items.t3-connect.title")}
                   </Text>
                 </View>
                 <Text className="text-sm text-foreground-muted">

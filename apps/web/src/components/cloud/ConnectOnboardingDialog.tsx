@@ -183,8 +183,10 @@ function ConfiguredConnectOnboardingDialog() {
       type: "success",
       title: "T3 Connect enabled",
       description: exposeEnvironment
-        ? "This environment is available to your other devices through T3 Connect."
-        : "This environment publishes agent activity to your mobile clients.",
+        ? t(
+            "web.dynamic.SavedEnvironmentRows.this-environment-is-available-to-your-other-devices-through-t3-connect",
+          )
+        : t("settings.status.activityPublishes"),
     });
     setStep("devices");
   };

@@ -30,6 +30,7 @@ import {
   formatUsageContractMismatch,
   formatUsd,
   makeWindow,
+  usageSourceMessages,
 } from "@t3tools/shared/usageFormat";
 import { useRef, useState, type ReactNode } from "react";
 import { Platform, Pressable, RefreshControl, View } from "react-native";
@@ -98,12 +99,12 @@ function UsageScreen(props: {
   const insets = useSafeAreaInsets();
   const [selection, setSelection] = useState(() => ({
     params: props.tabParam,
-    view: (props.tabParam === "usage" ? "cost" : "limits") as UsageView,
+    view: (props.tabParam === "usage" ? t("web.dynamic.UsagePage.cost") : "limits") as UsageView,
   }));
   if (selection.params !== props.tabParam) {
     setSelection({
       params: props.tabParam,
-      view: props.tabParam === "usage" ? "cost" : "limits",
+      view: props.tabParam === "usage" ? t("web.dynamic.UsagePage.cost") : "limits",
     });
   }
   const { view } = selection;
@@ -129,22 +130,9 @@ function UsageScreen(props: {
     void refresh();
     void limits.refreshAfterEnable();
   };
-  const sourceMessages = [
-    ...new Set(
-      selectedEnvironments.flatMap(
-        (environment) =>
-          environment.summary?.sources.flatMap((source) =>
-            source.message &&
-            !source.action &&
-            (source.status === "partial" ||
-              source.status === "failed" ||
-              source.fingerprint.provider === "cursor")
-              ? [source.message]
-              : [],
-          ) ?? [],
-      ),
-    ),
-  ];
+  const sourceMessages = usageSourceMessages(
+    selectedEnvironments.flatMap((environment) => environment.summary?.sources ?? []),
+  );
   const canReadDiagnostics = selectedEnvironments.some(
     (environment) => environment.canReadDiagnostics,
   );
@@ -166,7 +154,7 @@ function UsageScreen(props: {
   const [refreshingUsage, setRefreshingUsage] = useState(false);
   const refreshingRef = useRef(false);
   const showingLimits = view === "limits";
-  const metric: UsageChartMetric = view === "tokens" ? "tokens" : "cost";
+  const metric: UsageChartMetric = view === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost");
   const progress = usageProgress(selectedEnvironments, {
     refreshing: refreshingUsage,
     providerLabel,
@@ -174,12 +162,20 @@ function UsageScreen(props: {
   const selectWindow = (days: number) => {
     setWindowSelection({
       days,
-      window: makeWindow(days, undefined, days === 1 ? "hour" : "day"),
+      window: makeWindow(
+        days,
+        undefined,
+        days === 1 ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
+      ),
     });
   };
   const refreshWindow = () => {
     if (refreshingRef.current) return;
-    const nextWindow = makeWindow(windowDays, undefined, isPast24Hours ? "hour" : "day");
+    const nextWindow = makeWindow(
+      windowDays,
+      undefined,
+      isPast24Hours ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
+    );
     if (
       nextWindow.sinceDay !== window.sinceDay ||
       nextWindow.untilDay !== window.untilDay ||
@@ -225,7 +221,7 @@ function UsageScreen(props: {
   const environmentActions = [
     {
       id: "all",
-      title: "All environments",
+      title: t("mobile.dynamic.ThreadListFilters.all-environments"),
       subtitle: undefined,
       state: selectedEnvironmentIds === null ? ("on" as const) : ("off" as const),
     },
@@ -289,7 +285,7 @@ function UsageScreen(props: {
                       label: "",
                       type: "menu",
                       menu: {
-                        title: "Environments",
+                        title: t("mobile.connect.ConnectionsRouteScreen.environments"),
                         items: environmentActions.map((action) => ({
                           type: "action" as const,
                           label: action.title,
@@ -1138,7 +1134,7 @@ function usageEnvironmentStatus(
       ? t("usage.status.savedTotals", { error: environment.error })
       : environment.error;
   if (!environment.isConnected)
-    return environment.summary ? "Disconnected · showing saved usage" : "Waiting for connection…";
+    return environment.summary ? t("usage.status.disconnectedSaved") : t("usage.status.waiting");
   const progress = usageEnvironmentProgress(environment, refreshing);
   if (progress.phase === "loading") return "Loading usage…";
   if (progress.phase === "stale") return "Updating usage…";

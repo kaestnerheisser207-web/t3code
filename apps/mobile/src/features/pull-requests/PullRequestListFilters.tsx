@@ -285,7 +285,7 @@ export function usePullRequestListFilters(props: {
     { id: "sort", title: SORTS[value.sort], subactions: choices("sort", SORTS, value.sort) },
   ];
   const reset = (withEnvironment: boolean): MenuProps["actions"][number] => ({
-    id: id("reset", withEnvironment ? "environment" : ""),
+    id: id("reset", withEnvironment ? t("settings.scope.environment") : ""),
     title: t("pr.filters.reset"),
     attributes: {
       disabled:

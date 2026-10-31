@@ -58,6 +58,7 @@ import {
   formatUsageContractMismatch,
   formatUsd,
   makeWindow,
+  usageSourceMessages,
 } from "@t3tools/shared/usageFormat";
 import { Button, InlineButton } from "../ui/button";
 import { ProviderInstanceIcon } from "../chat/ProviderInstanceIcon";
@@ -194,7 +195,7 @@ export function UsagePage() {
     window: makeWindow(
       preferences.windowDays,
       undefined,
-      preferences.windowDays === 1 ? "hour" : "day",
+      preferences.windowDays === 1 ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
     ),
   }));
   const metric = preferences.metric;
@@ -246,7 +247,11 @@ export function UsagePage() {
     updatePreferences({ windowDays: days });
     setWindowSelection({
       days,
-      window: makeWindow(days, undefined, days === 1 ? "hour" : "day"),
+      window: makeWindow(
+        days,
+        undefined,
+        days === 1 ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
+      ),
     });
   };
   const selectMetric = (nextMetric: UsageMetric) => {
@@ -312,7 +317,11 @@ export function UsagePage() {
       });
       return;
     }
-    const nextWindow = makeWindow(windowDays, undefined, isPast24Hours ? "hour" : "day");
+    const nextWindow = makeWindow(
+      windowDays,
+      undefined,
+      isPast24Hours ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
+    );
     if (
       nextWindow.sinceDay !== window.sinceDay ||
       nextWindow.untilDay !== window.untilDay ||
@@ -575,7 +584,7 @@ export function UsagePage() {
                 days={days}
                 hours={hours}
                 showingKept={showingKept}
-                metric={metric === "tokens" ? "tokens" : "cost"}
+                metric={metric === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost")}
                 selectedEnvironments={selectedEnvironments}
                 hiddenProviders={hiddenProviders}
                 refreshingUsage={refreshingUsage}
@@ -595,11 +604,11 @@ export function UsagePage() {
         <UsageModelDialogHost
           models={merged.models}
           environments={selectedEnvironments}
-          metric={metric === "tokens" ? "tokens" : "cost"}
+          metric={metric === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost")}
           chartWindow={{
             days,
             hours,
-            resolution: shownHourly ? "hour" : "day",
+            resolution: shownHourly ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
             timeZone: shownWindow.timeZone,
             referenceTime: shownWindow.untilTime,
             hour12,
@@ -672,23 +681,14 @@ function UsageOverview({
   const chartLoadingProviders = new Set(
     activeProviders.filter((provider) => loadingProviders.has(provider)),
   );
-  const sourceMessages = [
-    ...new Set(
-      selectedEnvironments.flatMap(
-        (environment) =>
-          environment.summary?.sources.flatMap((source) =>
-            source.message &&
-            !source.action &&
-            !hiddenProviders.has(source.fingerprint.provider) &&
-            (source.status === "partial" ||
-              source.status === "failed" ||
-              source.fingerprint.provider === "cursor")
-              ? [source.message]
-              : [],
-          ) ?? [],
-      ),
+  const sourceMessages = usageSourceMessages(
+    selectedEnvironments.flatMap(
+      (environment) =>
+        environment.summary?.sources.filter(
+          (source) => !hiddenProviders.has(source.fingerprint.provider),
+        ) ?? [],
     ),
-  ];
+  );
   const breakdownPeriods: readonly (DailyTotals | HourlyTotals)[] = (
     shownHourly ? merged.hourly : merged.daily
   ).toReversed();
@@ -882,7 +882,7 @@ function UsageOverview({
             hourly={merged.hourly}
             metric={metric}
             referenceTime={shownWindow.untilTime}
-            resolution={shownHourly ? "hour" : "day"}
+            resolution={shownHourly ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one")}
             timeZone={shownWindow.timeZone}
             hour12={hour12}
           />
@@ -967,8 +967,16 @@ function UsageOverview({
           >
             {(
               [
-                { value: "model", label: "Model" },
-                { value: "time", label: shownHourly ? "Hour" : "Day" },
+                {
+                  value: "model",
+                  label: t("mobile.settings.SettingsScheduledTasksRouteScreen.model"),
+                },
+                {
+                  value: "time",
+                  label: shownHourly
+                    ? t("web.dynamic.UsagePage.hour")
+                    : t("web.dynamic.UsagePage.day"),
+                },
               ] as const
             ).map((option) => (
               <Toggle key={option.value} value={option.value}>
@@ -1003,7 +1011,10 @@ function UsageOverview({
                   const key = `${model.provider}:${model.model}`;
                   const value = metric === "tokens" ? model.totalTokens : model.costUsd;
                   const hasBar = value > 0 && breakdownPeak > 0;
-                  const share = modelShare(model, metric === "tokens" ? "tokens" : "cost");
+                  const share = modelShare(
+                    model,
+                    metric === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost"),
+                  );
                   const rowFigures = figureClass(loadingProviders.has(model.provider));
                   return (
                     <tr
@@ -1251,6 +1262,7 @@ function CursorEnableLimits({
   readonly environments: readonly EnvironmentUsageStatus[];
   readonly onEnabled: () => void;
 }) {
+  const t = useTranslate();
   return (
     <section className="flex flex-col gap-3">
       <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -1271,7 +1283,9 @@ function CursorEnableLimits({
               key={environment.environmentId}
               environmentId={environment.environmentId}
               label={environment.label}
-              buttonText={environments.length > 1 ? `Enable on ${environment.label}` : "Enable"}
+              buttonText={
+                environments.length > 1 ? `Enable on ${environment.label}` : t("usage.enable")
+              }
               onEnabled={onEnabled}
               tooltip={false}
             />
@@ -1397,7 +1411,7 @@ function UsageEnvironmentFilter({
   const t = useTranslate();
   const allSelected = selectedEnvironmentIds === null;
   const label = allSelected
-    ? "All environments"
+    ? t("mobile.dynamic.ThreadListFilters.all-environments")
     : selectedEnvironments.length === 1
       ? selectedEnvironments[0]!.label
       : `${selectedEnvironments.length} environments`;
@@ -1439,22 +1453,22 @@ function UsageEnvironmentFilter({
           const progress = usageEnvironmentProgress(environment, refreshing);
           const status =
             environment.error !== null
-              ? "Unavailable"
+              ? t("telemetry.unavailable")
               : environment.summary !== null &&
                   !isCompatibleUsageContractVersion(
                     environment.summary.contractVersion,
                     USAGE_CONTRACT_VERSION,
                   )
-                ? "Update required"
+                ? t("mobile.dynamic.OutdatedServerUpdateSection.update-required")
                 : !environment.isConnected
-                  ? "Connecting…"
+                  ? t("web.dynamic.CloudEnvironmentConnectList.connecting")
                   : progress.phase === "loading"
                     ? "Scanning…"
                     : progress.phase === "stale"
-                      ? "Refreshing…"
+                      ? t("web.dynamic.FileBrowserPanel.refreshing")
                       : progress.phase === "partway"
                         ? updatingProvidersLabel(progress.providers, providerLabel)
-                        : "Ready";
+                        : t("settings.pages.CodexSetupSection.ready");
           return (
             <MenuCheckboxItem
               key={environment.environmentId}
@@ -1521,7 +1535,7 @@ function UsageProviderFilter({
   const visible = PROVIDER_ORDER.filter((provider) => !hiddenProviders.has(provider));
   const label =
     visible.length === PROVIDER_ORDER.length
-      ? "All providers"
+      ? t("mobile.threads.ThreadSettingsSheet.all-providers")
       : visible.length === 0
         ? "No providers"
         : visible.length === 1

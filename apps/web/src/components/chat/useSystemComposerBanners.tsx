@@ -73,7 +73,8 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
   const setEnvironmentEnabled = useAtomCommand(environmentCatalog.setEnabled, {
     reportFailure: false,
   });
-  const activeEnvironmentConnectionPhase = activeEnvironment?.connection.phase ?? "available";
+  const activeEnvironmentConnectionPhase =
+    activeEnvironment?.connection.phase ?? t("web.dynamic.DeviceHostAvailability.available");
   const activeReconnectingEnvironmentId =
     activeEnvironmentConnectionPhase === "connecting" ||
     activeEnvironmentConnectionPhase === "reconnecting"
@@ -86,7 +87,11 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
     ENVIRONMENT_RECONNECT_WARNING_GRACE_MS,
   );
   const handleReconnectActiveEnvironment = async (environmentId: EnvironmentId) => {
-    const result = await retryEnvironment(environmentId);
+    // A retry does nothing while the environment is switched off.
+    const result =
+      activeEnvironment?.entry.enabled === false
+        ? await setEnvironmentEnabled({ environmentId, enabled: true })
+        : await retryEnvironment(environmentId);
     if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
       const error = squashAtomCommandFailure(result);
       toastManager.add(
@@ -226,7 +231,7 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
       const updateFailed = serverUpdateState.status === "failed";
       items.push({
         id: `server-version:${serverUpdateEnvironmentId}`,
-        variant: updateFailed ? "error" : "default",
+        variant: updateFailed ? "error" : t("web.dynamic.EnvironmentIconPicker.default"),
         group: "environment",
         icon: <ComposerServerUpdateIcon status={serverUpdateState.status} />,
         title: t(updateFailed ? "banners.updateFailed" : "banners.updating", {

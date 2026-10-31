@@ -257,7 +257,7 @@ function AddProjectToMachineDialog({ request }: { request: AddProjectToMachineRe
                 <span>
                   {selectedFiles.size === 0
                     ? t("web.dynamic.AddProjectToMachineDialog.no-files")
-                    : `+ ${selectedFiles.size} ${selectedFiles.size === 1 ? "file" : "files"}`}
+                    : `+ ${selectedFiles.size} ${selectedFiles.size === 1 ? t("mobile.dynamic.PullRequestRouteScreen.file") : t("mobile.dynamic.PreviewStreamWebView.files")}`}
                 </span>
               </div>
               <div className="flex min-w-0 flex-col gap-1">

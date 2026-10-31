@@ -382,6 +382,7 @@ function useBrowsePathInput(environment: EnvironmentOption | null, pinnedDirecto
 function useEnvironmentOptions(
   selectedEnvironmentId: EnvironmentId | null = null,
 ): ReadonlyArray<EnvironmentOption> {
+  const t = useTranslate();
   const serverConfigByEnvironmentId = useServerConfigs();
   const { savedConnectionsById } = useSavedRemoteConnections();
   const { connectedEnvironments } = useRemoteConnectionStatus();
@@ -400,7 +401,8 @@ function useEnvironmentOptions(
         machine: resolveEnvironmentMachineKind(config ?? null),
         baseDirectory: config?.settings.addProjectBaseDirectory ?? null,
         newProjectsRoot: config?.newProjectsRoot ?? null,
-        connectionState: runtime?.connectionState ?? "available",
+        connectionState:
+          runtime?.connectionState ?? t("web.dynamic.DeviceHostAvailability.available"),
         connectionError: runtime?.connectionError ?? null,
         connectionErrorTraceId: runtime?.connectionErrorTraceId ?? null,
       };
@@ -730,6 +732,9 @@ function useCreateProject(environment: EnvironmentOption | null) {
   const openNewTaskDraft = useOpenNewTaskDraft();
   const navigation = useNavigation();
   const createProject = useAtomCommand(projectEnvironment.create, { reportFailure: false });
+  const updateProject = useAtomCommand(projectEnvironment.update, {
+    label: "project unarchive",
+  });
   const projects = useProjects();
 
   return async (workspaceRoot: string, originRoute = getActiveRoute(navigation)) => {
@@ -751,7 +756,19 @@ function useCreateProject(environment: EnvironmentOption | null) {
       path: workspaceRoot,
     });
     if (existing) {
-      Dialog.alert(t("mobile.project.project-already-exists"), existing.title);
+      // Adding an archived project's folder again brings the project back.
+      const unarchived =
+        existing.archivedAt == null ||
+        (
+          await updateProject({
+            environmentId: existing.environmentId,
+            input: { projectId: existing.id, archived: false },
+          })
+        )._tag === "Success";
+      Dialog.alert(
+        "Project already exists",
+        unarchived ? existing.title : `${existing.title} is still archived. Try again later.`,
+      );
       openNewTaskDraft(
         {
           environmentId: existing.environmentId,
@@ -1152,9 +1169,7 @@ export function AddProjectNewScreen(props: { readonly environmentId?: string | s
     if (project === null) {
       setName("");
       setError(
-        t(
-          "mobile.project.the-project-was-created-but-has-not-reached-this-device-yet-it-will-appear-in-the-project-list-once-the-connection-catches-up",
-        ),
+        "The project was created but has not reached this device yet. It will appear in the project list once the connection catches up.",
       );
       return;
     }

@@ -147,7 +147,7 @@ function ExtendedOfficeViewer(props: {
         }
       })
       .catch((cause: unknown) =>
-        fail(cause instanceof Error ? cause.message : "Could not read this file."),
+        fail(cause instanceof Error ? cause.message : t("zip.readDetail")),
       );
     return () => {
       controller.abort();
@@ -155,7 +155,7 @@ function ExtendedOfficeViewer(props: {
       workerRef.current = null;
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [props.src, props.kind, props.sizeBytes]);
+  }, [props.src, props.kind, props.sizeBytes, t]);
   const selectPage = setPage;
   if (error)
     return (

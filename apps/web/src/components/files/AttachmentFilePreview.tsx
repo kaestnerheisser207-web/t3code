@@ -206,7 +206,7 @@ export function AttachmentFilePreview(props: {
             ...(props.sizeBytes > 0
               ? { headers: { Range: `bytes=0-${FILE_TEXT_PREVIEW_MAX_BYTES}` } }
               : {}),
-            cache: revision === 0 ? "default" : "reload",
+            cache: revision === 0 ? t("web.dynamic.EnvironmentIconPicker.default") : "reload",
           });
       const result = await readFilePreviewResponse(response, controller.signal);
       if (!controller.signal.aborted) setContent(result);
@@ -215,7 +215,7 @@ export function AttachmentFilePreview(props: {
         setContentError(cause instanceof Error ? cause.message : "Could not load this file.");
     });
     return () => controller.abort();
-  }, [url, needsText, streamsText, revision, props.sizeBytes, props.file, refresh]);
+  }, [url, needsText, streamsText, revision, props.sizeBytes, props.file, refresh, t]);
   const failure = error ?? (needsText ? contentError : null);
   const defaultWordWrap = useClientSettings((settings) => settings.wordWrap);
   const [wordWrapOverride, setWordWrapOverride] = useState<boolean | null>(null);
@@ -252,7 +252,8 @@ export function AttachmentFilePreview(props: {
         toastManager.add({
           type: "error",
           title: "Could not save file",
-          description: cause instanceof Error ? cause.message : "Please try again.",
+          description:
+            cause instanceof Error ? cause.message : t("mobile.threadStatus.retryPlease"),
         });
       }
       setSaving(false);
@@ -442,7 +443,8 @@ export function AttachmentFilePreview(props: {
                   toastManager.add({
                     type: "error",
                     title: "Could not copy file",
-                    description: cause instanceof Error ? cause.message : "Try again.",
+                    description:
+                      cause instanceof Error ? cause.message : t("mobile.threadStatus.retry"),
                   }),
                 );
             }}

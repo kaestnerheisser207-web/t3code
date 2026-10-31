@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { useTranslation } from "react-i18next";
 import { scopedThreadKey, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import { findForMessageMatch, openThreadFindOnQuery } from "./chat/threadFindStore";
@@ -98,6 +99,7 @@ export function useCommandPaletteThreadItems(input: {
   readonly activeThread: { readonly environmentId: EnvironmentId; readonly id: ThreadId } | null;
   readonly threadSearchQuery: string;
 }) {
+  const t = useTranslate();
   const { i18n: dateI18n } = useTranslation();
   const { activeThread, threadSearchQuery } = input;
   const navigate = useNavigate();
@@ -144,7 +146,8 @@ export function useCommandPaletteThreadItems(input: {
           project={projectByKey.get(`${thread.environmentId}:${thread.projectId}`) ?? null}
           projectTitle={projectTitle ?? null}
           environmentLabel={
-            projectEnvironmentLocationById.get(thread.environmentId)?.label ?? "Remote"
+            projectEnvironmentLocationById.get(thread.environmentId)?.label ??
+            t("web.ui.DiffPanel.remote")
           }
           branch={thread.branch}
           worktreePath={thread.worktreePath}

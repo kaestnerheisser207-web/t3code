@@ -226,6 +226,7 @@ function FileContextChip(props: {
   record: ComposerFileAttachment;
   upload: AttachmentUploadState | undefined;
 }) {
+  const t = useTranslate();
   const actions = use(ComposerContextActionsContext);
   const { resolvedTheme } = useTheme();
   const needsReattach = composerFileNeedsReattach(props.record);
@@ -250,7 +251,7 @@ function FileContextChip(props: {
       error={props.upload?.status === "failed"}
       unresolved={needsReattach}
       suffix={suffix}
-      accessibleLabel={`${isVideo && !needsReattach ? "Preview video" : "File"} attachment, ${props.record.name}, ${size}`}
+      accessibleLabel={`${isVideo && !needsReattach ? "Preview video" : t("mobile.common.ComposerContextSheet.file")} attachment, ${props.record.name}, ${size}`}
       onOpen={
         !needsReattach
           ? () =>

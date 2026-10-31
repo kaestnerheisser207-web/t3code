@@ -159,7 +159,7 @@ export function TimelineMinimap({
           />
           <button
             aria-label={t("web.dynamic.TimelineMinimap.jump-to-message-param", {
-              value: activeItem?.userText ?? "User message",
+              value: activeItem?.userText ?? t("web.dynamic.TimelineMinimap.user-message"),
             })}
             className="absolute inset-y-0 left-0 w-full cursor-pointer bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
             onBlur={() => setActiveIndex(null)}

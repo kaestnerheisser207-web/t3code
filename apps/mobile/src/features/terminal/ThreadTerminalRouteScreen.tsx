@@ -126,7 +126,7 @@ function TerminalHeader(props: {
                 items: [
                   {
                     id: "text-size",
-                    title: "Text size",
+                    title: t("mobile.appearance.TextAppearanceSection.text-size"),
                     icon: "textformat.size",
                     inline: true,
                     items: [
@@ -163,7 +163,7 @@ function TerminalHeader(props: {
                   {
                     id: "terminal-new",
                     disabled: !props.canOperateTerminal,
-                    title: "Open new terminal",
+                    title: t("mobile.git.newTerminal"),
                     icon: "plus",
                     subtitle: `Start another shell in ${basename(props.workspaceRoot) ?? "this workspace"}`,
                     onPress: props.onOpenNewTerminal,
@@ -877,7 +877,7 @@ function ThreadTerminal(props: {
               environmentLabel={
                 environment.presentation?.entry.target.label ??
                 selectedEnvironmentConnection?.environmentLabel ??
-                "Environment"
+                t("mobile.dynamic.SettingsEnvironmentDetailRouteScreen.environment")
               }
               connection={
                 environment.presentation?.connection ?? {

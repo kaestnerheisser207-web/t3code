@@ -209,7 +209,9 @@ export function PullRequestBranchRow(props: RowProps) {
   const methods = action.available("update-branch") ? allowedUpdateMethods(props.pr) : [];
   const canResolve =
     agent.canAsk && props.pr.state === "open" && props.pr.mergeability === "conflicting";
-  const summary = action.busy ? "Updating…" : pullRequestBranchSummary(props.pr, t);
+  const summary = action.busy
+    ? t("web.dynamic.ProviderUpdatesAction.updating")
+    : pullRequestBranchSummary(props.pr, t);
   const clean = props.pr.mergeability === "mergeable";
   const conflicting = props.pr.mergeability === "conflicting";
   const row = (

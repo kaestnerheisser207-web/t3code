@@ -9,17 +9,20 @@ import type { EnvironmentThreadShell, ThreadStructure } from "@t3tools/client-ru
 import {
   presentPendingBackgroundWork,
   presentProviderGoal,
+  type RunStopPresentation,
 } from "@t3tools/client-runtime/state/thread-execution";
 import { childThreadInputsTitle } from "@t3tools/client-runtime/state/threads";
 import { formatDuration } from "@t3tools/shared/orchestrationTiming";
 import * as DateTime from "effect/DateTime";
 import {
   CircleDashedIcon,
+  CircleStopIcon,
   GitBranchIcon,
   MessageCircleIcon,
   ShieldQuestionIcon,
   TargetIcon,
   TerminalIcon,
+  TriangleAlertIcon,
 } from "lucide-react";
 import { Fragment } from "react";
 import { tickTextContent } from "~/lib/tickTextContent";
@@ -29,7 +32,7 @@ import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import type { ComposerBannerStackItem } from "./ComposerBannerStack";
 import type { ThreadNowItem } from "./ThreadNow";
 
-/** Subagents waiting on the user, unless the parent is itself waiting on them. */
+/** Subagents and side chats waiting on the user, unless the parent is itself waiting on them. */
 export function childInputNowItem(
   input: {
     readonly childThreadInputs: ReadonlyArray<EnvironmentThreadShell>;
@@ -37,7 +40,7 @@ export function childInputNowItem(
     readonly onOpenThread: (threadId: ThreadId) => void;
   },
   t?: TFunction,
-): ThreadNowItem | null {
+): (ThreadNowItem & { readonly waitingLabel: string }) | null {
   const { childThreadInputs, onOpenThread } = input;
   const first = childThreadInputs[0];
   if (!first || input.parentAwaitingUser) return null;
@@ -50,6 +53,9 @@ export function childInputNowItem(
       <MessageCircleIcon className="text-info-foreground" />
     ),
     title: childThreadInputsTitle(childThreadInputs, t),
+    waitingLabel: childThreadInputs.every((child) => child.lineage.sideChat === true)
+      ? (t?.("release016.side-wait") ?? "Side chat waiting")
+      : (t?.("release016.subagent-wait") ?? "Subagent waiting"),
     description: childThreadInputs.map((child, index) => (
       <Fragment key={child.id}>
         {index > 0 ? " " : null}
@@ -116,6 +122,46 @@ export function goalNowItem(
         >
           {t?.("goal.clear") ?? "Clear"}
         </InlineButton>
+      </>
+    ),
+  };
+}
+
+/** A Stop the provider has not finished; Force stop once it stops answering. */
+export function runStopNowItem(input: {
+  readonly threadId: ThreadId;
+  readonly stop: RunStopPresentation;
+  readonly canForceStop: boolean;
+  readonly forceStopping: boolean;
+  readonly onForceStop: () => void;
+}): ThreadNowItem {
+  const unresponsive = input.stop.state === "unresponsive";
+  const requestedAtMs = Date.parse(input.stop.requestedAt);
+  return {
+    id: `run-stop:${input.threadId}`,
+    icon: unresponsive ? (
+      <TriangleAlertIcon className="text-warning-foreground" />
+    ) : (
+      <CircleStopIcon />
+    ),
+    title: unresponsive ? "Agent not responding to Stop" : "Stopping",
+    description: unresponsive
+      ? "It may be short on memory. Force stop kills its processes."
+      : undefined,
+    actions: (
+      <>
+        <span
+          ref={tickTextContent(
+            (nowMs) => formatDuration(Math.max(1_000, nowMs - requestedAtMs)),
+            true,
+          )}
+          className="tabular-nums"
+        />
+        {unresponsive && input.canForceStop ? (
+          <InlineButton disabled={input.forceStopping} onClick={input.onForceStop}>
+            {input.forceStopping ? "Force stopping..." : "Force stop"}
+          </InlineButton>
+        ) : null}
       </>
     ),
   };

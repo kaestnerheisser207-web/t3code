@@ -124,7 +124,7 @@ function UpdateEverythingDialogContent({
     ),
   );
   const running = stopped + continuing;
-  const threads = `${running} running ${running === 1 ? "thread" : "threads"}`;
+  const threads = `${running} running ${running === 1 ? t("release3904.undo-thread") : t("release3904.undo-threads")}`;
   const restarting = new Set(restarts.map((machine) => machine.environmentId));
   const updating = rows.filter((row) => row.app !== null || row.providers.length > 0);
   const skipped = rows.filter((row) => row.skipped !== null);
@@ -202,7 +202,7 @@ function UpdateEverythingDialogContent({
                   {row.providers.map((provider, index) => (
                     <Fragment key={provider}>
                       <span className="whitespace-nowrap">{provider}</span>
-                      {index < row.providers.length - 1 ? ", " : null}
+                      {index < row.providers.length - 1 ? t("background.listSeparator") : null}
                     </Fragment>
                   ))}
                 </span>

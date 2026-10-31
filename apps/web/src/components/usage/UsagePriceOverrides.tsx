@@ -179,7 +179,10 @@ export function UsagePriceOverrides({
   const hasChanges = stagedDrafts.length > 0;
   const destinationLabel =
     selected.length === 1 ? selected[0]!.label : `${selected.length} environments`;
-  const selectionLabel = selectedIds === null ? "All environments" : destinationLabel;
+  const selectionLabel =
+    selectedIds === null
+      ? t("mobile.dynamic.ThreadListFilters.all-environments")
+      : destinationLabel;
   const discard = () => {
     setDrafts([]);
     setAttempt(null);

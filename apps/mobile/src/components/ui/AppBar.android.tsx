@@ -162,7 +162,8 @@ export function AppBar(props: AppBarProps) {
               ...(search.refreshInToolbar && search.onRefresh
                 ? [
                     {
-                      accessibilityLabel: search.refreshAccessibilityLabel ?? "Refresh",
+                      accessibilityLabel:
+                        search.refreshAccessibilityLabel ?? t("files.action.refresh"),
                       icon: "arrow.clockwise" as const,
                       onPress: search.onRefresh,
                     },
@@ -213,7 +214,10 @@ export function AppBar(props: AppBarProps) {
                 <SearchField
                   inputRef={inputRef}
                   accessibilityLabel={search.placeholder}
-                  clearAccessibilityLabel={search.clearAccessibilityLabel ?? "Clear search"}
+                  clearAccessibilityLabel={
+                    search.clearAccessibilityLabel ??
+                    t("mobile.surfaces.WorkspaceSearchField.clear-search")
+                  }
                   placeholder={search.placeholder}
                   value={search.value}
                   onChangeText={search.onChangeText}

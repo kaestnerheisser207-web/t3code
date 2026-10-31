@@ -288,7 +288,7 @@ export function PullRequestDetailGhost({
                 changedFiles === null ? (
                   <GhostBar className="h-3 w-10" />
                 ) : (
-                  `${changedFiles.toLocaleString()} ${changedFiles === 1 ? "file" : "files"}`
+                  `${changedFiles.toLocaleString()} ${changedFiles === 1 ? t("mobile.dynamic.PullRequestRouteScreen.file") : t("mobile.dynamic.PreviewStreamWebView.files")}`
                 )
               }
               diffStat={

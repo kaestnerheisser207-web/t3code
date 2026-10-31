@@ -181,7 +181,10 @@ export function ThreadMarkdownImageView(props: {
                   withGallery({
                     kind: "image",
                     uri: props.uri!,
-                    name: props.actionsSource?.name ?? props.alt ?? "Image",
+                    name:
+                      props.actionsSource?.name ??
+                      props.alt ??
+                      t("mobile.dynamic.MediaImagePreview.image"),
                     sourceIdentifier,
                     actionsSource: props.actionsSource,
                   }),

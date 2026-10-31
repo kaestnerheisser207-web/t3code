@@ -13,6 +13,7 @@ import { useSettingsEnvironmentFilter } from "../settings-environment-filter";
 export function SettingsEnvironmentFilterHeader(props: {
   readonly trailingItems?: readonly NativeStackHeaderItem[];
 }) {
+  const t = useTranslate();
   const {
     availableTargets,
     selectedTargets,
@@ -53,14 +54,14 @@ export function SettingsEnvironmentFilterHeader(props: {
             label: "",
             type: "menu",
             menu: {
-              title: "Settings scope",
+              title: t("mobile.settings.SettingsEnvironmentFilterHeader.settings-scope"),
               items: [
                 {
                   type: "submenu",
                   label:
                     selectedIds === null
-                      ? "All environments"
-                      : `${selectedTargets.length} ${selectedTargets.length === 1 ? "environment" : "environments"}`,
+                      ? t("mobile.dynamic.ThreadListFilters.all-environments")
+                      : `${selectedTargets.length} ${selectedTargets.length === 1 ? t("settings.scope.environment") : "environments"}`,
                   items: [
                     {
                       type: "action",
@@ -91,17 +92,19 @@ export function SettingsEnvironmentFilterHeader(props: {
                   label:
                     selectableProjectGroups.find((group) => group.key === selectedProjectKey)
                       ?.label ??
-                    (selectedProjectKey === null ? "All projects" : "Unavailable project"),
+                    (selectedProjectKey === null
+                      ? t("mobile.dynamic.ThreadListFilters.all-projects")
+                      : t("settings.dynamic.unavailableProject")),
                   items: [
                     {
                       type: "action",
-                      label: "All projects",
+                      label: t("mobile.dynamic.ThreadListFilters.all-projects"),
                       state: selectedProjectKey === null ? "on" : undefined,
                       onPress: () => selectProject(null),
                     },
                     ...selectableProjectGroups.map((group) => ({
                       type: "action" as const,
-                      label: group.label,
+                      label: projectMenuLabel(group),
                       state: selectedProjectKey === group.key ? ("on" as const) : undefined,
                       onPress: () => selectProject(group.key),
                     })),
@@ -159,12 +162,12 @@ export function AndroidSettingsEnvironmentFilter() {
         })),
         {
           id: "project:all",
-          title: "All projects",
+          title: t("mobile.dynamic.ThreadListFilters.all-projects"),
           state: selectedProjectKey === null ? ("on" as const) : ("off" as const),
         },
         ...selectableProjectGroups.map((group) => ({
           id: `project:${group.key}`,
-          title: `Project · ${group.label}`,
+          title: `Project · ${projectMenuLabel(group)}`,
           state: selectedProjectKey === group.key ? ("on" as const) : ("off" as const),
         })),
       ]}
@@ -196,3 +199,6 @@ export function AndroidSettingsEnvironmentFilter() {
     </Menu>
   );
 }
+
+const projectMenuLabel = (group: { readonly label: string; readonly archived: boolean }) =>
+  group.archived ? `${group.label} · Archived` : group.label;

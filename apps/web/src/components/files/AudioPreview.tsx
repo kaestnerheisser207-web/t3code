@@ -16,6 +16,7 @@ type AudioPreviewProps = {
   readonly revision?: string | null;
   readonly onError?: () => void;
   readonly compact?: boolean;
+  readonly variant?: "chip" | "bubble";
   readonly failed?: boolean;
   readonly onOpen?: (() => void) | undefined;
   readonly onRetry?: () => void;
@@ -94,13 +95,13 @@ function AudioChip(props: AudioPreviewProps) {
   const open = props.onOpen ?? (props.failed ? props.onRetry : undefined);
   const action = props.failed
     ? props.onOpen
-      ? "Open"
-      : "Retry"
+      ? t("activity.open")
+      : t("mobile.common.MediaVideoPlayer.retry")
     : loading
-      ? "Loading"
+      ? t("mobile.dynamic.ThreadArrangementSheet.loading")
       : playing
-        ? "Pause"
-        : "Play";
+        ? t("mobile.dynamic.AudioFilePreview.pause")
+        : t("mobile.dynamic.AudioFilePreview.play");
   const Icon = props.failed
     ? TriangleAlertIcon
     : loading
@@ -113,6 +114,7 @@ function AudioChip(props: AudioPreviewProps) {
     <ContextChip
       kind="file"
       {...(props.failed ? { state: "invalid" as const } : {})}
+      {...(props.variant === "bubble" ? { shape: "bubble" as const } : {})}
       className="relative isolate overflow-hidden"
       title={
         props.failed
@@ -146,13 +148,13 @@ function AudioChip(props: AudioPreviewProps) {
       >
         <Icon aria-hidden className={loading && props.src ? "animate-spin" : undefined} />
       </ContextChipAction>
-      <ContextChipLabel className="max-w-72">
+      <ContextChipLabel className={props.variant === "bubble" ? "flex-1" : "max-w-72"}>
         {open ? (
           <button
             type="button"
             className="block max-w-full cursor-pointer truncate rounded-sm text-left focus-visible:outline-2 focus-visible:outline-foreground"
             onClick={open}
-            aria-label={`${props.failed && !props.onOpen ? "Retry" : "Preview"} ${props.name}`}
+            aria-label={`${props.failed && !props.onOpen ? t("mobile.common.MediaVideoPlayer.retry") : t("web.ui.PullRequestMarkdownEditor.preview")} ${props.name}`}
           >
             {middleTruncateAttachmentName(props.name)}
           </button>

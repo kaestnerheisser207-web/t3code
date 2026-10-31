@@ -1042,7 +1042,9 @@ function PullRequestCodeTab({
   );
 
   const selectedCommit = orderedCommits.find((entry) => entry.oid === commit);
-  const scopeLabel = selectedCommit ? selectedCommit.messageHeadline : "All commits";
+  const scopeLabel = selectedCommit
+    ? selectedCommit.messageHeadline
+    : t("web.ui.PullRequestCodeTab.all-commits");
   const changeIgnoreWhitespace = (next: boolean) => {
     setIgnoreWhitespace(next);
     setDraft(null);
@@ -1114,7 +1116,11 @@ function PullRequestCodeTab({
           </span>
           {hiddenTestFileCount > 0 ? (
             <Button type="button" size="xs" variant="link" onClick={() => setHideTestFiles(false)}>
-              {hiddenTestFileCount} test {hiddenTestFileCount === 1 ? "file" : "files"} hidden
+              {hiddenTestFileCount} test{" "}
+              {hiddenTestFileCount === 1
+                ? t("mobile.dynamic.PullRequestRouteScreen.file")
+                : t("mobile.dynamic.PreviewStreamWebView.files")}{" "}
+              hidden
             </Button>
           ) : null}
           {filesViewed.enabled && files.length > 0 ? (
@@ -1368,7 +1374,7 @@ function PullRequestCodeTab({
             <TooltipTrigger
               render={
                 <Toggle
-                  aria-label="Hide test files"
+                  aria-label={t("mobile.review.PullRequestFiles.hide-test-files")}
                   variant="ghost"
                   size="sm"
                   pressed={hideTestFiles}
@@ -1379,7 +1385,9 @@ function PullRequestCodeTab({
               <FlaskConicalOffIcon className="size-3.5" />
             </TooltipTrigger>
             <TooltipPopup side="top">
-              {hideTestFiles ? "Show test files" : "Hide test files"}
+              {hideTestFiles
+                ? t("mobile.review.PullRequestFiles.show-test-files")
+                : t("mobile.review.PullRequestFiles.hide-test-files")}
             </TooltipPopup>
           </Tooltip>
         ) : null}

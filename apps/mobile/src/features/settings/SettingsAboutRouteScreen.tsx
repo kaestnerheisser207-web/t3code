@@ -91,15 +91,15 @@ function AppSettingsSection() {
 
   const statusLabel =
     updateState === "checking"
-      ? "Checking…"
+      ? t("settings.pages.DeviceHostEditor.checking")
       : updateState === "downloading"
-        ? "Downloading…"
+        ? t("settings.support.downloading")
         : updateState === "ready"
           ? "Update ready"
           : updateState === "restarting"
-            ? "Restarting…"
+            ? t("settings.pages.LocalEnvironmentSetting.restarting")
             : updateState === "current"
-              ? "Up to date"
+              ? t("pr.status.upToDate")
               : null;
 
   const versionRow = (

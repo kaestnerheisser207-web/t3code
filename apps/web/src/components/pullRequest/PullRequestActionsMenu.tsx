@@ -335,7 +335,7 @@ export function PullRequestActionsMenu({
                 </span>
                 {maintainerEditsSaving ? (
                   <span role="status" className="text-xs text-muted-foreground">
-                    Saving…
+                    {t("mobile.dynamic.PullRequestEditScreen.saving")}
                   </span>
                 ) : null}
               </span>
@@ -348,7 +348,7 @@ export function PullRequestActionsMenu({
             {showsDraftToggle ? (
               <MenuItem
                 disabled={actionPending}
-                onClick={() => void perform(detail.isDraft ? "ready" : "draft")}
+                onClick={() => void perform(detail.isDraft ? "ready" : t("release3904.undo-draft"))}
               >
                 {detail.isDraft ? (
                   <PullRequestGlyph.pullRequest className="size-3.5" />
@@ -502,7 +502,11 @@ export function PullRequestActionsMenu({
                   ? t("web.dynamic.PullRequestActionsMenu.confirm-revert")
                   : t("web.dynamic.PullRequestActionsMenu.revert-changes")
               }
-              variant={inlineConfirm.isArmed("revert") ? "destructive" : "default"}
+              variant={
+                inlineConfirm.isArmed("revert")
+                  ? "destructive"
+                  : t("web.dynamic.EnvironmentIconPicker.default")
+              }
               disabled={actionPending}
               {...inlineConfirm.props("revert", () => void perform("revert"))}
             >

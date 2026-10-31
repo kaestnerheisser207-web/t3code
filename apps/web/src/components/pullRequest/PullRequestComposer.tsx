@@ -69,13 +69,20 @@ export function PullRequestComposer({
   );
   if (!canComment && verdicts.length === 0) return null;
 
-  const mode = canComment ? (verdicts.length === 0 ? "comment" : requestedMode) : "review";
+  const mode = canComment
+    ? verdicts.length === 0
+      ? t("web.dynamic.PullRequestReviewAnnotation.comment")
+      : requestedMode
+    : "review";
 
   return (
     <Popover
       open={open}
       onOpenChange={(next) => {
-        if (next) setRequestedMode(reviewStarted ? "review" : "comment");
+        if (next)
+          setRequestedMode(
+            reviewStarted ? "review" : t("web.dynamic.PullRequestReviewAnnotation.comment"),
+          );
         setOpen(next);
       }}
     >

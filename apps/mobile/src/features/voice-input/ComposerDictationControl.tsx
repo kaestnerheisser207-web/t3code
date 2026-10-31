@@ -123,6 +123,7 @@ export function ComposerDictationToolbar(props: {
   readonly showsDictation: boolean;
   readonly visible?: boolean;
 }) {
+  const t = useTranslate();
   // Android can drop the reduced-motion flip's final frame, leaving the toolbar invisible.
   const reducedMotion = useReducedMotion();
   const entering = props.showsDictation ? DICTATION_TOOLBAR_ENTERING : DRAFT_TOOLBAR_ENTERING;
@@ -132,7 +133,7 @@ export function ComposerDictationToolbar(props: {
     <View className="relative h-[44px] overflow-hidden">
       {props.visible !== false ? (
         <Animated.View
-          key={props.showsDictation ? "dictation" : "draft"}
+          key={props.showsDictation ? "dictation" : t("release3904.undo-draft")}
           className="absolute inset-0"
           entering={reducedMotion ? undefined : entering}
           exiting={reducedMotion ? undefined : exiting}

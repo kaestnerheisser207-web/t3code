@@ -54,8 +54,8 @@ export function CustomSnoozeSheet(props: {
           <SegmentedControl
             options={
               [
-                { value: "date", label: "Date and time" },
-                { value: "duration", label: "Duration" },
+                { value: "date", label: t("snooze.custom.date") },
+                { value: "duration", label: t("diagnostics.duration") },
               ] as const
             }
             selected={mode}
@@ -96,7 +96,11 @@ export function CustomSnoozeSheet(props: {
                 <DateTimePicker
                   value={date}
                   mode={picker}
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  display={
+                    Platform.OS === "ios"
+                      ? "spinner"
+                      : t("web.dynamic.EnvironmentIconPicker.default")
+                  }
                   onDismiss={() => setPicker(null)}
                   onValueChange={(_, selected) => {
                     const next = new Date(date);
@@ -178,7 +182,7 @@ export function CustomSnoozeSheet(props: {
                   setError(
                     mode === "date"
                       ? "Choose a date and time in the future."
-                      : "Enter a positive duration.",
+                      : t("snoozePreset.positive"),
                   );
                   return;
                 }

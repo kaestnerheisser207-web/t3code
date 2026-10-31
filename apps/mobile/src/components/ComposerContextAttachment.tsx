@@ -76,7 +76,7 @@ export function ComposerContextAttachment(props: {
       const cause = squashAtomCommandFailure(result);
       Dialog.alert(
         "Could not open attachment",
-        cause instanceof Error ? cause.message : "Try again.",
+        cause instanceof Error ? cause.message : t("mobile.threadStatus.retry"),
       );
     }
   };

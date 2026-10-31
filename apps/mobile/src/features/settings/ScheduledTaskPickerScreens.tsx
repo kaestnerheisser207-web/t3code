@@ -142,7 +142,11 @@ export function ScheduledTaskBranchPickerRouteScreen() {
       loading={
         query.trim() !== debouncedQuery.trim() || (branches.isPending && branches.data === null)
       }
-      error={project ? branches.error : "This project is no longer available."}
+      error={
+        project
+          ? branches.error
+          : t("web.dynamic.ProjectSettingsPanel.this-project-is-no-longer-available")
+      }
       refreshing={branches.isFetchingNextPage}
       hasMore={branches.data?.nextCursor != null}
       onRefresh={branches.refresh}

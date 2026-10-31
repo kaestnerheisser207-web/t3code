@@ -111,7 +111,7 @@ function ChecksBody({
                       if (!check.url) return;
                       void openLink(check.url).catch((error: unknown) => {
                         console.error(error);
-                        toastManager.add({ type: "error", title: "Unable to open check details" });
+                        toastManager.add({ type: "error", title: t("pr.save.checkDetailsFailed") });
                       });
                     }}
                   >

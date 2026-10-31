@@ -58,13 +58,9 @@ export function planProjectRemoval<
         ]),
     ...(threadCount > 0
       ? [
-          t?.("project.remove.history") ??
-            "This permanently clears conversation history for those threads and any archived threads.",
+          "Those threads and any archived threads are deleted from T3 Code. Provider sessions are kept.",
         ]
-      : [
-          t?.("project.remove.archive") ??
-            "This permanently clears any archived conversation history.",
-        ]),
+      : ["Any archived threads are deleted from T3 Code. Provider sessions are kept."]),
     isWholeGroup && !hasOtherMembers
       ? (t?.("project.remove.keepFiles") ??
         "This removes only the project entries, not the files on disk.")

@@ -47,7 +47,9 @@ export function PullRequestDescription(props: {
     .map((attachment) => {
       return {
         ...pullRequestImageSource(attachment.uri, mediaContext),
-        name: new URL(attachment.uri).pathname.split("/").pop() || "Image",
+        name:
+          new URL(attachment.uri).pathname.split("/").pop() ||
+          t("mobile.dynamic.MediaImagePreview.image"),
       };
     });
   const canCollapse = bodyHeight > COLLAPSED_HEIGHT;

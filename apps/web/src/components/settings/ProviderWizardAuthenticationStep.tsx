@@ -92,7 +92,7 @@ export function ProviderWizardAuthenticationStep({
       <WizardFooter>
         <Button
           size="sm"
-          variant={signedIn ? "default" : "outline"}
+          variant={signedIn ? t("web.dynamic.EnvironmentIconPicker.default") : "outline"}
           disabled={active}
           onClick={onFinish}
         >

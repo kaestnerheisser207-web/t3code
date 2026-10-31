@@ -655,7 +655,7 @@ function ManagedCodexSetup({
   const waitingControl = (
     <Button
       size="sm"
-      variant={remoteWeb ? "default" : "outline"}
+      variant={remoteWeb ? t("web.dynamic.EnvironmentIconPicker.default") : "outline"}
       className={presentation === "onboarding" ? "min-w-44" : undefined}
       disabled={
         handoffQuery.data?.phase === "finished"

@@ -541,7 +541,7 @@ function SidebarUpdateControl() {
             <TooltipPopup
               align="center"
               side="top"
-              variant={showUpdateDetails ? "glass" : "default"}
+              variant={showUpdateDetails ? "glass" : t("web.dynamic.EnvironmentIconPicker.default")}
             >
               {idleTooltip?.detail ? (
                 <div className="text-left">

@@ -10,6 +10,7 @@ import { useUiStateStore } from "../../uiStateStore";
 import { resolveSidebarFolderDot, resolveThreadLastVisitedAt } from "../Sidebar.logic";
 import { ProjectFavicon } from "../ProjectFavicon";
 import { Button } from "../ui/button";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 
 const FOLDER_DOT_CLASS_NAME = {
   attention: "bg-warning",
@@ -102,17 +103,24 @@ export const SidebarProjectFolderHeader = memo(function SidebarProjectFolderHead
       </button>
       {/* Sits over the count, which hides on hover, and left of the chevron. */}
       <span className="absolute inset-y-0 right-6 flex items-center opacity-0 focus-within:opacity-100 group-hover/project-folder:opacity-100 pointer-coarse:opacity-100">
-        <Button
-          data-sidebar-action-for={rowId}
-          size="icon-xs"
-          variant="ghost-muted"
-          aria-label={t("web.dynamic.SidebarProjectFolderHeader.new-thread-in-param", {
-            displayName: group.displayName,
-          })}
-          onClick={() => props.onNewThread(group)}
-        >
-          <SquarePenIcon aria-hidden />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-sidebar-action-for={rowId}
+                size="icon-xs"
+                variant="ghost-muted"
+                aria-label={t("web.dynamic.SidebarProjectFolderHeader.new-thread-in-param", {
+                  displayName: group.displayName,
+                })}
+                onClick={() => props.onNewThread(group)}
+              />
+            }
+          >
+            <SquarePenIcon aria-hidden />
+          </TooltipTrigger>
+          <TooltipPopup>New thread in {group.displayName}</TooltipPopup>
+        </Tooltip>
       </span>
     </li>
   );

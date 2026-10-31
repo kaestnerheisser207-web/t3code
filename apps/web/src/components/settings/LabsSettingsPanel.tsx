@@ -165,6 +165,7 @@ function LinkedEnvironmentsRow() {
 }
 
 function SimlockHostsRow() {
+  const t = useTranslate();
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
   return (
@@ -185,7 +186,7 @@ function SimlockHostsRow() {
           </a>{" "}
           pool, added in{" "}
           <Link to="/settings/devices" className="underline underline-offset-2">
-            Devices
+            {t("device.menu.devices")}
           </Link>
           . An alpha that may change or break. T3 Code never installs Simlock.
         </>

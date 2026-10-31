@@ -98,7 +98,7 @@ export function HtmlRenderFrame(props: {
                       else
                         toastManager.add({
                           type: "error",
-                          title: "Page unavailable",
+                          title: t("mobile.threads.HtmlRenderWebView.page-unavailable"),
                           description: "Reconnect to the environment and try again.",
                         });
                     }}

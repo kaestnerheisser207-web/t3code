@@ -170,8 +170,10 @@ export function MarkdownCodeBlock({
       ),
   });
   const [wrapped, setWrapped] = useState(() => getClientSettings().wordWrap);
-  const wrapLabel = wrapped ? "Disable line wrap" : "Wrap lines";
-  const copyLabel = copied ? "Copied" : "Copy code";
+  const wrapLabel = wrapped ? "Disable line wrap" : t("web.ui.PullRequestCodeTab.wrap-lines");
+  const copyLabel = copied
+    ? t("mobile.dynamic.SettingsDiagnosticsRouteScreen.copied")
+    : t("settings.pages.AuthorizedClientsSettings.copy-code");
   const command = code.trim();
   const canRun =
     onRunShellCommand !== undefined &&

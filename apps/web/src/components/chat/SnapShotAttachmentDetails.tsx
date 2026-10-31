@@ -85,7 +85,9 @@ export function SnapShotContentsButton({
   const includesAccessibility = snapShotIncludesAccessibility(source);
   const ContentsIcon = includesAccessibility ? TextIcon : ImageIcon;
   const accessibilityDetails = snapShotAccessibilityDetails(source);
-  const tooltip = includesAccessibility ? "Accessibility data" : "No accessibility data";
+  const tooltip = includesAccessibility
+    ? t("web.ui.SnapShotAttachmentDetails.accessibility-data")
+    : t("web.dynamic.SnapShotAttachmentDetails.no-accessibility-data");
 
   return (
     <Popover>

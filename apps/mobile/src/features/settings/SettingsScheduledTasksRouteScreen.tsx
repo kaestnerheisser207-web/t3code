@@ -75,6 +75,7 @@ import { SettingsSection } from "./components/SettingsSection";
 import { useSettingsEnvironmentFilter, type SettingsTarget } from "./settings-environment-filter";
 import {
   editDraft,
+  parseIntervalMinutes,
   scheduledTaskDefaultModel,
   scheduleFromDraft,
   type ScheduledTaskDraft as Draft,
@@ -710,7 +711,16 @@ function TaskForm({
   const tasks = useEnvironmentQuery(
     serverEnvironment.scheduledTasksLive({ environmentId, input: {} }),
   );
-  const projects = useProjects().filter((project) => project.environmentId === environmentId);
+  // Pinned first. The chosen project stays listed after it is archived.
+  const projects = useProjects()
+    .filter(
+      (project) =>
+        project.environmentId === environmentId &&
+        (project.archivedAt == null ||
+          project.id === draft.projectId ||
+          project.id === draft.task?.projectId),
+    )
+    .sort((left, right) => Number(right.pinnedAt != null) - Number(left.pinnedAt != null));
   const config = useEnvironmentServerConfig(environmentId);
   const modelOptions = buildModelOptions(config, null, undefined, draft.projectId);
   const canOperate = useAtomValue(
@@ -807,7 +817,8 @@ function TaskForm({
                 startFromOrigin: draft.startFromOrigin,
               },
       runtimeMode: draft.runtimeMode,
-      interactionMode: draft.task?.interactionMode ?? "default",
+      interactionMode:
+        draft.task?.interactionMode ?? t("web.dynamic.EnvironmentIconPicker.default"),
       creationSource: draft.task?.creationSource ?? "mobile",
     };
     submissionPending.current = true;
@@ -1049,7 +1060,11 @@ function TaskForm({
                 <DateTimePicker
                   value={timePickerValue(draft.schedule.timeOfDay)}
                   mode="time"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  display={
+                    Platform.OS === "ios"
+                      ? "spinner"
+                      : t("web.dynamic.EnvironmentIconPicker.default")
+                  }
                   onDismiss={() => setTimePickerOpen(false)}
                   onValueChange={(_, selected) => {
                     const timeOfDay = `${String(selected.getHours()).padStart(2, "0")}:${String(selected.getMinutes()).padStart(2, "0")}`;
@@ -1191,7 +1206,7 @@ function TaskForm({
                   setDraft({ ...draft, schedule: { ...draft.schedule, intervalMinutes } })
                 }
               />
-              {Number(draft.schedule.intervalMinutes) < 1 ? (
+              {!(parseIntervalMinutes(draft.schedule.intervalMinutes) >= 1) ? (
                 <Text className="px-4 pb-3 text-sm text-danger-foreground">
                   {t(
                     "mobile.settings.SettingsScheduledTasksRouteScreen.intervals-must-be-at-least-1-minute-update-this-interval-before-saving",

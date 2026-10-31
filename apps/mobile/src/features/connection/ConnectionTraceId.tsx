@@ -27,7 +27,9 @@ export function ConnectionTraceId({
           traceId: traceId,
         })}
         accessibilityRole="button"
-        accessibilityActions={[{ name: "activate", label: "Copy trace ID" }]}
+        accessibilityActions={[
+          { name: "activate", label: t("mobile.connect.T3ConnectProfilePage.copy-trace-id") },
+        ]}
         onAccessibilityAction={(event) => {
           event.stopPropagation();
           if (event.nativeEvent.actionName === "activate") copy();

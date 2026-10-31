@@ -732,7 +732,11 @@ export function BranchToolbarBranchSelector({
             <ComposerContextLabel displayMode={displayMode}>
               <MiddleTruncate
                 value={triggerLabel}
-                variant={displayMode === "panel" ? "cap-aligned" : "default"}
+                variant={
+                  displayMode === "panel"
+                    ? "cap-aligned"
+                    : t("web.dynamic.EnvironmentIconPicker.default")
+                }
                 className="w-full"
               />
             </ComposerContextLabel>

@@ -137,6 +137,7 @@ const ENTER_TIMING = {
 };
 const TOAST_EXITING = FadeOut.duration(MOBILE_MOTION.exit).reduceMotion(ReduceMotion.System);
 function SwipeableToast(props: ToastProps & { readonly onDismiss: () => void }) {
+  const t = useTranslate();
   const [glassReady, setGlassReady] = useState(Platform.OS !== "ios");
   const finishEntering = useCallback(() => setGlassReady(true), []);
   // UIKit can skip glass on a moving host; remount the surface after entry so its blur installs.
@@ -205,7 +206,9 @@ function SwipeableToast(props: ToastProps & { readonly onDismiss: () => void }) 
               accessibilityRole="alert"
               accessibilityLiveRegion="assertive"
               accessibilityLabel={props.message}
-              accessibilityActions={[{ name: "dismiss", label: "Dismiss message" }]}
+              accessibilityActions={[
+                { name: "dismiss", label: t("mobile.common.Toast.dismiss-message") },
+              ]}
               onAccessibilityAction={({ nativeEvent }) => {
                 if (nativeEvent.actionName === "dismiss") onDismiss();
               }}

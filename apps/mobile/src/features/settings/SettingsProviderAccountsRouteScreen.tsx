@@ -231,7 +231,9 @@ function ProviderAccount({
           : isDiscovering
             ? t("settings.extra.discovering")
             : needsExternalSetup
-              ? "No in-app sign-in advertised. Follow the provider's docs to finish setup."
+              ? t(
+                  "web.dynamic.ProviderWizardAuthenticationStep.no-in-app-sign-in-advertised-follow-the-provider-s-docs-to-finish-setup",
+                )
               : !provider.installed
                 ? t("settings.extra.notInstalled")
                 : t("settings.extra.notSignedIn");

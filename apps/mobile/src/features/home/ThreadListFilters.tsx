@@ -39,7 +39,7 @@ export function ThreadListFilters(
         actions={[
           {
             id: "all",
-            title: "All environments",
+            title: t("mobile.dynamic.ThreadListFilters.all-environments"),
             state: props.selectedEnvironmentId === null ? "on" : "off",
           },
           ...props.environments.map((environment) => ({
@@ -68,7 +68,7 @@ export function ThreadListFilters(
         actions={[
           {
             id: "all",
-            title: "All projects",
+            title: t("mobile.dynamic.ThreadListFilters.all-projects"),
             state: props.selectedProjectKey === null ? "on" : "off",
           },
           ...props.projects.map((project) => ({

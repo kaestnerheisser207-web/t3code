@@ -174,7 +174,7 @@ export function SourceControlAppSignInSettings({
       ) : tokenOverrides ? (
         "Signed in, but the token saved below is used until you remove it."
       ) : (
-        "Signed in"
+        t("mobile.dynamic.UsageLimitsPooled.signed-in")
       );
     action = (
       <Button size="xs" variant="outline" disabled={!canSignIn} onClick={() => void signOut()}>

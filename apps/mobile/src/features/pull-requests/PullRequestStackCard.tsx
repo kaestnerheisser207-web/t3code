@@ -6,6 +6,7 @@ import { Platform, View } from "react-native";
 import { useSelectWorkspaceDetail } from "../workspace/useSelectWorkspaceDetail";
 import { AppText as Text } from "../../components/ui/AppText";
 import { PullRequestCardGroup, PullRequestCardRow } from "./PullRequestControls";
+import { pullRequestLayerParams } from "./pullRequestStack";
 import { pullRequestStatus } from "./pullRequestStatus";
 import type { PullRequestParams } from "./usePullRequestDiff";
 import type { PullRequestStackState } from "./usePullRequestStack";
@@ -71,13 +72,13 @@ export function PullRequestStackCard(props: {
                   title={layer.title ?? layer.headBranch}
                   icon={status.icon}
                   tint={status.tint}
-                  value={selected ? "Current" : status.label}
+                  value={selected ? t("settings.pages.DiagnosticsSettings.current") : status.label}
                   detail={`#${layer.number} · ${index + 1} of ${stack.layers.length}`}
                   onPress={
                     selected
                       ? undefined
                       : () => {
-                          const params = { ...props.params, number: layer.number };
+                          const params = pullRequestLayerParams(props.params, layer.number);
                           if (Platform.OS === "android")
                             selectDetail({ name: "PullRequest", params });
                           else navigation.dispatch(StackActions.push("PullRequest", params));

@@ -92,7 +92,7 @@ export function useAutoBalanceUpdateBanner(
   );
   return {
     id: `auto-balance-server-updates-${dismissedNotices.size}`,
-    variant: failed ? "error" : "default",
+    variant: failed ? "error" : t("web.dynamic.EnvironmentIconPicker.default"),
     group: "environment",
     icon: <ComposerServerUpdateIcon status={status} />,
     title: (

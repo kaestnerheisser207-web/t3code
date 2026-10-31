@@ -568,7 +568,11 @@ export function PullRequestFiltersMenu({
       ? ALL_PROJECTS_VALUE
       : pullRequestProjectKey({ id: projectId, environmentId: projectEnvironmentId });
   const projectOptions: ReadonlyArray<PullRequestFilterOption<string>> = [
-    { value: ALL_PROJECTS_VALUE, label: "All projects", Icon: LayersIcon },
+    {
+      value: ALL_PROJECTS_VALUE,
+      label: t("mobile.dynamic.ThreadListFilters.all-projects"),
+      Icon: LayersIcon,
+    },
     ...projects
       .toSorted(
         (left, right) =>

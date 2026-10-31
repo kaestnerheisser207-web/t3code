@@ -27,7 +27,8 @@ export function DeviceToolVersions({
       : selected?.installedVersions
           .toSorted((a, b) => a.localeCompare(b, undefined, { numeric: true }))
           .at(-1));
-  const label = kind === "hub" ? "Device hub" : "Agent device";
+  const label =
+    kind === "hub" ? t("settings.pages.IntegrationsSettings.device-hub") : "Agent device";
   return (
     <Popover>
       <PopoverTrigger

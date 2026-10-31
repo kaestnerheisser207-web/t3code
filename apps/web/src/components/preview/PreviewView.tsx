@@ -19,6 +19,7 @@ import {
 } from "@t3tools/contracts";
 import {
   normalizePreviewUrl,
+  isPreviewUrlNormalizationError,
   resolveAddressBarInput,
   previewPdfAssetUrl,
   resolveSearchUrlTemplate,
@@ -265,7 +266,17 @@ export function PreviewView({
       if (await navigateToResolvedUrl(resolved)) {
         recordVisitForThread(threadRef, resolved);
       }
-    } catch {}
+    } catch (error) {
+      toastManager.add({
+        type: "error",
+        title: "Could not open this address",
+        description: isPreviewUrlNormalizationError(error)
+          ? "Enter an http or https URL."
+          : error instanceof Error
+            ? error.message
+            : t("web.git.an-error-occurred"),
+      });
+    }
   };
 
   const handleOpenServerUrl = async (next: string) => {
@@ -277,7 +288,17 @@ export function PreviewView({
       if (await navigateToResolvedUrl(resolved)) {
         recordVisitForThread(threadRef, next);
       }
-    } catch {}
+    } catch (error) {
+      toastManager.add({
+        type: "error",
+        title: "Could not open this address",
+        description: isPreviewUrlNormalizationError(error)
+          ? "Enter an http or https URL."
+          : error instanceof Error
+            ? error.message
+            : t("web.git.an-error-occurred"),
+      });
+    }
   };
 
   const handleRefresh = () => {

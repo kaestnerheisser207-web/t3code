@@ -91,7 +91,7 @@ export function LocalEnvironmentSetting() {
               {t("settings.pages.LocalEnvironmentSetting.cancel")}
             </AlertDialogClose>
             <Button
-              variant={enabled ? "destructive" : "default"}
+              variant={enabled ? "destructive" : t("web.dynamic.EnvironmentIconPicker.default")}
               disabled={isUpdating}
               onClick={() => void applyChange()}
             >

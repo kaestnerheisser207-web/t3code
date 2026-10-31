@@ -68,7 +68,7 @@ function DocumentPreview(props: {
     const input = {
       uri,
       attachment: {
-        name: name ?? "Document",
+        name: name ?? t("mobile.dynamic.FilePreview.document"),
         mimeType:
           props.source.mimeType ??
           (props.source.kind === "pdf" ? "application/pdf" : "application/octet-stream"),
@@ -84,7 +84,7 @@ function DocumentPreview(props: {
         if (!controller.signal.aborted) onRequestClose();
       });
     return () => controller.abort();
-  }, [uri, name, props.source.mimeType, props.source.kind]);
+  }, [uri, name, props.source.mimeType, props.source.kind, t]);
   return (
     <Modal transparent animationType="fade" onRequestClose={props.onRequestClose}>
       <View className="flex-1 items-center justify-center bg-backdrop p-6">

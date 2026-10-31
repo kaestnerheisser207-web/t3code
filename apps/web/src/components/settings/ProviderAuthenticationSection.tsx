@@ -85,13 +85,15 @@ export function ProviderAuthenticationSection({
           ? "Complete sign-in in the terminal below."
           : interaction?.type === "credentials"
             ? "Enter your credentials below."
-            : "Finish signing in in your browser."
+            : t("codex.setup.browser")
     : signedIn
       ? "Signed in."
       : isDiscovering
-        ? "Discovering sign-in methods…"
+        ? t("settings.extra.discovering")
         : needsExternalSetup
-          ? "No in-app sign-in advertised. Follow the provider's docs to finish setup."
+          ? t(
+              "web.dynamic.ProviderWizardAuthenticationStep.no-in-app-sign-in-advertised-follow-the-provider-s-docs-to-finish-setup",
+            )
           : `Sign in on ${environmentLabel}.`;
   const statusMessage = auth?.phase === "failed" ? auth.message : null;
   const disabled = readOnly || pending || query.error !== null || isDiscovering;

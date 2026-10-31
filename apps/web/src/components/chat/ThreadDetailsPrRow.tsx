@@ -332,7 +332,7 @@ export function ThreadDetailsPrRow({
   const trailingAction =
     rowAction === "resolve"
       ? {
-          label: "Resolve",
+          label: t("pr.actions.resolve"),
           pendingLabel: "Preparing...",
           pending: handoff === "conflicts",
           destructive: true,
@@ -342,7 +342,7 @@ export function ThreadDetailsPrRow({
         }
       : rowAction === "ready"
         ? {
-            label: "Ready",
+            label: t("settings.pages.CodexSetupSection.ready"),
             pendingLabel: "Marking...",
             pending: actionPending,
             destructive: false,
@@ -362,7 +362,7 @@ export function ThreadDetailsPrRow({
             }
           : rowAction === "merge"
             ? {
-                label: "Merge",
+                label: t("settings.dynamic.merge"),
                 pendingLabel: "Merging...",
                 pending: actionPending,
                 destructive: false,

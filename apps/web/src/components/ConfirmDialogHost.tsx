@@ -66,7 +66,8 @@ export function ConfirmDialogHost() {
     title: t("common.confirmAction"),
     description: t("common.confirmDescription"),
   });
-  const confirmVariant = state.status === "idle" ? "default" : state.variant;
+  const confirmVariant =
+    state.status === "idle" ? t("web.dynamic.EnvironmentIconPicker.default") : state.variant;
   const onCancel = () => respondToConfirmDialog(false);
   const onConfirm = () => respondToConfirmDialog(true);
 

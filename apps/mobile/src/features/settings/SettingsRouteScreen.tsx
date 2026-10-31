@@ -137,7 +137,7 @@ function ConfiguredSettingsRouteScreen() {
         {
           id: "SettingsNotifications",
           icon: "bell.badge",
-          label: "Notifications",
+          label: t("mobile.settings.SettingsNotificationsRouteScreen.notifications"),
           target: "SettingsNotifications",
         },
       ]}
@@ -176,7 +176,11 @@ function SettingsList(props: { readonly connections: readonly SettingsListRow[] 
   const indexSections = useSettingsIndexSections();
   const sections = filterSettingsSections(
     localizeSettingsSections(
-      [{ rows: overflowRows }, { title: "Connections", rows: props.connections }, ...indexSections],
+      [
+        { rows: overflowRows },
+        { title: t("settings.pages.LabsSettingsPanel.connections"), rows: props.connections },
+        ...indexSections,
+      ],
       t,
     ),
     query,
@@ -264,7 +268,7 @@ function useSettingsIndexSections(): SettingsListSection[] {
       ],
     },
     {
-      title: "Agents",
+      title: t("mobile.threads.ThreadAgentsSheet.agents"),
       rows: [
         serverPage("SettingsProviderAccounts", "person.crop.circle", "Providers"),
         serverPage("SettingsThreads", "text.bubble", "Threads"),
@@ -272,7 +276,7 @@ function useSettingsIndexSections(): SettingsListSection[] {
       ],
     },
     {
-      title: "Code",
+      title: t("mobile.connect.ConnectionsNewRouteScreen.code"),
       rows: [
         page(
           "SettingsProjectOverview",

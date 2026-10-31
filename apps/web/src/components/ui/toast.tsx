@@ -136,8 +136,9 @@ function handleToastDismissClick(
 }
 
 function CopyErrorButton({ text }: { text: string }) {
+  const t = useTranslate();
   const { copyToClipboard, isCopied } = useCopyToClipboard({ target: "error-message" });
-  const label = isCopied ? "Copied error" : "Copy error";
+  const label = isCopied ? "Copied error" : t("web.dynamic.__root.copy-error");
 
   return (
     <Tooltip>
@@ -172,9 +173,10 @@ function ToastExpandableSection({
   children: ReactNode;
   labels: { expand?: string; collapse?: string };
 }) {
+  const t = useTranslate();
   const [open, setOpen] = useState(false);
   const expandLabel = labels.expand ?? "Show details";
-  const collapseLabel = labels.collapse ?? "Hide details";
+  const collapseLabel = labels.collapse ?? t("web.dynamic.PreviewUnreachable.hide-details");
 
   return (
     <div className="min-w-0">
@@ -205,6 +207,7 @@ function ToastDescriptionAndExpandable({
   toastDescription: unknown;
   toastType: unknown;
 }) {
+  const t = useTranslate();
   const expandableContent = toastData?.expandableContent;
   const labels = toastData?.expandableLabels ?? {};
   const descriptionTrigger = toastData?.expandableDescriptionTrigger ?? false;
@@ -228,7 +231,7 @@ function ToastDescriptionAndExpandable({
   }
 
   const expandLabel = labels.expand ?? "Show details";
-  const collapseLabel = labels.collapse ?? "Hide details";
+  const collapseLabel = labels.collapse ?? t("web.dynamic.PreviewUnreachable.hide-details");
 
   const toggle = () => setOpen((v) => !v);
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {

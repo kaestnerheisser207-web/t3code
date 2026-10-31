@@ -29,7 +29,10 @@ export function CliCommandSettingsRow() {
           stackedThreadToast({
             type: "error",
             title: action === "install" ? "Could not install t3" : "Could not remove t3",
-            description: error instanceof Error ? error.message : "Something went wrong.",
+            description:
+              error instanceof Error
+                ? error.message
+                : t("web.remaining.__root.something-went-wrong"),
           }),
         );
       })

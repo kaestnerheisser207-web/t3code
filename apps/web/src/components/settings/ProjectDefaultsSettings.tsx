@@ -227,8 +227,8 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
                 value === "local" || value === "worktree"
                   ? resolveEnvModeLabel(value)
                   : unavailable
-                    ? "Unavailable"
-                    : "Mixed"
+                    ? t("telemetry.unavailable")
+                    : t("mobile.dynamic.BranchNamingSettings.mixed")
               }
             </SelectValue>
           </SelectTrigger>
@@ -288,7 +288,9 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
             }}
           />
         ) : (
-          <span className="text-sm text-muted-foreground">No providers available</span>
+          <span className="text-sm text-muted-foreground">
+            {t("settings.pages.ProjectDefaultsSettings.no-providers-available")}
+          </span>
         )
       }
     />
@@ -491,8 +493,8 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
                       value === "merge" || value === "squash" || value === "rebase"
                         ? PULL_REQUEST_MERGE_METHOD_LABELS[value]
                         : value === "last"
-                          ? "Last selected"
-                          : "Mixed"
+                          ? t("settings.dynamic.lastSelected")
+                          : t("mobile.dynamic.BranchNamingSettings.mixed")
                     }
                   </SelectValue>
                 </SelectTrigger>
@@ -564,8 +566,8 @@ export function WorktreeSubmodulesRow() {
                 isWorktreeSubmodules(value)
                   ? WORKTREE_SUBMODULES_LABELS[value]
                   : unavailable
-                    ? "Unavailable"
-                    : "Mixed"
+                    ? t("telemetry.unavailable")
+                    : t("mobile.dynamic.BranchNamingSettings.mixed")
               }
             </SelectValue>
           </SelectTrigger>

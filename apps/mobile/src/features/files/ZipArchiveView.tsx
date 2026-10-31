@@ -278,7 +278,11 @@ function ZipTreeRowView(props: {
         )}
       </View>
       <View className="w-5 items-center">
-        <PierreEntryIcon path={node.path} kind={entry ? "file" : "directory"} size={17} />
+        <PierreEntryIcon
+          path={node.path}
+          kind={entry ? t("mobile.dynamic.PullRequestRouteScreen.file") : "directory"}
+          size={17}
+        />
       </View>
       <Text className="min-w-0 flex-1 text-[15px] text-foreground" numberOfLines={1}>
         {folder ? (
@@ -294,7 +298,7 @@ function ZipTreeRowView(props: {
         {entry
           ? formatAttachmentSize(entry.sizeBytes)
           : props.collapsed
-            ? `${node.fileCount} ${node.fileCount === 1 ? "file" : "files"}`
+            ? `${node.fileCount} ${node.fileCount === 1 ? t("mobile.dynamic.PullRequestRouteScreen.file") : t("mobile.dynamic.PreviewStreamWebView.files")}`
             : ""}
       </Text>
     </Pressable>
@@ -558,6 +562,7 @@ export function ZipArchiveView(props: {
   readonly onSave: () => void;
   readonly onRemove: (() => void) | null;
 }) {
+  const t = useTranslate();
   const { state, retry, cancel } = useZipArchive(props);
   const [selection, setSelection] = useState<{
     readonly archive: ZipArchive;
@@ -577,7 +582,7 @@ export function ZipArchiveView(props: {
           name={props.name}
           subtitle={
             archive
-              ? `${archive.fileCount} ${archive.fileCount === 1 ? "file" : "files"}${props.sizeBytes > 0 ? ` · ${formatAttachmentSize(props.sizeBytes)}` : ""}`
+              ? `${archive.fileCount} ${archive.fileCount === 1 ? t("mobile.dynamic.PullRequestRouteScreen.file") : t("mobile.dynamic.PreviewStreamWebView.files")}${props.sizeBytes > 0 ? ` · ${formatAttachmentSize(props.sizeBytes)}` : ""}`
               : props.subtitle
           }
           tintColor={props.tintColor}
@@ -697,7 +702,7 @@ function ZipEntryView(props: {
             title: t("zip.previewLarge"),
             detail: t("zip.previewLimit", { size: formatAttachmentSize(ARCHIVE_ENTRY_MAX_BYTES) }),
           }),
-          title: "Too big to preview",
+          title: t("zip.previewLarge"),
           message: `Previews stop at ${formatAttachmentSize(ARCHIVE_ENTRY_MAX_BYTES)}. Save the file to open it in another app.`,
         }
       : { status: "loading" },
@@ -740,7 +745,7 @@ function ZipEntryView(props: {
               title: t("zip.readFailed"),
               detail: errorMessage(cause, t("zip.readDetail")),
             }),
-            title: "Couldn't read this file",
+            title: "Could not read this file",
             message: errorMessage(cause, "Could not read this file."),
           });
       });
@@ -825,7 +830,9 @@ function ZipEntryView(props: {
             ...(renderedMode
               ? [
                   {
-                    accessibilityLabel: rendered ? "Show source" : "Show preview",
+                    accessibilityLabel: rendered
+                      ? t("mobile.dynamic.ZipArchiveView.show-source")
+                      : t("mobile.dynamic.ZipArchiveView.show-preview"),
                     icon: rendered ? ("doc.text" as const) : ("eye" as const),
                     onPress: () => setRendered((value) => !value),
                   },

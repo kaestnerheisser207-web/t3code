@@ -42,7 +42,11 @@ function FileCardHeader(props: PreviewProps) {
       className="h-[72px] flex-row items-center gap-3 p-3 active:bg-subtle"
     >
       <View className="h-12 w-10 shrink-0 items-center justify-center rounded-lg bg-subtle">
-        <PierreEntryIcon path={props.source.name ?? "file"} kind="file" size={26} />
+        <PierreEntryIcon
+          path={props.source.name ?? t("mobile.dynamic.PullRequestRouteScreen.file")}
+          kind="file"
+          size={26}
+        />
       </View>
       <View className="min-w-0 flex-1 gap-1">
         <Text className="text-sm font-t3-medium text-foreground" numberOfLines={1}>

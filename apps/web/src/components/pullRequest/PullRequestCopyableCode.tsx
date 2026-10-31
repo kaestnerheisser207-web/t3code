@@ -61,7 +61,7 @@ export function PullRequestCopyableCode({
         </span>
       </TooltipTrigger>
       <TooltipPopup variant="code" side={tooltipSide}>
-        {`${isCopied ? "Copied" : copyLabel}: ${value}`}
+        {`${isCopied ? t("mobile.dynamic.SettingsDiagnosticsRouteScreen.copied") : copyLabel}: ${value}`}
       </TooltipPopup>
     </Tooltip>
   );

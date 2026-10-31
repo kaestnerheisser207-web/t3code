@@ -206,7 +206,7 @@ export function NewTaskEnvironmentPickerRouteScreen() {
       <NativeStackScreenOptions
         options={{
           headerShown: Platform.OS !== "android",
-          title: "Environment",
+          title: t("mobile.dynamic.SettingsEnvironmentDetailRouteScreen.environment"),
         }}
       />
       {Platform.OS === "android" ? (

@@ -133,8 +133,8 @@ export function ArchivedThreadsPanel() {
     if (!api) return;
     const clicked = await api.contextMenu.show(
       [
-        { id: "unarchive", label: "Unarchive" },
-        { id: "delete", label: "Delete", destructive: true },
+        { id: "unarchive", label: t("archive.restore") },
+        { id: "delete", label: t("mobile.schedule.delete"), destructive: true },
       ],
       position,
     );
@@ -149,7 +149,7 @@ export function ArchivedThreadsPanel() {
           stackedThreadToast({
             type: "error",
             title: "Failed to unarchive thread",
-            description: error instanceof Error ? error.message : "An error occurred.",
+            description: error instanceof Error ? error.message : t("web.git.an-error-occurred"),
           }),
         );
       }
@@ -165,8 +165,8 @@ export function ArchivedThreadsPanel() {
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Failed to delete thread",
-            description: error instanceof Error ? error.message : "An error occurred.",
+            title: t("menuFeedback.deleteFailed"),
+            description: error instanceof Error ? error.message : t("web.git.an-error-occurred"),
           }),
         );
       }
@@ -233,7 +233,7 @@ export function ArchivedThreadsPanel() {
                           type: "error",
                           title: "Archived thread action failed",
                           description:
-                            error instanceof Error ? error.message : "An error occurred.",
+                            error instanceof Error ? error.message : t("web.git.an-error-occurred"),
                         }),
                       );
                     }
@@ -278,7 +278,9 @@ export function ArchivedThreadsPanel() {
                               type: "error",
                               title: "Failed to unarchive thread",
                               description:
-                                error instanceof Error ? error.message : "An error occurred.",
+                                error instanceof Error
+                                  ? error.message
+                                  : t("web.git.an-error-occurred"),
                             }),
                           );
                         }

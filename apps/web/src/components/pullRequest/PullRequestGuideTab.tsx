@@ -106,24 +106,33 @@ export function PullRequestGuideTab({
       );
     }
     return (
-      <div className="flex min-h-48 flex-col items-center justify-center gap-2 px-4 py-10 text-center">
+      <div className="scrollbar-gutter-both flex h-full flex-col items-center justify-center-safe gap-2 overflow-y-auto px-4 py-10 text-center">
         <p className="text-sm font-medium text-foreground">
           {running
             ? t("web.dynamic.PullRequestGuideTab.writing-a-review-guide")
-            : t("web.dynamic.PullRequestGuideTab.no-review-guide-yet")}
+            : failure === null
+              ? t("web.dynamic.PullRequestGuideTab.no-review-guide-yet")
+              : "Could not write a review guide"}
         </p>
         <p className="max-w-md text-xs text-muted-foreground">
-          {failure ??
-            query.error ??
-            (running
-              ? t(
-                  "web.dynamic.PullRequestGuideTab.an-agent-is-reading-the-change-a-large-one-takes-a-few-minutes-you-can-leave-you-will-be-told-when-it-is-ready",
-                )
-              : t(
+          {running
+            ? t(
+                "web.dynamic.PullRequestGuideTab.an-agent-is-reading-the-change-a-large-one-takes-a-few-minutes-you-can-leave-you-will-be-told-when-it-is-ready",
+              )
+            : failure === null
+              ? (query.error ??
+                t(
                   "web.dynamic.PullRequestGuideTab.a-guide-is-a-tour-of-the-change-stops-through-the-code-in-reading-order-with-the-calls-only-a-maintainer-can-make",
-                ))}
+                ))
+              : FAILURE_HINT}
         </p>
-        {writeButton(failure === null ? "Write guide" : "Try again", "sm")}
+        {writeButton(
+          failure === null
+            ? t("web.dynamic.PullRequestActionsMenu.write-guide")
+            : t("mobile.common.PdfPreview.android.try-again"),
+          "sm",
+        )}
+        {failure === null || running ? null : <FailureDetails detail={failure} />}
       </div>
     );
   }
@@ -133,11 +142,18 @@ export function PullRequestGuideTab({
       <Alert variant={running ? "info" : "warning"}>
         {running ? <Spinner /> : <TriangleAlertIcon />}
         <AlertDescription>
-          {running
-            ? t(
-                "web.dynamic.PullRequestGuideTab.rewriting-this-guide-you-will-be-told-when-the-new-one-is-ready",
-              )
-            : (failure ?? t("web.dynamic.PullRequestGuideTab.written-before-the-latest-push"))}
+          {running ? (
+            t(
+              "web.dynamic.PullRequestGuideTab.rewriting-this-guide-you-will-be-told-when-the-new-one-is-ready",
+            )
+          ) : failure === null ? (
+            t("web.dynamic.PullRequestGuideTab.written-before-the-latest-push")
+          ) : (
+            <>
+              {`Could not rewrite this guide. ${FAILURE_HINT}`}
+              <FailureDetails detail={failure} />
+            </>
+          )}
         </AlertDescription>
         {!running && canWrite ? <AlertAction>{writeButton("Rewrite", "xs")}</AlertAction> : null}
       </Alert>
@@ -164,5 +180,21 @@ export function PullRequestGuideTab({
         onOpenFile={onOpenFile}
       />
     </GuideProseContext>
+  );
+}
+
+const FAILURE_HINT = "Check the review guide model in Settings → Source control.";
+
+function FailureDetails({ detail }: { detail: string }) {
+  const t = useTranslate();
+  return (
+    <details className="w-full max-w-lg text-xs text-muted-foreground">
+      <summary className="cursor-pointer rounded-sm -outline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring">
+        {t("web.ui.PullRequestDiffUnavailableState.technical-details")}
+      </summary>
+      <pre className="scrollbar-gutter-both mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-muted/40 p-3 text-left font-mono text-xs">
+        {detail}
+      </pre>
+    </details>
   );
 }

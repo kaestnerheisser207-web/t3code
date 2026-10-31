@@ -178,7 +178,10 @@ function ProjectFaviconImage(props: {
         <ProjectIconGlyphView glyph={fallbackGlyph} size={props.size} />
       ) : (
         <SymbolView
-          name={{ ios: "folder.fill", android: props.open ? "folder_open" : "folder" }}
+          name={{
+            ios: "folder.fill",
+            android: props.open ? "folder_open" : t("web.dynamic.WelcomeWizard.folder"),
+          }}
           size={props.size}
           tintColorClassName={"accent-icon-subtle"}
           type="monochrome"

@@ -1,7 +1,9 @@
-import { Trans } from "react-i18next";
+import { Discovery } from "@t3tools/client-runtime/relay";
+import type { EnvironmentId } from "@t3tools/contracts";
 import { useTranslate } from "../../i18n";
 import { useState } from "react";
 
+import { useRelayEnvironmentDiscovery } from "../../state/environments";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -16,18 +18,41 @@ import { useT3ConnectAccountPage } from "./T3ConnectAccountPages";
 
 export function RemoveT3ConnectEnvironmentDialog({
   environmentLabel,
+  environmentId,
   onCancel,
   onConfirm,
 }: {
   readonly environmentLabel: string | null;
+  readonly environmentId: EnvironmentId | null;
   readonly onCancel: () => void;
   readonly onConfirm: () => void;
 }) {
   const t = useTranslate();
   const accountPage = useT3ConnectAccountPage();
-  const [shownLabel, setShownLabel] = useState(environmentLabel);
-  if (environmentLabel !== null && environmentLabel !== shownLabel) setShownLabel(environmentLabel);
+  const discovery = useRelayEnvironmentDiscovery();
+  const registration = environmentId
+    ? Discovery.relayEnvironmentRegistration(discovery, environmentId)
+    : "unknown";
+  const [shown, setShown] = useState({ label: environmentLabel, registration });
+  if (
+    environmentLabel !== null &&
+    (environmentLabel !== shown.label || registration !== shown.registration)
+  ) {
+    setShown({ label: environmentLabel, registration });
+  }
   const openAccountPage = accountPage.open;
+  const accountPageLink = openAccountPage ? (
+    <InlineButton
+      onClick={() => {
+        onCancel();
+        openAccountPage();
+      }}
+    >
+      {t("web.ui.RemoveT3ConnectEnvironmentDialog.t3-connect-settings")}
+    </InlineButton>
+  ) : (
+    t("web.ui.RemoveT3ConnectEnvironmentDialog.t3-connect-settings")
+  );
 
   return (
     <>
@@ -40,11 +65,7 @@ export function RemoveT3ConnectEnvironmentDialog({
         <AlertDialogPopup>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Trans
-                t={t}
-                i18nKey="web.rich.RemoveT3ConnectEnvironmentDialog.remove-part-from-this-device"
-                components={{ value0: <>{shownLabel}</> }}
-              />
+              {t("mobile.threads.ThreadQueueControl.remove")} {shown.label} from this device?
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t(
@@ -52,28 +73,19 @@ export function RemoveT3ConnectEnvironmentDialog({
               )}
             </AlertDialogDescription>
             <AlertDialogDescription>
-              <Trans
-                t={t}
-                i18nKey="web.rich.RemoveT3ConnectEnvironmentDialog.it-stays-on-your-t3-connect-account-and-keeps-its-host-space-deregister-it-in-part-to-free-it"
-                components={{
-                  value0: (
-                    <>
-                      {openAccountPage ? (
-                        <InlineButton
-                          onClick={() => {
-                            onCancel();
-                            openAccountPage();
-                          }}
-                        >
-                          {t("web.ui.RemoveT3ConnectEnvironmentDialog.t3-connect-settings")}
-                        </InlineButton>
-                      ) : (
-                        t("web.dynamic.RemoveT3ConnectEnvironmentDialog.t3-connect-settings")
-                      )}
-                    </>
-                  ),
-                }}
-              />
+              {shown.registration === "registered" ? (
+                <>
+                  It stays on your T3 Connect account and keeps its host space. Deregister it in{" "}
+                  {accountPageLink} to free it.
+                </>
+              ) : shown.registration === "unregistered" ? (
+                "It's no longer on your T3 Connect account."
+              ) : (
+                <>
+                  This doesn't change your T3 Connect account. To deregister it there, use{" "}
+                  {accountPageLink}.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

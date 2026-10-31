@@ -321,7 +321,7 @@ export function DeviceSourcesSettings(props: {
               return `${target.label}: ${result?.status === "failed" ? result.error : "failed"}`;
             })
             .join("\n")
-        : "Connected or already available locally on each selected environment.",
+        : t("settings.status.availableEach"),
     });
   };
 
@@ -361,7 +361,7 @@ export function DeviceSourcesSettings(props: {
   rows.push({
     key: "local",
     shared: false,
-    title: "Local simulators",
+    title: t("nightly.localSimulators"),
     description:
       members.length > 1
         ? "Simulators and emulators installed on each environment's own machine."
@@ -379,7 +379,7 @@ export function DeviceSourcesSettings(props: {
             ? {
                 ...status,
                 action: {
-                  label: "Refresh",
+                  label: t("files.action.refresh"),
                   run: () => void list({ environmentId: member.environmentId, input: {} }),
                 },
               }
@@ -432,7 +432,10 @@ export function DeviceSourcesSettings(props: {
               ? {
                   ...status,
                   label: "Can't connect",
-                  action: { label: "Retry", run: () => retry(member.environmentId, held.host.id) },
+                  action: {
+                    label: t("mobile.common.MediaVideoPlayer.retry"),
+                    run: () => retry(member.environmentId, held.host.id),
+                  },
                 }
               : status,
         };
@@ -640,6 +643,7 @@ function PlatformIcon(props: {
   row: SourceRow;
   known: ReadonlyArray<SourceEnvironment>;
 }) {
+  const t = useTranslate();
   const availability = (environment: SourceEnvironment) =>
     environment.platforms?.find((candidate) => candidate.platform === props.platform);
   const availableOn = props.known.filter((environment) => availability(environment)?.available);
@@ -666,7 +670,7 @@ function PlatformIcon(props: {
         render={
           <button
             type="button"
-            aria-label={`${props.row.title}: ${props.label} ${available ? "available" : "not available"}`}
+            aria-label={`${props.row.title}: ${props.label} ${available ? t("web.dynamic.DeviceHostAvailability.available") : "not available"}`}
             className={cn(
               "relative grid size-6 shrink-0 place-items-center rounded-md outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
               available ? "text-foreground" : "text-muted-foreground/45",
@@ -685,7 +689,11 @@ function PlatformIcon(props: {
       <PopoverPopup side="top" align="end" width="sm">
         <p className="text-sm font-medium">
           {props.label}{" "}
-          {available ? (partial ? "available on some" : "available") : "not available"}
+          {available
+            ? partial
+              ? "available on some"
+              : t("web.dynamic.DeviceHostAvailability.available")
+            : "not available"}
         </p>
         {props.row.shared ? (
           <>
@@ -736,7 +744,9 @@ function PlatformIcon(props: {
                 <Fragment key={environment.environmentId}>
                   <dt className="text-muted-foreground">{environment.label}</dt>
                   <dd className={entry?.available ? "" : "text-muted-foreground"}>
-                    {entry?.available ? "Available" : (entry?.reason ?? "Not available")}
+                    {entry?.available
+                      ? t("connection.available")
+                      : (entry?.reason ?? "Not available")}
                   </dd>
                 </Fragment>
               );

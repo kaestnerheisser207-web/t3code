@@ -64,7 +64,7 @@ function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: R
     if (action === "snooze" && !snoozed && Date.parse(resetAt) <= Date.now()) {
       toastManager.add({
         type: "error",
-        title: "Could not snooze thread",
+        title: t("snoozePreset.failed"),
         description: "The reset time has passed. Retry the thread manually.",
       });
       // The deadline timer can lag after a throttled tab or sleep; disable now.
@@ -81,8 +81,8 @@ function RecoveryActions({ runId, resetAt, recovery, snoozedUntil, onChange }: R
     } catch (cause) {
       toastManager.add({
         type: "error",
-        title: action === "resume" ? "Could not change auto-resume" : "Could not snooze thread",
-        description: cause instanceof Error ? cause.message : "An error occurred.",
+        title: action === "resume" ? "Could not change auto-resume" : t("snoozePreset.failed"),
+        description: cause instanceof Error ? cause.message : t("web.git.an-error-occurred"),
       });
     }
     setPending(false);

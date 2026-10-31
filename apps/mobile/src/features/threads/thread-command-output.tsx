@@ -43,10 +43,10 @@ export function ThreadCommandOutput(props: {
     const message = error
       ? `Couldn't load output: ${error}`
       : data === null
-        ? "Loading output…"
+        ? t("web.ui.CommandOutputPanel.loading-output")
         : data.running
           ? null
-          : "No output.";
+          : t("web.ui.CommandOutputPanel.no-output");
     return message === null ? null : (
       <Text className="pt-1.5 font-mono text-2xs leading-normal text-foreground-muted">
         {message}

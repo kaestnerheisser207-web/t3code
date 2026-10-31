@@ -19,7 +19,9 @@ export function AutoSettleDaysField(props: AutoSettleDaysFieldProps) {
       min={MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS}
       max={MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS}
       label={t("mobile.settings.AutoSettleDaysField.days-before-auto-settle")}
-      formatValue={(value) => `${value} ${value === 1 ? "day" : "days"}`}
+      formatValue={(value) =>
+        `${value} ${value === 1 ? t("snoozeUnit.day_one") : t("snoozeUnit.day_other")}`
+      }
     />
   );
 }

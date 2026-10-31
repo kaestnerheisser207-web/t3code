@@ -78,7 +78,7 @@ export function ProposedPlanCard(props: {
           disabled={!canWrite || !props.workspaceRoot || saving}
           onPress={() =>
             Dialog.prompt({
-              title: "Save plan to workspace",
+              title: t("composer.ui.save-plan-to-workspace"),
               // The write replaces an existing file, and the RPC has no create-only mode.
               message:
                 "Enter a path relative to the thread's workspace. A file already at that path is replaced.",

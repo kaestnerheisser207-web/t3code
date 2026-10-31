@@ -91,7 +91,7 @@ function DeviceHostEditorForm({
     targets.length === 1 ||
     (expandedChecks?.key === connectionKey ? expandedChecks.open : failed > 0);
   const checkSummary = checking
-    ? "Checking environments…"
+    ? t("web.dynamic.IntegrationsSettings.checking-environments")
     : results
       ? failed
         ? `${failed} of ${targets.length} failed`

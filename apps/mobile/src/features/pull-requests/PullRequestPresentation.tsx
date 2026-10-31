@@ -47,6 +47,7 @@ export function PullRequestAvatar(props: {
   readonly actor: PullRequestActor | null;
   readonly size?: number;
 }) {
+  const t = useTranslate();
   const size = props.size ?? 24;
   return props.actor?.avatarUrl ? (
     <Image
@@ -62,7 +63,7 @@ export function PullRequestAvatar(props: {
       style={{ width: size, height: size }}
     >
       <Text className="font-t3-medium text-foreground-muted" style={{ fontSize: size * 0.45 }}>
-        {props.actor?.login.slice(0, 1).toUpperCase() ?? "?"}
+        {props.actor?.login.slice(0, 1).toUpperCase() ?? t("hero.inlineSuffix")}
       </Text>
     </View>
   );

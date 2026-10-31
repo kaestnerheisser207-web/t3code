@@ -62,7 +62,7 @@ export function CompactBrandTitle(
         className="font-t3-medium text-foreground-muted"
         style={{ fontSize: 21 * scale, letterSpacing: -0.5 * scale }}
       >
-        Code
+        {t("mobile.connect.ConnectionsNewRouteScreen.code")}
       </Text>
       {showStage ? (
         <View

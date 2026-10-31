@@ -133,7 +133,7 @@ function LinkedEnvironmentRow({
         : health.kind === "failing"
           ? health.detail
           : health.expiresInDays !== null
-            ? `Expires in ${health.expiresInDays} ${health.expiresInDays === 1 ? "day" : "days"}. Link it again to renew.`
+            ? `Expires in ${health.expiresInDays} ${health.expiresInDays === 1 ? t("snoozeUnit.day_one") : t("snoozeUnit.day_other")}. Link it again to renew.`
             : "Reachable";
   return (
     <div className={ITEM_ROW_CLASSNAME}>

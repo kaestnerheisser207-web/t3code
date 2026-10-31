@@ -36,9 +36,12 @@ export function SheetHeader(props: SheetHeaderProps) {
 }
 
 function NativeSheetHeader(props: SheetHeaderProps) {
+  const t = useTranslate();
   const { colors } = useControlTheme();
   const onDismiss = props.onCancel ?? props.onClose;
-  const dismissLabel = props.accessibilityLabel ?? (props.onCancel ? "Cancel" : "Close");
+  const dismissLabel =
+    props.accessibilityLabel ??
+    (props.onCancel ? t("chat.dynamic.cancel") : t("mobile.common.FilePreview.close"));
   const confirmation = props.confirm;
 
   // Toolbar children are parsed as native items, so keep the actual Button

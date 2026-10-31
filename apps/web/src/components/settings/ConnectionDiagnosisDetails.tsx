@@ -70,7 +70,12 @@ const HOP_MARK = { ok: "✓", failed: "✕", unchecked: "–" } as const;
 
 /** Ticks once per second, and only while a retry is scheduled, so the list around it does not re-render. */
 function RetryCountdown({ retryAt }: { readonly retryAt: number }) {
-  return useDeadlinePassed(retryAt) ? "retrying" : <RetryCountdownTicker retryAt={retryAt} />;
+  const t = useTranslate();
+  return useDeadlinePassed(retryAt) ? (
+    t("web.dynamic.ConnectionDiagnosisDetails.retrying")
+  ) : (
+    <RetryCountdownTicker retryAt={retryAt} />
+  );
 }
 
 function RetryCountdownTicker({ retryAt }: { readonly retryAt: number }) {

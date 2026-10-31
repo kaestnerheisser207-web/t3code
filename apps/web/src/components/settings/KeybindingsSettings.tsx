@@ -78,6 +78,7 @@ import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { useAtomCommand } from "../../state/use-atom-command";
 
 function KeybindingPill({ value }: { value: string }) {
+  const t = useTranslate();
   // Keys dedupe repeated parts; a literal "+" in a shortcut splits into empty strings.
   const seenParts = new Map<string, number>();
   const parts = value.split("+").map((part) => {
@@ -92,7 +93,7 @@ function KeybindingPill({ value }: { value: string }) {
           {part === "mod"
             ? navigator.platform.toLowerCase().includes("mac")
               ? "⌘"
-              : "Ctrl"
+              : t("chat.dynamic.ctrl")
             : part === "shift"
               ? "⇧"
               : part === "alt"
@@ -882,8 +883,13 @@ function WhenClauseControl({
   onValidityChange: (valid: boolean) => void;
 }) {
   const t = useTranslate();
+  // Closing unmounts the builder, which drops an unparsed draft and keeps the last valid value.
+  const handleOpenChange = (open: boolean) => {
+    if (!open) onValidityChange(true);
+  };
+
   return (
-    <Popover>
+    <Popover onOpenChange={handleOpenChange}>
       <PopoverTrigger
         render={
           <Button

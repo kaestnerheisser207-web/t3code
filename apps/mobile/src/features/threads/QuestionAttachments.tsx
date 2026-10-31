@@ -111,7 +111,7 @@ export function QuestionAttachments(props: {
       .catch((error) =>
         Dialog.alert(
           "Could not paste image",
-          error instanceof Error ? error.message : "Try again.",
+          error instanceof Error ? error.message : t("mobile.threadStatus.retry"),
         ),
       )
       .finally(() => changeQuestionAttachmentPreparation(key, -1));
@@ -158,7 +158,10 @@ export function QuestionAttachments(props: {
     changeQuestionAttachmentPreparation(key, -1);
     if (AsyncResult.isFailure(picked)) {
       const error = squashAtomCommandFailure(picked);
-      Dialog.alert("Could not attach file", error instanceof Error ? error.message : "Try again.");
+      Dialog.alert(
+        "Could not attach file",
+        error instanceof Error ? error.message : t("mobile.threadStatus.retry"),
+      );
     }
   };
   return (

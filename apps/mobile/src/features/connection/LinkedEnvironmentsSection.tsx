@@ -61,7 +61,7 @@ export function LinkedEnvironmentsSection(props: {
                 : health.kind === "failing"
                   ? health.detail
                   : health.expiresInDays !== null
-                    ? `Expires in ${health.expiresInDays} ${health.expiresInDays === 1 ? "day" : "days"}`
+                    ? `Expires in ${health.expiresInDays} ${health.expiresInDays === 1 ? t("snoozeUnit.day_one") : t("snoozeUnit.day_other")}`
                     : "Reachable";
           return (
             <View key={link.environmentId} className="gap-0.5 p-4">

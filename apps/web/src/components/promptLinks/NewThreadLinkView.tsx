@@ -228,8 +228,8 @@ export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Clone failed",
-            description: error instanceof Error ? error.message : "An error occurred.",
+            title: t("web.palette.clone-failed"),
+            description: error instanceof Error ? error.message : t("web.git.an-error-occurred"),
           }),
         );
       }

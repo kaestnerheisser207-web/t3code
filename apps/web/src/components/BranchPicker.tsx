@@ -258,6 +258,7 @@ export function BranchPickerRefItem({
   onClick: ComponentProps<typeof ComboboxItem>["onClick"];
   onContextMenu?: ComponentProps<typeof ComboboxItem>["onContextMenu"];
 }) {
+  const t = useTranslate();
   const itemValue = refName.name;
   const hasSecondaryWorktree =
     refName.worktreePath && activeProjectCwd && refName.worktreePath !== activeProjectCwd;
@@ -268,7 +269,7 @@ export function BranchPickerRefItem({
       : refName.isRemote
         ? "remote"
         : refName.isDefault
-          ? "default"
+          ? t("web.dynamic.EnvironmentIconPicker.default")
           : null;
   return (
     <ComboboxItem

@@ -814,7 +814,7 @@ export function CloudLinkRow({
   if (!canReadRelay) {
     return (
       <SettingsRow
-        title="T3 Connect"
+        title={t("settings.items.t3-connect.title")}
         description={t(
           "settings.pages.SavedEnvironmentRows.to-edit-these-settings-pair-this-connection-with-both-view-relay-and-manage-relay-permissions",
         )}

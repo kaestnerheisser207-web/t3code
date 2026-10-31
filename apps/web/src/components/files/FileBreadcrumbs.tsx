@@ -325,7 +325,7 @@ export function FileBreadcrumbs(props: FileBreadcrumbsProps) {
           const current = index === currentIndex;
           return (
             <li
-              key={crumb.path || "project"}
+              key={crumb.path || t("project.remove.project")}
               className="flex min-w-0 shrink-0 items-center"
               data-file-crumb
               data-current-file-crumb={current}

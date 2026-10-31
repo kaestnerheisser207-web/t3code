@@ -53,13 +53,17 @@ export function PullRequestMedia(props: {
   readonly caption?: string;
   readonly compact?: boolean;
 }) {
+  const t = useTranslate();
   const media = usePullRequestMediaUrl(props.url);
   const visible = useContext(PullRequestMediaVisibleContext);
   const context = useContext(PullRequestMediaContext);
   const withGallery = useFilePreviewGallery();
   const [image, setImage] = useState<FilePreviewSource | null>(null);
   const [video, setVideo] = useState<VideoPreviewSource | null>(null);
-  const name = props.caption || new URL(props.url).pathname.split("/").pop() || "Attachment";
+  const name =
+    props.caption ||
+    new URL(props.url).pathname.split("/").pop() ||
+    t("web.dynamic.AttachmentFilePreview.attachment");
   if (props.kind === "image")
     return (
       <>

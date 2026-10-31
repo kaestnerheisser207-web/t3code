@@ -100,7 +100,9 @@ function CloudEnvironmentRowsContent(
     <View collapsable={false} className={cn("gap-3", showHeader && "mt-5")}>
       {showHeader ? (
         <View className="px-1">
-          <Text className="text-sm font-t3-bold uppercase text-foreground-muted">T3 Connect</Text>
+          <Text className="text-sm font-t3-bold uppercase text-foreground-muted">
+            {t("settings.items.t3-connect.title")}
+          </Text>
         </View>
       ) : null}
 
@@ -183,6 +185,7 @@ function ConnectedCloudEnvironmentRow(props: {
   readonly onOpen?: (() => void) | undefined;
   readonly onToggleError: () => void;
 }) {
+  const t = useTranslate();
   const serverConfig = useAtomValue(
     serverEnvironment.configValueAtom(props.environment.environmentId),
   );
@@ -204,7 +207,11 @@ function ConnectedCloudEnvironmentRow(props: {
       onRemove={props.onRemove}
       connectionError={enabled || unsupported ? props.environment.connectionError : null}
       connectionErrorTraceId={enabled ? props.environment.connectionErrorTraceId : null}
-      connectionState={enabled || unsupported ? props.environment.connectionState : "available"}
+      connectionState={
+        enabled || unsupported
+          ? props.environment.connectionState
+          : t("web.dynamic.DeviceHostAvailability.available")
+      }
       errorExpanded={props.errorExpanded}
       label={props.environment.environmentLabel}
       machine={resolveEnvironmentMachineKind(

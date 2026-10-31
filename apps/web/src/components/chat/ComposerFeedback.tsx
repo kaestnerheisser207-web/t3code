@@ -34,7 +34,8 @@ export function feedbackBannerItem(
                 toastManager.add({
                   type: "error",
                   title: "Could not copy thread ID",
-                  description: error instanceof Error ? error.message : "An error occurred.",
+                  description:
+                    error instanceof Error ? error.message : t("web.git.an-error-occurred"),
                 });
               },
             );

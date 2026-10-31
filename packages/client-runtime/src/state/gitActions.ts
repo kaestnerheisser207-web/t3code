@@ -169,7 +169,7 @@ export function resolveQuickAction(
   }
 
   if (hasChanges) {
-    if (!gitStatus.hasUpstream && !hasOriginRemote) {
+    if (isBehind || (!gitStatus.hasUpstream && !hasOriginRemote)) {
       return {
         label: t?.("git.labels.commit") ?? "Commit",
         disabled: false,

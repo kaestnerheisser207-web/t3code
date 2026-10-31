@@ -61,7 +61,7 @@ export function FilesHeader(props: {
           trailing={
             <AndroidAnchoredMenu
               title={t("mobile.tools.FilesHeader.file-options")}
-              actions={[{ id: "refresh", title: "Refresh files" }]}
+              actions={[{ id: "refresh", title: t("files.action.refreshFiles") }]}
               onPressAction={({ nativeEvent }) => {
                 if (nativeEvent.event === "refresh") props.onRefresh();
               }}

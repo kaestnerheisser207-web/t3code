@@ -285,16 +285,9 @@ export function GuideStop({
 
         <footer className="flex flex-wrap items-center justify-end gap-3 border-t border-border/60 pt-4">
           {nextTitle !== null ? (
-            <Button className="min-w-0" onClick={() => onStep(1)}>
-              <Trans
-                t={t}
-                i18nKey="web.rich.GuideStop.part-next-part-part-part"
-                components={{
-                  part0: <span className="min-w-0 truncate">{null}</span>,
-                  value1: <>{nextTitle}</>,
-                  part2: <ArrowRightIcon aria-hidden />,
-                }}
-              />
+            <Button size="multiline" className="max-w-full" onClick={() => onStep(1)}>
+              <span className="min-w-0 break-words">Next: {nextTitle}</span>
+              <ArrowRightIcon aria-hidden />
             </Button>
           ) : onFinish !== null ? (
             <Button onClick={onFinish}>

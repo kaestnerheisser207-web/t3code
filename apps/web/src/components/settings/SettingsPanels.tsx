@@ -29,6 +29,7 @@ import { createModelSelection } from "@t3tools/shared/model";
 import * as Equal from "effect/Equal";
 import * as Schema from "effect/Schema";
 import { APP_VERSION, HOSTED_APP_CHANNEL, HOSTED_APP_CHANNEL_LABEL } from "../../branding";
+import { AboutVersionTitle } from "./AboutVersionTitle";
 import { CliCommandSettingsRow } from "./CliCommandSettingsRow";
 import { MobileAppSettingsRow } from "./MobileAppSettingsRow";
 import {
@@ -143,16 +144,6 @@ const QUIT_CONFIRMATION_MODE_KEYS: Record<QuitConfirmationMode, TranslationKey> 
 };
 
 const DEFAULT_DRIVER_KIND = ProviderDriverKind.make("codex");
-function AboutVersionTitle() {
-  const t = useTranslate();
-  return (
-    <span className="inline-flex items-baseline gap-2">
-      <span>{t("settings.panels.AboutVersionTitle.version")}</span>
-      <code className="text-2xs font-medium text-muted-foreground">{APP_VERSION}</code>
-    </span>
-  );
-}
-
 function AboutVersionSection() {
   const t = useTranslate();
   const updateState = useDesktopUpdateState();

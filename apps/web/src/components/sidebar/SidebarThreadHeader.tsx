@@ -58,7 +58,7 @@ export function SidebarThreadHeader({
   const activeResultExists = resultsVisible && activeSearchResultIndex < searchResultCount;
   const newThreadLabel = newThreadShortcutLabel
     ? `New thread (${newThreadShortcutLabel})`
-    : "New thread";
+    : t("mobile.common.NewThreadButton.android.new-thread");
 
   return (
     <div className="flex items-center gap-1">

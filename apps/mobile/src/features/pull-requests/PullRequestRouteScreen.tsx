@@ -1,4 +1,3 @@
-import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import { Toolbar } from "../../components/ui/Toolbar";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
@@ -76,7 +75,7 @@ import { useAndroidWorkspaceBack } from "../workspace/useAndroidWorkspaceNavigat
 import { EmptyState } from "../../components/ui/EmptyState";
 import { SegmentedControl } from "../../components/ui/SegmentedControl";
 import { SymbolView } from "../../components/ui/AppSymbol";
-import { relativeTime } from "../../lib/time";
+import { RelativeTime } from "../../components/RelativeTime";
 import { NativeStackScreenOptions } from "../../native/StackHeader";
 import { usePullRequestConnected } from "./usePullRequestConnected";
 import { usePullRequestLiveChecks } from "./usePullRequestLiveChecks";
@@ -226,11 +225,7 @@ function PullRequestIdentity(props: {
           {pr.author?.login ?? t("mobile.dynamic.PullRequestRouteScreen.unknown-author")}
         </Text>
         <Text className="shrink text-right text-2xs text-foreground-muted" numberOfLines={1}>
-          <Trans
-            t={t}
-            i18nKey="mobile.rich.PullRequestRouteScreen.updated-part-ago"
-            components={{ value0: <>{relativeTime(pr.updatedAt, t)}</> }}
-          />
+          Updated <RelativeTime timestamp={pr.updatedAt} /> ago
         </Text>
       </View>
       <View className="flex-row items-start gap-1.5">
@@ -915,19 +910,25 @@ export function PullRequestRouteScreen({ route }: StaticScreenProps<PullRequestP
                           }}
                         >
                           <PullRequestIdentity pr={identity} params={params} />
-                          <SegmentedControl
-                            options={[
-                              { value: "overview", label: t("pr.tabs.overview") },
-                              ...(guidesEnabled
-                                ? [{ value: "guide" as const, label: t("pr.tabs.guide") }]
-                                : []),
-                              { value: "activity", label: t("pr.tabs.activity") },
-                            ]}
-                            selected={section}
-                            onSelect={selectSection}
-                            role="tab"
-                            size="compact"
-                          />
+                          {/* UIKit draws the tapped control's glass lens outside the hidden
+                              tab's opacity, so only the visible tab mounts the control. */}
+                          {Platform.OS !== "ios" || section === tab ? (
+                            <SegmentedControl
+                              options={[
+                                { value: "overview", label: t("pr.tabs.overview") },
+                                ...(guidesEnabled
+                                  ? [{ value: "guide" as const, label: t("pr.tabs.guide") }]
+                                  : []),
+                                { value: "activity", label: t("pr.tabs.activity") },
+                              ]}
+                              selected={section}
+                              onSelect={selectSection}
+                              role="tab"
+                              size="compact"
+                            />
+                          ) : (
+                            <View style={{ height: 32 }} />
+                          )}
                         </View>
                       ) : null}
                     </>
@@ -1163,7 +1164,7 @@ function PullRequestFileRouteContent({ route }: PullRequestFileRouteProps) {
         options={{
           title,
           headerTitle: title,
-          unstable_headerSubtitle: `${commit ? commit.slice(0, 7) : `#${route.params.number}`} · ${data.files.length} ${data.files.length === 1 ? "file" : "files"}${filter.hideTestFiles && filter.hiddenCount ? ` · ${filter.hiddenCount} ${filter.hiddenCount === 1 ? "test" : "tests"} hidden` : ""}`,
+          unstable_headerSubtitle: `${commit ? commit.slice(0, 7) : `#${route.params.number}`} · ${data.files.length} ${data.files.length === 1 ? t("mobile.dynamic.PullRequestRouteScreen.file") : t("mobile.dynamic.PreviewStreamWebView.files")}${filter.hideTestFiles && filter.hiddenCount ? ` · ${filter.hiddenCount} ${filter.hiddenCount === 1 ? "test" : "tests"} hidden` : ""}`,
         }}
       />
       {Platform.OS === "android" ? (
@@ -1221,7 +1222,10 @@ function PullRequestFileRouteContent({ route }: PullRequestFileRouteProps) {
                 )
                   navigation.navigate("PullRequestReview", {
                     ...route.params,
-                    mode: nativeEvent.event === "submit-review" ? "review" : "comment",
+                    mode:
+                      nativeEvent.event === "submit-review"
+                        ? "review"
+                        : t("web.dynamic.PullRequestReviewAnnotation.comment"),
                   });
                 else if (nativeEvent.event === "comment") commentOnLine();
                 else void Clipboard.setStringAsync(selectedRow?.content ?? "");
