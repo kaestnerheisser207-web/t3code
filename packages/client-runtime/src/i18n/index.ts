@@ -44,6 +44,11 @@ export { runtimeModeText } from "./runtimeMode.ts";
 export { sourceControlTerm } from "./sourceControlTerm.ts";
 
 export { idleCompactionTitle, idleCompactingLabel } from "./compaction.ts";
-export { usageAccessibilityLabel } from "./usage.ts";
+export {
+  usageAccessibilityLabel,
+  usageText,
+  usageWindowLabel,
+  usageResetCreditsSummary,
+} from "./usage.ts";
 
 export { sessionPermissionsText } from "./permissions.ts";

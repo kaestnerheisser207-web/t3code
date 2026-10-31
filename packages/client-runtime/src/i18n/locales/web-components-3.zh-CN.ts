@@ -217,16 +217,16 @@ export const webComponents3ZhCN = {
   "web.ui.UpdateEverythingDialog.update": "更新",
   "web.ui.UsageLimits.the-line-is-where-even-spending-would-be":
     "这条线表示按匀速消耗此时应到达的位置。",
-  "web.ui.UsageLimits.use-a-reset-credit": "使用重置额度？",
+  "web.ui.UsageLimits.use-a-reset-credit": "使用重置券？",
   "web.ui.UsageLimits.this-redeems-one-credit-on-your-account-and-clears-the-current-rate-limit-windows-it-cannot-be-undone":
-    "这将在你的账户上扣除一次重置额度，并清除当前的速率限制窗口。此操作不可撤销。",
+    "这会消耗账户中的一张重置券，将当前限流周期的用量清零。此操作无法撤销。",
   "web.ui.UsageLimits.cancel": "取消",
-  "web.ui.UsageLimits.use-credit": "使用额度",
+  "web.ui.UsageLimits.use-credit": "使用重置券",
   "web.ui.UsageLimitsPooled.toggle-account-email-visibility": "切换账户邮箱的可见性",
   "web.ui.UsageLimitsPooled.plan": "套餐",
   "web.ui.UsageLimitsPooled.left": "剩余",
   "web.ui.UsageLimitsPooled.resets": "重置",
-  "web.ui.UsageLimitsPooled.even-pace": "均匀用量",
+  "web.ui.UsageLimitsPooled.even-pace": "匀速参考",
   "web.ui.UsageLimitsPooled.restores": "恢复",
   "web.ui.UsageLimitsPooled.segment": "区段",
   "web.ui.UsageLimitsPooled.no-provider-on-the-selected-environments-reports-subscription-limits":

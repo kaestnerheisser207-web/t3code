@@ -20,7 +20,7 @@ export const finalStaticSentencesZhCN = {
   "pr.empty.matches": "没有匹配“{{query}}”的结果",
   "pr.branch.receives": "更改来自",
   "pr.review.beforeLatest": "，早于最新的提交",
-  "usage.evenPaceRemaining": "此时应剩余 {{percent}}%",
+  "usage.evenPaceRemaining": "按匀速使用，此时应剩余 {{percent}}%",
   "usage.poolRestore": "+{{percent}}% 配额池",
   "usage.unpricedExcluded": "占比为 {{percent}} 的未定价记录未计入 API 估算。",
 } as const;

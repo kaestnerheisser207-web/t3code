@@ -1,3 +1,6 @@
+import type { TFunction } from "i18next";
+import { webI18n } from "../../i18n";
+import { usageText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import type { EnvironmentId, UsageLimitsReport } from "@t3tools/contracts";
 import type { TimestampFormat } from "@t3tools/contracts/settings";
@@ -34,8 +37,8 @@ function AccountSummary({ account }: { readonly account: UsageLimitsReport["acco
           key={label}
           value={label}
           ariaLabel={t("web.ui.ComposerUsageLimits.toggle-account-label-visibility")}
-          revealTooltip="Click to reveal account"
-          hideTooltip="Click to hide account"
+          revealTooltip={t("usageReview.reveal-account")}
+          hideTooltip={t("usageReview.hide-account")}
           className="max-w-full truncate align-bottom font-sans text-xs leading-normal"
         />
       ) : (
@@ -71,35 +74,45 @@ export function usageLimitsBannerItem(
   };
 }
 
-export function modelFallbackBannerItem({
-  fallbackModelName,
-  defaultProviderName,
-  defaultModelName,
-  resetsAt,
-  timestampFormat,
-  onUseDefault,
-  onDismiss,
-}: {
-  readonly fallbackModelName: string;
-  readonly defaultProviderName: string;
-  readonly defaultModelName: string;
-  readonly resetsAt: string | null;
-  readonly timestampFormat: TimestampFormat;
-  readonly onUseDefault: () => void;
-  readonly onDismiss: () => void;
-}): ComposerBannerStackItem {
+export function modelFallbackBannerItem(
+  {
+    fallbackModelName,
+    defaultProviderName,
+    defaultModelName,
+    resetsAt,
+    timestampFormat,
+    onUseDefault,
+    onDismiss,
+  }: {
+    readonly fallbackModelName: string;
+    readonly defaultProviderName: string;
+    readonly defaultModelName: string;
+    readonly resetsAt: string | null;
+    readonly timestampFormat: TimestampFormat;
+    readonly onUseDefault: () => void;
+    readonly onDismiss: () => void;
+  },
+  t: TFunction = webI18n.getFixedT("en"),
+  locale = "en",
+): ComposerBannerStackItem {
   return {
     id: "fallback-model",
     variant: "info",
     icon: <GaugeIcon />,
-    title: `Using ${fallbackModelName}`,
-    description: `${defaultProviderName} is out of usage${resetsAt ? ` · resets ${formatUpcomingTimestamp(resetsAt, timestampFormat)}` : ""}`,
+    title: t("usageReview.fallback-model", { model: fallbackModelName }),
+    description:
+      t("usageReview.fallback-usage", { provider: defaultProviderName }) +
+      (resetsAt
+        ? t("usageReview.fallback-resets", {
+            time: formatUpcomingTimestamp(resetsAt, timestampFormat, undefined, locale),
+          })
+        : ""),
     actions: (
       <Button size="xs" variant="ghost" onClick={onUseDefault}>
-        Use {defaultModelName}
+        {t("usageReview.fallback-use", { model: defaultModelName })}
       </Button>
     ),
-    dismissLabel: "Dismiss fallback model notice",
+    dismissLabel: t("usageReview.fallback-dismiss"),
     onDismiss,
   };
 }
@@ -130,7 +143,7 @@ function UsageLimitsBannerBody({
                 </span>
               ) : null}
               {notice ? (
-                <span className="text-xs text-muted-foreground">{notice}</span>
+                <span className="text-xs text-muted-foreground">{usageText(t, notice ?? "")}</span>
               ) : (
                 <LimitWindows
                   compact
@@ -163,7 +176,7 @@ function UsageLimitsBannerBody({
         })}
         {report.notices.map((notice) => (
           <span key={notice} className="text-xs text-muted-foreground">
-            {notice}
+            {usageText(t, notice ?? "")}
           </span>
         ))}
       </ComposerBanner.Body>

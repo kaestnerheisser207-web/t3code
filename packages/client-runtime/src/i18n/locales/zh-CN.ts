@@ -1,3 +1,4 @@
+import { usageReviewZhCN } from "./usage-review.zh-CN.ts";
 import { release016ZhCN } from "./release-016.zh-CN.ts";
 import { release3904ZhCN } from "./release-3904.zh-CN.ts";
 import { nightlyMergeZhCN } from "./nightly-merge.zh-CN.ts";
@@ -131,6 +132,7 @@ import { wizardZhCN } from "./wizard.zh-CN.ts";
 import type { en } from "./en.ts";
 
 export const zhCN = {
+  ...usageReviewZhCN,
   ...release016ZhCN,
   "settings.secrets": "凭证",
   ...release3904ZhCN,

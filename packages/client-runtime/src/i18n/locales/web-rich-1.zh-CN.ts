@@ -13,6 +13,6 @@ export const webRich1ZhCN = {
   "web.rich.__root.this-link-doesn-t-point-to-a-page-in-part-go-home-to-choose-a-project-or-start-a-thread":
     "此链接不指向 <value0/> 中的页面。请返回主页选择项目或开始新会话。",
   "web.rich._chat.settings.part-part-to-change-its-settings": "<value0/><value1/> 可更改其设置。",
-  "web.rich.UsageLimitsPooled.bankedCredit_one": "已存入 <value0/> 次重置额度",
-  "web.rich.UsageLimitsPooled.bankedCredit_other": "已存入 <value0/> 次重置额度",
+  "web.rich.UsageLimitsPooled.bankedCredit_one": "已存入 <value0/> 张重置券",
+  "web.rich.UsageLimitsPooled.bankedCredit_other": "已存入 <value0/> 张重置券",
 } as const satisfies Record<keyof typeof webRich1En, string>;

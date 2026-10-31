@@ -1,3 +1,4 @@
+import { usageWindowLabel, usageText } from "@t3tools/client-runtime/i18n";
 import { usageAccessibilityLabel } from "@t3tools/client-runtime/i18n";
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
@@ -204,25 +205,34 @@ function PoolWindowCard({
     <>
       <View className={wide ? "gap-1" : "flex-row items-start justify-between gap-3"}>
         <View className="gap-1">
-          <Text className="text-sm font-t3-medium text-foreground">{label ?? pool.label}</Text>
+          <Text className="text-sm font-t3-medium text-foreground">
+            {usageWindowLabel(t, label ?? pool.label)}
+          </Text>
           <View className="flex-row items-baseline gap-1.5">
             <Text className="text-3xl font-t3-bold tabular-nums text-foreground">
               {pool.remainingPercent}%
             </Text>
-            <Text className="text-sm text-foreground-muted">left</Text>
+            <Text className="text-sm text-foreground-muted">{t("usageReview.left")}</Text>
           </View>
         </View>
         {pool.pace ? (
-          <Text className="text-xs text-foreground-tertiary">{PACE_LABEL[pool.pace]}</Text>
+          <Text className="text-xs text-foreground-tertiary">
+            {usageText(t, PACE_LABEL[pool.pace] ?? "")}
+          </Text>
         ) : null}
       </View>
-      {description ? <Text className="text-xs text-foreground-muted">{description}</Text> : null}
+      {description ? (
+        <Text className="text-xs text-foreground-muted">{usageText(t, description ?? "")}</Text>
+      ) : null}
       {nextRefill ? (
         <Text className="text-xs tabular-nums text-foreground-muted">
           ↻ +{nextRefill.restoresPercent}%{" "}
-          {formatResetsIn(nextRefill.member.window, now)
-            ?.replace("resets in ", "in ")
-            .replace("resets now", "now")}
+          {usageText(
+            t,
+            formatResetsIn(nextRefill.member.window, now)
+              ?.replace("resets in ", "in ")
+              .replace("resets now", "now") ?? "",
+          )}
         </Text>
       ) : null}
     </>
@@ -297,7 +307,7 @@ function PoolWindowCard({
                           tintColorClassName="accent-foreground-muted"
                         />
                         <Text className="text-xs tabular-nums text-foreground-muted">
-                          {resetsIn}
+                          {usageText(t, resetsIn ?? "")}
                         </Text>
                       </>
                     ) : null}
@@ -380,7 +390,7 @@ function PoolWindowCard({
                     tintColorClassName="accent-foreground-muted"
                   />
                   <Text className="text-xs tabular-nums text-foreground-muted">
-                    {resetsIn.replace("resets in ", "")}
+                    {usageText(t, resetsIn.replace("resets in ", "") ?? "")}
                   </Text>
                 </>
               ) : null}
@@ -499,10 +509,14 @@ export function UsageLimitsSection({
       {cursorPromptAt === pools.length ? cursorPrompt : null}
       {externalLinks.map((link) => (
         <View key={link.url} className="gap-3 rounded-xl border border-border-subtle p-4">
-          <Text className="text-base font-t3-medium text-foreground">{link.label}</Text>
+          <Text className="text-base font-t3-medium text-foreground">
+            {usageText(t, link.label ?? "")}
+          </Text>
           <Text className="text-xs text-foreground-muted">{link.accounts.join(", ")}</Text>
           {link.message ? (
-            <Text className="text-sm text-foreground-muted">{link.message}</Text>
+            <Text className="text-sm text-foreground-muted">
+              {usageText(t, link.message ?? "")}
+            </Text>
           ) : null}
           <Pressable
             accessibilityRole="link"
@@ -530,7 +544,7 @@ export function UsageLimitsSection({
           <View className="min-w-0 flex-1 gap-0.5">
             {notices.map((notice) => (
               <Text key={notice} className="text-sm font-t3-medium text-warning-foreground">
-                {notice}
+                {usageText(t, notice ?? "")}
               </Text>
             ))}
             {failedLabels.length > 0 ? (
@@ -622,7 +636,9 @@ export function UsageLimitAccountScreen({ route }: AccountScreenProps) {
               ) : null}
             </View>
             <View className="gap-3 rounded-[24px] border-continuous bg-grouped-card p-4">
-              <Text className="text-sm font-t3-medium text-foreground">{window.label}</Text>
+              <Text className="text-sm font-t3-medium text-foreground">
+                {usageWindowLabel(t, window.label)}
+              </Text>
               <Text className="text-3xl font-t3-bold tabular-nums text-foreground">
                 <Trans
                   t={t}

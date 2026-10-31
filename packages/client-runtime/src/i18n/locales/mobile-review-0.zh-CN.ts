@@ -145,7 +145,7 @@ export const mobileReview0ZhCN = {
   "mobile.review.UsageLimitsPooled.account": "账户",
   "mobile.review.UsageLimitsPooled.this-account-is-no-longer-reporting-limits-on-the-selected-environments":
     "此账户不再报告所选环境中的限额。",
-  "mobile.review.UsageLimitsPooled.reset-credits": "重置额度",
+  "mobile.review.UsageLimitsPooled.reset-credits": "重置券",
   "mobile.review.UsageLimitsSection.manage-usage": "管理用量",
   "mobile.review.UsageLimitsSection.this-connection-cannot-manage-provider-accounts":
     "此连接无法管理提供方账户。",

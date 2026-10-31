@@ -1,3 +1,5 @@
+import { usageWindowLabel, usageText } from "@t3tools/client-runtime/i18n";
+import { usageResetCreditsSummary } from "@t3tools/client-runtime/i18n";
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
@@ -13,7 +15,6 @@ import {
   type ServerProviderUsageWindow,
 } from "@t3tools/contracts";
 import {
-  formatDuration,
   formatResetsIn,
   limitsNotice,
   paceOf,
@@ -89,7 +90,7 @@ function WindowRow(props: {
   return (
     <View className="gap-1">
       <View className="flex-row items-baseline justify-between gap-3">
-        <Text className="text-sm text-foreground">{window.label}</Text>
+        <Text className="text-sm text-foreground">{usageWindowLabel(t, window.label)}</Text>
         <Text className="text-sm font-t3-medium tabular-nums text-foreground">
           <Trans
             t={t}
@@ -132,8 +133,12 @@ function WindowRow(props: {
       </View>
       {pace || resetsIn ? (
         <View className="flex-row justify-between gap-3">
-          <Text className="text-xs text-foreground-tertiary">{pace ? PACE_LABEL[pace] : ""}</Text>
-          <Text className="text-xs tabular-nums text-foreground-tertiary">{resetsIn ?? ""}</Text>
+          <Text className="text-xs text-foreground-tertiary">
+            {pace ? usageText(t, PACE_LABEL[pace]) : ""}
+          </Text>
+          <Text className="text-xs tabular-nums text-foreground-tertiary">
+            {usageText(t, resetsIn ?? "")}
+          </Text>
         </View>
       ) : null}
     </View>
@@ -211,7 +216,7 @@ export function AccountLimits(props: {
         {props.trailing}
       </View>
       {notice ? (
-        <Text className="text-sm text-foreground-muted">{notice}</Text>
+        <Text className="text-sm text-foreground-muted">{usageText(t, notice ?? "")}</Text>
       ) : (
         <View className="gap-3">
           {limits.windows.map((window) => (
@@ -259,15 +264,7 @@ export function ResetCredits(props: {
   const [status, setStatus] = useState<string | null>(null);
   if (dense && credits.availableCount === 0 && status === null) return null;
 
-  const expiresIn = credits.nextExpiresAt
-    ? formatDuration(Date.parse(credits.nextExpiresAt) - now)
-    : null;
-  const summary =
-    credits.availableCount === 0
-      ? "No reset credits banked"
-      : `${credits.availableCount} ${credits.availableCount === 1 ? "reset credit" : "reset credits"} banked${
-          expiresIn ? ` · next expires in ${expiresIn}` : ""
-        }`;
+  const summary = usageResetCreditsSummary(t, credits, now);
 
   const redeem = async () => {
     if (!readEnvironmentScope(environmentId, AuthProvidersManageScope)) return;
@@ -288,14 +285,10 @@ export function ResetCredits(props: {
 
   const confirm = () => {
     if (!readEnvironmentScope(environmentId, AuthProvidersManageScope)) return;
-    Dialog.alert(
-      "Use a reset credit?",
-      "This redeems one credit on your account and clears the current rate-limit windows. It cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Use credit", onPress: () => void redeem() },
-      ],
-    );
+    Dialog.alert(t("usageReview.reset-title"), t("usageReview.reset-description"), [
+      { text: t("usageReview.reset-cancel"), style: "cancel" },
+      { text: t("usageReview.reset-action"), onPress: () => void redeem() },
+    ]);
   };
 
   return (
@@ -331,7 +324,9 @@ export function ResetCredits(props: {
           {t("mobile.review.UsageLimitsSection.this-connection-cannot-manage-provider-accounts")}
         </Text>
       ) : null}
-      {status ? <Text className="text-sm text-foreground">{status}</Text> : null}
+      {status ? (
+        <Text className="text-sm text-foreground">{usageText(t, status ?? "")}</Text>
+      ) : null}
     </View>
   );
 }

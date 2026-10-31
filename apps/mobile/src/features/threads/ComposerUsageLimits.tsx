@@ -1,3 +1,4 @@
+import { usageText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import type { EnvironmentId, UsageLimitsReport } from "@t3tools/contracts";
 import { Pressable, ScrollView, View } from "react-native";
@@ -91,7 +92,7 @@ export function ComposerUsageLimits({
                 : "border-t border-border-subtle px-4 py-3 text-xs text-foreground-muted"
             }
           >
-            {notice}
+            {usageText(t, notice ?? "")}
           </Text>
         ))}
       </ScrollView>

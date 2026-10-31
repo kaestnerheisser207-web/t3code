@@ -1,3 +1,6 @@
+import { usageWindowLabel } from "@t3tools/client-runtime/i18n";
+import { useTranslation } from "react-i18next";
+import { usageText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import type {
   ProviderInstanceId,
@@ -73,7 +76,7 @@ export function ThreadDetailsUsage({
             fill={null}
             tone={null}
             value={t("web.dynamic.CodexSetupSection.unavailable")}
-            tooltip={<span className="text-foreground">{notice}</span>}
+            tooltip={<span className="text-foreground">{usageText(t, notice ?? "")}</span>}
           />
         ) : (
           limits.windows.map((window) => <LimitRow key={window.id} window={window} now={now} />)
@@ -148,17 +151,18 @@ function LimitRow({
   readonly now: number;
 }) {
   const t = useTranslate();
+  const { i18n } = useTranslation();
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
   const left = remainingPercent(window);
   const pace = paceOf(window, now);
   const resetsAt = window.resetsAt ? Date.parse(window.resetsAt) : Number.NaN;
   return (
     <UsageRow
-      label={window.label}
+      label={usageWindowLabel(t, window.label)}
       fill={left}
       tone={left <= 10 ? "error" : left <= 20 ? "warning" : null}
       value={`${left}%`}
-      ariaValue={`${left}% left`}
+      ariaValue={t("release3904.percent-left", { percent: left })}
       tooltip={
         <>
           <span className="text-foreground">
@@ -166,8 +170,16 @@ function LimitRow({
           </span>
           {window.resetsAt && resetsAt > now ? (
             <span className="text-muted-foreground">
-              {t("release3904.reset-in", { duration: formatDuration(resetsAt - now) })} ·{" "}
-              {formatUpcomingTimestamp(window.resetsAt, timestampFormat, now)}
+              {t("release3904.reset-in", {
+                duration: usageText(t, formatDuration(resetsAt - now)),
+              })}{" "}
+              ·{" "}
+              {formatUpcomingTimestamp(
+                window.resetsAt,
+                timestampFormat,
+                now,
+                i18n.resolvedLanguage,
+              )}
             </span>
           ) : null}
           {pace ? <span className="text-muted-foreground">{t(PACE_LABEL[pace])}</span> : null}

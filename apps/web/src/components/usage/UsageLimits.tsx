@@ -1,3 +1,5 @@
+import { usageText, usageWindowLabel } from "@t3tools/client-runtime/i18n";
+import { usageAccessibilityLabel, usageResetCreditsSummary } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { Trans, useTranslation } from "react-i18next";
 import {
@@ -13,7 +15,6 @@ import {
 import { useAtomValue } from "@effect/atom-react";
 import { normalizeProviderAccentColor } from "@t3tools/client-runtime/state/provider-instance-display";
 import {
-  formatDuration,
   formatResetsIn,
   type LimitPace,
   paceOf,
@@ -58,6 +59,7 @@ export function barColor(driver: ServerProvider["driver"]): string {
 }
 
 export function PaceIcon({ pace }: { readonly pace: LimitPace }) {
+  const t = useTranslate();
   const Icon = PACE[pace].icon;
   return (
     <Tooltip>
@@ -65,14 +67,14 @@ export function PaceIcon({ pace }: { readonly pace: LimitPace }) {
         render={
           <span
             role="img"
-            aria-label={PACE[pace].label}
+            aria-label={usageText(t, PACE[pace].label)}
             className="inline-flex text-muted-foreground"
           />
         }
       >
         <Icon className="size-3.5" aria-hidden />
       </TooltipTrigger>
-      <TooltipPopup side="top">{PACE[pace].label}</TooltipPopup>
+      <TooltipPopup side="top">{usageText(t, PACE[pace].label ?? "")}</TooltipPopup>
     </Tooltip>
   );
 }
@@ -134,9 +136,12 @@ function WindowBar({
   const resetsAt = window.resetsAt
     ? formatUpcomingTimestamp(window.resetsAt, timestampFormat, now, dateI18n.resolvedLanguage)
     : null;
-  const summary = `${window.label}: ${remaining}% left${
-    timeLeft === null ? "" : `, ${timeLeft}% of the window left`
-  }${resetsIn ? `, ${resetsIn}` : ""}`;
+  const summary = usageAccessibilityLabel(t, {
+    account: usageWindowLabel(t, window.label),
+    remaining,
+    timeLeft,
+    resetsIn,
+  });
 
   return (
     <Tooltip>
@@ -197,7 +202,7 @@ function WindowBar({
           {resetsAt ? (
             <span className="text-muted-foreground">
               {t("misc.resets", { time: resetsAt })}
-              {resetsIn ? ` · ${resetsIn}` : ""}
+              {usageText(t, resetsIn ? ` · ${resetsIn}` : "")}
             </span>
           ) : null}
         </div>
@@ -240,7 +245,7 @@ export function LimitWindows({
                 i18nKey="web.rich.UsageLimits.part-part-part-part-part-left-part"
                 components={{
                   part0: <span className="truncate text-muted-foreground">{null}</span>,
-                  value1: <>{window.label}</>,
+                  value1: <>{usageWindowLabel(t, window.label)}</>,
                   part2: (
                     <span className="ms-auto shrink-0 font-medium text-foreground tabular-nums">
                       {null}
@@ -253,7 +258,7 @@ export function LimitWindows({
             <WindowBar color={color} window={window} now={now} />
             <span className="flex items-center gap-2 text-xs whitespace-nowrap text-muted-foreground tabular-nums">
               {pace ? <PaceIcon pace={pace} /> : null}
-              <span className="ms-auto shrink-0">{resetsIn ?? ""}</span>
+              <span className="ms-auto shrink-0">{usageText(t, resetsIn ?? "")}</span>
             </span>
           </Fragment>
         );
@@ -338,22 +343,6 @@ export function ResetCreditDialog({
   );
 }
 
-export function resetCreditsSummary(
-  credits: ServerProviderResetCredits,
-  now: number,
-  compact = false,
-): string {
-  const expiresIn = credits.nextExpiresAt
-    ? formatDuration(Date.parse(credits.nextExpiresAt) - now)
-    : null;
-  if (credits.availableCount === 0) return "No reset credits banked";
-  if (compact)
-    return `${credits.availableCount} banked${expiresIn ? ` · expires in ${expiresIn}` : ""}`;
-  return `${credits.availableCount} ${credits.availableCount === 1 ? "reset credit" : "reset credits"} banked${
-    expiresIn ? ` · next expires in ${expiresIn}` : ""
-  }`;
-}
-
 export function ResetCredits({
   environmentId,
   input,
@@ -373,7 +362,7 @@ export function ResetCredits({
   if (credits.availableCount === 0 && status === null) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-      <span className="tabular-nums">{resetCreditsSummary(credits, now)}</span>
+      <span className="tabular-nums">{usageResetCreditsSummary(t, credits, now)}</span>
       {credits.availableCount > 0 ? (
         <Button
           size="xs"
@@ -386,7 +375,7 @@ export function ResetCredits({
           {busy ? t("web.dynamic.UsageLimits.using") : t("web.dynamic.UsageLimits.use-reset")}
         </Button>
       ) : null}
-      {status ? <span className="text-foreground">{status}</span> : null}
+      {status ? <span className="text-foreground">{usageText(t, status ?? "")}</span> : null}
       <ResetCreditDialog
         open={confirming}
         onOpenChange={setConfirming}

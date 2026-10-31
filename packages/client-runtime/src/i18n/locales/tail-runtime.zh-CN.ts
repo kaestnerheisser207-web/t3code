@@ -33,7 +33,7 @@ export const tailRuntimeZhCN = {
   "usage.accessibility.accountRemaining": "{{account}}：剩余 {{remaining}}%",
   "usage.accessibility.segmentRemaining": "第 {{index}} 段，{{account}}，剩余 {{remaining}}%",
   "usage.accessibility.windowRemaining": "配额周期剩余 {{percent}}%",
-  "usage.accessibility.banked_one": "已累积 {{count}} 次重置额度",
-  "usage.accessibility.banked_other": "已累积 {{count}} 次重置额度",
+  "usage.accessibility.banked_one": "已累积 {{count}} 张重置券",
+  "usage.accessibility.banked_other": "已累积 {{count}} 张重置券",
   "usage.accessibility.separator": "，",
 } as const;

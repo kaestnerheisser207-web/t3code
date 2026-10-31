@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { createI18n, resources } from "./index.ts";
+import { createI18n, resources, usageAccessibilityLabel } from "./index.ts";
 
 describe("bundled translations", () => {
   it("preserves interpolation parameters in translated messages", () => {
@@ -55,5 +55,12 @@ describe("bundled translations", () => {
     expect(second.t("wizard.importCount", { count: 1 })).toBe("Import 1 project");
     expect(second.t("wizard.importCount", { count: 3 })).toBe("Import 3 projects");
     expect(first.t("wizard.importCount", { count: 3 })).toContain("3");
+    expect(
+      usageAccessibilityLabel(first.t, {
+        account: "user@example.com",
+        remaining: 75,
+        resetsIn: "resets in 1h 5m",
+      }),
+    ).toContain("1小时 5分钟后重置");
   });
 });

@@ -792,9 +792,7 @@ function UsageOverview({
             const totals = merged.providers.find((entry) => entry.provider === provider);
             const share = metric === "cost" ? (totals?.costShare ?? 0) : (totals?.tokenShare ?? 0);
             const providerSessions = totals?.sessions ?? 0;
-            const sessionLabel = `${formatCount(providerSessions, formatI18n.resolvedLanguage ?? "en")} ${
-              providerSessions === 1 ? "session" : "sessions"
-            }`;
+            const sessionLabel = t("usageReview.sessions", { count: providerSessions });
             const providerLoading = loadingProviders.has(provider);
             const awaitingData = providerLoading && !providersWithData.has(provider);
             return (

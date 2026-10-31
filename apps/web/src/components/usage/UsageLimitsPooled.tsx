@@ -1,3 +1,5 @@
+import { usageText, usageWindowLabel } from "@t3tools/client-runtime/i18n";
+import { usageResetCreditsSummary } from "@t3tools/client-runtime/i18n";
 import { usageAccessibilityLabel } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { Trans, useTranslation } from "react-i18next";
@@ -42,14 +44,7 @@ import { Button } from "../ui/button";
 import { OpenAI } from "../Icons";
 import { Alert, AlertTitle } from "../ui/alert";
 import { Popover, PopoverCreateHandle, PopoverPopup, PopoverTrigger } from "../ui/popover";
-import {
-  PaceIcon,
-  ResetCreditDialog,
-  barColor,
-  usePaceMark,
-  resetCreditsSummary,
-  useResetCredit,
-} from "./UsageLimits";
+import { PaceIcon, ResetCreditDialog, barColor, usePaceMark, useResetCredit } from "./UsageLimits";
 
 function accountInitials(email: string): string {
   const [local = "", domain = ""] = email.split("@");
@@ -179,8 +174,8 @@ function SegmentPopover({
           <RedactedSensitiveText
             value={account.email}
             ariaLabel={t("web.ui.UsageLimitsPooled.toggle-account-email-visibility")}
-            revealTooltip="Click to reveal email"
-            hideTooltip="Click to hide email"
+            revealTooltip={t("usageReview.reveal-email")}
+            hideTooltip={t("usageReview.hide-email")}
             className="w-fit"
           />
         ) : null}
@@ -209,7 +204,7 @@ function SegmentPopover({
               now,
               dateI18n.resolvedLanguage,
             )}
-            {resetsIn ? ` · ${resetsIn.replace("resets in ", "in ")}` : ""}
+            {usageText(t, resetsIn ? ` · ${resetsIn.replace("resets in ", "in ")}` : "")}
           </Row>
         ) : null}
         {timeLeft !== null ? (
@@ -226,7 +221,7 @@ function SegmentPopover({
       {credits && redeem ? (
         <div className="border-t border-border/60 pt-2.5 text-muted-foreground">
           <span className="flex items-center gap-3">
-            <span className="tabular-nums">{resetCreditsSummary(credits, now, true)}</span>
+            <span className="tabular-nums">{usageResetCreditsSummary(t, credits, now, true)}</span>
             <Button
               size="xs"
               variant="outline"
@@ -347,7 +342,9 @@ function RedeemableSegment({
       {redeem.busy || redeem.status ? (
         <span role="status" className="col-span-full text-xs text-muted-foreground">
           <AccountName account={props.account} className="font-medium text-foreground" />{" "}
-          {redeem.busy ? t("web.dynamic.UsageLimitsPooled.using-reset-credit") : redeem.status}
+          {redeem.busy
+            ? t("web.dynamic.UsageLimitsPooled.using-reset-credit")
+            : usageText(t, redeem.status ?? "")}
         </span>
       ) : null}
     </>
@@ -451,7 +448,7 @@ function SegmentTriggers({
           ) : null}
           {resetsIn || credits ? (
             <span className="ms-auto flex min-w-0 items-center gap-1.5 overflow-hidden rounded-sm bg-background/85 px-1.5 py-0.5 text-2xs whitespace-nowrap text-foreground tabular-nums">
-              {resetsIn?.replace("resets in ", "↻ ") ?? ""}
+              {usageText(t, resetsIn?.replace("resets in ", "↻ ") ?? "")}
               {credits ? (
                 <>
                   {resetsIn ? (
@@ -511,7 +508,7 @@ function LegendRow({
       <AccountName account={account} className="min-w-0 truncate font-medium text-foreground" />
       <span className="shrink-0 font-semibold text-foreground tabular-nums">{remaining}%</span>
       <span className="ms-auto flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground tabular-nums">
-        {resetsIn?.replace("resets in ", "↻ ") ?? ""}
+        {usageText(t, resetsIn?.replace("resets in ", "↻ ") ?? "")}
         {credits ? (
           <>
             {resetsIn ? <span aria-hidden>·</span> : null}
@@ -594,7 +591,9 @@ function PoolWindowCard({
   return (
     <div className="grid items-center gap-x-6 gap-y-3 rounded-lg border border-border/60 p-4 md:grid-cols-[11rem_minmax(0,1fr)]">
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">{label ?? pool.label}</span>
+        <span className="text-sm font-medium text-foreground">
+          {usageWindowLabel(t, label ?? pool.label)}
+        </span>
         <span className="flex items-baseline gap-2">
           <Trans
             t={t}
@@ -622,7 +621,9 @@ function PoolWindowCard({
       </div>
       <PoolBar pool={pool} color={color} now={now} />
       {description ? (
-        <p className="text-xs text-muted-foreground md:col-span-2">{description}</p>
+        <p className="text-xs text-muted-foreground md:col-span-2">
+          {usageText(t, description ?? "")}
+        </p>
       ) : null}
     </div>
   );
@@ -722,7 +723,7 @@ export function UsageLimitsPooled({
               <OpenAI className="size-5 shrink-0" aria-hidden="true" />
             ) : null}
             <div className="min-w-0 space-y-1">
-              <h2 className="text-sm font-medium">{link.label}</h2>
+              <h2 className="text-sm font-medium">{usageText(t, link.label ?? "")}</h2>
               <p className="text-xs break-words text-muted-foreground">
                 {link.accounts.join(", ")}
               </p>
@@ -731,7 +732,9 @@ export function UsageLimitsPooled({
                   {t("web.ui.UsageLimitsPooled.view-usage-in-chatgpt-with-your-connected-account")}
                 </p>
               ) : link.message ? (
-                <p className="max-w-xl text-xs text-muted-foreground">{link.message}</p>
+                <p className="max-w-xl text-xs text-muted-foreground">
+                  {usageText(t, link.message ?? "")}
+                </p>
               ) : null}
             </div>
           </div>
@@ -751,13 +754,14 @@ export function UsageLimitsPooled({
 }
 
 function LimitNotices({ notices }: { readonly notices: readonly string[] }) {
+  const t = useTranslate();
   if (notices.length === 0) return null;
   return (
     <Alert variant="warning" controlAlignment="first-line">
       <AlertTriangleIcon />
       {notices.map((notice) => (
         <AlertTitle key={notice} className="break-words">
-          {notice}
+          {usageText(t, notice ?? "")}
         </AlertTitle>
       ))}
     </Alert>
