@@ -620,6 +620,18 @@ const layerProviderInstallationRefresh = Layer.effectDiscard(
   }),
 );
 
+// Providers probed before desktop shell discovery finished saw the launcher PATH.
+const layerProviderShellPathRefresh = Layer.effectDiscard(
+  Effect.gen(function* () {
+    const receiver = yield* DesktopTelemetryReceiver.DesktopTelemetryReceiver;
+    const providers = yield* ProviderRegistry.ProviderRegistry;
+    yield* receiver.shellPathChanges.pipe(
+      Stream.runForEach(() => providers.refresh()),
+      Effect.forkScoped,
+    );
+  }),
+).pipe(Layer.provide(layerDesktopTelemetryReceiver));
+
 const layerRuntimeCoreDependenciesBase = Layer.mergeAll(
   AgentAwarenessRelay.layer,
   HeldHooksWaker.layer,
@@ -662,6 +674,7 @@ const layerRuntimeCoreDependenciesBase = Layer.mergeAll(
   ).pipe(Layer.provide(DelegatedTaskQuestionReactor.layer), Layer.provide(ProjectionStoreV2.layer)),
   ProviderUsageLimitsIngestion.layer,
   layerProviderInstallationRefresh,
+  layerProviderShellPathRefresh,
   ReplayMarkers.layer,
   Layer.effectDiscard(ProjectSettingsOverrideSweep.sweep),
 ).pipe(

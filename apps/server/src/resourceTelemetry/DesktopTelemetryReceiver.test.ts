@@ -158,12 +158,13 @@ NodeAssert.deepEqual(fingerprints(NodeTls.getCACertificates("default")), expecte
   );
 
   it.effect.each([
-    { platform: "darwin", discovered: true, applied: true, pending: false },
-    { platform: "win32", discovered: true, applied: false, pending: true },
-    { platform: "darwin", discovered: false, applied: true, pending: true },
+    { platform: "darwin", discovered: true, path: "/fresh/bin", applied: true, pending: false },
+    { platform: "win32", discovered: true, path: "/fresh/bin", applied: false, pending: true },
+    { platform: "darwin", discovered: false, path: "/fresh/bin", applied: true, pending: true },
+    { platform: "darwin", discovered: true, path: "/old/bin", applied: true, pending: false },
   ])(
-    "applies platform=$platform discovered=$discovered with pending=$pending",
-    ({ platform, discovered, applied, pending }) =>
+    "applies platform=$platform discovered=$discovered path=$path with pending=$pending",
+    ({ platform, discovered, path, applied, pending }) =>
       Effect.gen(function* () {
         const environment: NodeJS.ProcessEnv = {
           PATH: "/old/bin",
@@ -171,7 +172,7 @@ NodeAssert.deepEqual(fingerprints(NodeTls.getCACertificates("default")), expecte
           UNRELATED: "keep",
           T3CODE_DESKTOP_SHELL_DISCOVERY_PENDING: "1",
         };
-        yield* makeApplyDesktopShellEnvironmentSnapshot(
+        const pathChanged = yield* makeApplyDesktopShellEnvironmentSnapshot(
           environment,
           "darwin",
         )({
@@ -179,10 +180,11 @@ NodeAssert.deepEqual(fingerprints(NodeTls.getCACertificates("default")), expecte
           type: "shellEnvironment",
           platform,
           discovered,
-          environment: { PATH: "/fresh/bin", JAVA_HOME: null },
+          environment: { PATH: path, JAVA_HOME: null },
         });
+        expect(pathChanged).toBe(applied && path !== "/old/bin");
         expect(environment).toEqual({
-          PATH: applied ? "/fresh/bin" : "/old/bin",
+          PATH: applied ? path : "/old/bin",
           ...(applied ? {} : { JAVA_HOME: "/old/java" }),
           UNRELATED: "keep",
           ...(pending ? { T3CODE_DESKTOP_SHELL_DISCOVERY_PENDING: "1" } : {}),

@@ -598,6 +598,36 @@ describe("DesktopShellEnvironment", () => {
     }),
   );
 
+  it.effect("publishes a login shell PATH that arrives after five seconds", () =>
+    Effect.gen(function* () {
+      const env = { SHELL: "/bin/zsh", PATH: "/usr/bin" };
+      const started = yield* Deferred.make<void>();
+      const prepared = yield* runShellEnvironment({
+        env,
+        platform: "darwin",
+        handler: () => "",
+        processSpawner: ChildProcessSpawner.make((command) =>
+          command._tag === "StandardCommand" && command.command === "/bin/zsh"
+            ? Deferred.succeed(started, undefined).pipe(
+                Effect.andThen(Effect.sleep("8 seconds")),
+                Effect.as(makeProcess(envOutput({ PATH: "/opt/homebrew/bin:/usr/bin" }))),
+              )
+            : Effect.succeed(makeProcess("")),
+        ),
+        use: (service) =>
+          Effect.gen(function* () {
+            assert.isFalse(yield* service.installIntoProcess);
+            yield* Deferred.await(started);
+            yield* TestClock.adjust("8 seconds");
+            return yield* service.awaitDiscovery;
+          }),
+      });
+
+      assert.isTrue(prepared);
+      assert.equal(env.PATH, "/opt/homebrew/bin:/usr/bin");
+    }),
+  );
+
   it.effect(
     "a timed-out discovery keeps fallback paths without overwriting the server environment",
     () =>
@@ -627,7 +657,7 @@ describe("DesktopShellEnvironment", () => {
               ).pipe(Effect.forkChild);
               assert.isFalse(yield* service.installIntoProcess);
               yield* Deferred.await(started);
-              yield* TestClock.adjust("5 seconds");
+              yield* TestClock.adjust("30 seconds");
               const discovered = yield* service.awaitDiscovery;
               yield* Fiber.interrupt(listener);
               assert.isFalse(yield* service.installIntoProcess);

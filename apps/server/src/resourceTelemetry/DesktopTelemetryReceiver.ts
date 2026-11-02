@@ -205,6 +205,8 @@ export class DesktopTelemetryReceiver extends Context.Service<
       never,
       Scope.Scope
     >;
+    /** Emits when a desktop shell snapshot changes PATH; a late subscriber receives the last change. */
+    readonly shellPathChanges: Stream.Stream<void>;
   }
 >()("t3/resourceTelemetry/DesktopTelemetryReceiver") {}
 
@@ -225,7 +227,8 @@ export function makeApplyDesktopShellEnvironmentSnapshot(
   return Effect.fn("resourceTelemetry.desktopTelemetryReceiver.applyShellEnvironment")(function* (
     message: DesktopShellEnvironmentSnapshot,
   ) {
-    if (message.platform !== platform) return;
+    if (message.platform !== platform) return false;
+    const previousPath = environment.PATH;
     // Node's first default-CA enumeration consults process.env, so capture it before the patch.
     if (message.environment.NODE_EXTRA_CA_CERTS !== undefined && baseCertificates === undefined) {
       // Remove only the startup extras, preserving duplicates from bundled or system trust.
@@ -269,6 +272,7 @@ export function makeApplyDesktopShellEnvironmentSnapshot(
       );
     }
     if (message.discovered) delete environment.T3CODE_DESKTOP_SHELL_DISCOVERY_PENDING;
+    return environment.PATH !== previousPath;
   });
 }
 
@@ -420,6 +424,7 @@ export const make = Effect.fn("resourceTelemetry.desktopTelemetryReceiver.make")
   const healthChanges = yield* PubSub.sliding<DesktopTelemetryReceiverHealth>(4);
   const latestUpdateReport = yield* Ref.make(Option.none<DesktopUpdateStatusReport>());
   const updateReportChanges = yield* PubSub.sliding<DesktopUpdateStatusReport>(16);
+  const shellPathChanges = yield* PubSub.sliding<void>({ capacity: 1, replay: 1 });
   const controlMutex = yield* Semaphore.make(1);
   const snapshotMutex = yield* Semaphore.make(1);
   const health = yield* Ref.make<DesktopTelemetryReceiverHealth>({
@@ -597,7 +602,13 @@ export const make = Effect.fn("resourceTelemetry.desktopTelemetryReceiver.make")
         }
 
         if (message.type === "shellEnvironment") {
-          return recordContact.pipe(Effect.andThen(applyShellSnapshot(message)));
+          return recordContact.pipe(
+            Effect.andThen(applyShellSnapshot(message)),
+            Effect.flatMap((pathChanged) =>
+              pathChanged ? PubSub.publish(shellPathChanges, undefined) : Effect.succeed(false),
+            ),
+            Effect.asVoid,
+          );
         }
 
         if (message.type === "desktopUpdateStatus") {
@@ -745,6 +756,7 @@ export const make = Effect.fn("resourceTelemetry.desktopTelemetryReceiver.make")
         changes: Stream.fromSubscription(subscription),
       };
     }),
+    shellPathChanges: Stream.fromPubSub(shellPathChanges),
   });
 });
 
@@ -802,6 +814,7 @@ export const layerTest = (
           latest: Option.none<DesktopUpdateStatusReport>(),
           changes: Stream.empty,
         }),
+      shellPathChanges: Stream.empty,
       ...overrides,
     }),
   );
