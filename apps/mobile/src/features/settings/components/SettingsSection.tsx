@@ -1,3 +1,5 @@
+import { managedPolicyText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../../i18n";
 import { createContext, use, type ComponentProps } from "react";
 import { View } from "react-native";
 
@@ -13,7 +15,10 @@ export const SettingsSidebarContext = createContext<{ readonly selected: string 
 );
 
 export function SettingsSection(props: ComponentProps<typeof ListSection>) {
-  if (!use(SettingsSidebarContext)) return <ListSection {...props} />;
+  const t = useTranslate();
+  const footer =
+    typeof props.footer === "string" ? managedPolicyText(t, props.footer) : props.footer;
+  if (!use(SettingsSidebarContext)) return <ListSection {...props} footer={footer} />;
   return (
     <View className="gap-1">
       {props.title ? (
@@ -30,7 +35,7 @@ export function SettingsSection(props: ComponentProps<typeof ListSection>) {
       <View>{props.children}</View>
       {props.footer ? (
         <Text textRole="footnote" className="px-2 text-foreground-muted">
-          {props.footer}
+          {footer}
         </Text>
       ) : null}
     </View>

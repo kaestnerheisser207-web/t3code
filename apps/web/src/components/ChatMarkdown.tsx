@@ -509,6 +509,8 @@ function useChatMarkdownState({
   headingLevelOffset = 0,
   sourceControlMedia = false,
 }: ChatMarkdownProps) {
+  const t = useTranslate();
+
   const resolvedTheme = useRenderedAppearance();
   const markdownRef = useRef<HTMLElement>(null);
   const mediaRequestId = useRef(0);
@@ -623,7 +625,7 @@ function useChatMarkdownState({
         toastManager.add(
           stackedThreadToast({
             type: "error",
-            title: "Media unavailable",
+            title: t("release4066.text044"),
             description,
           }),
         );
@@ -716,7 +718,7 @@ function useChatMarkdownState({
         AsyncResult.failure<void, BrowserPreviewUnavailableError>(
           Cause.fail(
             new BrowserPreviewUnavailableError({
-              message: "Preview access is unavailable for this client.",
+              message: t("release4066.text045"),
             }),
           ),
         ),
@@ -730,7 +732,7 @@ function useChatMarkdownState({
           toastManager.add(
             stackedThreadToast({
               type: "error",
-              title: "Unable to open link in browser",
+              title: t("release4066.text046"),
               description: error.message,
             }),
           );
@@ -746,7 +748,7 @@ function useChatMarkdownState({
         AsyncResult.failure<void, BrowserPreviewUnavailableError>(
           Cause.fail(
             new BrowserPreviewUnavailableError({
-              message: "Environment is not connected.",
+              message: t("release4066.text047"),
             }),
           ),
         ),
@@ -1386,6 +1388,7 @@ const CHAT_MARKDOWN_COMPONENTS = {
       workspaceMutationId,
       renderContextReference,
       fileLinkChip,
+      resolvedTheme,
     } = use(ChatMarkdownRendererContext);
     const imageExpand = use(MarkdownLinkContext) ? undefined : expandMedia;
     const contextReference = typeof src === "string" ? parseComposerContextHref(src) : null;
@@ -1397,10 +1400,13 @@ const CHAT_MARKDOWN_COMPONENTS = {
         <span>{label}</span>
       );
     }
-    const localSrc = node?.properties?.dataLocalSrc;
+    // A `<picture>`'s source for this theme, resolved like any other image.
+    const themeSrc = node?.properties?.[resolvedTheme === "dark" ? "dataDarkSrc" : "dataLightSrc"];
+    const localSrc = typeof themeSrc === "string" ? undefined : node?.properties?.dataLocalSrc;
     const markdownTitle = node?.properties?.dataMarkdownTitle;
     const standalone = node?.properties?.dataStandalone === true;
-    const authoredSrc = typeof localSrc === "string" ? localSrc : src;
+    const authoredSrc =
+      typeof themeSrc === "string" ? themeSrc : typeof localSrc === "string" ? localSrc : src;
     const authoredTitle = typeof markdownTitle === "string" ? markdownTitle : title;
     const srcString =
       typeof authoredSrc === "string" ? normalizeMarkdownLinkDestination(authoredSrc) : "";
@@ -1620,7 +1626,12 @@ const CHAT_MARKDOWN_COMPONENTS = {
           fenceTitle={fenceTitle}
           theme={resolvedTheme}
           isStreaming={isStreaming && !isClosedCodeFence(node, text, codeBlock.code)}
-          onExpand={(src) => expandMedia({ images: [{ src, name: "Mermaid diagram" }], index: 0 })}
+          onExpand={(src) =>
+            expandMedia({
+              images: [{ src, name: "Mermaid diagram", mimeType: "image/svg+xml" }],
+              index: 0,
+            })
+          }
         >
           {highlightedCode}
         </MarkdownMermaidCodeBlock>

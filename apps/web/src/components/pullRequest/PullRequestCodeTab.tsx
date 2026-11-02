@@ -84,6 +84,7 @@ import { DiffPanelLoadingState } from "../DiffPanelShell";
 import { useDiffWorkerPool } from "../DiffWorkerPoolProvider";
 import { DiffCommentAnnotation } from "../diffs/DiffCommentAnnotation";
 import { DiffFileTree } from "../diffs/DiffFileTree";
+import { FileExplorerPane } from "../files/FileExplorerPane";
 import { useCodeViewFileReveal } from "../diffs/useCodeViewFileReveal";
 import { useHideTestFiles } from "../diffs/useHideTestFiles";
 import { diffFileTreeEntries, orderDiffFilesLikeTree } from "../diffs/diffFileTree.logic";
@@ -207,7 +208,7 @@ function FileViewedToggle({
       {stat}
       <label
         data-viewed-toggle=""
-        className="flex cursor-pointer select-none items-center gap-1.5 text-2xs text-muted-foreground"
+        className="flex w-18 shrink-0 cursor-pointer select-none items-center gap-1.5 text-2xs text-muted-foreground"
         onClick={(event) => event.stopPropagation()}
       >
         <Checkbox
@@ -944,7 +945,7 @@ function PullRequestCodeTab({
         if (result._tag === "Failure") {
           toastManager.add({
             type: "error",
-            title: "More comments could not be loaded",
+            title: t("release4066.text127"),
           });
           return null;
         }
@@ -1004,7 +1005,7 @@ function PullRequestCodeTab({
           {...(canCommentOnLines && onAddToAgentSelection
             ? {
                 secondaryAction: {
-                  label: "Add to agent",
+                  label: t("release4066.text129"),
                   onAction: (text: string) =>
                     finishSelection(draft, text, (comment) =>
                       onAddToAgentSelection({ comment, request: text }),
@@ -1607,7 +1608,14 @@ function PullRequestCodeTab({
           </FileViewedToggleContext>
         </div>
         {fileTreeOpen ? (
-          <aside className="flex w-[min(20rem,40%)] min-w-48 shrink-0 border-l border-border/60">
+          <FileExplorerPane
+            resizable
+            storageKey="t3code:diff-file-tree-width"
+            defaultWidth={320}
+            defaultWidthFraction={0.4}
+            minWidth={192}
+            resizeLabel="Resize PR Code files"
+          >
             <DiffFileTree
               ariaLabel={t("web.dynamic.PullRequestCodeTab.param-param-files", {
                 value: capitalizeTerm(term),
@@ -1636,7 +1644,7 @@ function PullRequestCodeTab({
                 )
               }
             />
-          </aside>
+          </FileExplorerPane>
         ) : null}
       </div>
       {unstructured}

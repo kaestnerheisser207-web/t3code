@@ -14,6 +14,7 @@ import {
   type EnvironmentId,
   connectReachabilityHelpUrl,
   formatConnectReachable,
+  managedCapabilityDenial,
   resolveEnvironmentMachineKind,
 } from "@t3tools/contracts";
 import {
@@ -62,6 +63,7 @@ import {
   usePrimaryEnvironmentId,
 } from "~/state/environments";
 import { APP_VERSION } from "~/branding";
+import { usePrimaryManagedPolicy } from "~/state/managedPolicy";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { serverEnvironment } from "~/state/server";
 import {
@@ -571,6 +573,8 @@ function ConfiguredCloudLinkRow({ canManageRelay }: { readonly canManageRelay: b
     reconcileCloudState,
   } = useCloudLinkController();
   const { openAuthPrompt } = useT3ConnectAuthPrompt();
+  // The server unlinks and refuses relay changes under such a policy; unlinking stays possible.
+  const connectDenial = managedCapabilityDenial(usePrimaryManagedPolicy(), "connect");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUpdatingPreference, setIsUpdatingPreference] = useState(false);
 
@@ -698,35 +702,38 @@ function ConfiguredCloudLinkRow({ canManageRelay }: { readonly canManageRelay: b
         <SettingsRow
           title={searchableSetting("t3-connect", t).title}
           description={
-            signedOut
-              ? t(
-                  "web.dynamic.SavedEnvironmentRows.sign-in-to-make-this-environment-available-to-your-other-devices-through-t3-connect",
-                )
-              : linkRevoked
+            connectDenial !== undefined && !managedTunnelActive
+              ? connectDenial
+              : signedOut
                 ? t(
-                    "web.dynamic.SavedEnvironmentRows.this-environment-was-removed-from-t3-connect-turn-it-on-to-link-it-again",
+                    "web.dynamic.SavedEnvironmentRows.sign-in-to-make-this-environment-available-to-your-other-devices-through-t3-connect",
                   )
-                : managedTunnelActive
-                  ? reachability?.status === "unreachable"
-                    ? t(
-                        "web.dynamic.SavedEnvironmentRows.t3-connect-is-on-but-other-devices-cannot-reach-this-environment",
-                      )
-                    : reachability?.status === "reachable"
+                : linkRevoked
+                  ? t(
+                      "web.dynamic.SavedEnvironmentRows.this-environment-was-removed-from-t3-connect-turn-it-on-to-link-it-again",
+                    )
+                  : managedTunnelActive
+                    ? reachability?.status === "unreachable"
                       ? t(
-                          "web.dynamic.SavedEnvironmentRows.this-environment-is-available-to-your-other-devices-through-t3-connect",
+                          "web.dynamic.SavedEnvironmentRows.t3-connect-is-on-but-other-devices-cannot-reach-this-environment",
+                        )
+                      : reachability?.status === "reachable"
+                        ? t(
+                            "web.dynamic.SavedEnvironmentRows.this-environment-is-available-to-your-other-devices-through-t3-connect",
+                          )
+                        : t(
+                            "web.dynamic.SavedEnvironmentRows.t3-connect-is-on-reachability-has-not-been-checked-yet",
+                          )
+                    : managedTunnelOutOfSync
+                      ? t(
+                          "web.dynamic.SavedEnvironmentRows.t3-connect-is-out-of-sync-this-environment-is-linked-only-to-publish-agent-activity-so-other-devices-cannot-connect-turn-t3-connect-on-to-repair-it",
                         )
                       : t(
-                          "web.dynamic.SavedEnvironmentRows.t3-connect-is-on-reachability-has-not-been-checked-yet",
+                          "web.dynamic.SavedEnvironmentRows.make-this-environment-available-to-your-other-devices-through-t3-connect",
                         )
-                  : managedTunnelOutOfSync
-                    ? t(
-                        "web.dynamic.SavedEnvironmentRows.t3-connect-is-out-of-sync-this-environment-is-linked-only-to-publish-agent-activity-so-other-devices-cannot-connect-turn-t3-connect-on-to-repair-it",
-                      )
-                    : t(
-                        "web.dynamic.SavedEnvironmentRows.make-this-environment-available-to-your-other-devices-through-t3-connect",
-                      )
           }
           status={operationError ?? primaryCloudLinkState.error ?? reachabilityStatus}
+          managed={managedTunnelActive ? undefined : connectDenial}
           control={
             signedOut ? (
               signInButton
@@ -740,7 +747,9 @@ function ConfiguredCloudLinkRow({ canManageRelay }: { readonly canManageRelay: b
             )
           }
         >
-          {signedOut ? null : <T3ConnectTunnelUsage tunnelLimit={tunnelLimit} />}
+          {signedOut || connectDenial !== undefined ? null : (
+            <T3ConnectTunnelUsage tunnelLimit={tunnelLimit} />
+          )}
         </SettingsRow>
       ) : linkRevoked ? (
         <SettingsRow
@@ -762,6 +771,7 @@ function ConfiguredCloudLinkRow({ canManageRelay }: { readonly canManageRelay: b
                   "web.dynamic.SavedEnvironmentRows.send-activity-to-mobile-notifications-and-live-activities-without-t3-connect",
                 )
           }
+          managed={connectDenial}
           control={
             signedOut ? (
               signInButton
@@ -781,10 +791,11 @@ function ConfiguredCloudLinkRow({ canManageRelay }: { readonly canManageRelay: b
       )}
       {managedTunnelActive && !signedOut ? (
         <SettingsRow
-          title={searchableSetting("hold-webhooks-while-offline", t).title}
+          title={searchableSetting("hold-webhooks-while-offline").title}
           description={t(
             "settings.pages.SavedEnvironmentRows.keep-webhook-requests-for-up-to-24-hours-while-this-environment-is-offline-then-deliver-them-off-t3-connect-only-forwards-requests-and-stores-nothing",
           )}
+          managed={connectDenial}
           control={
             <CloudLinkSwitch
               ariaLabel={t(

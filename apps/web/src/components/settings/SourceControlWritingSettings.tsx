@@ -311,9 +311,7 @@ export function SourceControlWritingSettingsSection() {
         settingKeys={["reviewGuidesEnabled"]}
         mixed={mixedReviewGuidesEnabled}
         {...searchableSetting("review-guides")}
-        description={t(
-          "settings.pages.SourceControlWritingSettings.adds-a-guide-tab-to-pull-requests-an-agent-writes-a-tour-of-the-change-stop-by-stop-with-the-calls-a-maintainer-should-make",
-        )}
+        description={t("release4066.text174")}
         control={
           <Switch
             mixed={mixedReviewGuidesEnabled}
@@ -536,9 +534,7 @@ export function SourceControlWritingSettingsSection() {
           serverScoped
           settingKeys={["sourceControlWriterModelSelection"]}
           {...searchableSetting("source-control-writer-model")}
-          description={t(
-            "settings.pages.SourceControlWritingSettings.model-for-source-control-text-and-branch-or-bookmark-names-off-uses-the-environment-s-text-generation-model",
-          )}
+          description={t("release4066.text175")}
           control={
             !hasServerTargets ? (
               <span className="text-sm text-muted-foreground">

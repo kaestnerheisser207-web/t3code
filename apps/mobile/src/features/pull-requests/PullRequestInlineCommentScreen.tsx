@@ -82,7 +82,7 @@ export function PullRequestInlineCommentScreen({ route }: StaticScreenProps<Inli
           ? t("mobile.dynamic.PullRequestInlineCommentScreen.edit-review-comment")
           : t("mobile.dynamic.PullRequestInlineCommentScreen.review-comment")
       }
-      subtitle={`#${params.number} · ${reviewPositionLabel(params.position)}`}
+      subtitle={`#${params.number} · ${reviewPositionLabel(params.position, t)}`}
       footer={
         <Button
           fullWidth

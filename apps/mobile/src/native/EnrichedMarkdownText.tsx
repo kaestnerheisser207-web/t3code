@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { decodeComposerContextFragment } from "@t3tools/shared/composerContextClipboard";
 import {
   collectComposerContextReferences,
@@ -162,6 +163,8 @@ function enrichedStyle(
 }
 
 export function MobileEnrichedMarkdownText(props: SelectableMarkdownTextProps) {
+  const t = useTranslate();
+
   const { renderImage, resolveImageSource, fileEmbedLabel } = props;
   const { themeAppearance, mathRenderingEnabled } = useAppearancePreferences();
   const { markdown, fileHrefs } = useMemo(() => {
@@ -222,9 +225,9 @@ export function MobileEnrichedMarkdownText(props: SelectableMarkdownTextProps) {
             const menu = fileContextMenu?.(url) ?? {
               title: url,
               actions: [
-                { id: "enriched-open-link", title: "Open link" },
-                { id: "enriched-copy-link", title: "Copy link" },
-                { id: "enriched-share-link", title: "Share link" },
+                { id: "enriched-open-link", title: t("release4066.text042") },
+                { id: "enriched-copy-link", title: t("web.ui.ThreadPullRequestsPanel.copy-link") },
+                { id: "enriched-share-link", title: t("release4066.text043") },
               ],
             };
             return [
@@ -264,13 +267,16 @@ export function MobileEnrichedMarkdownText(props: SelectableMarkdownTextProps) {
     };
   }, [props.contextClipboardFragment, props.markdown]);
   const { fontScale } = useWindowDimensions();
-  const markdownStyle = useMemo(
-    () => ({
-      ...enrichedStyle(props.textStyle, themeAppearance === "dark", fontScale),
+  const markdownStyle = useMemo(() => {
+    const style = enrichedStyle(props.textStyle, themeAppearance === "dark", fontScale);
+    return {
+      ...style,
+      paragraph: props.textAlign
+        ? { ...style.paragraph, textAlign: props.textAlign }
+        : style.paragraph,
       linkVariants,
-    }),
-    [props.textStyle, themeAppearance, fontScale, linkVariants],
-  );
+    };
+  }, [props.textStyle, props.textAlign, themeAppearance, fontScale, linkVariants]);
   const renderers = renderImage
     ? {
         image: (block: MarkdownImageBlock) => {
@@ -291,8 +297,8 @@ export function MobileEnrichedMarkdownText(props: SelectableMarkdownTextProps) {
             const menu = props.fileContextMenu?.(url) ?? {
               title: url,
               actions: [
-                { id: "enriched-open-link", title: "Open link" },
-                { id: "enriched-copy-link", title: "Copy link" },
+                { id: "enriched-open-link", title: t("release4066.text042") },
+                { id: "enriched-copy-link", title: t("web.ui.ThreadPullRequestsPanel.copy-link") },
               ],
             };
             setActiveMenu({ url, menu });
@@ -312,6 +318,7 @@ export function MobileEnrichedMarkdownText(props: SelectableMarkdownTextProps) {
         <EnrichedMarkdownText
           markdown={markdown}
           markdownStyle={markdownStyle}
+          writingDirection={props.writingDirection}
           onLinksChange={onLinksChange}
           renderers={renderers}
           resolveImageSource={resolveNativeImageSource}

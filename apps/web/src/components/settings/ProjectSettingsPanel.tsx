@@ -313,7 +313,10 @@ function ProjectDetail({
         () => undefined,
       );
       if (result._tag === "Failure") {
-        reportProjectFailure(`Failed to remove "${member.title}"`, result);
+        reportProjectFailure(
+          t("project.extra.removeNamedFailed", { project: member.title }),
+          result,
+        );
         return;
       }
       const projectRef = scopeProjectRef(member.environmentId, member.id);
@@ -491,6 +494,7 @@ function ProjectDetail({
                   void renameGroup(event.currentTarget.value, wasEdited);
                 }}
                 onKeyDown={(event) => {
+                  if (event.nativeEvent.isComposing || event.keyCode === 229) return;
                   if (event.key === "Enter") event.currentTarget.blur();
                 }}
               />

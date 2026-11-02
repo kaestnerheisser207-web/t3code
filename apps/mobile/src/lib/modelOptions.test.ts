@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { describe, expect, it } from "vite-plus/test";
 
 import {
@@ -648,8 +649,24 @@ describe("mobile model options", () => {
 
       expect(isModelSelectionUnavailable(configWith(settings), selection, projectId)).toBe(true);
       expect(
-        describeUnavailableModelSelection(configWith(settings), selection, projectId).title,
+        describeUnavailableModelSelection(
+          configWith(settings),
+          selection,
+          projectId,
+          createI18n("en").t,
+        ).title,
       ).toBe("Model turned off for this project");
+      expect(
+        describeUnavailableModelSelection(
+          configWith(settings),
+          selection,
+          projectId,
+          createI18n("zh-CN").t,
+        ),
+      ).toEqual({
+        title: "此项目已禁用该模型",
+        detail: "请在网页端或桌面端重新启用，或选择其他模型。",
+      });
       expect(isModelSelectionUnavailable(configWith(settings), selection, null)).toBe(true);
     });
 
@@ -801,5 +818,67 @@ describe("synchronized mobile model visibility", () => {
     expect(
       buildModelOptions(cleared, null, provider, null).map((option) => option.selection.model),
     ).toEqual(["hidden", "first", "second", "custom"]);
+  });
+
+  describe("managed provider policy", () => {
+    const config = {
+      providers: [
+        {
+          instanceId: "codex",
+          driver: "codex",
+          enabled: true,
+          installed: true,
+          auth: { status: "authenticated" },
+          models: [{ slug: "gpt-5.6-sol", name: "GPT", isCustom: false, capabilities: null }],
+        },
+        {
+          instanceId: "claudeAgent",
+          driver: "claudeAgent",
+          enabled: true,
+          installed: true,
+          auth: { status: "authenticated" },
+          models: [
+            { slug: "claude-sonnet-5", name: "Sonnet", isCustom: false, capabilities: null },
+          ],
+        },
+      ],
+      managedPolicy: {
+        organization: "Example Corp",
+        lockedSettings: [],
+        limits: { providers: { allowedDrivers: [ProviderDriverKind.make("codex")] } },
+      },
+    } as unknown as ServerConfig;
+    const disallowed = {
+      instanceId: ProviderInstanceId.make("claudeAgent"),
+      model: "claude-sonnet-5",
+    };
+
+    it("leaves drivers the policy does not allow out of the picker", () => {
+      expect(
+        buildModelOptions(config, null, undefined, null).map((option) => option.providerKey),
+      ).toEqual(["codex"]);
+    });
+
+    it("marks a thread's selection on a disallowed driver unavailable with the policy reason", () => {
+      expect(
+        buildModelOptions(config, disallowed, undefined, null).find(
+          (option) => option.providerKey === "claudeAgent",
+        )?.isUnavailable,
+      ).toBe(true);
+      expect(isModelSelectionUnavailable(config, disallowed, null)).toBe(true);
+      const i18n = createI18n("zh-CN");
+      const original = JSON.stringify({ config, disallowed });
+      expect(describeUnavailableModelSelection(config, disallowed, null, i18n.t)).toEqual({
+        title: "不允许使用此提供方",
+        detail: "Example Corp 的策略不允许使用 Claude 提供方。请选择其他模型。",
+      });
+      expect(JSON.stringify({ config, disallowed })).toBe(original);
+      expect(
+        describeUnavailableModelSelection(config, disallowed, null, createI18n("en").t),
+      ).toEqual({
+        title: "Provider not allowed",
+        detail: "Example Corp's policy does not allow the Claude provider. Choose another model.",
+      });
+    });
   });
 });

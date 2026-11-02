@@ -50,9 +50,24 @@ export async function prepareLocalTrackSwitch(
     message:
       found !== null
         ? (t?.("release3904.track-older-build", { found, version: input.version }) ??
+          t?.("release3904.track-older-build", { found: found, version: input.version }) ??
           `This app found ${found}, which is older than ${input.version}. Try again in a few minutes.`)
         : (local.message ??
           t?.("release3904.track-no-build", { version: input.version }) ??
+          t?.("release3904.track-no-build", { version: input.version }) ??
           `This app found no build of ${input.version} to install.`),
   };
+}
+
+/**
+ * Whether this app stays put while connected machines move: its updater is off, as for a .deb
+ * install or without a feed. Off only because a policy rules out its nightly channel, it moves.
+ */
+export function localUpdaterStaysPut(
+  state: Pick<DesktopUpdateState, "enabled" | "channelBlockedByPolicy"> | null | undefined,
+  target: DesktopUpdateChannel,
+): boolean {
+  return (
+    state?.enabled === false && !(target === "latest" && state.channelBlockedByPolicy === true)
+  );
 }

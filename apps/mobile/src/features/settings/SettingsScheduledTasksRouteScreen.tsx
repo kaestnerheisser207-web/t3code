@@ -1,3 +1,4 @@
+import { managedPolicyText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -5,6 +6,8 @@ import * as Dialog from "../../components/ui/Dialog";
 import { useAtomValue } from "@effect/atom-react";
 import {
   AuthOrchestrationOperateScope,
+  clampManagedRuntimeMode,
+  managedCapabilityDenial,
   resolveProjectProviderInstanceEnabled,
 } from "@t3tools/contracts";
 import { readEnvironmentScope } from "../../state/session";
@@ -26,6 +29,7 @@ import {
   squashAtomCommandFailure,
   type AtomCommandResult,
 } from "@t3tools/client-runtime/state/runtime";
+import { resolvePastedPath } from "@t3tools/shared/path";
 import {
   DEFAULT_WEBHOOK_PROMPT,
   emptyWebhookFilterDraft,
@@ -111,6 +115,13 @@ const DAYS = [
 ] as const;
 
 function describeSchedule(task: ScheduledTask, t: TFunction, locale: string): string {
+  if (task.schedule.type === "once")
+    return t("release4066.schedule.onceAt", {
+      time: new Date(task.schedule.runAt).toLocaleString(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }),
+    });
   if (task.schedule.type === "webhook") return t("schedule.onWebhook");
   if (task.schedule.type === "interval")
     return formatScheduledTaskInterval(task.schedule.everyMs, t);
@@ -130,6 +141,14 @@ function formatTime(value: string, locale: string): string {
     minute: "2-digit",
     hour12: new Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions().hour12,
   });
+}
+
+function formatRunAtDate(value: Date, locale?: string): string {
+  return value.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function formatRunAtTime(value: Date, locale?: string): string {
+  return value.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
 }
 
 function timePickerValue(value: string): Date {
@@ -723,6 +742,8 @@ function TaskForm({
     .sort((left, right) => Number(right.pinnedAt != null) - Number(left.pinnedAt != null));
   const config = useEnvironmentServerConfig(environmentId);
   const modelOptions = buildModelOptions(config, null, undefined, draft.projectId);
+  // Existing webhook tasks keep the option so they can still switch to a timer.
+  const webhookDenial = managedCapabilityDenial(config?.managedPolicy, "webhookTasks");
   const canOperate = useAtomValue(
     serverEnvironment.upsertScheduledTask.permissionAtom(environmentId),
   );
@@ -732,6 +753,7 @@ function TaskForm({
   });
   const submissionPending = useRef(false);
   const [timePickerOpen, setTimePickerOpen] = useState(false);
+  const [runAtPicker, setRunAtPicker] = useState<"date" | "time" | null>(null);
   const taskMissing =
     draft.task !== null &&
     tasks.data !== null &&
@@ -746,6 +768,9 @@ function TaskForm({
     }
   };
 
+  const offersOnce =
+    config?.environment.capabilities.oneTimeSchedules === true ||
+    draft.task?.schedule.type === "once";
   const save = async () => {
     if (
       !readEnvironmentScope(environmentId, AuthOrchestrationOperateScope) ||
@@ -770,6 +795,13 @@ function TaskForm({
       Dialog.alert(
         t("mobile.schedule.invalidAge"),
         t("mobile.schedule.ageHint", { max: MAX_WEBHOOK_DELIVERY_AGE_MINUTES }),
+      );
+      return;
+    }
+    if (draft.schedule.mode === "once" && !offersOnce) {
+      Dialog.alert(
+        "Once is not available here",
+        "This environment runs an older T3 Code. Update it to schedule a one-time task, or pick another schedule.",
       );
       return;
     }
@@ -816,9 +848,10 @@ function TaskForm({
                 baseRef: draft.baseRef.trim() || "main",
                 startFromOrigin: draft.startFromOrigin,
               },
-      runtimeMode: draft.runtimeMode,
-      interactionMode:
-        draft.task?.interactionMode ?? t("web.dynamic.EnvironmentIconPicker.default"),
+      // Tasks have no mode picker; a mode above the administrator's ceiling is refused.
+      runtimeMode:
+        clampManagedRuntimeMode(config?.managedPolicy, draft.runtimeMode) ?? draft.runtimeMode,
+      interactionMode: draft.task?.interactionMode ?? "default",
       creationSource: draft.task?.creationSource ?? "mobile",
     };
     submissionPending.current = true;
@@ -1001,7 +1034,12 @@ function TaskForm({
               disabled={saving}
               value={draft.checkoutPath}
               borderTop
-              onChange={(checkoutPath) => setDraft({ ...draft, checkoutPath })}
+              onChange={(checkoutPath) =>
+                setDraft({
+                  ...draft,
+                  checkoutPath: resolvePastedPath(draft.checkoutPath, checkoutPath),
+                })
+              }
             />
           ) : null}
         </SettingsSection>
@@ -1012,19 +1050,33 @@ function TaskForm({
               variant="card"
               options={[
                 { value: "fixed_time", label: t("mobile.schedule.atTime") },
+                // Older servers reject one-time schedules on save.
+                ...(offersOnce || draft.schedule.mode === "once"
+                  ? [{ value: "once" as const, label: t("release4066.text015") }]
+                  : []),
                 { value: "interval", label: t("mobile.schedule.interval") },
-                { value: "webhook", label: t("mobile.schedule.webhook") },
+                ...(webhookDenial === undefined || draft.schedule.mode === "webhook"
+                  ? [{ value: "webhook" as const, label: t("mobile.schedule.webhook") }]
+                  : []),
               ]}
               selected={draft.schedule.mode}
               onSelect={(mode) => {
                 setTimePickerOpen(false);
+                setRunAtPicker(null);
                 setDraft({
                   ...draft,
                   prompt:
                     mode === "webhook" && !draft.prompt.trim()
                       ? DEFAULT_WEBHOOK_PROMPT
                       : draft.prompt,
-                  schedule: { ...draft.schedule, mode },
+                  schedule: {
+                    ...draft.schedule,
+                    mode,
+                    runAt:
+                      mode === "once" && !draft.schedule.runAt
+                        ? new Date(Math.ceil(Date.now() / 3_600_000) * 3_600_000).toISOString()
+                        : draft.schedule.runAt,
+                  },
                 });
               }}
             />
@@ -1060,11 +1112,7 @@ function TaskForm({
                 <DateTimePicker
                   value={timePickerValue(draft.schedule.timeOfDay)}
                   mode="time"
-                  display={
-                    Platform.OS === "ios"
-                      ? "spinner"
-                      : t("web.dynamic.EnvironmentIconPicker.default")
-                  }
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
                   onDismiss={() => setTimePickerOpen(false)}
                   onValueChange={(_, selected) => {
                     const timeOfDay = `${String(selected.getHours()).padStart(2, "0")}:${String(selected.getMinutes()).padStart(2, "0")}`;
@@ -1120,6 +1168,62 @@ function TaskForm({
                 }}
               />
             </>
+          ) : draft.schedule.mode === "webhook" && webhookDenial !== undefined && draft.enabled ? (
+            <Text className="border-t border-border-subtle px-4 py-3 text-sm text-foreground-muted">
+              {t("release4066.policy.timer", { reason: managedPolicyText(t, webhookDenial) })}
+            </Text>
+          ) : draft.schedule.mode === "once" ? (
+            (["date", "time"] as const).map((field) => {
+              const runAt = new Date(draft.schedule.runAt);
+              const label =
+                field === "date"
+                  ? formatRunAtDate(runAt, i18n.resolvedLanguage)
+                  : formatRunAtTime(runAt, i18n.resolvedLanguage);
+              return (
+                <View key={field}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`${field === "date" ? t("mobile.dynamic.CustomSnoozeSheet.shared.date") : t("mobile.settings.SettingsScheduledTasksRouteScreen.time")}, ${label}`}
+                    onPress={() => setRunAtPicker((open) => (open === field ? null : field))}
+                    className="min-h-14 flex-row items-center gap-3 border-t border-border-subtle px-4 py-3 active:opacity-70"
+                  >
+                    <Text textRole="body" className="text-foreground">
+                      {field === "date"
+                        ? t("mobile.dynamic.CustomSnoozeSheet.shared.date")
+                        : t("mobile.settings.SettingsScheduledTasksRouteScreen.time")}
+                    </Text>
+                    <Text
+                      textRole="footnote"
+                      className="min-w-0 flex-1 text-right text-foreground-muted"
+                    >
+                      {label}
+                    </Text>
+                    <SymbolView
+                      name="chevron.right"
+                      size={14}
+                      tintColorClassName="accent-chevron"
+                      type="monochrome"
+                    />
+                  </Pressable>
+                  {runAtPicker === field ? (
+                    <DateTimePicker
+                      value={runAt}
+                      mode={field}
+                      display={Platform.OS === "ios" ? "spinner" : "default"}
+                      onDismiss={() => setRunAtPicker(null)}
+                      onValueChange={(_, selected) => {
+                        // Android shows a dialog that closes on pick; iOS stays inline.
+                        if (Platform.OS === "android") setRunAtPicker(null);
+                        setDraft({
+                          ...draft,
+                          schedule: { ...draft.schedule, runAt: selected.toISOString() },
+                        });
+                      }}
+                    />
+                  ) : null}
+                </View>
+              );
+            })
           ) : draft.schedule.mode === "webhook" ? (
             <>
               <WebhookScheduleDetails
@@ -1156,7 +1260,7 @@ function TaskForm({
                 }
               />
               <FormField
-                label={t("mobile.settings.SettingsScheduledTasksRouteScreen.replay-key-template")}
+                label={t("release4066.text016")}
                 value={draft.schedule.replayKey}
                 placeholder="{{headers.delivery-id}}"
                 disabled={saving}
@@ -1165,6 +1269,9 @@ function TaskForm({
                   setDraft({ ...draft, schedule: { ...draft.schedule, replayKey } })
                 }
               />
+              <Text className="px-4 pb-3 text-sm text-foreground-muted">
+                {t("release4066.text017")}
+              </Text>
               <FormField
                 label={t("mobile.settings.SettingsScheduledTasksRouteScreen.coalesce-key-template")}
                 value={draft.schedule.coalesceKey}
@@ -1189,9 +1296,7 @@ function TaskForm({
                 }
               />
               <Text className="px-4 pb-3 text-sm text-foreground-muted">
-                {t(
-                  "mobile.settings.SettingsScheduledTasksRouteScreen.replay-keys-suppress-repeats-for-7-days-coalescing-runs-the-latest-payload-when-the-window-from-the-first-delivery-closes-empty-keys-run-normally",
-                )}
+                {t("release4066.text018")}
               </Text>
             </>
           ) : (
@@ -1247,7 +1352,14 @@ function TaskForm({
         tone="primary"
         fullWidth
         loading={saving}
-        disabled={!canOperate || dictationPending || taskMissing || environmentUnavailable}
+        disabled={
+          !canOperate ||
+          dictationPending ||
+          taskMissing ||
+          environmentUnavailable ||
+          // The server refuses an enabled webhook task under this policy.
+          (draft.enabled && draft.schedule.mode === "webhook" && webhookDenial !== undefined)
+        }
         onPress={() => void save()}
         label={
           saving
@@ -1489,6 +1601,11 @@ function EnvironmentTasks({
                     ? ` · ${formatNextScheduledTaskRun(task.nextRunAt, now, t, i18n.resolvedLanguage ?? "en")}`
                     : ""}
               </Text>
+              {task.blockedByPolicy ? (
+                <Text className="text-sm text-foreground-muted" numberOfLines={2}>
+                  {task.blockedByPolicy}
+                </Text>
+              ) : null}
               {task.lastRunError ? (
                 <Text className="text-sm text-danger-foreground" numberOfLines={2}>
                   {t("mobile.settings.dynamic.lastRunFailed", { error: task.lastRunError })}

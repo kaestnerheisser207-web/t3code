@@ -47,7 +47,7 @@ import {
   useProjects,
   useServerConfigs,
   useThreadShell,
-  useThreadShells,
+  useVisibleThreadShells,
 } from "../../state/entities";
 import { useThreadSearch } from "../../state/queries";
 import { requestThreadMessageJump } from "../threads/threadMessageJump";
@@ -114,6 +114,8 @@ function PaletteRow(props: {
   readonly searchQuery: string;
   readonly onSelect: () => void;
 }) {
+  const t = useTranslate();
+
   const foregroundClassName = props.selected
     ? "text-thread-selected-foreground"
     : "text-foreground";
@@ -171,8 +173,8 @@ function PaletteRow(props: {
               lives, unless the hint already names it. */}
           {(props.searchMatch ||
             (props.item.matchHint &&
-              props.item.matchHint.label !== "Project" &&
-              props.item.matchHint.label !== "Environment")) &&
+              props.item.matchHint.label !== t("pr.filters.project") &&
+              props.item.matchHint.label !== t("pr.filters.environment"))) &&
           props.item.detail ? (
             <Text
               numberOfLines={1}
@@ -228,7 +230,7 @@ export function CommandPalette(props: {
   const selectDetail = useSelectWorkspaceDetail();
   const runCommand = props.onCommand;
   const projects = useProjects();
-  const threads = useThreadShells();
+  const threads = useVisibleThreadShells();
   const activeThreadRef = parseActiveThreadPath(props.pathname);
   const activeThread = useThreadShell(activeThreadRef);
   const visitThread = useAtomCommand(threadEnvironment.visit, { reportFailure: false });

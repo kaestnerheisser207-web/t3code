@@ -23,6 +23,7 @@ import type {
 import * as DateTime from "effect/DateTime";
 import * as Option from "effect/Option";
 
+import { formatBytes } from "../../lib/formatBytes";
 import { cn } from "../../lib/utils";
 import { ensureLocalApi } from "../../localApi";
 import { useOpenInPreferredEditor } from "../../editorPreferences";
@@ -52,18 +53,6 @@ function formatCount(value: number): string {
 function formatDuration(value: number): string {
   if (value < 1_000) return `${Math.round(value)} ms`;
   return `${(value / 1_000).toFixed(value >= 10_000 ? 1 : 2).replace(/\.0+$/, "")} s`;
-}
-
-function formatBytes(value: number): string {
-  if (value < 1024) return `${value} B`;
-  const units = ["KB", "MB", "GB"] as const;
-  let unitIndex = -1;
-  let next = value;
-  do {
-    next /= 1024;
-    unitIndex += 1;
-  } while (next >= 1024 && unitIndex < units.length - 1);
-  return `${next.toFixed(next >= 10 ? 1 : 2)} ${units[unitIndex]}`;
 }
 
 function RelativeTimeNoWrap(props: { value: DateTime.Utc }) {
@@ -1107,7 +1096,7 @@ function DiagnosticsSettingsBody() {
           <StatBlock
             label={t("settings.pages.DiagnosticsSettings.cpu-time")}
             value={resourceData ? formatCpuTime(resourceData.totalCpuSecondsApprox) : "..."}
-            tooltip="Approximate active CPU time for the T3 server root process and its descendants during the selected window. It grows only while sampled processes use CPU and older samples leave as the window moves."
+            tooltip={t("release4066.text142")}
           />
           <StatBlock
             label={t("settings.pages.DiagnosticsSettings.samples")}
@@ -1197,11 +1186,7 @@ function DiagnosticsSettingsBody() {
           <StatBlock
             label={t("settings.pages.DiagnosticsSettings.failures")}
             value={data ? formatCount(data.failureCount) : "..."}
-            tone={
-              data && data.failureCount > 0
-                ? "danger"
-                : t("web.dynamic.EnvironmentIconPicker.default")
-            }
+            tone={data && data.failureCount > 0 ? "danger" : "default"}
           />
           <StatBlock
             label={t("settings.pages.DiagnosticsSettings.slow-spans")}
@@ -1213,20 +1198,12 @@ function DiagnosticsSettingsBody() {
                   })
                 : t("diagnostics.slowConfigured")
             }
-            tone={
-              data && data.slowSpanCount > 0
-                ? "warning"
-                : t("web.dynamic.EnvironmentIconPicker.default")
-            }
+            tone={data && data.slowSpanCount > 0 ? "warning" : "default"}
           />
           <StatBlock
             label={t("settings.pages.DiagnosticsSettings.parse-errors")}
             value={data ? formatCount(data.parseErrorCount) : "..."}
-            tone={
-              data && data.parseErrorCount > 0
-                ? "warning"
-                : t("web.dynamic.EnvironmentIconPicker.default")
-            }
+            tone={data && data.parseErrorCount > 0 ? "warning" : "default"}
           />
         </StatsGrid>
         {openLogsDirectoryError || traceDiagnosticsError || error ? (

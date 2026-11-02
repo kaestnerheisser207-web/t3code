@@ -252,7 +252,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     to: "/settings/worktrees",
     scope: "project-defaults",
     searchTerms: [
-      "disk storage delete deleted archived threads old inactive merged unchanged worktrees retention days project inherit off custom",
+      "disk storage automatic delete deleted archived threads old inactive merged settled unchanged worktrees retention days project inherit off custom",
     ],
   },
   {
@@ -267,7 +267,9 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     titleKey: "settings.items.storage-artifacts.title",
     to: "/settings/maintenance",
     scope: "environment-defaults",
-    searchTerms: ["disk storage browser screenshots captures rotated logs cleanup retention"],
+    searchTerms: [
+      "disk storage delete old browser artifacts screenshots captures rotated logs cleanup retention",
+    ],
   },
   {
     id: "project-defaults",
@@ -288,6 +290,14 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     to: "/settings/threads",
     scope: "project-defaults",
     searchTerms: ["new thread project provider reasoning effort"],
+  },
+  {
+    id: "fallback-model",
+    titleKey: "release4066.text159",
+    to: "/settings/threads",
+    scope: "environment-defaults",
+    searchTerms: ["fallback agent provider out of usage new threads"],
+    environmentOnly: true,
   },
   {
     id: "default-permissions",
@@ -464,7 +474,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "boring-sidebar-multiline",
-    title: "Two-line folder rows",
+    titleKey: "release4066.text150",
     to: "/settings/labs",
     searchTerms: ["beta boring sidebar folder rows multiline branch pull request details"],
   },
@@ -484,7 +494,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "simlock-hosts",
-    title: "Simlock device hosts (alpha)",
+    titleKey: "release4066.text180",
     to: "/settings/labs",
     scope: "environment",
     searchTerms: ["beta alpha simlock callstack simulator emulator ios android pool lease gateway"],
@@ -577,7 +587,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     id: "proactive-panels",
     titleKey: "settings.items.proactive-panels.title",
     to: "/settings/diffs",
-    searchTerms: ["automatically open diff pull request pr right panel agent completion"],
+    searchTerms: ["proactive automatically open diff pull request pr right panel agent completion"],
   },
   {
     id: "skills-in-slash-menu",
@@ -809,7 +819,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     titleKey: "settings.items.providers.title",
     to: "/settings/providers",
     searchTerms: [
-      "agents cli codex claude cursor grok fx opencode antigravity google sign in sign out install subscription instances authentication api key models configuration binary path config directory endpoint arguments environment variables display name accent color custom favorite hidden auto compact",
+      "agents cli codex claude cursor grok fx opencode antigravity google sign in sign out install subscription instances authentication api key models configuration binary path config directory codex_home shadow home endpoint arguments environment variables display name accent color custom favorite hidden auto compact native sessions import resume",
     ],
   },
   {
@@ -929,7 +939,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     id: "browser-search-engine",
     titleKey: "settings.items.browser-search-engine.title",
     to: "/settings/browser",
-    searchTerms: ["address bar duckduckgo google bing brave kagi ecosia custom"],
+    searchTerms: ["address bar duckduckgo google bing brave kagi ecosia custom url"],
   },
   {
     id: "pull-request-links-open-in-app",
@@ -1091,7 +1101,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     titleKey: "settings.items.wsl-backend.title",
     to: "/settings/access",
     searchTerms: [
-      "windows subsystem linux distro second server projects stop windows backend restart",
+      "windows subsystem linux distro second server projects stop windows backend restart wsl only",
     ],
     desktopOnly: true,
     windowsOnly: true,

@@ -611,6 +611,7 @@ export function NewTaskDraftScreen(props: {
         selectedEnvironmentServerConfig,
         modelSelection,
         selectedProject.id,
+        t,
       );
       Dialog.alert(title, detail);
       return null;

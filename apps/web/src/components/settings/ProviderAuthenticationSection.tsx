@@ -76,25 +76,31 @@ export function ProviderAuthenticationSection({
     !signedIn &&
     (provider.setup?.canAuthenticate === false ||
       (provider.driver === "acpRegistry" && auth?.methods?.length === 0));
+  const usesCredentials =
+    provider.driver === "antigravity" &&
+    (provider.auth.type === "gemini-api-key" || provider.auth.type === "agent-platform");
   const accountDescription = active
     ? auth?.phase === "starting"
-      ? (auth.message ?? "Starting sign-in…")
+      ? (auth.message ??
+        (usesCredentials ? t("release4066.auth.connecting") : t("release4066.auth.starting")))
       : auth?.phase === "verifying"
-        ? "Checking your account…"
+        ? usesCredentials
+          ? t("release4066.auth.checkingCredentials")
+          : t("release4066.auth.checkingAccount")
         : interaction?.type === "terminal"
-          ? "Complete sign-in in the terminal below."
+          ? t("release4066.auth.terminal")
           : interaction?.type === "credentials"
-            ? "Enter your credentials below."
+            ? t("release4066.auth.credentials")
             : t("codex.setup.browser")
     : signedIn
-      ? "Signed in."
+      ? t("release4066.auth.signedIn")
       : isDiscovering
         ? t("settings.extra.discovering")
         : needsExternalSetup
-          ? t(
-              "web.dynamic.ProviderWizardAuthenticationStep.no-in-app-sign-in-advertised-follow-the-provider-s-docs-to-finish-setup",
-            )
-          : `Sign in on ${environmentLabel}.`;
+          ? t("release4066.auth.external")
+          : usesCredentials
+            ? t("release4066.auth.connectOn", { environment: environmentLabel })
+            : t("release4066.auth.signInOn", { environment: environmentLabel });
   const statusMessage = auth?.phase === "failed" ? auth.message : null;
   const disabled = readOnly || pending || query.error !== null || isDiscovering;
   const draftId = `${auth?.flowId ?? ""}:${interaction?.id ?? ""}`;
@@ -174,8 +180,8 @@ export function ProviderAuthenticationSection({
               ariaLabel={t(
                 "settings.pages.ProviderAuthenticationSection.toggle-account-email-visibility",
               )}
-              revealTooltip="Click to reveal email"
-              hideTooltip="Click to hide email"
+              revealTooltip={t("usageReview.reveal-email")}
+              hideTooltip={t("usageReview.hide-email")}
               className="max-w-full truncate"
             />
           </span>
@@ -308,8 +314,12 @@ export function ProviderAuthenticationSection({
                 {signedIn
                   ? t("web.dynamic.ProviderAuthenticationSection.change-account")
                   : auth?.phase === "failed" || auth?.phase === "cancelled"
-                    ? t("web.dynamic.ProviderAuthenticationSection.retry-sign-in")
-                    : t("web.dynamic.ProviderAuthenticationSection.sign-in")}
+                    ? usesCredentials
+                      ? t("web.dynamic.CodexSetupSection.retry-connection")
+                      : t("web.dynamic.ProviderAuthenticationSection.retry-sign-in")
+                    : usesCredentials
+                      ? t("settings.pages.ProviderAuthenticationSection.connect")
+                      : t("web.dynamic.ProviderAuthenticationSection.sign-in")}
               </Button>
             ) : null}
             {!active && signedIn && (provider.auth.canLogout ?? provider.setup?.canAuthenticate) ? (

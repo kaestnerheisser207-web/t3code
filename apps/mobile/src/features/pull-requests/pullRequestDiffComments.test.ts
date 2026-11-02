@@ -1,3 +1,4 @@
+import { createI18n } from "@t3tools/client-runtime/i18n";
 import { describe, expect, it } from "vite-plus/test";
 import type { PullRequestReviewThread } from "@t3tools/contracts";
 import type { NativeReviewDiffData } from "../review/nativeReviewDiffAdapter";
@@ -31,8 +32,12 @@ describe("PR comments in continuous native diffs", () => {
         throw new Error("Empty annotation must not read rows");
       },
     };
-    expect(annotatePullRequestDiff(unannotated, [], [], undefined)).toBe(unannotated);
-    expect(annotatePullRequestDiff(data, [], [], undefined).rows).toBe(data.rows);
+    expect(annotatePullRequestDiff(unannotated, [], [], undefined, createI18n("en").t)).toBe(
+      unannotated,
+    );
+    expect(annotatePullRequestDiff(data, [], [], undefined, createI18n("en").t).rows).toBe(
+      data.rows,
+    );
   });
 
   it("anchors old/new lines separately despite identical line numbers", () => {
@@ -41,6 +46,7 @@ describe("PR comments in continuous native diffs", () => {
       [thread, { ...thread, id: "right", side: "right" }],
       [],
       "abc",
+      createI18n("en").t,
     );
     expect(annotated.rows.map((row) => row.id)).toEqual([
       "header",
@@ -68,6 +74,7 @@ describe("PR comments in continuous native diffs", () => {
         },
       ],
       "new",
+      createI18n("en").t,
     );
     expect(annotated.rows).toEqual(data.rows);
   });
@@ -86,6 +93,7 @@ describe("PR comments in continuous native diffs", () => {
         },
       ],
       "abc",
+      createI18n("en").t,
     );
     expect(annotated.rows.map((row) => row.id)).toEqual([
       "header",
@@ -95,6 +103,48 @@ describe("PR comments in continuous native diffs", () => {
       "draft:draft",
     ]);
     expect(annotated.commentTargetsByRowId).toBe(data.commentTargetsByRowId);
+    const body = "Feedback: /tmp/agent.ts {{unchanged}}";
+    const chinese = annotatePullRequestDiff(
+      data,
+      [{ ...thread, line: null, isResolved: true }],
+      [
+        {
+          id: "draft",
+          path: "a.ts",
+          position: { kind: "added", newLine: 2 },
+          body,
+          code: "",
+          headSha: "abc",
+        },
+      ],
+      "abc",
+      createI18n("zh-CN").t,
+    );
+    expect(chinese.rows.map((row) => row.id)).toEqual(annotated.rows.map((row) => row.id));
+    expect(chinese.rows.find((row) => row.id === "discussion:t")?.commentText).toBe(
+      "讨论 · 已解决\n\n0 条评论 · 点按打开",
+    );
+    expect(chinese.rows.find((row) => row.id === "discussion:t")?.commentRangeLabel).toBe("文件");
+    expect(chinese.rows.find((row) => row.id === "draft:draft")?.commentText).toBe(
+      `待提交评审 · 点按编辑\n${body}`,
+    );
+  });
+  it("counts a single-comment discussion in the singular", () => {
+    const annotated = annotatePullRequestDiff(
+      data,
+      [
+        { ...thread, commentCount: 1 },
+        { ...thread, id: "right", side: "right", commentCount: 2 },
+      ],
+      [],
+      "abc",
+      createI18n("en").t,
+    );
+    expect(
+      annotated.rows
+        .filter((row) => row.kind === "comment")
+        .map((row) => row.commentText?.split("\n").at(-1)),
+    ).toEqual(["1 comment · Tap to open", "2 comments · Tap to open"]);
   });
   it("uses the old line number for left-side context when the line numbers differ", () => {
     const position = { kind: "context" as const, side: "left" as const, oldLine: 7, newLine: 8 };
@@ -109,8 +159,10 @@ describe("PR comments in continuous native diffs", () => {
       [],
       [{ id: "left", path: "a.ts", position, headSha: "abc", code: "", body: "Feedback" }],
       "abc",
+      createI18n("en").t,
     );
     expect(annotated.rows.at(-1)?.id).toBe("draft:left");
-    expect(reviewPositionLabel(position)).toBe("Old line 7");
+    expect(reviewPositionLabel(position, createI18n("en").t)).toBe("Old line 7");
+    expect(reviewPositionLabel(position, createI18n("zh-CN").t)).toBe("原第 7 行");
   });
 });

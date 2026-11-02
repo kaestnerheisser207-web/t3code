@@ -45,6 +45,7 @@ import {
   pullRequestOverrideAfterAction,
   reusePullRequestEntries,
   settlePullRequestOverrides,
+  comparePullRequestsByRecency,
   largestPullRequestReadCount,
 } from "./pullRequestList.logic";
 import {
@@ -567,7 +568,7 @@ export function PullRequestsPage() {
       const held = new Set(ordered.entries.map(pullRequestEntryKey));
       const arrived = answered.entries.filter((entry) => !held.has(pullRequestEntryKey(entry)));
       const appended = rankPullRequestMatches(
-        arrived.toSorted((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
+        arrived.toSorted(comparePullRequestsByRecency),
         sentParsed.text,
       );
       setOrdered({ key: filterKey, source: answered, entries: [...ordered.entries, ...appended] });
@@ -1142,14 +1143,14 @@ export function PullRequestsPage() {
   const listBody = (
     <>
       {!capabilityKnown ? (
-        <PullRequestListGhost rows={7} caption="Loading pull requests…" />
+        <PullRequestListGhost rows={7} caption={t("release4066.text133")} />
       ) : !pullRequestsSupported ? (
         <PullRequestsUnavailableState
           title={t("web.ui.PullRequestsPage.pull-requests-unavailable")}
           error="Update your T3 Code servers to browse pull requests."
         />
       ) : firstLoad ? (
-        <PullRequestListGhost rows={7} caption="Loading pull requests…" />
+        <PullRequestListGhost rows={7} caption={t("release4066.text133")} />
       ) : listQuery.error && shownCount === 0 ? (
         <PullRequestsUnavailableState
           error={listQuery.error}
@@ -1251,7 +1252,7 @@ export function PullRequestsPage() {
     }),
   ];
   const serverMenuOptions: ReadonlyArray<PullRequestFilterOption<string>> = [
-    { value: "", label: "All servers", Icon: LayersIcon },
+    { value: "", label: t("release4066.text135"), Icon: LayersIcon },
     ...capableEnvironments.map((environment) => ({
       value: environment.environmentId,
       label: environment.label,

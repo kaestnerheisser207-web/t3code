@@ -69,6 +69,7 @@ import {
   isMarkdownPreviewFile,
   isSvgImagePreviewFile,
   isVideoPreviewFile,
+  needsWorkspaceFileContents,
 } from "./filePath";
 import { useWorkspaceFileAssetUrlState } from "./workspaceFileAssetUrl";
 
@@ -90,8 +91,8 @@ function FilesBrowserHeader(props: {
       search={{
         value: props.searchQuery,
         onChangeText: props.onSearchQueryChange,
-        placeholder: "Search files",
-        closeAccessibilityLabel: "Close file search",
+        placeholder: t("web.ui.FileBrowserPanel.search-files"),
+        closeAccessibilityLabel: t("mobile.tools.FilesHeader.close-file-search"),
         clearAccessibilityLabel: "Clear file search",
       }}
       menus={
@@ -284,7 +285,7 @@ function FileContent(props: {
 
   if (isAudioFile) {
     return props.previewUri === null ? (
-      <FilePreviewLoading message="Loading file..." />
+      <FilePreviewLoading message={t("release4066.text003")} />
     ) : (
       <AudioFilePreview uri={props.previewUri} onRetry={props.onRetryPreview} />
     );
@@ -319,7 +320,7 @@ function FileContent(props: {
   }
 
   if (props.fileContents === null) {
-    return <FilePreviewLoading message="Loading file..." />;
+    return <FilePreviewLoading message={t("release4066.text003")} />;
   }
 
   return (
@@ -543,12 +544,17 @@ export function ThreadFilesTreeScreen(props: ThreadFilesRouteScreenProps) {
         />
       );
     }
-    return <LoadingScreen message="Opening files..." messagePlacement="above-spinner" />;
+    return <LoadingScreen message={t("release4066.text004")} messagePlacement="above-spinner" />;
   }
 
   if (!canReadFiles) {
     if (fileAccess.isPending) {
-      return <LoadingScreen message="Checking file access..." messagePlacement="above-spinner" />;
+      return (
+        <LoadingScreen
+          message={t("web.ui.FilePreviewPanel.checking-file-access")}
+          messagePlacement="above-spinner"
+        />
+      );
     }
     return (
       <FilesUnavailable
@@ -734,15 +740,12 @@ export function ThreadFileScreen(props: ThreadFileRouteScreenProps) {
   const handleRetryPreview = () => {
     void assetPreview.refresh().finally(() => setPreviewRevision((current) => current + 1));
   };
-  const needsFileContents =
-    !metadataPending &&
-    directoryPath === null &&
-    relativePath !== null &&
-    !isVideoFile &&
-    !isAudioFile &&
-    (resolvedActiveMode === "source" ||
-      isMarkdownPreviewFile(relativePath) ||
-      filePreviewDelimiter({ name: relativePath }) !== null);
+  // Metadata is needed only to distinguish directories; file contents can load concurrently.
+  const needsFileContents = needsWorkspaceFileContents({
+    relativePath,
+    metadataKind: metadata.data?.kind,
+    activeMode: resolvedActiveMode,
+  });
   const fileQuery = useEnvironmentQuery(
     canReadFiles &&
       environmentId !== null &&
@@ -942,12 +945,17 @@ export function ThreadFileScreen(props: ThreadFileRouteScreenProps) {
   };
 
   if (environmentId === null || (threadId !== null && selectedThread === null)) {
-    return <LoadingScreen message="Opening file..." messagePlacement="above-spinner" />;
+    return <LoadingScreen message={t("release4066.text005")} messagePlacement="above-spinner" />;
   }
 
   if (!canReadFiles) {
     if (fileAccess.isPending) {
-      return <LoadingScreen message="Checking file access..." messagePlacement="above-spinner" />;
+      return (
+        <LoadingScreen
+          message={t("web.ui.FilePreviewPanel.checking-file-access")}
+          messagePlacement="above-spinner"
+        />
+      );
     }
     return (
       <FilesUnavailable
@@ -975,7 +983,7 @@ export function ThreadFileScreen(props: ThreadFileRouteScreenProps) {
   }
 
   if (metadataPending) {
-    return <LoadingScreen message="Opening file..." messagePlacement="above-spinner" />;
+    return <LoadingScreen message={t("release4066.text005")} messagePlacement="above-spinner" />;
   }
   if (directoryPath !== null) {
     return (

@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import {
   scopeProjectRef,
@@ -43,18 +44,21 @@ import {
 } from "../threadRoutes";
 import { toastManager } from "./ui/toast";
 
-const PREVIEW_FORWARDED_LAYOUT_COMMANDS = [
+const PREVIEW_FORWARDED_COMMANDS = [
   "workspace.focusNext",
   "workspace.focusPrevious",
   "sidebar.toggle",
   "rightPanel.toggle",
   "rightPanel.toggleMaximized",
+  "preview.focusUrl",
 ] as const;
 
 const isGlobalPullRequests = (ref: ScopedThreadRef) =>
   scopedThreadKey(ref) === scopedThreadKey(PULL_REQUESTS_PANEL_REF);
 
 export function ReopenClosedViewShortcut() {
+  const t = useTranslate();
+
   const navigate = useNavigate();
   const params = useParams({ strict: false });
   const target = resolveThreadRouteTarget(params);
@@ -145,7 +149,7 @@ export function ReopenClosedViewShortcut() {
       .catch((error: unknown) => {
         toastManager.add({
           type: "error",
-          title: "Could not reopen view",
+          title: t("release4066.text065"),
           description: error instanceof Error ? error.message : String(error),
         });
       });
@@ -205,7 +209,7 @@ export function ReopenClosedViewShortcut() {
     // Guest browser processes miss app keydown listeners; desktop forwards the chords as menu actions.
     const commands = [
       ...(hasHistory ? (["view.reopenClosed"] as const) : []),
-      ...PREVIEW_FORWARDED_LAYOUT_COMMANDS,
+      ...PREVIEW_FORWARDED_COMMANDS,
     ];
     void preview
       .setForwardedShortcuts(

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   mergeDirectPreviewAnnotation,
   resolveBackgroundDraftWorkspaceOptions,
@@ -262,6 +263,8 @@ interface ComposerSendInput {
  * when it fails.
  */
 export function useComposerSend(input: ComposerSendInput) {
+  const t = useTranslate();
+
   const {
     environmentId,
     routeThreadKey,
@@ -435,8 +438,8 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "info",
-          title: "Annotation attached to draft",
-          description: "Sending is unavailable right now. Finish the current action, then send.",
+          title: t("release4066.text096"),
+          description: t("release4066.text097"),
         }),
       );
     };
@@ -475,8 +478,8 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add({
         ...stackedThreadToast({
           type: "warning",
-          title: "Not connected: message not sent",
-          description: "Reconnecting to the environment. Try again once it is connected.",
+          title: t("release4066.text098"),
+          description: t("release4066.text099"),
         }),
         id: `chat-send-environment-unavailable:${toastSlot}`,
       });
@@ -495,7 +498,7 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "warning",
-          title: "Side chat not started",
+          title: t("release4066.text100"),
           description: sideChatDisabledReason,
         }),
       );
@@ -514,8 +517,8 @@ export function useComposerSend(input: ComposerSendInput) {
         toastManager.add(
           stackedThreadToast({
             type: "warning",
-            title: "Side chats take text only",
-            description: "Remove the attachments and context, then send it again.",
+            title: t("release4066.text101"),
+            description: t("release4066.text102"),
           }),
         );
         return;
@@ -570,9 +573,8 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "warning",
-          title: "Choose models and a base branch",
-          description:
-            "Multiple models need a new thread in a Git project. Each gets its own worktree.",
+          title: t("release4066.text103"),
+          description: t("release4066.text104"),
         }),
       );
       return;
@@ -620,7 +622,7 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "warning",
-          title: "Attached thread is on another machine",
+          title: t("release4066.text105"),
           description: `This machine's agent can't read "${strandedThread.title}". Remove it, or switch back to ${owner} to send.`,
         }),
       );
@@ -675,8 +677,8 @@ export function useComposerSend(input: ComposerSendInput) {
         toastManager.add(
           stackedThreadToast({
             type: "warning",
-            title: "Start a Codex thread first",
-            description: "Send a message before you submit feedback.",
+            title: t("release4066.text106"),
+            description: t("release4066.text107"),
           }),
         );
         return;
@@ -759,8 +761,6 @@ export function useComposerSend(input: ComposerSendInput) {
         interactionMode: followUp.interactionMode,
       });
       if (!followUpSent) {
-        promptRef.current = followUpPromptSnapshot;
-        composerTerminalContextsRef.current = [...followUpTerminalContexts];
         restorePlanFollowUpComposer({
           snapshot: {
             prompt: followUpPromptSnapshot,
@@ -769,6 +769,14 @@ export function useComposerSend(input: ComposerSendInput) {
             previewAnnotations: followUpPreviewAnnotations,
             threadContexts: followUpThreadContexts,
             environmentContexts: followUpEnvironmentContexts,
+          },
+          draftHasUserContent: composerDraftHasUserContent(
+            useComposerDraftStore.getState().getComposerDraft(composerDraftTarget),
+          ),
+          routeIsCurrent: currentRouteThreadKeyRef.current === routeThreadKey,
+          writeComposerRefs: (snapshot) => {
+            promptRef.current = snapshot.prompt;
+            composerTerminalContextsRef.current = [...snapshot.terminalContexts];
           },
           writePrompt: (prompt) => setComposerDraftPrompt(composerDraftTarget, prompt),
           writeTerminalContexts: (contexts) =>
@@ -829,8 +837,8 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "warning",
-          title: "Choose a project first",
-          description: "This draft no longer points to an available project.",
+          title: t("release4066.text108"),
+          description: t("release4066.text109"),
         }),
       );
       return;
@@ -1140,7 +1148,7 @@ export function useComposerSend(input: ComposerSendInput) {
           toastManager.add({
             type: "info",
             title: notice,
-            description: "Send again when it's ready.",
+            description: t("release4066.text110"),
           });
         }
         return;
@@ -1379,7 +1387,7 @@ export function useComposerSend(input: ComposerSendInput) {
           toastManager.add(
             stackedThreadToast({
               type: "warning",
-              title: "Could not open a fresh composer",
+              title: t("release4066.text111"),
               description: error instanceof Error ? error.message : undefined,
             }),
           );
@@ -1409,7 +1417,7 @@ export function useComposerSend(input: ComposerSendInput) {
             toastManager.add(
               stackedThreadToast({
                 type: "success",
-                title: "Started in background",
+                title: t("release4066.text112"),
                 timeout: 5_000,
                 actionProps: {
                   children: "Open",

@@ -52,3 +52,5 @@ export {
 } from "./usage.ts";
 
 export { sessionPermissionsText } from "./permissions.ts";
+
+export { managedPolicyText } from "./managedPolicy.ts";

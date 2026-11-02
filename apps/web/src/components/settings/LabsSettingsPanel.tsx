@@ -1,6 +1,7 @@
 import { useTranslate } from "../../i18n";
 import { useAuth } from "@clerk/react";
 import { Link } from "@tanstack/react-router";
+import { managedCapabilityDenial } from "@t3tools/contracts";
 
 import { hasCloudPublicConfig } from "~/cloud/publicConfig";
 import { useT3ConnectAuthPrompt } from "../clerk/useT3ConnectAuthPrompt";
@@ -11,6 +12,8 @@ import { SettingsPageContainer, SettingsRow, SettingsSection } from "./settingsL
 import { searchableSetting } from "./settingsSearch";
 import { LegacyFeaturesSection } from "./SettingsPanels";
 import { useScopedSettings, useUpdateScopedSettings } from "./useScopedSettings";
+import { useOptionalSettingsScope } from "./SettingsScopeContext";
+import { firstManagedDenial, usePrimaryManagedPolicy } from "~/state/managedPolicy";
 
 /** Features still settling in, and legacy behavior kept for people who rely on it. */
 export function LabsSettingsPanel() {
@@ -55,19 +58,21 @@ function BoringSidebarRow() {
 }
 
 function BoringSidebarMultilineRow() {
+  const t = useTranslate();
+
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
   return (
     <SettingsRow
       {...searchableSetting("boring-sidebar-multiline")}
-      description="In the boring sidebar, show folder threads on two lines: the title, then the branch, pull request, and agent."
+      description={t("release4066.text149")}
       control={
         <Switch
           checked={settings.boringSidebarMultilineRows}
           onCheckedChange={(checked) =>
             updateSettings({ boringSidebarMultilineRows: Boolean(checked) })
           }
-          aria-label="Two-line folder rows"
+          aria-label={t("release4066.text150")}
         />
       }
     />
@@ -100,11 +105,22 @@ function GuestLinksRow() {
   const t = useTranslate();
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
+  const scope = useOptionalSettingsScope();
+  const primaryPolicy = usePrimaryManagedPolicy();
+  // Guests arrive through T3 Connect, so a policy that turns Connect off turns this off too.
+  const connectDenial = firstManagedDenial(
+    scope
+      ? scope.connectedEnvironments.map((environment) => environment.serverConfig?.managedPolicy)
+      : [primaryPolicy],
+    (policy) => managedCapabilityDenial(policy, "connect"),
+  );
   return (
     <SettingsRow
       serverScoped
       {...searchableSetting("guest-links")}
       settingKeys={["guestSharingEnabled"]}
+      // Turning guest links off still works without T3 Connect.
+      managed={settings.guestSharingEnabled ? undefined : connectDenial}
       description={
         <>
           {t(
@@ -175,7 +191,7 @@ function SimlockHostsRow() {
       settingKeys={["simlockDeviceHostsEnabled"]}
       description={
         <>
-          Let the Device panel lease simulators and emulators from your own{" "}
+          {t("release4066.text151")}{" "}
           <a
             href="https://incubator.callstack.com/simlock/"
             target="_blank"
@@ -188,7 +204,7 @@ function SimlockHostsRow() {
           <Link to="/settings/devices" className="underline underline-offset-2">
             {t("device.menu.devices")}
           </Link>
-          . An alpha that may change or break. T3 Code never installs Simlock.
+          {t("release4066.text152")}
         </>
       }
       control={
@@ -198,7 +214,7 @@ function SimlockHostsRow() {
           onCheckedChange={(checked) =>
             updateSettings({ simlockDeviceHostsEnabled: Boolean(checked) })
           }
-          aria-label="Simlock device hosts"
+          aria-label={t("release4066.text153")}
         />
       }
     />

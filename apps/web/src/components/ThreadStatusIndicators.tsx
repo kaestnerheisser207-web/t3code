@@ -537,13 +537,15 @@ export function ThreadTerminalStatusButton({
   terminalIds: readonly string[];
   onThreadActivate: (threadRef: ScopedThreadRef) => void;
 }) {
+  const t = useTranslate();
+
   const terminalId = terminalIds[0];
   if (terminalId === undefined) return null;
   const status = terminalStatusFromRunningIds(terminalIds);
   const label =
     terminalIds.length === 1
       ? "1 terminal process running. Open terminal"
-      : `${terminalIds.length} terminal processes running. Open terminal`;
+      : t("release4066.text203", { value0: terminalIds.length });
   return (
     <Tooltip>
       <TooltipTrigger
@@ -683,6 +685,8 @@ export function ThreadRowLeadingStatus({ thread }: { thread: SidebarThreadSummar
     thread.environmentId,
     thread.linkedPullRequest,
     leaseLiveStatus,
+    thread.pullRequests,
+    thread.branchPullRequest,
   );
   const gitStatus = useEnvironmentQuery(
     leaseLiveStatus &&
@@ -705,8 +709,12 @@ export function ThreadRowLeadingStatus({ thread }: { thread: SidebarThreadSummar
     linkedPullRequest: thread.linkedPullRequest,
     linkedPullRequestStatus: linkedPullRequest,
   };
-  const pr = resolveDisplayedThreadPr(displayedPrInput);
-  const prStatus = prStatusIndicator(pr, resolveDisplayedThreadPrProvider(displayedPrInput), t);
+  const pr = linkedPullRequest?.pr ?? resolveDisplayedThreadPr(displayedPrInput);
+  const prStatus = prStatusIndicator(
+    pr,
+    linkedPullRequest?.sourceControlProvider ?? resolveDisplayedThreadPrProvider(displayedPrInput),
+    t,
+  );
   const threadStatus = resolveThreadStatusPill({
     thread: {
       ...thread,

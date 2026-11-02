@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import {
   isAtomCommandInterrupted,
@@ -79,6 +80,8 @@ function threadShowingBrowser(
 }
 
 export function DesktopWebLinkCoordinator() {
+  const t = useTranslate();
+
   const router = useRouter();
   const primaryEnvironment = usePrimaryEnvironment();
   const openPullRequestsInApp = useClientSettings((settings) => settings.pullRequestLinksOpenInApp);
@@ -107,14 +110,18 @@ export function DesktopWebLinkCoordinator() {
 
   const reportFailure = (url: string, description = url) =>
     toastManager.add(
-      stackedThreadToast({ type: "error", title: "Could not open the link", description }),
+      stackedThreadToast({
+        type: "error",
+        title: t("web.remaining._chat.new.could-not-open-the-link"),
+        description,
+      }),
     );
 
   const reportPairingFailure = (error: unknown) =>
     toastManager.add(
       stackedThreadToast({
         type: "error",
-        title: "Could not add backend",
+        title: t("environment.extra.cannotAdd"),
         description: error instanceof Error ? error.message : "Failed to add backend.",
       }),
     );
@@ -141,8 +148,8 @@ export function DesktopWebLinkCoordinator() {
     pairedUrlsRef.current.add(pairingUrl);
     toastManager.add({
       type: "success",
-      title: "Backend added",
-      description: "The environment is saved and will reconnect on app startup.",
+      title: t("environment.extra.backendAdded"),
+      description: t("environment.extra.saved"),
     });
   };
 
@@ -237,10 +244,8 @@ export function DesktopWebLinkCoordinator() {
     // A connected server publishes its config before its project snapshot, so a source control
     // link delivered at launch would miss its project and fall through to the browser. Hold
     // those links until discovery settles; an ordinary link never waits for it.
-    // Discovery never settles without the local environment, so those links do not wait.
     const hold =
       openPullRequestsInApp &&
-      !localEnvironmentDisabled &&
       (sourceControlClients.parseChangeRequestUrl(url) !== null ||
         sourceControlClients.parseCommitUrl(url) !== null)
         ? projectsSettled()

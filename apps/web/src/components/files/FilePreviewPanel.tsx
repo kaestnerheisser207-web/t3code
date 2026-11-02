@@ -327,6 +327,7 @@ function WorkspaceVideoPreview(props: {
         revision={revision}
         preload="metadata"
         className="flex h-full min-h-0 w-full max-w-5xl items-center justify-center"
+        videoClassName="aspect-auto max-h-full w-auto max-w-full"
         onRetry={refreshAssetUrl}
         actionsSource={{
           kind: "video",
@@ -374,7 +375,7 @@ function WorkspaceAudioPreview(props: {
   if (assetUrl._tag === "Failure" || (url !== null && failedUrl === url)) {
     return (
       <FileSurfaceFailure
-        message="Unable to load audio."
+        message={t("release4066.text123")}
         onRetry={() => {
           setFailedUrl(null);
           void refreshAssetUrl().catch(() => undefined);
@@ -1621,7 +1622,7 @@ export function WorkspaceLargeTextPreview(props: {
   const showError = (cause: unknown) => {
     toastManager.add({
       type: "error",
-      title: "Could not read file",
+      title: t("release4066.text124"),
       description: cause instanceof Error ? cause.message : t("thread.action.tryAgain"),
     });
   };

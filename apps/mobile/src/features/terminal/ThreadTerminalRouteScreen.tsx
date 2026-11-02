@@ -120,7 +120,7 @@ function TerminalHeader(props: {
         props.isEnvironmentReady
           ? [
               {
-                title: "Terminal options",
+                title: t("release4066.text023"),
                 icon: "terminal",
                 status: getTerminalStatusLabel(props.status),
                 items: [
@@ -308,7 +308,7 @@ export function ThreadTerminalRouteScreen(props: ThreadTerminalRouteScreenProps)
 
   if (!selectedThread) {
     if (!connectionsReady) {
-      return <LoadingScreen message="Opening terminal…" />;
+      return <LoadingScreen message={t("release4066.text024")} />;
     }
 
     return (
@@ -819,7 +819,7 @@ function ThreadTerminal(props: {
   }
 
   if (!environment.isReady && environment.presentation === null) {
-    return <LoadingScreen message="Opening terminal…" />;
+    return <LoadingScreen message={t("release4066.text024")} />;
   }
 
   return (
@@ -881,7 +881,7 @@ function ThreadTerminal(props: {
               }
               connection={
                 environment.presentation?.connection ?? {
-                  phase: "available",
+                  phase: t("web.dynamic.DeviceHostAvailability.available"),
                   error: null,
                   traceId: null,
                 }
@@ -1013,7 +1013,14 @@ function ThreadTerminal(props: {
                     KeyboardController.dismiss();
                     requestCapture();
                   }}
-                  className="px-4 py-2"
+                  className="px-4 pt-2"
+                  style={{
+                    paddingBottom:
+                      8 +
+                      (keyboardState.isVisible
+                        ? 0
+                        : (nativeColumnMetrics?.safeArea.bottom ?? insets.bottom)),
+                  }}
                 >
                   <Text style={{ color: terminalTheme.foreground }}>
                     {t("mobile.tools.ThreadTerminalRouteScreen.attach-visible-output")}

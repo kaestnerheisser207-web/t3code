@@ -69,6 +69,8 @@ describe("searchSettings", () => {
     const i18n = createI18n("zh-CN");
     const localized = localizeSettingsSearchItems(SETTINGS_SEARCH_ITEMS, i18n.getFixedT("zh-CN"));
     expect(searchSettings("界面语言", localized)[0]?.id).toBe("interface-language");
+    expect(searchSettings("备用模型", localized)[0]?.id).toBe("fallback-model");
+    expect(searchSettings("文件夹会话显示两行", localized)[0]?.id).toBe("boring-sidebar-multiline");
     expect(searchSettings("Interface language", localized)[0]?.id).toBe("interface-language");
     expect(searchSettings("中文", localized)[0]?.to).toBe("/settings/general");
     expect(
@@ -76,6 +78,13 @@ describe("searchSettings", () => {
         (item) => item.id,
       ),
     ).toContain("word-wrap");
+    for (const query of ["fallback", "fallback agent", "fallback model"]) {
+      expect(searchSettings(query)[0]).toMatchObject({
+        id: "fallback-model",
+        to: "/settings/threads",
+        scope: "environment-defaults",
+      });
+    }
   });
 
   it("hides the Secrets page from nav and search while the secrets feature is disabled", () => {
@@ -194,6 +203,21 @@ describe("searchSettings", () => {
     expect(searchSettings("sidebar.toggle")[0]?.targetId).toBeUndefined();
   });
 
+  it("finds rows by the titles shown on their pages", () => {
+    for (const [title, id] of [
+      ["Automatic worktree cleanup", "storage-worktrees"],
+      ["Delete settled worktrees", "storage-worktrees"],
+      ["Delete old browser artifacts", "storage-artifacts"],
+      ["Delete old rotated logs", "storage-artifacts"],
+      ["Custom search URL", "browser-search-engine"],
+      ["Native sessions", "providers"],
+      ["CODEX_HOME path", "providers"],
+      ["Shadow home path", "providers"],
+    ] as const) {
+      expect(searchSettings(title)[0]?.id, title).toBe(id);
+    }
+  });
+
   it("keeps catalog result ids unique", () => {
     const ids = SETTINGS_SEARCH_ITEMS.map((item) => item.id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -217,6 +241,11 @@ describe("settings search targets", () => {
     expect(isSettingsSearchScopeAvailable(updates.scope, "environment")).toBe(true);
     expect(isSettingsSearchScopeAvailable(updates.scope, "all")).toBe(true);
     expect(isSettingsSearchScopeAvailable(updates.scope, "project")).toBe(false);
+    const fallback = getSettingsSearchTargetScope("fallback-model")!;
+    expect(fallback.scope).toBe("environment-defaults");
+    expect(isSettingsSearchScopeAvailable(fallback.scope, "environment")).toBe(true);
+    expect(isSettingsSearchScopeAvailable(fallback.scope, "all")).toBe(true);
+    expect(isSettingsSearchScopeAvailable(fallback.scope, "project")).toBe(false);
     const streaming = getSettingsSearchTargetScope("response-streaming")!;
     expect(streaming.scope).toBe("project-defaults");
     expect(isSettingsSearchScopeAvailable(streaming.scope, "project")).toBe(true);

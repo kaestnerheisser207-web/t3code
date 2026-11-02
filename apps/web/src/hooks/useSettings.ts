@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import { useRef, useSyncExternalStore, use } from "react";
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector";
 import { RegistryContext, useAtomValue } from "@effect/atom-react";
@@ -442,6 +443,8 @@ export async function prepareModelPreferencesPatch(
 }
 
 export function useUpdateEnvironmentModelPreferences(environmentId: EnvironmentId | null) {
+  const t = useTranslate();
+
   const settings = useAtomValue(
     environmentId ? serverEnvironment.settingsValueAtom(environmentId) : noEnvironmentSettingsAtom,
   );
@@ -454,8 +457,8 @@ export function useUpdateEnvironmentModelPreferences(environmentId: EnvironmentI
     } catch {
       toastManager.add({
         type: "error",
-        title: "Model preferences not saved",
-        description: "Could not load saved model preferences. Try again.",
+        title: t("release4066.text182"),
+        description: t("release4066.text183"),
       });
       return;
     }
@@ -465,6 +468,8 @@ export function useUpdateEnvironmentModelPreferences(environmentId: EnvironmentI
 
 /** Send the desired state so two clients adding a favorite do not cancel each other. */
 export function useToggleEnvironmentModelFavorite(environmentId: EnvironmentId | null) {
+  const t = useTranslate();
+
   const registry = use(RegistryContext);
   const pendingFavorites = useRef(
     new Map<string, { favorite: boolean; settings: ServerSettings; pending: boolean }>(),
@@ -481,8 +486,8 @@ export function useToggleEnvironmentModelFavorite(environmentId: EnvironmentId |
       } catch {
         toastManager.add({
           type: "error",
-          title: "Favorites not saved",
-          description: "Could not load saved model preferences. Try again.",
+          title: t("release4066.text184"),
+          description: t("release4066.text183"),
         });
         return;
       }
@@ -591,14 +596,20 @@ function useSharedSettingsSyncTargetIds(includePending = false): ReadonlyArray<E
 }
 
 function useUpdateSettingsTarget(environmentId: EnvironmentId | null) {
+  const t = useTranslate();
+
   useEnvironmentScope(environmentId, AuthSettingsWriteScope);
   const persist = useAtomCommand(serverEnvironment.updateSettings, {
     label: "server settings update",
     reportFailure: false,
   });
   const { environments } = useEnvironments();
-  const persistServerSettings = async (request: Parameters<typeof persist>[0]) => {
+  const persistServerSettings = async (
+    request: Parameters<typeof persist>[0],
+    onFailed?: () => void,
+  ) => {
     const result = await persist(request);
+    if (result._tag === "Failure") onFailed?.();
     if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
       const label =
         environments.find((environment) => environment.environmentId === request.environmentId)
@@ -606,14 +617,23 @@ function useUpdateSettingsTarget(environmentId: EnvironmentId | null) {
       const error = squashAtomCommandFailure(result);
       toastManager.add({
         type: "error",
-        title: "Setting not saved",
-        description: `Could not save on ${label}: ${error instanceof Error ? error.message : "The save failed. Try reconnecting and saving again."}`,
+        title: t("release4066.text185"),
+        description: t("release4066.text205", {
+          value0: label,
+          value1:
+            error instanceof Error
+              ? error.message
+              : "The save failed. Try reconnecting and saving again.",
+        }),
       });
     }
     return result;
   };
   const sharedSettingsSyncTargetIds = useSharedSettingsSyncTargetIds(true);
-  const updateSettings = (patch: UnifiedSettingsPatch) => {
+  const updateSettings = (
+    patch: UnifiedSettingsPatch,
+    options?: { readonly onFailed?: () => void },
+  ) => {
     const { serverPatch, clientPatch } = splitPatch(patch);
 
     const canWriteServerPatch =
@@ -622,27 +642,34 @@ function useUpdateSettingsTarget(environmentId: EnvironmentId | null) {
         readEnvironmentScope(environmentId, scope),
       );
     if (Object.keys(serverPatch).length > 0 && !canWriteServerPatch) {
+      options?.onFailed?.();
       toastManager.add({
         type: "warning",
-        title: "Setting not saved",
-        description: `This connection lacks permission to change settings on ${environments.find((target) => target.environmentId === environmentId)?.label ?? "the selected environment"}.`,
+        title: t("release4066.text185"),
+        description: t("settings.scope.noPermission", {
+          environments:
+            environments.find((target) => target.environmentId === environmentId)?.label ??
+            "the selected environment",
+        }),
       });
     }
     if (Object.keys(serverPatch).length > 0 && canWriteServerPatch) {
       const { sharedPatch, localPatch } = splitSharedServerPatch(serverPatch);
       // Dropping the write silently leaves the control looking saved.
-      const warnUnsaved = (description = PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE) =>
-        toastManager.add({
+      const warnUnsaved = (description = PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE) => {
+        options?.onFailed?.();
+        return toastManager.add({
           type: "warning",
-          title: "Setting not saved",
+          title: t("release4066.text185"),
           description,
         });
+      };
       if (Object.keys(localPatch).length > 0) {
         if (environmentId) {
-          void persistServerSettings({
-            environmentId,
-            input: { patch: localPatch },
-          });
+          void persistServerSettings(
+            { environmentId, input: { patch: localPatch } },
+            options?.onFailed,
+          );
         } else {
           warnUnsaved();
         }
@@ -683,7 +710,7 @@ function useUpdateSettingsTarget(environmentId: EnvironmentId | null) {
         if (writes.length === 0) {
           warnUnsaved(
             deniedLabels.length > 0
-              ? `This connection lacks permission to change settings on ${deniedLabels.join(", ")}.`
+              ? t("settings.scope.noPermission", { environments: deniedLabels.join(", ") })
               : targets.size > 0
                 ? "Update older servers to save this setting."
                 : undefined,
@@ -697,11 +724,23 @@ function useUpdateSettingsTarget(environmentId: EnvironmentId | null) {
               result: await persist(request),
             })),
           ).then((outcomes) => {
+            if (
+              deniedLabels.length > 0 ||
+              outcomes.some(({ result }) => result._tag === "Failure")
+            ) {
+              options?.onFailed?.();
+            }
             const failures = outcomes.flatMap(({ label, result }) => {
               if (result._tag !== "Failure" || isAtomCommandInterrupted(result)) return [];
               const error = squashAtomCommandFailure(result);
               return [
-                `Could not save on ${label}: ${error instanceof Error ? error.message : "The save failed. Try reconnecting and saving again."}`,
+                t("release4066.text205", {
+                  value0: label,
+                  value1:
+                    error instanceof Error
+                      ? error.message
+                      : "The save failed. Try reconnecting and saving again.",
+                }),
               ];
             });
             if (failures.length === 0) return;
@@ -713,7 +752,9 @@ function useUpdateSettingsTarget(environmentId: EnvironmentId | null) {
               title: saved.length > 0 ? "Setting saved on some environments" : "Setting not saved",
               description: [
                 ...failures,
-                ...(saved.length > 0 ? [`Saved on ${saved.join(", ")}.`] : []),
+                ...(saved.length > 0
+                  ? [t("release4066.text206", { value0: saved.join(", ") })]
+                  : []),
               ].join("\n"),
             });
           });

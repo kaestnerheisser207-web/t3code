@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   matchComposerEnvironmentItems,
   matchComposerThreadItems,
@@ -28,7 +29,7 @@ import {
   getProviderSlashCommandsForSlashMenu,
 } from "@t3tools/client-runtime/providerSkills";
 import { searchProviderSkills } from "../../providerSkillSearch";
-import { useThreadShells } from "~/state/entities";
+import { useVisibleThreadShells } from "~/state/entities";
 import { useEnvironmentIdentities, useEnvironmentMachines } from "~/state/environments";
 import { offersLinkedEnvironmentsAtom } from "~/state/peerLinks";
 import {
@@ -71,6 +72,7 @@ export function useComposerMenuItems({
   selectedProviderSkills,
   selectedProviderSlashCommands,
   showSkillsInSlashMenu,
+  workspaceSkillsScanning,
   questionAttachmentTarget,
 }: {
   readonly composerTrigger: ComposerTrigger | null;
@@ -89,8 +91,11 @@ export function useComposerMenuItems({
   readonly selectedProviderSkills: ServerProvider["skills"];
   readonly selectedProviderSlashCommands: ServerProvider["slashCommands"];
   readonly showSkillsInSlashMenu: boolean;
+  readonly workspaceSkillsScanning: boolean;
   readonly questionAttachmentTarget: DraftId | null;
 }) {
+  const t = useTranslate();
+
   // Thread mentions rank by recency as of when the composer mounted.
   const [now] = useState(() => Date.now());
   const composerTriggerKind = composerTrigger?.kind ?? null;
@@ -107,7 +112,7 @@ export function useComposerMenuItems({
   const settledPullRequestTextQuery =
     pullRequestTextQuery === debouncedPullRequestTextQuery ? pullRequestTextQuery : null;
   const isPathTrigger = composerTriggerKind === "path";
-  const environmentThreadShells = useThreadShells(isPathTrigger);
+  const environmentThreadShells = useVisibleThreadShells(isPathTrigger);
   // Mounts older settled threads matching the mention, which shells may leave out.
   useThreadSearch(isPathTrigger ? [environmentId] : [], pathTriggerQuery, { titlesOnly: true });
   // The user's machines feed `@` machine matches; the catalog summary is cheap and stable.
@@ -220,7 +225,7 @@ export function useComposerMenuItems({
           type: "slash-command",
           command: "model",
           label: "/model",
-          description: "Switch response model for this thread",
+          description: t("release4066.text093"),
         },
         ...(planModeUiEnabled
           ? ([
@@ -229,14 +234,14 @@ export function useComposerMenuItems({
                 type: "slash-command",
                 command: "plan",
                 label: "/plan",
-                description: "Switch this thread into plan mode",
+                description: t("release4066.text094"),
               },
               {
                 id: "slash:default",
                 type: "slash-command",
                 command: "default",
                 label: "/default",
-                description: "Switch this thread back to normal build mode",
+                description: t("release4066.text095"),
               },
             ] as const)
           : []),
@@ -373,6 +378,8 @@ export function useComposerMenuItems({
   })();
   const isLoading =
     (composerTriggerKind === "path" && pathTriggerQuery.length > 0 && workspaceEntries.isPending) ||
+    ((composerTriggerKind === "skill" || composerTriggerKind === "slash-command") &&
+      workspaceSkillsScanning) ||
     (composerTriggerKind === "pull-request" &&
       pullRequestProjectId !== null &&
       pullRequestRepository !== null &&

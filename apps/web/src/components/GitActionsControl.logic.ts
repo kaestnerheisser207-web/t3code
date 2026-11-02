@@ -172,6 +172,7 @@ export function buildMenuItems(
       id: "pr",
       label:
         t?.("git.labels.create", { shortLabel: terminology.shortLabel }) ??
+        t?.("git.labels.create", { shortLabel: terminology.shortLabel }) ??
         `Create ${terminology.shortLabel}`,
       disabled: !canCreatePr,
       icon: "pr",
@@ -286,6 +287,7 @@ export function resolveQuickAction(
     return {
       label:
         t?.("git.labels.pushCreate", { shortLabel: terminology.shortLabel }) ??
+        t?.("git.labels.pushCreate", { shortLabel: terminology.shortLabel }) ??
         `Push & create ${terminology.shortLabel}`,
       disabled: false,
       kind: "run_action",
@@ -322,6 +324,7 @@ export function resolveQuickAction(
     return {
       label:
         t?.("git.labels.pushCreate", { shortLabel: terminology.shortLabel }) ??
+        t?.("git.labels.pushCreate", { shortLabel: terminology.shortLabel }) ??
         `Push & create ${terminology.shortLabel}`,
       disabled: false,
       kind: "run_action",
@@ -341,6 +344,7 @@ export function resolveQuickAction(
   if (hasDefaultBranchDelta && !isDefaultRef) {
     return {
       label:
+        t?.("git.labels.create", { shortLabel: terminology.shortLabel }) ??
         t?.("git.labels.create", { shortLabel: terminology.shortLabel }) ??
         `Create ${terminology.shortLabel}`,
       disabled: false,
@@ -387,7 +391,10 @@ export function resolveDefaultBranchActionDialogCopy(
         description:
           t?.("git.default.commitPushDescription", params) ??
           `This action will commit and push changes${suffix}`,
-        continueLabel: t?.("git.default.commitPushTo", params) ?? `Commit & push to ${branchLabel}`,
+        continueLabel:
+          t?.("git.default.commitPushTo", params) ??
+          t?.("git.shared.commitPushTo", { branch: branchLabel }) ??
+          `Commit & push to ${branchLabel}`,
       };
     }
     return {
@@ -395,7 +402,10 @@ export function resolveDefaultBranchActionDialogCopy(
       description:
         t?.("git.default.pushDescription", params) ??
         `This action will push local commits${suffix}`,
-      continueLabel: t?.("git.default.pushTo", params) ?? `Push to ${branchLabel}`,
+      continueLabel:
+        t?.("git.default.pushTo", params) ??
+        t?.("git.shared.pushTo", { branch: branchLabel }) ??
+        `Push to ${branchLabel}`,
     };
   }
 
@@ -415,12 +425,15 @@ export function resolveDefaultBranchActionDialogCopy(
   return {
     title:
       t?.("git.default.pushCreateTitle", params) ??
+      t?.("git.default.pushCreateTitle", { shortLabel: terminology.shortLabel }) ??
       `Push & create ${terminology.shortLabel} from default ref?`,
     description:
       t?.("git.default.pushCreateDescription", params) ??
       `This action will push local commits and create a ${terminology.singular}${suffix}`,
     continueLabel:
-      t?.("git.labels.pushCreate", params) ?? `Push & create ${terminology.shortLabel}`,
+      t?.("git.labels.pushCreate", params) ??
+      t?.("git.labels.pushCreate", { shortLabel: terminology.shortLabel }) ??
+      `Push & create ${terminology.shortLabel}`,
   };
 }
 
@@ -434,6 +447,7 @@ export function resolveFeatureBranchUnavailableReason(
 ): string | null {
   if (input.hasWorkingTreeChanges) return null;
   return (
+    t?.("git.default.noFeature", { branch: input.branchName }) ??
     t?.("git.default.noFeature", { branch: input.branchName }) ??
     `There are no changes to commit, so a feature branch can't be named. Create a branch yourself or continue on ${input.branchName}.`
   );
@@ -489,4 +503,29 @@ export function resolveLiveThreadBranchUpdate(input: {
   return {
     branch: input.gitStatus.refName,
   };
+}
+
+export type ChangesLineTotals = {
+  readonly insertions: number;
+  readonly deletions: number;
+};
+
+// `branchChanges ?? workingTree` treats `{0,0}` as present, so a zero branch total hid a dirty
+// working tree and the Changes row read +0 while Diff still showed the work.
+export function resolveChangesTotals(
+  status: VcsStatusResult | null | undefined,
+): ChangesLineTotals | null {
+  if (!status) return null;
+  const branch = status.branchChanges;
+  const tree = status.workingTree;
+  if (branch && (branch.insertions > 0 || branch.deletions > 0)) {
+    return { insertions: branch.insertions, deletions: branch.deletions };
+  }
+  if (tree.insertions > 0 || tree.deletions > 0) {
+    return { insertions: tree.insertions, deletions: tree.deletions };
+  }
+  if (branch) {
+    return { insertions: branch.insertions, deletions: branch.deletions };
+  }
+  return { insertions: tree.insertions, deletions: tree.deletions };
 }

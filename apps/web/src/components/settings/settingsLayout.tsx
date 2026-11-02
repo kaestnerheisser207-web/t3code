@@ -1,11 +1,17 @@
+import { managedPolicyText } from "@t3tools/client-runtime/i18n";
 import { SettingsGroup } from "./SettingsGroup";
 import { useTranslate } from "../../i18n";
 import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import { AuthSettingsWriteScope } from "@t3tools/contracts";
 import { usePrimaryEnvironmentId, usePrimaryEnvironment } from "../../state/environments";
 import { useEnvironmentScope, useEnvironmentsWithScope } from "../../state/session";
+import { useServerConfigs } from "../../state/entities";
 import { InfoIcon, Undo2Icon } from "lucide-react";
-import { DEFAULT_SERVER_SETTINGS, type ServerSettings } from "@t3tools/contracts";
+import {
+  DEFAULT_SERVER_SETTINGS,
+  isManagedSettingPath,
+  type ServerSettings,
+} from "@t3tools/contracts";
 import * as Equal from "effect/Equal";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { createContext, type ComponentPropsWithoutRef, type ReactNode, useContext } from "react";
@@ -35,6 +41,7 @@ import {
 } from "./SettingInheritance";
 
 const EMPTY_SETTING_KEYS: readonly (keyof ServerSettings)[] = [];
+const EMPTY_MANAGED_PATHS: readonly string[] = [];
 
 declare module "@tanstack/react-router" {
   interface HistoryState {
@@ -318,7 +325,9 @@ export function SettingsRow({
   control,
   serverScoped = false,
   settingKeys = EMPTY_SETTING_KEYS,
+  managedPaths = EMPTY_MANAGED_PATHS,
   mixed: mixedOverride,
+  managed,
   children,
   className,
   ...rowProps
@@ -331,6 +340,8 @@ export function SettingsRow({
     control?: ReactNode;
     serverScoped?: boolean;
     settingKeys?: readonly (keyof ServerSettings)[];
+    managedPaths?: readonly string[];
+    managed?: string | undefined;
     mixed?: boolean;
     children?: ReactNode;
   }) {
@@ -350,6 +361,22 @@ export function SettingsRow({
     ? context.connectedEnvironments.length > 0 &&
       context.connectedEnvironments.every((target) => writableIds.has(target.environmentId))
     : primaryCanWrite;
+  const serverConfigs = useServerConfigs();
+  // An administrator's lock on any target wins over every other reason a control is inert.
+  const lockablePaths = [...settingKeys, ...managedPaths];
+  const managedBy =
+    lockablePaths.length === 0
+      ? undefined
+      : (context
+          ? context.connectedEnvironments.map((environment) => environment.serverConfig)
+          : [primaryEnvironmentId === null ? undefined : serverConfigs.get(primaryEnvironmentId)]
+        )
+          .map((config) => config?.managedPolicy)
+          .find(
+            (policy) =>
+              policy !== undefined &&
+              lockablePaths.some((path) => isManagedSettingPath(policy, path)),
+          )?.organization;
   const clearOverrides = useClearScopedSettings();
   const clearProjectOverrides = useClearProjectOverrides();
   const isProjectScope =
@@ -378,17 +405,19 @@ export function SettingsRow({
     ),
   );
   const overridingProjects = isProjectScope ? [] : projectOverrides(context, scopedKeys);
-  const renderedReset = unavailable ? null : isProjectScope && scopedKeys.length > 0 ? (
-    source === "project" || source === "mixed" ? (
-      <SettingResetButton
-        label={typeof title === "string" ? title : t("settings.scope.override")}
-        tooltip={t("settings.support.reset-to-inherited-value")}
-        onClick={() => (onResetOverride ? onResetOverride() : clearOverrides(scopedKeys))}
-      />
-    ) : null
-  ) : (
-    resetAction
-  );
+  const renderedReset =
+    unavailable || managedBy !== undefined || managed !== undefined ? null : isProjectScope &&
+      scopedKeys.length > 0 ? (
+      source === "project" || source === "mixed" ? (
+        <SettingResetButton
+          label={typeof title === "string" ? title : t("settings.scope.override")}
+          tooltip={t("settings.support.reset-to-inherited-value")}
+          onClick={() => (onResetOverride ? onResetOverride() : clearOverrides(scopedKeys))}
+        />
+      ) : null
+    ) : (
+      resetAction
+    );
   const inertControl = (message: string) => (
     <Tooltip>
       <TooltipTrigger
@@ -406,30 +435,32 @@ export function SettingsRow({
           {control}
         </div>
       </TooltipTrigger>
-      <TooltipPopup side="top">{message}</TooltipPopup>
+      <TooltipPopup side="top">{managedPolicyText(t, message)}</TooltipPopup>
     </Tooltip>
   );
   const renderedControl =
-    unavailable && control
-      ? inertControl(
-          !canWriteSettings
-            ? t("settings.scope.noPermission", {
-                environments: context
-                  ? context.connectedEnvironments
-                      .filter((target) => !writableIds.has(target.environmentId))
-                      .map((target) => target.label)
-                      .join(", ") || t("settings.scope.selectedEnvironment")
-                  : (primaryEnvironment?.label ?? t("settings.scope.primaryEnvironment")),
-              })
-            : context
-              ? t("settings.support.reconnect-the-selected-environment-to-change-this-setting")
-              : PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE,
-        )
-      : environmentWide && control
-        ? inertControl(
-            t("settings.support.environment-wide-setting-select-an-environment-to-change-it"),
-          )
-        : control;
+    managed !== undefined && control
+      ? inertControl(managed)
+      : managedBy !== undefined && control
+        ? inertControl(t("release4066.text189", { value0: managedBy }))
+        : unavailable && control
+          ? inertControl(
+              !canWriteSettings
+                ? t("settings.scope.noPermission", {
+                    environments: context
+                      ? context.connectedEnvironments
+                          .filter((target) => !writableIds.has(target.environmentId))
+                          .map((target) => target.label)
+                          .join(", ") || "the selected environment"
+                      : (primaryEnvironment?.label ?? "the primary environment"),
+                  })
+                : context
+                  ? "Reconnect the selected environment to change this setting."
+                  : PRIMARY_SETTINGS_UNAVAILABLE_MESSAGE,
+            )
+          : environmentWide && control
+            ? inertControl("Environment-wide setting. Select an environment to change it.")
+            : control;
   const customized =
     context !== null &&
     settingKeys.some((key) =>

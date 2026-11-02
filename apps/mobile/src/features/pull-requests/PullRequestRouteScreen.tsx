@@ -1027,8 +1027,10 @@ function PullRequestFileRouteContent({ route }: PullRequestFileRouteProps) {
         staleDiff || commit ? [] : (activity.data?.reviewThreads ?? []),
         commit ? [] : reviewDraft.draft.comments,
         diffHead.sha ?? undefined,
+        t,
       ),
     [
+      t,
       baseData,
       highlightFiles,
       staleDiff,

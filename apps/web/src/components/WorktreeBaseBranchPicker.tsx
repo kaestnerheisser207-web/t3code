@@ -1,6 +1,7 @@
+import { useTranslate } from "../i18n";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { ChevronDownIcon, GitBranchIcon } from "lucide-react";
-import { useDeferredValue, useState } from "react";
+import { useState } from "react";
 
 import { usePaginatedBranches } from "../state/queries";
 import { useEnvironmentQuery } from "../state/query";
@@ -30,13 +31,14 @@ export function WorktreeBaseBranchPicker({
   disabled?: boolean;
   id?: string;
 }) {
+  const t = useTranslate();
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const deferredQuery = useDeferredValue(query.trim());
   const branches = usePaginatedBranches({
     environmentId,
     cwd,
-    query: sanitizeNewRefName(deferredQuery),
+    query: sanitizeNewRefName(query.trim()),
   });
   const selectedRefQuery = useEnvironmentQuery(
     cwd && value
@@ -66,7 +68,10 @@ export function WorktreeBaseBranchPicker({
       : branches.isFetchingNextPage
         ? "Loading more refs..."
         : hasNextPage
-          ? `Showing ${branches.refs.length} of ${branches.data?.totalCount} refs`
+          ? t("release4066.text199", {
+              value0: branches.refs.length,
+              value1: branches.data?.totalCount ?? "?",
+            })
           : null);
   const handleOpenChange = (next: boolean) => {
     setOpen(next);

@@ -57,6 +57,15 @@ const SourcePreview = lazy(() => import("./ReadOnlySourcePreview"));
 
 const STALE_URL_MS = 5 * 60_000;
 
+const blobKeys = new WeakMap<Blob, string>();
+let nextBlobKey = 0;
+
+function blobKey(blob: Blob) {
+  const key = blobKeys.get(blob) ?? `blob:${nextBlobKey++}`;
+  blobKeys.set(blob, key);
+  return key;
+}
+
 export function ReadOnlySourcePreview(props: { name: string; text: string; wordWrap?: boolean }) {
   return (
     <Suspense fallback={<FileSurfaceLoading className="p-4" />}>
@@ -251,7 +260,7 @@ export function AttachmentFilePreview(props: {
         const cause = Cause.squash(result.cause);
         toastManager.add({
           type: "error",
-          title: "Could not save file",
+          title: t("release4066.text119"),
           description:
             cause instanceof Error ? cause.message : t("mobile.threadStatus.retryPlease"),
         });
@@ -329,6 +338,17 @@ export function AttachmentFilePreview(props: {
       pdf={kind === "pdf"}
       htmlRender={props.htmlRender === true}
       threadRef={props.threadRef}
+      // Each mount signs or creates a new URL, so the URL cannot identify the file across visits.
+      // A draft keeps its Blob key after upload, so finishing the upload does not reload the PDF.
+      documentKey={
+        kind !== "pdf"
+          ? undefined
+          : props.file
+            ? blobKey(props.file)
+            : props.asset && "attachmentId" in props.asset
+              ? `${props.asset.environmentId}:${props.asset.attachmentId}`
+              : undefined
+      }
     />
   ) : kind === "audio" ? (
     <AudioPreview src={url} name={props.name} onError={() => setError("Unable to load audio.")} />
@@ -432,8 +452,8 @@ export function AttachmentFilePreview(props: {
               if (!copy) {
                 toastManager.add({
                   type: "error",
-                  title: "Could not copy file",
-                  description: "Wait for the file to finish loading before copying.",
+                  title: t("release4066.text120"),
+                  description: t("release4066.text121"),
                 });
                 return;
               }
@@ -442,7 +462,7 @@ export function AttachmentFilePreview(props: {
                 .catch((cause: unknown) =>
                   toastManager.add({
                     type: "error",
-                    title: "Could not copy file",
+                    title: t("release4066.text120"),
                     description:
                       cause instanceof Error ? cause.message : t("mobile.threadStatus.retry"),
                   }),

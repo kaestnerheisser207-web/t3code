@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ThreadStructure } from "@t3tools/client-runtime/state/shell";
 import {
   AuthOrchestrationOperateScope,
@@ -50,6 +51,8 @@ import { readEnvironmentScope } from "../../state/session";
 import { threadEnvironment } from "../../state/threads";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { useOrchestrationCommand } from "../../state/use-orchestration-command";
+import { toastManager } from "../ui/toast";
+
 import type { ChatComposerHandle } from "./ChatComposer";
 
 const EMPTY_PENDING_USER_INPUT_ANSWERS: Record<string, PendingUserInputDraftAnswer> = {};
@@ -121,6 +124,8 @@ export function usePendingThreadRequests(input: {
   readonly composerRef: RefObject<ChatComposerHandle | null>;
   readonly setThreadError: (threadId: ThreadId, error: string | null) => void;
 }) {
+  const t = useTranslate();
+
   const {
     environmentId,
     activeThreadId,
@@ -403,6 +408,12 @@ export function usePendingThreadRequests(input: {
     const nextPrompt = carryDisplacedCustomAnswerIntoPrompt(currentPrompt, displacedAnswer);
     if (nextPrompt !== currentPrompt) {
       setComposerDraftPrompt(composerDraftTarget, nextPrompt);
+      toastManager.add({
+        type: "info",
+        title: t("release4066.text113"),
+        description: t("release4066.text114"),
+        data: { threadRef: activeThreadId ? { environmentId, threadId: activeThreadId } : null },
+      });
       if (activeThreadId) {
         const store = useComposerDraftStore.getState();
         const questionTarget = questionAttachmentDraftId(

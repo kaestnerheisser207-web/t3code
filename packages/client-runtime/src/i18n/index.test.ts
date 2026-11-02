@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { createI18n, resources, usageAccessibilityLabel } from "./index.ts";
+import { createI18n, resources, usageAccessibilityLabel, managedPolicyText } from "./index.ts";
 
 describe("bundled translations", () => {
   it("preserves interpolation parameters in translated messages", () => {
@@ -47,6 +47,23 @@ describe("bundled translations", () => {
     const app = "<workspace> {{unresolved}}";
     expect(first.t("desktop.menu.about", { app })).toContain(app);
     const english = second.t("desktop.menu.about", { app });
+    const organization = "Example's <workspace>";
+    const policy = `${organization}'s policy does not allow webhook tasks.`;
+    expect(managedPolicyText(first.t, policy)).toBe(
+      `${organization} 的策略不允许运行 webhook 任务。`,
+    );
+    expect(managedPolicyText(second.t, policy)).toBe(policy);
+    expect(managedPolicyText(first.t, `${organization} limits threads to Full access.`)).toContain(
+      organization,
+    );
+    expect(
+      managedPolicyText(
+        first.t,
+        `${organization} manages T3 Code updates. Only stable releases can be installed.`,
+      ),
+    ).toContain("仅允许安装正式版");
+    const raw = "A user message about manages T3 Code updates. Keep this verbatim.";
+    expect(managedPolicyText(first.t, raw)).toBe(raw);
     await first.changeLanguage("en");
     expect(first.t("desktop.menu.about", { app })).toBe(english);
     await first.changeLanguage("zh-CN");

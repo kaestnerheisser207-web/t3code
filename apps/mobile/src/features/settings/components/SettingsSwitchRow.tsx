@@ -1,3 +1,5 @@
+import { managedPolicyText } from "@t3tools/client-runtime/i18n";
+import { useTranslate } from "../../../i18n";
 import type { ComponentProps } from "react";
 
 import { ListToggleRow } from "../../../components/ui/ListToggleRow";
@@ -8,5 +10,11 @@ export function SettingsSwitchRow({
 }: Omit<ComponentProps<typeof ListToggleRow>, "description"> & {
   readonly subtitle?: string;
 }) {
-  return <ListToggleRow {...props} description={subtitle} />;
+  const t = useTranslate();
+  return (
+    <ListToggleRow
+      {...props}
+      description={subtitle === undefined ? undefined : managedPolicyText(t, subtitle)}
+    />
+  );
 }

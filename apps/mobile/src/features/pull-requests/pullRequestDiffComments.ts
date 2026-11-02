@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { PullRequestReviewPosition, PullRequestReviewThread } from "@t3tools/contracts";
 import type { NativeReviewDiffRow } from "../diffs/nativeReviewDiffSurface";
 import type { NativeReviewDiffData } from "../review/nativeReviewDiffAdapter";
@@ -18,10 +19,15 @@ export function reviewPosition(row: NativeReviewDiffRow): PullRequestReviewPosit
     };
   return null;
 }
-export function reviewPositionLabel(position: PullRequestReviewPosition) {
+export function discussionCommentCountLabel(count: number, t: TFunction) {
+  return t("counts.comments", { count });
+}
+export function reviewPositionLabel(position: PullRequestReviewPosition, t: TFunction) {
   const oldSide =
     position.kind === "deleted" || (position.kind === "context" && position.side === "left");
-  return `${oldSide ? "Old line" : "Line"} ${reviewLine(position)}`;
+  return t(oldSide ? "release4066.pr.oldLine" : "release4066.pr.line", {
+    line: reviewLine(position),
+  });
 }
 function reviewLine(position: PullRequestReviewPosition) {
   if (position.kind === "deleted" || (position.kind === "context" && position.side === "left"))
@@ -33,6 +39,7 @@ export function annotatePullRequestDiff(
   threads: readonly PullRequestReviewThread[],
   drafts: readonly PendingReviewComment[],
   headSha: string | undefined,
+  t: TFunction,
 ): NativeReviewDiffData {
   if (threads.length === 0 && drafts.length === 0) return data;
   const anchors = new Map<string, NativeReviewDiffRow[]>();
@@ -79,8 +86,10 @@ export function annotatePullRequestDiff(
     attach(
       anchor,
       `discussion:${thread.id}`,
-      `${first?.author?.login ?? "Discussion"}${thread.isResolved ? " · Resolved" : ""}\n${first?.body ?? ""}\n${thread.commentCount ?? thread.comments.length} comments · Tap to open`,
-      thread.line === null ? "file" : String(thread.line),
+      `${first?.author?.login ?? t("mobile.review.PullRequestDiscussionScreen.discussion")}${thread.isResolved ? ` · ${t("discussion.resolved")}` : ""}\n${first?.body ?? ""}\n${discussionCommentCountLabel(thread.commentCount ?? thread.comments.length, t)} · ${t("release4066.pr.tapToOpen")}`,
+      thread.line === null
+        ? t("mobile.common.ComposerContextSheet.file").toLowerCase()
+        : String(thread.line),
     );
   }
   for (const draft of drafts) {
@@ -95,7 +104,7 @@ export function annotatePullRequestDiff(
     attach(
       lines.get(JSON.stringify([draft.path, side, line])),
       `draft:${draft.id}`,
-      `Pending review · Tap to edit\n${draft.body}`,
+      `${t("release4066.pr.pendingDraft")}\n${draft.body}`,
       String(line),
     );
   }

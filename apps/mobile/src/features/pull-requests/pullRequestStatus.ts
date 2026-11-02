@@ -68,6 +68,7 @@ export function pullRequestConflict(
   return {
     label: pr.baseBranch
       ? (t?.("pr.status.conflictsWith", { branch: pr.baseBranch }) ??
+        t?.("pr.status.conflictsWith", { branch: pr.baseBranch }) ??
         `Conflicts with ${pr.baseBranch}`)
       : (t?.("pr.status.conflicts") ?? "Has conflicts"),
   };
@@ -184,6 +185,11 @@ export function pullRequestChecksSummary(pr: Pick<PullRequestDetail, "checks">, 
   } as const;
 }
 
+// GitHub and Forgejo send uppercase review states; Bitbucket and GitCafe send lowercase.
+export function normalizedReviewState(reviewState: string | null) {
+  return reviewState?.toUpperCase().replaceAll("-", "_");
+}
+
 export function pullRequestReviewSummary(
   pr: Pick<PullRequestDetail, "reviewers">,
   activity: Pick<PullRequestActivity, "comments" | "commits"> | null,
@@ -192,8 +198,8 @@ export function pullRequestReviewSummary(
   const latest = new Map<string, PullRequestActivity["comments"][number]>();
   const comments = new Map<string, PullRequestActivity["comments"][number]>();
   for (const review of activity?.comments ?? []) {
-    if (review.kind !== "review" || !review.reviewState) continue;
-    const state = review.reviewState.toUpperCase().replaceAll("-", "_");
+    const state = normalizedReviewState(review.reviewState);
+    if (review.kind !== "review" || !state) continue;
     const key = review.author?.login ?? review.id;
     if (state === "COMMENTED") {
       const previous = comments.get(key);
@@ -233,6 +239,7 @@ export function pullRequestReviewSummary(
       title:
         approved.length === 1 && approved[0]?.author
           ? (t?.("pr.status.approvedBy", { login: approved[0].author.login }) ??
+            t?.("pr.status.approvedBy", { login: approved[0].author.login }) ??
             `Approved by ${approved[0].author.login}`)
           : (t?.("pr.status.reviewsApproved") ?? "Reviews approved"),
       count:

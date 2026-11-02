@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { Link as LinkIconNode } from "lucide";
 import { Button, InlineButton } from "../ui/button";
+import { ModelSwitchRow } from "./V2LifecycleRow";
 import { useAssetUrlRefresh, useAssetUrls, useAssetUrlState } from "../../assets/assetUrls";
 import { AttachmentImage } from "../media/AttachmentImage";
 import { MediaVideoPlayer } from "../media/MediaVideoPlayer";
@@ -76,6 +77,7 @@ import {
 import { chatMarkdownClipboardPayload } from "../../markdown-clipboard";
 import type { ChatMarkdownContextReference } from "../ChatMarkdown";
 import { cn } from "~/lib/utils";
+import { markdownProseDirection } from "~/textDirection";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { formatChatTimestampTooltip, formatDayAwareTimestamp } from "../../timestampFormat";
 import { WorkflowOpeningBlock } from "./WorkflowOpeningBlock";
@@ -142,7 +144,12 @@ function UserFileCard({
       {file.downloadable === false ? (
         <>
           <div className="flex min-w-0 flex-1 items-center gap-3">{identity}</div>
-          <Button size="icon-xs" variant="ghost-muted" disabled aria-label="Sending attachment">
+          <Button
+            size="icon-xs"
+            variant="ghost-muted"
+            disabled
+            aria-label={t("release4066.text090")}
+          >
             <DownloadIcon />
           </Button>
         </>
@@ -150,7 +157,7 @@ function UserFileCard({
         <>
           <button
             type="button"
-            aria-label={`Preview ${label}`}
+            aria-label={t("preview.named", { name: label })}
             onClick={() => ctx.onFileOpen(file)}
             className="group/file focus-visible:ring-ring/70 flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl text-left focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none"
           >
@@ -162,7 +169,9 @@ function UserFileCard({
                 <Button
                   size="icon-xs"
                   variant="ghost-muted"
-                  aria-label={`Download ${label}`}
+                  aria-label={t("web.dynamic.TimelineUserMessageRow.download-param", {
+                    name: label,
+                  })}
                   onClick={() => ctx.onFileDownload(file)}
                 />
               }
@@ -252,6 +261,20 @@ function UserVideoAttachment({
 }
 
 export function UserMessageRow({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
+  const ctx = use(TimelineRowCtx);
+  const item = row.projectedItem?.item;
+  const modelSwitch = item?.type === "user_message" ? item.modelSwitch : undefined;
+  return (
+    <>
+      {modelSwitch ? (
+        <ModelSwitchRow environmentId={ctx.activeThreadEnvironmentId} modelSwitch={modelSwitch} />
+      ) : null}
+      <UserMessageContent row={row} />
+    </>
+  );
+}
+
+function UserMessageContent({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
   const ctx = use(TimelineRowCtx);
   return ctx.workflowOpening?.messageId === row.message.id ? (
     <WorkflowOpeningBlock
@@ -899,6 +922,7 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
           <div
             ref={folded ? revealFoldRef : undefined}
             hidden={folded && !expanded}
+            dir={markdownProseDirection(resolvedContext.text)}
             className={cn(
               folded && "px-3 pb-3",
               folded && !ctx.findActive && "max-h-96 overflow-auto",
@@ -966,7 +990,7 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
                       <div key={file.id} className="flex min-w-0 items-center gap-1">
                         <button
                           type="button"
-                          aria-label={`Preview ${label}`}
+                          aria-label={t("preview.named", { name: label })}
                           onClick={() => ctx.onFileOpen(file)}
                           className="focus-visible:ring-ring/70 flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-1 text-left text-sm hover:underline focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none"
                         >
@@ -979,7 +1003,9 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
                               <Button
                                 size="icon-xs"
                                 variant="ghost-muted"
-                                aria-label={`Download ${label}`}
+                                aria-label={t("web.dynamic.TimelineUserMessageRow.download-param", {
+                                  name: label,
+                                })}
                                 onClick={() => ctx.onFileDownload(file)}
                               />
                             }

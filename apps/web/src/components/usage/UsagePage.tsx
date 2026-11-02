@@ -584,7 +584,7 @@ export function UsagePage() {
                 days={days}
                 hours={hours}
                 showingKept={showingKept}
-                metric={metric === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost")}
+                metric={metric === "tokens" ? "tokens" : "cost"}
                 selectedEnvironments={selectedEnvironments}
                 hiddenProviders={hiddenProviders}
                 refreshingUsage={refreshingUsage}
@@ -604,7 +604,7 @@ export function UsagePage() {
         <UsageModelDialogHost
           models={merged.models}
           environments={selectedEnvironments}
-          metric={metric === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost")}
+          metric={metric === "tokens" ? "tokens" : "cost"}
           chartWindow={{
             days,
             hours,
@@ -880,7 +880,7 @@ function UsageOverview({
             hourly={merged.hourly}
             metric={metric}
             referenceTime={shownWindow.untilTime}
-            resolution={shownHourly ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one")}
+            resolution={shownHourly ? "hour" : "day"}
             timeZone={shownWindow.timeZone}
             hour12={hour12}
           />
@@ -1535,10 +1535,10 @@ function UsageProviderFilter({
     visible.length === PROVIDER_ORDER.length
       ? t("mobile.threads.ThreadSettingsSheet.all-providers")
       : visible.length === 0
-        ? "No providers"
+        ? t("release4066.usage.noProviders")
         : visible.length === 1
           ? PROVIDER_PRESENTATION[visible[0]!].label
-          : `${visible.length} providers`;
+          : t("release4066.usage.providers", { count: visible.length });
 
   return (
     <Menu>

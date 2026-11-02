@@ -1,3 +1,4 @@
+import { release4066En } from "./release4066.en.ts";
 import { usageReviewEn } from "./usage-review.en.ts";
 import { release016En } from "./release-016.en.ts";
 import { release3904En } from "./release-3904.en.ts";
@@ -131,6 +132,7 @@ import { settingsEn } from "./settings.en.ts";
 import { wizardEn } from "./wizard.en.ts";
 
 export const en = {
+  ...release4066En,
   ...usageReviewEn,
   ...release016En,
   "settings.secrets": "Secrets",

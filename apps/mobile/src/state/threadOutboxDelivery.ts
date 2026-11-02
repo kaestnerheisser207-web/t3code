@@ -1,3 +1,4 @@
+import { mobileI18n } from "../i18n";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import * as Dialog from "../components/ui/Dialog";
 import {
@@ -16,6 +17,7 @@ import {
   CommandId,
   DEFAULT_PROVIDER_INTERACTION_MODE,
   DEFAULT_RUNTIME_MODE,
+  managedRuntimeModeDenial,
   PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
   type EnvironmentId,
   type MessageId,
@@ -779,8 +781,17 @@ export function createThreadOutboxDelivery(): {
         serverConfig,
         settings.modelSelection,
         thread.projectId,
+        mobileI18n.t,
       );
       return restoreQueuedMessage(queuedMessage, `${title}. ${detail}`);
+    }
+    // The server would refuse this mode in settings sync, which retries forever; stop first.
+    const runtimeModeDenial = managedRuntimeModeDenial(
+      serverConfig.managedPolicy,
+      settings.runtimeMode,
+    );
+    if (runtimeModeDenial !== undefined) {
+      return restoreQueuedMessage(queuedMessage, runtimeModeDenial);
     }
 
     if (settings.runtimeMode !== thread.runtimeMode) {
@@ -856,6 +867,7 @@ export function createThreadOutboxDelivery(): {
         currentConfig,
         settings.modelSelection,
         thread.projectId,
+        mobileI18n.t,
       );
       return restoreQueuedMessage(persistedMessage, `${title}. ${detail}`);
     }
@@ -946,8 +958,16 @@ export function createThreadOutboxDelivery(): {
         serverConfig,
         settings.modelSelection,
         creation.projectId,
+        mobileI18n.t,
       );
       return restoreQueuedMessage(queuedMessage, `${title}. ${detail}`);
+    }
+    const runtimeModeDenial = managedRuntimeModeDenial(
+      serverConfig.managedPolicy,
+      settings.runtimeMode,
+    );
+    if (runtimeModeDenial !== undefined) {
+      return restoreQueuedMessage(queuedMessage, runtimeModeDenial);
     }
     let prepared: PreparedTurnAttachments;
     let persistedMessage: QueuedThreadMessage;
@@ -987,6 +1007,7 @@ export function createThreadOutboxDelivery(): {
         currentConfig,
         settings.modelSelection,
         creation.projectId,
+        mobileI18n.t,
       );
       return restoreQueuedMessage(persistedMessage, `${title}. ${detail}`);
     }

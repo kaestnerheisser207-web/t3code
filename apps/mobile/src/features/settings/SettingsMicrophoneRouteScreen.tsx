@@ -20,6 +20,7 @@ import {
   microphoneEntryKey,
   microphoneOrder,
 } from "../../lib/microphonePriority";
+import { getLocalVoiceTranscriber } from "../../native/voiceTranscription";
 import { mobilePreferencesAtom, updateMobilePreferencesAtom } from "../../state/preferences";
 import { ListRowLayout } from "../../components/ui/ListRowLayout";
 import { ThreadSwipeable } from "../home/thread-swipe-actions";
@@ -93,6 +94,32 @@ const microphoneKinds = (
 });
 
 export function SettingsMicrophoneRouteScreen() {
+  return getLocalVoiceTranscriber() === null ? <VoiceInputUnavailable /> : <MicrophoneSettings />;
+}
+
+function VoiceInputUnavailable() {
+  const t = useTranslate();
+
+  const insets = useSafeAreaInsets();
+  return (
+    <View collapsable={false} className="flex-1 bg-sheet">
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerClassName="gap-3 px-5 pt-4"
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) + 18 }}
+      >
+        <SettingsSection title={t("release4066.text012")}>
+          <ListRowLayout icon="mic" label={t("release4066.text013")} />
+        </SettingsSection>
+        <Text className="px-2 text-sm text-foreground-muted">{t("release4066.text014")}</Text>
+      </ScrollView>
+    </View>
+  );
+}
+
+function MicrophoneSettings() {
   const t = useTranslate();
   const insets = useSafeAreaInsets();
   const preferencesResult = useAtomValue(mobilePreferencesAtom);
