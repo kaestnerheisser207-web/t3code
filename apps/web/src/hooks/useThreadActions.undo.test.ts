@@ -27,6 +27,11 @@ vi.mock("../state/session", async (original) => ({
   ...(await original<typeof import("../state/session")>()),
   readEnvironmentScope: () => true,
 }));
+vi.mock("../i18n", async () => {
+  const { createI18n } = await import("@t3tools/client-runtime/i18n");
+  const i18n = createI18n("en");
+  return { webI18n: i18n, useTranslate: () => i18n.t };
+});
 vi.mock("react", async (original) => ({
   ...(await original<typeof import("react")>()),
   useCallback: (callback: unknown) => callback,
