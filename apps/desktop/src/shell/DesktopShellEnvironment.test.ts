@@ -4,6 +4,8 @@ import { assert, describe, it } from "@effect/vitest";
 import * as HostProcess from "@t3tools/shared/HostProcess";
 import * as Effect from "effect/Effect";
 import * as Deferred from "effect/Deferred";
+import * as Fiber from "effect/Fiber";
+import * as TestClock from "effect/testing/TestClock";
 import * as FileSystem from "effect/FileSystem";
 import * as Layer from "effect/Layer";
 import * as Logger from "effect/Logger";
@@ -164,8 +166,11 @@ describe("DesktopShellEnvironment", () => {
             const startup = yield* service.installIntoProcess.pipe(Effect.forkChild);
             yield* Deferred.await(started);
             assert.isDefined(startup.pollUnsafe());
+            assert.isFalse(yield* Fiber.join(startup));
             yield* Deferred.succeed(release, undefined);
-            return yield* service.awaitDiscovery;
+            const discovered = yield* service.awaitDiscovery;
+            assert.isTrue(yield* service.installIntoProcess);
+            return discovered;
           }),
       });
     }),
@@ -231,7 +236,7 @@ describe("DesktopShellEnvironment", () => {
           }),
           use: (service) =>
             Effect.gen(function* () {
-              yield* service.installIntoProcess;
+              assert.isTrue(yield* service.installIntoProcess);
               yield* service.installIntoProcess;
               assert.equal(env.PATH, "/old/bin:/usr/bin:/launcher/bin");
               assert.equal(env.SSH_AUTH_SOCK, "/current-session.sock");
@@ -267,6 +272,11 @@ describe("DesktopShellEnvironment", () => {
     "not json",
     '{"version":2,"key":"old","environment":{"PATH":"/bad/bin"}}',
     '{"version":1,"key":"other-shell","environment":{"PATH":"/bad/bin"}}',
+    encodeCache({
+      version: 1,
+      key: '["darwin","/test-home","/bin/zsh",""]',
+      environment: { PATH: " " },
+    }),
   ])("ignores an unusable cache and still starts before discovery: %s", (contents) =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
@@ -291,6 +301,7 @@ describe("DesktopShellEnvironment", () => {
             const startup = yield* service.installIntoProcess.pipe(Effect.forkChild);
             yield* Deferred.await(started);
             assert.isDefined(startup.pollUnsafe());
+            assert.isFalse(yield* Fiber.join(startup));
             assert.equal(env.PATH, "/usr/bin");
             yield* Deferred.succeed(release, undefined);
             return yield* service.awaitDiscovery;
@@ -587,16 +598,48 @@ describe("DesktopShellEnvironment", () => {
     }),
   );
 
-  it.effect("leaves macOS preparation incomplete when no login shell returns a PATH", () =>
-    Effect.gen(function* () {
-      const prepared = yield* runShellEnvironment({
-        env: { SHELL: "/bin/zsh", PATH: "/usr/bin:/bin:/usr/sbin:/sbin" },
-        platform: "darwin",
-        handler: () => "",
-      });
+  it.effect(
+    "a timed-out discovery keeps fallback paths without overwriting the server environment",
+    () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const home = yield* fs.makeTempDirectoryScoped();
+        const localBin = `${home}/.local/bin`;
+        yield* fs.makeDirectory(localBin, { recursive: true });
+        const env = { HOME: home, SHELL: "/bin/zsh", PATH: "/preferred/bin:/usr/bin" };
+        const started = yield* Deferred.make<void>();
+        const updates: unknown[] = [];
+        const prepared = yield* runShellEnvironment({
+          env,
+          platform: "darwin",
+          handler: () => "",
+          processSpawner: ChildProcessSpawner.make((command) =>
+            command._tag === "StandardCommand" && command.command === "/bin/zsh"
+              ? Deferred.succeed(started, undefined).pipe(Effect.andThen(Effect.never))
+              : Effect.succeed(makeProcess("")),
+          ),
+          use: (service) =>
+            Effect.gen(function* () {
+              const listener = yield* Stream.runForEach(service.updates, (message) =>
+                Effect.sync(() => {
+                  updates.push(message);
+                }),
+              ).pipe(Effect.forkChild);
+              assert.isFalse(yield* service.installIntoProcess);
+              yield* Deferred.await(started);
+              yield* TestClock.adjust("5 seconds");
+              const discovered = yield* service.awaitDiscovery;
+              yield* Fiber.interrupt(listener);
+              assert.isFalse(yield* service.installIntoProcess);
+              assert.deepEqual(updates, []);
+              return discovered;
+            }),
+        });
 
-      assert.isFalse(prepared);
-    }),
+        assert.isFalse(prepared);
+        assert.isTrue(env.PATH.startsWith("/preferred/bin:/usr/bin:"));
+        assert.include(env.PATH.split(":"), localBin);
+      }).pipe(Effect.provide(NodeServices.layer)),
   );
 
   it.effect("loads PowerShell profile environment on Windows", () =>

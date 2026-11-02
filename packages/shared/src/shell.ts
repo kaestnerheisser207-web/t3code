@@ -196,6 +196,25 @@ export function mergePathEntries(
   return merged.length > 0 ? merged.join(delimiter) : undefined;
 }
 
+// Only used after PATH discovery fails; append these so an inherited toolchain keeps priority.
+export function listExistingPosixCliDirs(
+  env: NodeJS.ProcessEnv,
+  platform: NodeJS.Platform,
+): ReadonlyArray<string> {
+  const home = trimNonEmpty(env.HOME);
+  return [
+    platform === "darwin" ? "/opt/homebrew/bin" : "/home/linuxbrew/.linuxbrew/bin",
+    "/usr/local/bin",
+    ...(home ? [NodePath.join(home, ".local", "bin")] : []),
+  ].filter((directory) => {
+    try {
+      return NodeFS.statSync(directory).isDirectory();
+    } catch {
+      return false;
+    }
+  });
+}
+
 function envCaptureStart(name: string): string {
   return `__T3CODE_ENV_${name}_START__`;
 }

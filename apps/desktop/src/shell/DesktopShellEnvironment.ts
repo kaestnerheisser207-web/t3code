@@ -2,6 +2,7 @@ import { DesktopShellEnvironmentSnapshot, ShellEnvironmentPatch } from "@t3tools
 import {
   applyShellEnvironment,
   buildEnvironmentCaptureCommand,
+  listExistingPosixCliDirs,
   listLoginShellCandidates,
   setWindowsPath,
 } from "@t3tools/shared/shell";
@@ -75,7 +76,7 @@ export class DesktopShellEnvironmentCommandTimeoutError extends Schema.TaggedErr
 export class DesktopShellEnvironment extends Context.Service<
   DesktopShellEnvironment,
   {
-    // Desktop owns discovery, including on cache misses; the backend receives updates over fd4.
+    // False leaves server hydration enabled until a usable cache or discovery has been applied.
     readonly installIntoProcess: Effect.Effect<boolean>;
     readonly awaitDiscovery: Effect.Effect<boolean>;
     readonly updates: Stream.Stream<DesktopShellEnvironmentSnapshot>;
@@ -430,9 +431,13 @@ const installPosixEnvironment = Effect.fn("desktop.shellEnvironment.installPosix
       config.platform === "darwin" && !shellEnvironment.PATH
         ? yield* readLaunchctlPath(config.env)
         : Option.none<string>();
+    const probedPath = trimNonEmpty(shellEnvironment.PATH).pipe(Option.orElse(() => launchctlPath));
     const mergedPath = mergePaths(config.platform, [
-      trimNonEmpty(shellEnvironment.PATH).pipe(Option.orElse(() => launchctlPath)),
+      probedPath,
       readEnvPath(config.env),
+      Option.isNone(probedPath)
+        ? trimNonEmpty(listExistingPosixCliDirs(config.env, config.platform).join(":"))
+        : Option.none(),
     ]);
 
     if (Option.isSome(mergedPath)) {
@@ -595,7 +600,11 @@ export const make = Effect.gen(function* () {
     const patch = Object.fromEntries(
       Object.keys(ShellEnvironmentPatch.fields).map((name) => [name, fresh[name] ?? null]),
     );
-    if (prepared || Option.isNone(yield* Ref.get(latest))) yield* publish(patch, prepared);
+    if (prepared) yield* publish(patch, true);
+    else if (Option.isNone(yield* Ref.get(latest))) {
+      // A failed desktop probe must not overwrite a PATH already repaired by the server.
+      applyShellEnvironment(env, patch, environment.platform);
+    }
     if (prepared) {
       const cached = Object.fromEntries(
         CACHED_ENV_NAMES.flatMap((name) => (fresh[name] ? [[name, fresh[name]]] : [])),
@@ -617,12 +626,16 @@ export const make = Effect.gen(function* () {
     Effect.withSpan("desktop.shellEnvironment.refresh"),
     Effect.onExit((exit) => Deferred.done(discovered, exit)),
   );
-  const installIntoProcess = yield* Effect.cached(
+  const startDiscovery = yield* Effect.cached(
     Effect.gen(function* () {
       const cache = yield* fileSystem
         .readFileString(cachePath)
         .pipe(Effect.flatMap(decodeCache), Effect.option);
-      if (Option.isSome(cache) && cache.value.key === key) {
+      if (
+        Option.isSome(cache) &&
+        cache.value.key === key &&
+        Option.isSome(trimNonEmpty(cache.value.environment.PATH))
+      ) {
         const cached = Object.fromEntries(
           CACHED_ENV_NAMES.flatMap((name) => {
             const value = cache.value.environment[name];
@@ -648,8 +661,12 @@ export const make = Effect.gen(function* () {
         );
       }
       yield* Effect.forkIn(refresh, scope);
-      return true;
-    }).pipe(Effect.withSpan("desktop.shellEnvironment.installIntoProcess")),
+    }),
+  );
+  const installIntoProcess = startDiscovery.pipe(
+    Effect.andThen(Ref.get(latest)),
+    Effect.map(Option.isSome),
+    Effect.withSpan("desktop.shellEnvironment.installIntoProcess"),
   );
   const updates = Stream.unwrap(
     Effect.gen(function* () {

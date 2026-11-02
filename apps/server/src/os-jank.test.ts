@@ -3,6 +3,7 @@ import { it as effectIt } from "@effect/vitest";
 import * as HostProcess from "@t3tools/shared/HostProcess";
 import { CommandAvailability, WindowsShellEnvironment } from "@t3tools/shared/shell";
 import * as Effect from "effect/Effect";
+import * as FileSystem from "effect/FileSystem";
 // @effect-diagnostics-next-line nodeBuiltinImport:off -- Observe the existing synchronous shell probe without launching the user's login shell.
 import * as NodeChildProcess from "node:child_process";
 import * as NodeOS from "node:os";
@@ -150,4 +151,39 @@ effectIt.effect("replaces a Path-spelled Windows PATH instead of adding a second
 
     assert.deepEqual(env, { PATH: "C:\\Tools;C:\\Windows" });
   }),
+);
+
+effectIt.effect(
+  "keeps inherited PATH priority and finds local CLIs when every shell probe fails",
+  () =>
+    Effect.acquireUseRelease(
+      Effect.sync(() =>
+        vi.spyOn(NodeChildProcess, "execFileSync").mockImplementation(() => {
+          throw new Error("shell probe timed out");
+        }),
+      ),
+      () =>
+        Effect.gen(function* () {
+          const fs = yield* FileSystem.FileSystem;
+          const home = yield* fs.makeTempDirectoryScoped();
+          const localBin = `${home}/.local/bin`;
+          yield* fs.makeDirectory(localBin, { recursive: true });
+          const env = { HOME: home, SHELL: "/bin/zsh", PATH: "/preferred/bin:/usr/bin" };
+          yield* fixPath({ shellEnvironmentPrepared: false }).pipe(
+            Effect.provideService(HostProcess.Platform, "darwin"),
+            Effect.provideService(HostProcess.Environment, env),
+          );
+          assert.isTrue(env.PATH.startsWith("/preferred/bin:/usr/bin:"));
+          assert.include(env.PATH.split(":"), localBin);
+          yield* fs.remove(localBin, { recursive: true });
+          yield* fs.writeFileString(localBin, "not a directory");
+          env.PATH = "/preferred/bin:/usr/bin";
+          yield* fixPath({ shellEnvironmentPrepared: false }).pipe(
+            Effect.provideService(HostProcess.Platform, "darwin"),
+            Effect.provideService(HostProcess.Environment, env),
+          );
+          assert.notInclude(env.PATH.split(":"), localBin);
+        }),
+      (probe) => Effect.sync(() => probe.mockRestore()),
+    ).pipe(Effect.provide(NodeServices.layer)),
 );
