@@ -87,4 +87,10 @@ export const connectionDiagnosisEn = {
   "connection.diagnosis.host-version": "Host version",
   "connection.diagnosis.error": "Error",
   "connection.diagnosis.trace-id": "Trace ID",
+  "connection.diagnosis.this-device-is-still-loading-its-t3-connect-sign-in":
+    "This device is still loading its T3 Connect sign-in",
+  "connection.diagnosis.wait-a-moment-t3-code-retries-on-its-own":
+    "Wait a moment. T3 Code retries on its own.",
+  "connection.diagnosis.if-it-keeps-waiting-reload-or-restart-t3-code-on-this-device":
+    "If it keeps waiting, reload or restart T3 Code on this device.",
 } as const;

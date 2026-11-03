@@ -27,7 +27,7 @@ export interface ConnectionDiagnosis {
   readonly hops: ReadonlyArray<ConnectionDiagnosisHop>;
   readonly steps: ReadonlyArray<string>;
   readonly facts: ReadonlyArray<readonly [label: string, value: string]>;
-  /** The troubleshooting guide section for this failure. Null for direct routes. */
+  /** The troubleshooting guide section for this failure. Null for direct routes, except a pending T3 Connect sign-in. */
   readonly moreInfoUrl: string | null;
 }
 
@@ -47,7 +47,15 @@ export interface ConnectionDiagnosisInput {
 
 interface Located {
   readonly hop: ConnectionHop;
-  readonly cause: ConnectionFailureCause | "offline" | "outdated" | "released" | null;
+  readonly cause:
+    | ConnectionFailureCause
+    | "offline"
+    | "outdated"
+    | "released"
+    | "session_pending"
+    | null;
+  /** The failure named no hop, so the hops before this one were never probed. */
+  readonly guessed?: true;
 }
 
 const NOT_ANSWERING: ReadonlySet<ConnectionFailureCause> = new Set([
@@ -63,6 +71,9 @@ function locate(input: ConnectionDiagnosisInput): Located | null {
   if (failure?._tag === "ConnectionBlockedError" && failure.serverUpdateRequired) {
     return { hop: "server", cause: "outdated" };
   }
+  if (failure?.reason === "session-pending") {
+    return { hop: "device", cause: "session_pending" };
+  }
   if (failure?.hop !== undefined) {
     return { hop: failure.hop, cause: failure.failureCause ?? null };
   }
@@ -72,7 +83,11 @@ function locate(input: ConnectionDiagnosisInput): Located | null {
       failure.reason === "timeout" ||
       failure.reason === "transport";
     const via = failure.via ?? input.via;
-    return { hop: unreachable && via === "relay" ? "tunnel" : "server", cause: null };
+    return {
+      hop: unreachable && via === "relay" ? "tunnel" : "server",
+      cause: null,
+      guessed: true,
+    };
   }
   const status = input.relayStatus;
   if (status?.status !== "offline") return null;
@@ -90,6 +105,11 @@ function headline(
   switch (located.cause) {
     case "offline":
       return t?.("connection.diagnosis.this-device-is-offline") ?? "This device is offline";
+    case "session_pending":
+      return (
+        t?.("connection.diagnosis.this-device-is-still-loading-its-t3-connect-sign-in") ??
+        "This device is still loading its T3 Connect sign-in"
+      );
     case "outdated":
       return (
         t?.("connection.diagnosis.host-runs-an-older-t3-code", { host }) ??
@@ -202,6 +222,13 @@ function steps(
         t?.(
           "connection.diagnosis.connect-this-device-to-the-internet-t3-code-reconnects-on-its-own",
         ) ?? "Connect this device to the internet. T3 Code reconnects on its own.",
+      ];
+    case "session_pending":
+      return [
+        t?.("connection.diagnosis.wait-a-moment-t3-code-retries-on-its-own") ??
+          "Wait a moment. T3 Code retries on its own.",
+        t?.("connection.diagnosis.if-it-keeps-waiting-reload-or-restart-t3-code-on-this-device") ??
+          "If it keeps waiting, reload or restart T3 Code on this device.",
       ];
     case "outdated":
       return [
@@ -338,6 +365,7 @@ function helpSection(
       return "the-host-runs-an-older-t3-code";
     case "clock_skew":
       return "the-clock-is-off";
+    case "session_pending":
     case "not_linked":
     case "tunnel_not_enabled":
       return "sign-in-account-or-link-problems";
@@ -419,7 +447,12 @@ export function presentConnectionDiagnosis(
   const hops = order.map((hop, index): ConnectionDiagnosisHop => ({
     hop,
     label: hopLabel(hop, host, t),
-    result: index < failedIndex ? "ok" : index === failedIndex ? "failed" : "unchecked",
+    result:
+      index === failedIndex
+        ? "failed"
+        : index < failedIndex && located.guessed !== true
+          ? "ok"
+          : "unchecked",
   }));
 
   // The relay health check only explains the state when no attempt has failed yet.
@@ -454,7 +487,10 @@ export function presentConnectionDiagnosis(
     hops,
     steps: steps(host, located, failure, t),
     facts,
-    moreInfoUrl: relayPath ? t3ConnectTroubleshootingUrl(helpSection(located, failure)) : null,
+    moreInfoUrl:
+      relayPath || located.cause === "session_pending"
+        ? t3ConnectTroubleshootingUrl(helpSection(located, failure))
+        : null,
   };
 }
 

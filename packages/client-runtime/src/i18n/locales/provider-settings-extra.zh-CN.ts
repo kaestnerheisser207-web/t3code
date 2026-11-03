@@ -29,4 +29,8 @@ export const providerSettingsExtraZhCN = {
   "provider.extra.localAcp": "本地 ACP",
   "provider.extra.addFailed": "无法添加提供方实例",
   "provider.extra.added": "提供方实例已添加",
+  "provider.extra.removalSavedSettings": "其已保存的设置（包括自定义二进制路径）将被移除。",
+  "provider.extra.removeInstanceConfirm": "移除 {{name}} 提供方实例？",
+  "provider.extra.resetInstanceConfirm": "将 {{name}} 提供方重置为默认设置？",
+  "provider.extra.resetTurnsOff": " 它也会被关闭。",
 } as const;

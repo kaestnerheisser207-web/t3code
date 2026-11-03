@@ -228,4 +228,11 @@ export const settingsGroup2En = {
   "settings.pages.ProviderWizardAuthenticationStep.account": "Account",
   "settings.pages.ProviderWizardAuthenticationStep.sign-in": "Sign in",
   "settings.pages.ProviderWizardAuthenticationStep.open-docs": "Open docs",
+  "settings.pages.ProjectSettingsPanel.grouping-rule-hint":
+    "Grouping rule decides how each checkout joins project groups in the sidebar. Changing it can move a checkout to a different project.",
+  "settings.pages.ProjectSettingsPanel.grouping-save-failed": "Could not save grouping rule",
+  "settings.pages.ProjectSettingsPanel.grouping-rule-for":
+    "Grouping rule for {{workspaceRoot}} on {{environment}}",
+  "settings.pages.ProjectSettingsPanel.grouping-default": "Default ({{mode}})",
+  "settings.pages.ProjectSettingsPanel.use-global-default": "Use global default",
 } as const;

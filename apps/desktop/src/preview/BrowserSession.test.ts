@@ -1,5 +1,6 @@
 import { desktopI18n } from "../i18n.ts";
 import { assert, describe, it } from "@effect/vitest";
+import * as NodeCrypto from "@effect/platform-node/NodeCrypto";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -47,7 +48,7 @@ const layerDialog = Layer.succeed(ElectronDialog.ElectronDialog, {
   showErrorBox: () => Effect.void,
 });
 const layer = BrowserSession.layer.pipe(
-  Layer.provide(Layer.merge(NodeServices.layer, layerDialog)),
+  Layer.provide(Layer.merge(Layer.mergeAll(NodeServices.layer, NodeCrypto.layer), layerDialog)),
 );
 
 describe("BrowserSession", () => {

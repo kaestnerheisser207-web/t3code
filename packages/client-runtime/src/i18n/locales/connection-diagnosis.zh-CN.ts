@@ -78,4 +78,9 @@ export const connectionDiagnosisZhCN = {
   "connection.diagnosis.host-version": "主机版本",
   "connection.diagnosis.error": "错误",
   "connection.diagnosis.trace-id": "Trace ID",
+  "connection.diagnosis.this-device-is-still-loading-its-t3-connect-sign-in":
+    "此设备仍在加载 T3 Connect 登录状态",
+  "connection.diagnosis.wait-a-moment-t3-code-retries-on-its-own": "请稍候，T3 Code 会自动重试。",
+  "connection.diagnosis.if-it-keeps-waiting-reload-or-restart-t3-code-on-this-device":
+    "如果一直等待，请在此设备上重新加载或重启 T3 Code。",
 } as const;

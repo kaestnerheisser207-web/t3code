@@ -220,4 +220,11 @@ export const settingsGroup2ZhCN = {
   "settings.pages.ProviderWizardAuthenticationStep.account": "账户",
   "settings.pages.ProviderWizardAuthenticationStep.sign-in": "登录",
   "settings.pages.ProviderWizardAuthenticationStep.open-docs": "打开文档",
+  "settings.pages.ProjectSettingsPanel.grouping-rule-hint":
+    "分组规则决定每个检出目录如何加入侧边栏中的项目分组。更改它可能会把检出目录移到其他项目。",
+  "settings.pages.ProjectSettingsPanel.grouping-save-failed": "无法保存分组规则",
+  "settings.pages.ProjectSettingsPanel.grouping-rule-for":
+    "{{environment}} 上 {{workspaceRoot}} 的分组规则",
+  "settings.pages.ProjectSettingsPanel.grouping-default": "默认（{{mode}}）",
+  "settings.pages.ProjectSettingsPanel.use-global-default": "使用全局默认",
 } as const satisfies Record<keyof typeof settingsGroup2En, string>;

@@ -30,4 +30,9 @@ export const providerSettingsExtraEn = {
   "provider.extra.localAcp": "Local ACP",
   "provider.extra.addFailed": "Could not add provider instance",
   "provider.extra.added": "Provider instance added",
+  "provider.extra.removalSavedSettings":
+    "Its saved settings, including any custom binary path, will be removed.",
+  "provider.extra.removeInstanceConfirm": "Remove the {{name}} provider instance?",
+  "provider.extra.resetInstanceConfirm": "Reset the {{name}} provider to its defaults?",
+  "provider.extra.resetTurnsOff": " It will also be turned off.",
 } as const;

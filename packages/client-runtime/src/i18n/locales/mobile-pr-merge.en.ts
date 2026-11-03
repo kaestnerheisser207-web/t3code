@@ -36,4 +36,11 @@ export const mobilePrMergeEn = {
   "pr.stack.closed": "Reopen the closed layers before merging this stack.",
   "pr.stack.draft": "Mark every layer being merged ready for review.",
   "pr.stack.stale": "Refresh the stack to load its latest revisions before merging.",
+  "pr.merge.status.merged": "Merged",
+  "pr.merge.status.closed": "Closed",
+  "pr.merge.status.draft": "Draft",
+  "pr.merge.status.conflicts": "Resolve conflicts to merge",
+  "pr.merge.status.autoPending": "Auto-merge pending",
+  "pr.merge.status.autoPendingMethod": "Auto-merge pending ({{method}})",
+  "pr.merge.status.checkingStack": "Checking stack…",
 } as const;

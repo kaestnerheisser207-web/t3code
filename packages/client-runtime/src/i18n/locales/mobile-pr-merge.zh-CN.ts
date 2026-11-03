@@ -35,4 +35,11 @@ export const mobilePrMergeZhCN = {
   "pr.stack.closed": "合并此堆叠前请先重新打开已关闭的层。",
   "pr.stack.draft": "请将所有待合并的层标记为可供审查。",
   "pr.stack.stale": "合并前请刷新堆叠以加载其最新修订版本。",
+  "pr.merge.status.merged": "已合并",
+  "pr.merge.status.closed": "已关闭",
+  "pr.merge.status.draft": "草稿",
+  "pr.merge.status.conflicts": "解决冲突后再合并",
+  "pr.merge.status.autoPending": "等待自动合并",
+  "pr.merge.status.autoPendingMethod": "等待自动合并（{{method}}）",
+  "pr.merge.status.checkingStack": "正在检查堆叠…",
 } as const;
