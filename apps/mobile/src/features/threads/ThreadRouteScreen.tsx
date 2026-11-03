@@ -267,8 +267,7 @@ function LiveThreadRouteController(props: ThreadRouteScreenProps) {
   const navigation = useNavigation();
   const routeName = useRoute().name;
   const routeConnectionState =
-    routeEnvironmentRuntime?.connectionState ??
-    (environmentId ? t("web.dynamic.DeviceHostAvailability.available") : connectionState);
+    routeEnvironmentRuntime?.connectionState ?? (environmentId ? "available" : connectionState);
   const routeThreadKey =
     environmentId !== null && threadIdRaw !== null
       ? scopedThreadKey(environmentId, ThreadId.make(threadIdRaw))
@@ -526,8 +525,7 @@ function ThreadRouteContent(
   }, [previewTarget]);
   const routeEnvironmentRuntime = useRemoteEnvironmentRuntime(environmentId);
   const routeConnectionState =
-    routeEnvironmentRuntime?.connectionState ??
-    (environmentId ? t("web.dynamic.DeviceHostAvailability.available") : connectionState);
+    routeEnvironmentRuntime?.connectionState ?? (environmentId ? "available" : connectionState);
   const routeConnectionError = routeEnvironmentRuntime?.connectionError ?? null;
   const selectedThreadWithDraftSettings = selectedThread
     ? {
@@ -615,11 +613,7 @@ function ThreadRouteContent(
       return;
     }
     navigation.setParams({ inspector: undefined });
-    setChosenInspectorMode(
-      props.renderInspector === undefined
-        ? t("mobile.dynamic.PreviewStreamWebView.files")
-        : "route",
-    );
+    setChosenInspectorMode(props.renderInspector === undefined ? "files" : "route");
     showAuxiliaryPane("inspector");
   };
   const handleToggleInspector = () => {

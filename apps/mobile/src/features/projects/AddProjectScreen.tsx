@@ -384,7 +384,6 @@ function useBrowsePathInput(environment: EnvironmentOption | null, pinnedDirecto
 function useEnvironmentOptions(
   selectedEnvironmentId: EnvironmentId | null = null,
 ): ReadonlyArray<EnvironmentOption> {
-  const t = useTranslate();
   const serverConfigByEnvironmentId = useServerConfigs();
   const { savedConnectionsById } = useSavedRemoteConnections();
   const { connectedEnvironments } = useRemoteConnectionStatus();
@@ -403,8 +402,7 @@ function useEnvironmentOptions(
         machine: resolveEnvironmentMachineKind(config ?? null),
         baseDirectory: config?.settings.addProjectBaseDirectory ?? null,
         newProjectsRoot: config?.newProjectsRoot ?? null,
-        connectionState:
-          runtime?.connectionState ?? t("web.dynamic.DeviceHostAvailability.available"),
+        connectionState: runtime?.connectionState ?? "available",
         connectionError: runtime?.connectionError ?? null,
         connectionErrorTraceId: runtime?.connectionErrorTraceId ?? null,
       };

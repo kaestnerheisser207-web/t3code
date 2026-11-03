@@ -99,12 +99,12 @@ function UsageScreen(props: {
   const insets = useSafeAreaInsets();
   const [selection, setSelection] = useState(() => ({
     params: props.tabParam,
-    view: (props.tabParam === "usage" ? t("web.dynamic.UsagePage.cost") : "limits") as UsageView,
+    view: (props.tabParam === "usage" ? "cost" : "limits") as UsageView,
   }));
   if (selection.params !== props.tabParam) {
     setSelection({
       params: props.tabParam,
-      view: props.tabParam === "usage" ? t("web.dynamic.UsagePage.cost") : "limits",
+      view: props.tabParam === "usage" ? "cost" : "limits",
     });
   }
   const { view } = selection;
@@ -154,7 +154,7 @@ function UsageScreen(props: {
   const [refreshingUsage, setRefreshingUsage] = useState(false);
   const refreshingRef = useRef(false);
   const showingLimits = view === "limits";
-  const metric: UsageChartMetric = view === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost");
+  const metric: UsageChartMetric = view === "tokens" ? "tokens" : "cost";
   const progress = usageProgress(selectedEnvironments, {
     refreshing: refreshingUsage,
     providerLabel,
@@ -162,20 +162,12 @@ function UsageScreen(props: {
   const selectWindow = (days: number) => {
     setWindowSelection({
       days,
-      window: makeWindow(
-        days,
-        undefined,
-        days === 1 ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
-      ),
+      window: makeWindow(days, undefined, days === 1 ? "hour" : "day"),
     });
   };
   const refreshWindow = () => {
     if (refreshingRef.current) return;
-    const nextWindow = makeWindow(
-      windowDays,
-      undefined,
-      isPast24Hours ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
-    );
+    const nextWindow = makeWindow(windowDays, undefined, isPast24Hours ? "hour" : "day");
     if (
       nextWindow.sinceDay !== window.sinceDay ||
       nextWindow.untilDay !== window.untilDay ||

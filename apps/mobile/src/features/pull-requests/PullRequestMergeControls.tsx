@@ -50,11 +50,11 @@ export function PullRequestMergeControls(props: {
   const preferred =
     selectedMethod ??
     (AsyncResult.isSuccess(preferences) ? preferences.value.pullRequestMergeMethod : undefined) ??
-    t("pr.merge.method.squash");
+    "squash";
   const method = methods.includes(preferred)
     ? preferred
     : methods.includes("squash")
-      ? t("pr.merge.method.squash")
+      ? "squash"
       : methods[0];
   const scope = stack.stack ? pullRequestStackMerge(stack.stack, pr.number, terminology, t) : null;
   const canMergeSingle = singlePullRequestMergeAllowed({

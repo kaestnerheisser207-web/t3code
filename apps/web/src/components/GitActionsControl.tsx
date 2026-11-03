@@ -312,8 +312,7 @@ function GitQuickActionIcon({
     }
     return <SourceControlIcon className={className} />;
   }
-  if (quickAction.label === t("web.ui.GitActionsControl.commit"))
-    return <GitCommitIcon className={className} />;
+  if (quickAction.label === t("git.labels.commit")) return <GitCommitIcon className={className} />;
   if (quickAction.label === t("git.labels.push")) return <CloudUploadIcon className={className} />;
   return <InfoIcon className={className} />;
 }

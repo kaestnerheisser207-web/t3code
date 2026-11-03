@@ -60,7 +60,6 @@ export function ThreadInspectorContentStack(props: {
   readonly resetKeys: readonly [string | null, string | null];
   readonly renderRoute?: () => ReactNode;
 }) {
-  const t = useTranslate();
   const [mountedModes, setMountedModes] = useState<ReadonlySet<ThreadInspectorMode>>(
     () => new Set([props.mode]),
   );
@@ -80,8 +79,7 @@ export function ThreadInspectorContentStack(props: {
     }
 
     // Keep both inspectors alive after opening; detaching the file tree makes UIKit rebuild its expensive focus graph.
-    const alternateMode =
-      props.mode === "files" ? "git" : t("mobile.dynamic.PreviewStreamWebView.files");
+    const alternateMode = props.mode === "files" ? "git" : "files";
     const timeout = setTimeout(() => {
       setMountedModes((current) => {
         if (current.has(alternateMode)) {
@@ -92,7 +90,7 @@ export function ThreadInspectorContentStack(props: {
     }, INSPECTOR_PREWARM_DELAY_MS);
 
     return () => clearTimeout(timeout);
-  }, [props.mode, t]);
+  }, [props.mode]);
 
   return (
     <View className="flex-1">

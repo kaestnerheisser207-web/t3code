@@ -3425,7 +3425,7 @@ export default function ChatView(props: ChatViewProps) {
                 isCompacting={isCompacting}
                 awaitingUser={
                   activePendingApproval !== null
-                    ? t("web.dynamic.PullRequestDetailPanel.approval")
+                    ? "approval"
                     : activePendingUserInput !== null ||
                         // A secret request has no runtime request; the shell carries it.
                         activeThreadShell?.hasPendingUserInput === true

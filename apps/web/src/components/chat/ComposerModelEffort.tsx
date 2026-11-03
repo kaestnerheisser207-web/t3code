@@ -549,11 +549,10 @@ const FOOTER_SEGMENT =
 function SpeedSegment(props: {
   checked: boolean;
   label: string;
+  bolt: "fast" | "ultra" | null;
   description?: string | undefined;
   onPick: () => void;
 }) {
-  const t = useTranslate();
-
   const buttonProps = {
     type: "button",
     role: "radio",
@@ -564,9 +563,7 @@ function SpeedSegment(props: {
   } as const;
   const content = (
     <>
-      {props.label === t("usage.chart.fast") || props.label === t("usage.ultrafast") ? (
-        <FastBolt ultra={props.label === t("usage.ultrafast")} />
-      ) : null}
+      {props.bolt ? <FastBolt ultra={props.bolt === "ultra"} /> : null}
       {props.label}
     </>
   );
@@ -601,6 +598,9 @@ function SpeedControl(props: { traits: TraitsSelectionInput }) {
               key={option.id}
               checked={option.id === traits.selectValue(speedSelect)}
               label={option.label}
+              bolt={
+                option.label === "Fast" ? "fast" : option.label === "Ultrafast" ? "ultra" : null
+              }
               description={option.description}
               onPick={() => traits.changeSelect(speedSelect, option.id)}
             />
@@ -611,6 +611,7 @@ function SpeedControl(props: { traits: TraitsSelectionInput }) {
                 key={String(value)}
                 checked={(fastToggle.currentValue === true) === value}
                 label={value ? t("usage.chart.fast") : t("usage.chart.standard")}
+                bolt={value ? "fast" : null}
                 onPick={() => traits.changeBoolean(fastToggle.id, value)}
               />
             ))

@@ -110,7 +110,6 @@ function SubagentMetadata(props: {
   readonly environmentId: EnvironmentId;
   readonly subagent: SubagentRowSubagent;
 }) {
-  const t = useTranslate();
   const { environmentId, subagent } = props;
   // A task in a linked environment runs a provider instance of that environment.
   const config = useEnvironmentServerConfig(subagent.remoteChild?.environmentId ?? environmentId);
@@ -180,9 +179,7 @@ function SubagentMetadata(props: {
         >
           <Text className="text-xs text-foreground-muted">·</Text>
           <SymbolView
-            name={
-              label === "Branch" ? "arrow.triangle.branch" : t("web.dynamic.WelcomeWizard.folder")
-            }
+            name={label === "Branch" ? "arrow.triangle.branch" : "folder"}
             size={11}
             tintColorClassName="accent-icon-muted"
           />

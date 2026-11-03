@@ -1485,10 +1485,7 @@ function ThreadSettingsPickerNavigator(props: ThreadSettingsPickerPresentation) 
       <ThreadSettingsPickerStack.Navigator
         initialRouteName="ThreadSettingsModels"
         screenOptions={{
-          animation:
-            Platform.OS === "android"
-              ? t("web.dynamic.EnvironmentIconPicker.default")
-              : "slide_from_right",
+          animation: Platform.OS === "android" ? "default" : "slide_from_right",
           contentStyle: { backgroundColor: solidSheetBackground },
           gestureEnabled: true,
           headerBackButtonDisplayMode: "minimal",

@@ -42,9 +42,7 @@ export function ChatGptWelcomeCoordinator() {
             key: JSON.stringify([
               environmentId,
               provider.instanceId,
-              provider.auth.profileId ??
-                provider.auth.email ??
-                t("web.dynamic.EnvironmentIconPicker.default"),
+              provider.auth.profileId ?? provider.auth.email ?? "default",
             ]),
             environmentLabel: presentation.entry.target.label,
             providerName: provider.displayName ?? "Codex",

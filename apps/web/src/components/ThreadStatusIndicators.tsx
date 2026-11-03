@@ -894,7 +894,7 @@ export function ThreadSearchPullRequestNumber({
     : pr === null
       ? null
       : pr.state === "open" && pr.isDraft
-        ? t("release3904.undo-draft")
+        ? "draft"
         : pr.state;
   return (
     <span

@@ -109,14 +109,14 @@ export function PullRequestCheckoutMenu({
                   size="xs"
                   variant="outline"
                   aria-label={
-                    handoff?.startsWith(t("project.remove.checkout"))
+                    handoff?.startsWith("checkout")
                       ? t("web.dynamic.PullRequestDetailActions.checking-out")
                       : t("web.dynamic.PullRequestDetailActions.check-out")
                   }
                 >
                   <GitBranchIcon aria-hidden className="size-3.5" />
                   <span className="@max-[35rem]/pr-header:hidden">
-                    {handoff?.startsWith(t("project.remove.checkout"))
+                    {handoff?.startsWith("checkout")
                       ? t("web.dynamic.PullRequestDetailActions.checking-out")
                       : t("web.dynamic.PullRequestDetailActions.check-out")}
                   </span>

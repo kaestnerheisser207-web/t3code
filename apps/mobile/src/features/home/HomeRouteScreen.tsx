@@ -117,9 +117,7 @@ export function HomeRouteScreen() {
     Object.values(savedConnectionsById).map((connection) => ({
       environmentId: connection.environmentId,
       label: connection.environmentLabel,
-      connectionState:
-        connectionStateByEnvironmentId.get(connection.environmentId) ??
-        t("web.dynamic.DeviceHostAvailability.available"),
+      connectionState: connectionStateByEnvironmentId.get(connection.environmentId) ?? "available",
     })),
     Order.mapInput(Order.String, (environment: { readonly label: string }) => environment.label),
   );

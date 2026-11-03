@@ -161,9 +161,7 @@ export default function ProjectScriptsControl({
         <MenuGroupLabel>{t("web.ui.ProjectScriptsControl.from-t3-json")}</MenuGroupLabel>
         {importableScripts.map((fileScript) => (
           <MenuItem
-            density={
-              presentation === "menu" ? "touch" : t("web.dynamic.EnvironmentIconPicker.default")
-            }
+            density={presentation === "menu" ? "touch" : "default"}
             key={`${fileScript.name} ${fileScript.command}`}
             onClick={() => void importFileScript(fileScript)}
           >
@@ -190,9 +188,7 @@ export default function ProjectScriptsControl({
         );
         return (
           <MenuItem
-            density={
-              presentation === "menu" ? "touch" : t("web.dynamic.EnvironmentIconPicker.default")
-            }
+            density={presentation === "menu" ? "touch" : "default"}
             key={script.id}
             className="group"
             disabled={!onRunScript}
@@ -238,10 +234,7 @@ export default function ProjectScriptsControl({
         );
       })}
       {importMenuItems}
-      <MenuItem
-        density={presentation === "menu" ? "touch" : t("web.dynamic.EnvironmentIconPicker.default")}
-        onClick={openAddDialog}
-      >
+      <MenuItem density={presentation === "menu" ? "touch" : "default"} onClick={openAddDialog}>
         <PlusIcon className="size-4" />
         <MenuItemLabel>
           {isPanel
@@ -258,9 +251,7 @@ export default function ProjectScriptsControl({
         <>
           {primaryScript && (
             <MenuItem
-              density={
-                presentation === "menu" ? "touch" : t("web.dynamic.EnvironmentIconPicker.default")
-              }
+              density={presentation === "menu" ? "touch" : "default"}
               disabled={!onRunScript}
               onClick={() => onRunScript?.(primaryScript)}
             >
@@ -288,9 +279,7 @@ export default function ProjectScriptsControl({
             </MenuSub>
           ) : (
             <MenuItem
-              density={
-                presentation === "menu" ? "touch" : t("web.dynamic.EnvironmentIconPicker.default")
-              }
+              density={presentation === "menu" ? "touch" : "default"}
               onClick={openAddDialog}
             >
               <PlusIcon className="size-4" />

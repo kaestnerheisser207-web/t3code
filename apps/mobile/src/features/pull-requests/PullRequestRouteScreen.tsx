@@ -1224,10 +1224,7 @@ function PullRequestFileRouteContent({ route }: PullRequestFileRouteProps) {
                 )
                   navigation.navigate("PullRequestReview", {
                     ...route.params,
-                    mode:
-                      nativeEvent.event === "submit-review"
-                        ? "review"
-                        : t("web.dynamic.PullRequestReviewAnnotation.comment"),
+                    mode: nativeEvent.event === "submit-review" ? "review" : "comment",
                   });
                 else if (nativeEvent.event === "comment") commentOnLine();
                 else void Clipboard.setStringAsync(selectedRow?.content ?? "");

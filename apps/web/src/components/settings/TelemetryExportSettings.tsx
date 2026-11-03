@@ -80,7 +80,7 @@ function endpointStatus(url: string, check: EndpointCheck | undefined, t: TFunct
         label: t("settings.controls.rejectedStatus", { status: result.status }),
         dot: "bg-destructive",
       };
-    case t("settings.controls.unreachable"):
+    case "Unreachable":
       return {
         label: result.timedOut
           ? t("settings.controls.timedOut")

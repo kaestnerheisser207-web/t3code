@@ -3356,7 +3356,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                         const rowVariant = folderRow
                           ? folderRowsMultiline
                             ? "folder-multiline"
-                            : t("web.dynamic.WelcomeWizard.folder")
+                            : "folder"
                           : isCard
                             ? "card"
                             : "slim";

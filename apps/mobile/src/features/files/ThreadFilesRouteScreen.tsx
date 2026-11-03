@@ -735,7 +735,7 @@ export function ThreadFileScreen(props: ThreadFileRouteScreenProps) {
   const previewUri =
     assetPreviewUri === null || previewRevision === 0
       ? assetPreviewUri
-      : `${assetPreviewUri}${assetPreviewUri.includes("?") ? "&" : t("hero.inlineSuffix")}revision=${previewRevision}`;
+      : `${assetPreviewUri}${assetPreviewUri.includes("?") ? "&" : "?"}revision=${previewRevision}`;
   // Remounting the preview after a re-mint is what makes a failed asset URL retryable.
   const handleRetryPreview = () => {
     void assetPreview.refresh().finally(() => setPreviewRevision((current) => current + 1));

@@ -215,7 +215,7 @@ export function AttachmentFilePreview(props: {
             ...(props.sizeBytes > 0
               ? { headers: { Range: `bytes=0-${FILE_TEXT_PREVIEW_MAX_BYTES}` } }
               : {}),
-            cache: revision === 0 ? t("web.dynamic.EnvironmentIconPicker.default") : "reload",
+            cache: revision === 0 ? "default" : "reload",
           });
       const result = await readFilePreviewResponse(response, controller.signal);
       if (!controller.signal.aborted) setContent(result);
@@ -224,7 +224,7 @@ export function AttachmentFilePreview(props: {
         setContentError(cause instanceof Error ? cause.message : "Could not load this file.");
     });
     return () => controller.abort();
-  }, [url, needsText, streamsText, revision, props.sizeBytes, props.file, refresh, t]);
+  }, [url, needsText, streamsText, revision, props.sizeBytes, props.file, refresh]);
   const failure = error ?? (needsText ? contentError : null);
   const defaultWordWrap = useClientSettings((settings) => settings.wordWrap);
   const [wordWrapOverride, setWordWrapOverride] = useState<boolean | null>(null);

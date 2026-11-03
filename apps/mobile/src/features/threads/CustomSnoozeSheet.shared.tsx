@@ -96,11 +96,7 @@ export function CustomSnoozeSheet(props: {
                 <DateTimePicker
                   value={date}
                   mode={picker}
-                  display={
-                    Platform.OS === "ios"
-                      ? "spinner"
-                      : t("web.dynamic.EnvironmentIconPicker.default")
-                  }
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
                   onDismiss={() => setPicker(null)}
                   onValueChange={(_, selected) => {
                     const next = new Date(date);

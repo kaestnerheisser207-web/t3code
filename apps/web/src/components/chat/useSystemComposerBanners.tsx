@@ -73,8 +73,7 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
   const setEnvironmentEnabled = useAtomCommand(environmentCatalog.setEnabled, {
     reportFailure: false,
   });
-  const activeEnvironmentConnectionPhase =
-    activeEnvironment?.connection.phase ?? t("web.dynamic.DeviceHostAvailability.available");
+  const activeEnvironmentConnectionPhase = activeEnvironment?.connection.phase ?? "available";
   const activeReconnectingEnvironmentId =
     activeEnvironmentConnectionPhase === "connecting" ||
     activeEnvironmentConnectionPhase === "reconnecting"
@@ -231,7 +230,7 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
       const updateFailed = serverUpdateState.status === "failed";
       items.push({
         id: `server-version:${serverUpdateEnvironmentId}`,
-        variant: updateFailed ? "error" : t("web.dynamic.EnvironmentIconPicker.default"),
+        variant: updateFailed ? "error" : "default",
         group: "environment",
         icon: <ComposerServerUpdateIcon status={serverUpdateState.status} />,
         title: t(updateFailed ? "banners.updateFailed" : "banners.updating", {

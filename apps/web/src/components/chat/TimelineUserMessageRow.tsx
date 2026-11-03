@@ -853,9 +853,7 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
   return (
     <div
       className="group @container flex flex-col items-end gap-1"
-      data-user-message-attribution={
-        folded ? t("web.dynamic.ThreadLineageWorkflowRow.agent") : undefined
-      }
+      data-user-message-attribution={folded ? "agent" : undefined}
     >
       {userMessage.attribution === "t3code" ? (
         <p

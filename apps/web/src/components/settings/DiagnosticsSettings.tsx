@@ -815,8 +815,7 @@ function DiagnosticsSettingsBody() {
     environmentId === null ? null : environmentSession.sessionStateAtom(environmentId),
   );
   const diagnosticsAccess = resolveUsageAccess({
-    connectionPhase:
-      environment?.connection.phase ?? t("web.dynamic.DeviceHostAvailability.available"),
+    connectionPhase: environment?.connection.phase ?? "available",
     session: session.data,
     hasSessionError: session.error !== null,
   });

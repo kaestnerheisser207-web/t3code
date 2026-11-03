@@ -1193,7 +1193,7 @@ function ResourceTelemetryDiagnosticsBody({
                   ? "danger"
                   : allT3 && allT3.ioWriteBytesPerSecond >= 1_024 * 1_024
                     ? "warning"
-                    : t("web.dynamic.EnvironmentIconPicker.default")
+                    : "default"
               }
             />
             <IconStat
@@ -1213,11 +1213,7 @@ function ResourceTelemetryDiagnosticsBody({
                     })
                   : undefined
               }
-              tone={
-                speedLimit !== null && speedLimit < 80
-                  ? "warning"
-                  : t("web.dynamic.EnvironmentIconPicker.default")
-              }
+              tone={speedLimit !== null && speedLimit < 80 ? "warning" : "default"}
             />
           </div>
           {telemetry.error ? (

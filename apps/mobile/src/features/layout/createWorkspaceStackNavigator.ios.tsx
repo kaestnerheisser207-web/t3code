@@ -309,9 +309,7 @@ function WorkspaceColumns(
       portraitPreferredDisplayMode={
         sidebarByOrientation ? sidebarDisplayMode(sidebarByOrientation.portrait, true) : undefined
       }
-      primaryBackgroundStyle={
-        deviceType === "pad" ? "none" : t("web.dynamic.EnvironmentIconPicker.default")
-      }
+      primaryBackgroundStyle={deviceType === "pad" ? "none" : "default"}
       topColumnForCollapsing={compactColumn}
       onCollapse={() => {
         collapsed.current = true;
@@ -331,7 +329,7 @@ function WorkspaceColumns(
           : (["threads", "pullRequests", "usage"] as const).find((candidate) =>
               workspaceTabs?.isTabActive(candidate),
             );
-        openWorkspaceTab(tab ?? t("release3904.undo-threads"), { columns: true });
+        openWorkspaceTab(tab ?? "threads", { columns: true });
       }}
       preferredDisplayMode={
         sidebarByOrientation

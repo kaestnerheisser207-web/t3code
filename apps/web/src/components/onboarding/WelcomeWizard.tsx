@@ -125,9 +125,7 @@ export function WelcomeWizard({
   readonly onDone: (projectRef?: ScopedProjectRef) => void | Promise<void>;
 }) {
   const t = useTranslate();
-  const [step, setStep] = useState<WizardStep>(
-    resumeEnvironmentId ? t("web.dynamic.ThreadLineageWorkflowRow.agents") : "connection",
-  );
+  const [step, setStep] = useState<WizardStep>(resumeEnvironmentId ? "agents" : "connection");
   const { environments } = useEnvironments();
   const [selection, setSelection] = useState<ReadonlySet<EnvironmentId> | null>(null);
   // Share the registry for the wizard's lifetime so unchecked computers are not auto-selected again.
@@ -263,9 +261,7 @@ export function WelcomeWizard({
             isStepDisabled={(index) => isImporting || index >= stageIndex}
             onStepChange={(index) => {
               if (isImporting || index > stageIndex) return;
-              setStep(
-                index === 0 ? "connection" : t("web.dynamic.ThreadLineageWorkflowRow.agents"),
-              );
+              setStep(index === 0 ? "connection" : "agents");
             }}
           />
         </WizardHeader>

@@ -881,7 +881,7 @@ function ThreadTerminal(props: {
               }
               connection={
                 environment.presentation?.connection ?? {
-                  phase: t("web.dynamic.DeviceHostAvailability.available"),
+                  phase: "available",
                   error: null,
                   traceId: null,
                 }

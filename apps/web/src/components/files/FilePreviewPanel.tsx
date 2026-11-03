@@ -192,7 +192,7 @@ function WorkspaceImagePreview(props: {
   const revisionSuffix =
     props.workspaceMutationId === null
       ? ""
-      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : t("hero.inlineSuffix")}workspace-revision=${encodeURIComponent(props.workspaceMutationId)}`;
+      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : "?"}workspace-revision=${encodeURIComponent(props.workspaceMutationId)}`;
   const imageUrl = assetUrl._tag === "Success" ? `${assetUrl.url}${revisionSuffix}` : null;
   const actionsSource: MediaActionSource = {
     kind: "image",
@@ -253,7 +253,7 @@ export function WorkspaceBrowserPreview(props: {
   const revisionSuffix =
     revision === null
       ? ""
-      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : t("hero.inlineSuffix")}${fileRevision !== undefined ? t("mobile.dynamic.PullRequestRouteScreen.file") : "workspace"}-revision=${encodeURIComponent(revision)}`;
+      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : "?"}${fileRevision !== undefined ? "file" : "workspace"}-revision=${encodeURIComponent(revision)}`;
 
   if (assetUrl._tag === "Failure") {
     return (
@@ -292,7 +292,6 @@ function WorkspaceVideoPreview(props: {
   readonly name: string;
   readonly workspaceMutationId: string | null;
 }) {
-  const t = useTranslate();
   const resource = workspaceAssetResource({
     kind: "media-file",
     threadRef: props.threadRef,
@@ -315,7 +314,7 @@ function WorkspaceVideoPreview(props: {
   const revisionSuffix =
     revision === null
       ? ""
-      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : t("hero.inlineSuffix")}${fileRevision !== undefined ? t("mobile.dynamic.PullRequestRouteScreen.file") : "workspace"}-revision=${encodeURIComponent(revision)}`;
+      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : "?"}${fileRevision !== undefined ? "file" : "workspace"}-revision=${encodeURIComponent(revision)}`;
   const latestUrl = assetUrl._tag === "Success" ? `${assetUrl.url}${revisionSuffix}` : null;
 
   return (
@@ -370,7 +369,7 @@ function WorkspaceAudioPreview(props: {
   const revisionSuffix =
     revision === null
       ? ""
-      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : t("hero.inlineSuffix")}${fileRevision !== undefined ? t("mobile.dynamic.PullRequestRouteScreen.file") : "workspace"}-revision=${encodeURIComponent(revision)}`;
+      : `${assetUrl._tag === "Success" && assetUrl.url.includes("?") ? "&" : "?"}${fileRevision !== undefined ? "file" : "workspace"}-revision=${encodeURIComponent(revision)}`;
   const url = assetUrl._tag === "Success" ? `${assetUrl.url}${revisionSuffix}` : null;
   if (assetUrl._tag === "Failure" || (url !== null && failedUrl === url)) {
     return (
@@ -1659,7 +1658,7 @@ export function WorkspaceLargeTextPreview(props: {
         {t("web.ui.FilePreviewPanel.loading")}
       </div>
     );
-  const src = `${loaded.url}${loaded.url.includes("?") ? "&" : t("hero.inlineSuffix")}revision=${encodeURIComponent(loaded.revision)}`;
+  const src = `${loaded.url}${loaded.url.includes("?") ? "&" : "?"}revision=${encodeURIComponent(loaded.revision)}`;
   return (
     <>
       <div className={FILE_SURFACE_SUBHEADER_CLASS}>

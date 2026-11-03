@@ -278,11 +278,7 @@ function ZipTreeRowView(props: {
         )}
       </View>
       <View className="w-5 items-center">
-        <PierreEntryIcon
-          path={node.path}
-          kind={entry ? t("mobile.dynamic.PullRequestRouteScreen.file") : "directory"}
-          size={17}
-        />
+        <PierreEntryIcon path={node.path} kind={entry ? "file" : "directory"} size={17} />
       </View>
       <Text className="min-w-0 flex-1 text-[15px] text-foreground" numberOfLines={1}>
         {folder ? (

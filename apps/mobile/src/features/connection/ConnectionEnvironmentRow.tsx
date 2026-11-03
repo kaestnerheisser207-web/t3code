@@ -121,11 +121,7 @@ export function ConnectionEnvironmentRow(props: {
         >
           <View className="flex-row items-center gap-1.5">
             <ConnectionStatusDot
-              state={
-                enabled || unsupported
-                  ? props.environment.connectionState
-                  : t("web.dynamic.DeviceHostAvailability.available")
-              }
+              state={enabled || unsupported ? props.environment.connectionState : "available"}
               pulse={isRetrying}
               size={8}
             />

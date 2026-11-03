@@ -195,7 +195,7 @@ export function UsagePage() {
     window: makeWindow(
       preferences.windowDays,
       undefined,
-      preferences.windowDays === 1 ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
+      preferences.windowDays === 1 ? "hour" : "day",
     ),
   }));
   const metric = preferences.metric;
@@ -247,11 +247,7 @@ export function UsagePage() {
     updatePreferences({ windowDays: days });
     setWindowSelection({
       days,
-      window: makeWindow(
-        days,
-        undefined,
-        days === 1 ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
-      ),
+      window: makeWindow(days, undefined, days === 1 ? "hour" : "day"),
     });
   };
   const selectMetric = (nextMetric: UsageMetric) => {
@@ -317,11 +313,7 @@ export function UsagePage() {
       });
       return;
     }
-    const nextWindow = makeWindow(
-      windowDays,
-      undefined,
-      isPast24Hours ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
-    );
+    const nextWindow = makeWindow(windowDays, undefined, isPast24Hours ? "hour" : "day");
     if (
       nextWindow.sinceDay !== window.sinceDay ||
       nextWindow.untilDay !== window.untilDay ||
@@ -608,7 +600,7 @@ export function UsagePage() {
           chartWindow={{
             days,
             hours,
-            resolution: shownHourly ? t("snoozeUnit.hour_one") : t("snoozeUnit.day_one"),
+            resolution: shownHourly ? "hour" : "day",
             timeZone: shownWindow.timeZone,
             referenceTime: shownWindow.untilTime,
             hour12,
@@ -1009,10 +1001,7 @@ function UsageOverview({
                   const key = `${model.provider}:${model.model}`;
                   const value = metric === "tokens" ? model.totalTokens : model.costUsd;
                   const hasBar = value > 0 && breakdownPeak > 0;
-                  const share = modelShare(
-                    model,
-                    metric === "tokens" ? "tokens" : t("web.dynamic.UsagePage.cost"),
-                  );
+                  const share = modelShare(model, metric === "tokens" ? "tokens" : "cost");
                   const rowFigures = figureClass(loadingProviders.has(model.provider));
                   return (
                     <tr

@@ -180,7 +180,7 @@ function ProjectFaviconImage(props: {
         <SymbolView
           name={{
             ios: "folder.fill",
-            android: props.open ? "folder_open" : t("web.dynamic.WelcomeWizard.folder"),
+            android: props.open ? "folder_open" : "folder",
           }}
           size={props.size}
           tintColorClassName={"accent-icon-subtle"}

@@ -101,9 +101,7 @@ export function PullRequestChip(props: {
   const t = useTranslate();
   const previewTarget = usePullRequestPreviewTarget(props.environmentId, props.metadata.url);
   const displayState =
-    props.metadata.state === "open" && props.metadata.isDraft
-      ? t("release3904.undo-draft")
-      : props.metadata.state;
+    props.metadata.state === "open" && props.metadata.isDraft ? "draft" : props.metadata.state;
   const StateIcon = PULL_REQUEST_STATE_PRESENTATION[displayState].Icon;
   const button = (
     <ContextChip
@@ -213,7 +211,6 @@ export function FileChip(props: {
       }
     | undefined;
 }) {
-  const t = useTranslate();
   if (props.svgPreview && !props.unresolved) return <SvgFileChip {...props} />;
   const content = <FileChipContent {...props} />;
   const state = props.unresolved
@@ -222,10 +219,7 @@ export function FileChip(props: {
       ? ("invalid" as const)
       : null;
   const attributes = {
-    kind: props.isVideo
-      ? "video"
-      : (documentChipKindForFileName(props.name) ??
-        t("mobile.dynamic.PullRequestRouteScreen.file")),
+    kind: props.isVideo ? "video" : (documentChipKindForFileName(props.name) ?? "file"),
     ...(state ? { state } : {}),
     "aria-label": [props.accessibleLabel, props.suffix].filter(Boolean).join(", "),
     "data-markdown-copy": props.copyMarkdown,

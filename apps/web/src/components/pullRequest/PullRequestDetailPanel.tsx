@@ -1168,7 +1168,7 @@ export function PullRequestDetailPanel({
     : null;
   const showsDraftToggle =
     detail?.state === "open" &&
-    can(detail.isDraft ? "ready" : t("release3904.undo-draft")) &&
+    can(detail.isDraft ? "ready" : "draft") &&
     !(detail.isDraft && primaryAction === "ready");
   const showsAutoMerge =
     canMergeSinglePullRequest &&

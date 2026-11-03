@@ -584,7 +584,7 @@ function AdaptiveWorkspaceLayoutContent(
       if (layout.primarySidebarOverlaysContent) setPrimarySidebarVisible(false);
       workspace?.dispatch({
         type: "select",
-        tab: detail.name === "Thread" ? t("release3904.undo-threads") : "pullRequests",
+        tab: detail.name === "Thread" ? "threads" : "pullRequests",
       });
       startOpeningDetail(detail);
       navigation.dispatch(selectWorkspaceDetail(detail, sheet));

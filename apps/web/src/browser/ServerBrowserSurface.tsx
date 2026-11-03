@@ -795,11 +795,7 @@ export function ServerBrowserSurface(props: {
         {!pdfUrl && agentCursor && control?.controller !== "you" ? (
           <AgentCursorMark
             {...agentCursor}
-            controller={
-              control?.controller === "agent"
-                ? t("web.dynamic.ThreadLineageWorkflowRow.agent")
-                : "none"
-            }
+            controller={control?.controller === "agent" ? "agent" : "none"}
           />
         ) : null}
         {/* Pin top-left to avoid focus scrolling; 16px prevents iOS focus zoom. */}
