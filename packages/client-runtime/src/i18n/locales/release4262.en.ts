@@ -375,4 +375,9 @@ export const release4262En = {
     "Say a sentence in the language above. Cleanup is skipped, so you see exactly what the model heard. The transcript stays on this page.",
   "release4262.voice-destination-help":
     "Microphone audio is sent to this environment to transcribe, then discarded. Choose Off to turn voice input off on this device. This choice is saved on this device only.",
+  "release4262.entry-one": "{{count}} entry",
+  "release4262.entry-other": "{{count}} entries",
+  "release4262.auto-detect": "Auto-detect",
+  "release4262.auto-with-language": "Auto ({{language}})",
+  "release4262.comfortable": "Comfortable",
 } as const;

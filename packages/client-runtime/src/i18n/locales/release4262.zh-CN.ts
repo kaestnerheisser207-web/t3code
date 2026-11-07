@@ -352,4 +352,9 @@ export const release4262ZhCN = {
     "用上方的语言说一句话。此处跳过清理，你看到的就是模型听到的内容。转写结果只保留在此页面。",
   "release4262.voice-destination-help":
     "麦克风音频会发送到此环境转写，随后丢弃。选择“关闭”可在此设备上关闭语音输入。此选择仅保存在此设备上。",
+  "release4262.entry-one": "{{count}} 个词条",
+  "release4262.entry-other": "{{count}} 个词条",
+  "release4262.auto-detect": "自动检测",
+  "release4262.auto-with-language": "自动（{{language}}）",
+  "release4262.comfortable": "舒适",
 } as const;

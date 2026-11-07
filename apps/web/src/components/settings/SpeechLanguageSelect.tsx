@@ -22,7 +22,8 @@ export function SpeechLanguageSelect({ model }: { readonly model: ModelLanguages
         preference,
       )
     : preference;
-  const effectiveLabel = resolved === "auto" ? "Auto-detect" : languageLabel(resolved);
+  const effectiveLabel =
+    resolved === "auto" ? t("release4262.auto-detect") : languageLabel(resolved);
   const unavailable =
     preference !== "auto" && preference !== resolved
       ? `${languageLabel(preference)} unavailable`
@@ -30,7 +31,7 @@ export function SpeechLanguageSelect({ model }: { readonly model: ModelLanguages
   const label = unavailable
     ? `${effectiveLabel} (${unavailable})`
     : preference === "auto" && resolved !== "auto"
-      ? `Auto (${effectiveLabel})`
+      ? t("release4262.auto-with-language", { language: effectiveLabel })
       : effectiveLabel;
   return (
     <Select

@@ -1,3 +1,4 @@
+import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import type { CSSProperties } from "react";
 import { useState } from "react";
@@ -73,11 +74,11 @@ function environmentIdentificationOptions(
   ];
 }
 
-const CHAT_WIDTH_LABELS: Record<ChatWidth, string> = {
-  comfortable: "Comfortable",
-  wide: "Wide",
-  full: "Full",
-};
+const CHAT_WIDTH_LABELS = {
+  comfortable: "release4262.comfortable",
+  wide: "settings.pages.AppearanceSettingsPanel.wide",
+  full: "settings.pages.AppearanceSettingsPanel.full",
+} as const satisfies Record<ChatWidth, TranslationKey>;
 
 export function AppearanceSettingsPanel() {
   const t = useTranslate();
@@ -292,7 +293,7 @@ export function AppearanceSettingsPanel() {
                   className="w-full min-w-0"
                   aria-label={t("settings.pages.AppearanceSettingsPanel.chat-width")}
                 >
-                  <SelectValue>{CHAT_WIDTH_LABELS[settings.chatWidth]}</SelectValue>
+                  <SelectValue>{t(CHAT_WIDTH_LABELS[settings.chatWidth])}</SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
                   <SelectItem value="comfortable">

@@ -402,7 +402,9 @@ function ProjectDictionaryRow() {
       }
       control={
         <span className="text-xs text-muted-foreground">
-          {words.length} {words.length === 1 ? "entry" : "entries"}
+          {t(words.length === 1 ? "release4262.entry-one" : "release4262.entry-other", {
+            count: words.length,
+          })}
         </span>
       }
     >
@@ -1203,12 +1205,12 @@ export function VoiceSettingsPanel() {
               >
                 <SelectValue>
                   {destinationValue === OFF
-                    ? "Off"
+                    ? t("settings.dynamic.off")
                     : (chosenEnvironment?.label ?? t("release4262.chosen-environment-unavailable"))}
                 </SelectValue>
               </SelectTrigger>
               <SelectPopup align="end" alignItemWithTrigger={false}>
-                <SelectItem value={OFF}>{t("web.dynamic.TraitsPicker.off")}</SelectItem>
+                <SelectItem value={OFF}>{t("settings.dynamic.off")}</SelectItem>
                 {environments.map((environment) => (
                   <SelectItem key={environment.environmentId} value={environment.environmentId}>
                     {environment.label}
@@ -1305,8 +1307,12 @@ export function VoiceSettingsPanel() {
           description={t("release4262.names-and-terms-transcription-should-spell-your-")}
           control={
             <span className="text-xs text-muted-foreground">
-              {settings.speechCustomWords.length}{" "}
-              {settings.speechCustomWords.length === 1 ? "entry" : "entries"}
+              {t(
+                settings.speechCustomWords.length === 1
+                  ? "release4262.entry-one"
+                  : "release4262.entry-other",
+                { count: settings.speechCustomWords.length },
+              )}
             </span>
           }
         >
