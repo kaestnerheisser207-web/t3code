@@ -784,9 +784,9 @@ describe("DesktopShellEnvironment", () => {
       }).pipe(Effect.forkChild({ startImmediately: true }));
 
       yield* Effect.forEach(spawned.slice(0, 2), Deferred.await);
-      yield* TestClock.adjust("5 seconds");
+      yield* TestClock.adjust("30 seconds");
       yield* Effect.forEach(spawned.slice(2), Deferred.await);
-      yield* TestClock.adjust("5 seconds");
+      yield* TestClock.adjust("30 seconds");
       yield* Fiber.join(fiber);
       assert.deepEqual([...new Set(commands)], ["pwsh.exe", "powershell.exe"]);
     }),
