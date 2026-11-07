@@ -1,11 +1,15 @@
+import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { useAuth } from "@clerk/react";
 import { Link } from "@tanstack/react-router";
 import { managedCapabilityDenial } from "@t3tools/contracts";
+import { ToolCallVisibility } from "@t3tools/contracts/settings";
+import * as Schema from "effect/Schema";
 
 import { hasCloudPublicConfig } from "~/cloud/publicConfig";
 import { useT3ConnectAuthPrompt } from "../clerk/useT3ConnectAuthPrompt";
 import { Button } from "../ui/button";
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { ScopedSwitch } from "./ScopedSwitch";
 import { SettingsPageContainer, SettingsRow, SettingsSection } from "./settingsLayout";
@@ -23,6 +27,7 @@ export function LabsSettingsPanel() {
       <SettingsSection id="beta" title={t("settings.pages.LabsSettingsPanel.beta")}>
         <BoringSidebarRow />
         <BoringSidebarMultilineRow />
+        <ToolCallVisibilityRow />
         {/* Clerk is only mounted when this build has T3 Connect. */}
         {hasCloudPublicConfig() ? <GuestLinksRowWithSignIn /> : <GuestLinksRow />}
         <LinkedEnvironmentsRow />
@@ -74,6 +79,55 @@ function BoringSidebarMultilineRow() {
           }
           aria-label={t("release4066.text150")}
         />
+      }
+    />
+  );
+}
+
+const TOOL_CALL_VISIBILITY_LABELS: Record<ToolCallVisibility, TranslationKey> = {
+  showAll: "web.dynamic.PullRequestChecksPopover.show-all",
+  hideSuccessful: "release4262.hide-successful",
+  hideAll: "release4262.hide-all",
+  zen: "release4262.zen",
+};
+
+const isToolCallVisibility = Schema.is(ToolCallVisibility);
+
+function ToolCallVisibilityRow() {
+  const t = useTranslate();
+  const settings = useScopedSettings();
+  const updateSettings = useUpdateScopedSettings();
+  return (
+    <SettingsRow
+      {...searchableSetting("tool-call-visibility")}
+      description={t("release4262.hide-the-commands-edits-and-searches-agents-run-")}
+      control={
+        <div className="w-full sm:w-40">
+          <Select
+            value={settings.toolCallVisibility}
+            onValueChange={(value) => {
+              if (isToolCallVisibility(value)) updateSettings({ toolCallVisibility: value });
+            }}
+          >
+            <SelectTrigger
+              size="sm"
+              className="w-full min-w-0"
+              aria-label={t("release4262.tool-calls-in-chat")}
+            >
+              <SelectValue>
+                {t(TOOL_CALL_VISIBILITY_LABELS[settings.toolCallVisibility])}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup align="end" alignItemWithTrigger={false}>
+              <SelectItem value="showAll">
+                {t("web.dynamic.PullRequestChecksPopover.show-all")}
+              </SelectItem>
+              <SelectItem value="hideSuccessful">{t("release4262.hide-successful")}</SelectItem>
+              <SelectItem value="hideAll">{t("release4262.hide-all")}</SelectItem>
+              <SelectItem value="zen">{t("release4262.zen")}</SelectItem>
+            </SelectPopup>
+          </Select>
+        </div>
       }
     />
   );

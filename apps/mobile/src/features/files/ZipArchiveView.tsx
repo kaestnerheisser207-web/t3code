@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import { useTranslate } from "../../i18n";
+import { useTranslate, mobileI18n } from "../../i18n";
 import { formatAttachmentSize } from "@t3tools/client-runtime/state/attachments";
 import {
   ARCHIVE_ENTRY_MAX_BYTES,
@@ -14,24 +14,22 @@ import {
   hostPreviewMimeTypeFromExtension,
 } from "@t3tools/shared/filePreview";
 import { LegendList } from "@legendapp/list/react-native";
+import * as Schema from "effect/Schema";
 import { fetch } from "expo/fetch";
 import { File } from "expo-file-system";
 import { useNavigation, usePreventRemove } from "@react-navigation/native";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
-import { Keyboard, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Keyboard, Pressable, ScrollView, TextInput, View } from "react-native";
 
 import { PierreEntryIcon } from "../../components/PierreEntryIcon";
-import { AndroidScreenHeader } from "../../components/ui/AndroidScreenHeader";
+import { AppBar } from "../../components/ui/AppBar";
+import { useContentTopInset } from "../../components/ui/useBarInset";
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { AppText as Text } from "../../components/ui/AppText";
 import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Progress } from "../../components/ui/Progress";
-import { Toolbar } from "../../components/ui/Toolbar";
-import { useNativeColumnLayoutMetrics } from "../../native/native-layout-metrics";
 import { NativeScrollView } from "../../native/NativeScrollViewMarker";
-import { NativeStackScreenOptions } from "../../native/StackHeader";
 import * as Dialog from "../../components/ui/Dialog";
 import { FilePreviewModal } from "../../components/FilePreviewModal";
 import {
@@ -70,41 +68,66 @@ interface ZipArchive {
   readonly fileCount: number;
 }
 
-interface ZipFailure {
-  readonly localized: (t: TFunction) => { title: string; detail: string };
-  readonly title: string;
-  readonly detail: string;
-  readonly retry: boolean;
-}
+const ZipFailure = Schema.Struct({
+  kind: Schema.Literals(["too-large", "cancelled", "network", "browse"]),
+  causeMessage: Schema.NullOr(Schema.String),
+  title: Schema.String,
+  detail: Schema.String,
+  retry: Schema.Boolean,
+});
+type ZipFailure = typeof ZipFailure.Type;
 
 const SAVE_ZIP_HINT = "Save the ZIP to open it in another app.";
 const TOO_LARGE: ZipFailure = {
-  localized: (t) => ({
-    title: t("zip.tooLarge"),
-    detail: t("zip.browseLimit", { size: formatAttachmentSize(ARCHIVE_MAX_BYTES) }),
-  }),
+  kind: "too-large",
+  causeMessage: null,
   title: "Too large to browse here",
   detail: `Browsing works up to ${formatAttachmentSize(ARCHIVE_MAX_BYTES)}. ${SAVE_ZIP_HINT}`,
   retry: false,
 };
 const CANCELLED: ZipFailure = {
-  localized: (t) => ({ title: t("zip.cancelled"), detail: t("zip.cancelledDetail") }),
+  kind: "cancelled",
+  causeMessage: null,
   title: "Download cancelled",
   detail: "The ZIP wasn't downloaded. Try again to list its files.",
   retry: true,
 };
 const NETWORK: ZipFailure = {
-  localized: (t) => ({ title: t("zip.network"), detail: t("zip.networkDetail") }),
+  kind: "network",
+  causeMessage: null,
   title: "Couldn't download this ZIP",
   detail: "Check the connection to this environment and try again.",
   retry: true,
 };
 
-class ZipFailureError extends Error {
-  constructor(readonly failure: ZipFailure) {
-    super(failure.title);
+function localizedZipFailure(failure: ZipFailure, t: TFunction) {
+  switch (failure.kind) {
+    case "too-large":
+      return {
+        title: t("zip.tooLarge"),
+        detail: t("zip.browseLimit", { size: formatAttachmentSize(ARCHIVE_MAX_BYTES) }),
+      };
+    case "cancelled":
+      return { title: t("zip.cancelled"), detail: t("zip.cancelledDetail") };
+    case "network":
+      return { title: t("zip.network"), detail: t("zip.networkDetail") };
+    case "browse":
+      return {
+        title: t("zip.browseFailed"),
+        detail: `${failure.causeMessage ?? t("zip.damaged")} ${t("zip.saveHint")}`,
+      };
   }
 }
+
+class ZipFailureError extends Schema.TaggedError<ZipFailureError>()("ZipFailureError", {
+  failure: ZipFailure,
+}) {
+  override get message(): string {
+    return this.failure.title;
+  }
+}
+
+const isZipFailureError = Schema.is(ZipFailureError);
 
 function errorMessage(cause: unknown, fallback: string) {
   return cause instanceof Error ? cause.message : fallback;
@@ -122,7 +145,7 @@ async function readArchiveBody(
       const { value, done } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > ARCHIVE_MAX_BYTES) throw new ZipFailureError(TOO_LARGE);
+      if (size > ARCHIVE_MAX_BYTES) throw new ZipFailureError({ failure: TOO_LARGE });
       chunks.push(value);
       onProgress(size);
     }
@@ -144,13 +167,13 @@ async function openArchive(bytes: ArrayBuffer): Promise<ZipArchive> {
     files = await boundedZip(bytes);
   } catch (cause) {
     throw new ZipFailureError({
-      localized: (t) => ({
-        title: t("zip.browseFailed"),
-        detail: `${errorMessage(cause, t("zip.damaged"))} ${t("zip.saveHint")}`,
-      }),
-      title: "Couldn't browse this ZIP",
-      detail: `${errorMessage(cause, "It may be incomplete or damaged.")} ${SAVE_ZIP_HINT}`,
-      retry: false,
+      failure: {
+        kind: "browse",
+        causeMessage: cause instanceof Error && cause.message ? cause.message : null,
+        title: mobileI18n.t("zip.browseFailed"),
+        detail: `${errorMessage(cause, "It may be incomplete or damaged.")} ${SAVE_ZIP_HINT}`,
+        retry: false,
+      },
     });
   }
   const entries = [...files].map(([path, file]): ZipEntry => {
@@ -200,15 +223,15 @@ function useZipArchive(input: {
     // oxlint-disable-next-line react/set-state-in-effect -- A new archive load resets its progress.
     setState({ status: "loading", receivedBytes: 0, timeLeft: null });
     void (async () => {
-      if (sizeBytes > ARCHIVE_MAX_BYTES) throw new ZipFailureError(TOO_LARGE);
+      if (sizeBytes > ARCHIVE_MAX_BYTES) throw new ZipFailureError({ failure: TOO_LARGE });
       if (isLocal) {
         const file = new File(uri);
-        if ((file.size ?? 0) > ARCHIVE_MAX_BYTES) throw new ZipFailureError(TOO_LARGE);
+        if ((file.size ?? 0) > ARCHIVE_MAX_BYTES) throw new ZipFailureError({ failure: TOO_LARGE });
         return openArchive(await file.arrayBuffer());
       }
       const url = (await refresh()) ?? uri;
       const response = await fetch(url, { signal: abort.signal });
-      if (!response.ok || !response.body) throw new ZipFailureError(NETWORK);
+      if (!response.ok || !response.body) throw new ZipFailureError({ failure: NETWORK });
       const bytes = await readArchiveBody(response.body, (receivedBytes) =>
         setState({
           status: "loading",
@@ -230,7 +253,7 @@ function useZipArchive(input: {
         if (!abort.signal.aborted)
           setState({
             status: "failed",
-            failure: cause instanceof ZipFailureError ? cause.failure : NETWORK,
+            failure: isZipFailureError(cause) ? cause.failure : NETWORK,
           });
       });
     return () => abort.abort();
@@ -304,70 +327,37 @@ function ZipTreeRowView(props: {
 function ZipArchiveHeader(props: {
   readonly name: string;
   readonly subtitle: string;
-  readonly tintColor: string;
   readonly onSave: () => void;
   readonly onRemove: (() => void) | null;
 }) {
   const t = useTranslate();
   const navigation = useNavigation();
-  const isAndroid = Platform.OS === "android";
   return (
-    <>
-      <NativeStackScreenOptions
-        options={{
-          headerShown: !isAndroid,
-          headerTintColor: props.tintColor,
-          headerTitle: props.name,
-          title: props.name,
-          unstable_headerSubtitle: isAndroid ? undefined : props.subtitle,
-        }}
-      />
-      {isAndroid ? (
-        <AndroidScreenHeader
-          title={props.name}
-          subtitle={props.subtitle}
-          onBack={() => {
-            if (navigation.canGoBack()) navigation.goBack();
-          }}
-          actions={[
-            { accessibilityLabel: "Save ZIP", icon: "square.and.arrow.up", onPress: props.onSave },
-            ...(props.onRemove
-              ? [
-                  {
-                    accessibilityLabel: "Remove from draft",
-                    icon: "trash" as const,
-                    onPress: props.onRemove,
-                    destructive: true,
-                    overflowOnly: true,
-                  },
-                ]
-              : []),
-          ]}
-        />
-      ) : (
-        <Toolbar placement="right">
-          {props.onRemove ? (
-            <Toolbar.Menu
-              accessibilityLabel={t("mobile.tools.ZipArchiveView.zip-actions")}
-              icon="ellipsis"
-            >
-              <Toolbar.MenuAction icon="square.and.arrow.up" onPress={props.onSave}>
-                {t("mobile.tools.ZipArchiveView.save-zip")}
-              </Toolbar.MenuAction>
-              <Toolbar.MenuAction icon="trash" destructive onPress={props.onRemove}>
-                {t("mobile.tools.ZipArchiveView.remove-from-draft")}
-              </Toolbar.MenuAction>
-            </Toolbar.Menu>
-          ) : (
-            <Toolbar.Button
-              accessibilityLabel={t("mobile.tools.ZipArchiveView.save-zip")}
-              icon="square.and.arrow.up"
-              onPress={props.onSave}
-            />
-          )}
-        </Toolbar>
-      )}
-    </>
+    <AppBar
+      title={props.name}
+      subtitle={props.subtitle}
+      onBack={() => {
+        if (navigation.canGoBack()) navigation.goBack();
+      }}
+      actions={[
+        {
+          accessibilityLabel: t("mobile.tools.ZipArchiveView.save-zip"),
+          icon: "square.and.arrow.up",
+          onPress: props.onSave,
+        },
+        ...(props.onRemove
+          ? [
+              {
+                accessibilityLabel: t("mobile.tools.ZipArchiveView.remove-from-draft"),
+                icon: "trash" as const,
+                onPress: props.onRemove,
+                destructive: true,
+                overflowOnly: true,
+              },
+            ]
+          : []),
+      ]}
+    />
   );
 }
 
@@ -414,12 +404,13 @@ function ZipArchiveFailure(props: {
   readonly onSave: () => void;
 }) {
   const t = useTranslate();
+  const localized = localizedZipFailure(props.failure, t);
   return (
     <View className="flex-1 items-center justify-center bg-sheet px-6">
       <EmptyState
         variant="plain"
-        title={props.failure.localized(t).title}
-        detail={props.failure.localized(t).detail}
+        title={localized.title}
+        detail={localized.detail}
         action={
           <View className="flex-row gap-3">
             {props.failure.retry ? (
@@ -461,13 +452,13 @@ function ZipArchiveList(props: {
   return (
     <View className="flex-1 bg-sheet">
       <LegendList
-        renderScrollComponent={Platform.OS === "ios" ? NativeScrollView : undefined}
+        renderScrollComponent={NativeScrollView}
         contentInsetStartAdjustment={props.headerInset}
         className="flex-1"
         data={rows}
         keyExtractor={(row) => `${row.node.entry ? "f" : "d"}:${row.node.path}`}
-        contentInsetAdjustmentBehavior={Platform.OS === "ios" ? "automatic" : "never"}
-        automaticallyAdjustsScrollIndicatorInsets={Platform.OS === "ios"}
+        contentInsetAdjustmentBehavior="automatic"
+        automaticallyAdjustsScrollIndicatorInsets
         estimatedItemSize={44}
         recycleItems
         keyboardDismissMode="on-drag"
@@ -547,7 +538,6 @@ function ZipArchiveList(props: {
 export function ZipArchiveView(props: {
   readonly name: string;
   readonly subtitle: string;
-  readonly tintColor: string;
   readonly sizeBytes: number;
   readonly uri: string | null;
   readonly isLocal: boolean;
@@ -568,9 +558,7 @@ export function ZipArchiveView(props: {
   const selected = selection && selection.archive === archive ? selection.entry : null;
   const entryOpen = selected !== null;
   usePreventRemove(entryOpen, () => setSelection(null));
-  const insets = useSafeAreaInsets();
-  const columnMetrics = useNativeColumnLayoutMetrics();
-  const headerInset = Platform.OS === "ios" ? (columnMetrics?.safeArea.top ?? insets.top) : 0;
+  const headerInset = useContentTopInset();
   return (
     <View className="flex-1 bg-sheet">
       {entryOpen ? null : (
@@ -581,7 +569,6 @@ export function ZipArchiveView(props: {
               ? `${archive.fileCount} ${archive.fileCount === 1 ? t("mobile.dynamic.PullRequestRouteScreen.file") : t("mobile.dynamic.PreviewStreamWebView.files")}${props.sizeBytes > 0 ? ` · ${formatAttachmentSize(props.sizeBytes)}` : ""}`
               : props.subtitle
           }
-          tintColor={props.tintColor}
           onSave={props.onSave}
           onRemove={props.onRemove}
         />
@@ -806,79 +793,51 @@ function ZipEntryView(props: {
   });
   const folders = entry.path.split("/").slice(0, -1);
   const subtitle = `${[props.archiveName, ...folders].join(" / ")} · ${formatAttachmentSize(entry.sizeBytes)}`;
-  const isAndroid = Platform.OS === "android";
   return (
     <View className="flex-1 bg-sheet">
-      <NativeStackScreenOptions
-        options={{
-          headerShown: !isAndroid,
-          headerTitle: entry.name,
-          title: entry.name,
-          unstable_headerSubtitle: isAndroid ? undefined : subtitle,
-        }}
+      <AppBar
+        title={entry.name}
+        subtitle={subtitle}
+        onBack={props.onBack}
+        menus={[
+          {
+            title: t("mobile.tools.ZipArchiveView.file-actions"),
+            icon: "ellipsis",
+            items: [
+              ...(renderedMode
+                ? [
+                    {
+                      id: "toggle-rendered",
+                      title: rendered
+                        ? t("mobile.dynamic.ZipArchiveView.show-source")
+                        : t("mobile.dynamic.ZipArchiveView.show-preview"),
+                      icon: rendered ? "doc.text" : "eye",
+                      onPress: () => setRendered((value) => !value),
+                    },
+                  ]
+                : []),
+              ...(canAddToChat
+                ? [
+                    {
+                      id: "add-to-chat",
+                      title: t("mobile.tools.ZipArchiveView.add-to-chat"),
+                      icon: "plus.bubble",
+                      disabled: busy !== null,
+                      onPress: addToChat,
+                    },
+                  ]
+                : []),
+              {
+                id: "save",
+                title: t("mobile.tools.ZipArchiveView.save-file"),
+                icon: "square.and.arrow.up",
+                disabled: busy !== null,
+                onPress: save,
+              },
+            ],
+          },
+        ]}
       />
-      {isAndroid ? (
-        <AndroidScreenHeader
-          title={entry.name}
-          subtitle={subtitle}
-          onBack={props.onBack}
-          actions={[
-            ...(renderedMode
-              ? [
-                  {
-                    accessibilityLabel: rendered
-                      ? t("mobile.dynamic.ZipArchiveView.show-source")
-                      : t("mobile.dynamic.ZipArchiveView.show-preview"),
-                    icon: rendered ? ("doc.text" as const) : ("eye" as const),
-                    onPress: () => setRendered((value) => !value),
-                  },
-                ]
-              : []),
-            ...(canAddToChat
-              ? [
-                  {
-                    accessibilityLabel: "Add to chat",
-                    icon: "plus.bubble" as const,
-                    onPress: addToChat,
-                    disabled: busy !== null,
-                  },
-                ]
-              : []),
-            {
-              accessibilityLabel: "Save file",
-              icon: "square.and.arrow.up",
-              onPress: save,
-              loading: busy === "save",
-            },
-          ]}
-        />
-      ) : (
-        <Toolbar placement="right">
-          <Toolbar.Menu
-            accessibilityLabel={t("mobile.tools.ZipArchiveView.file-actions")}
-            icon="ellipsis"
-          >
-            {renderedMode ? (
-              <Toolbar.MenuAction
-                icon={rendered ? "doc.text" : "eye"}
-                onPress={() => setRendered((value) => !value)}
-              >
-                {rendered
-                  ? t("mobile.dynamic.ZipArchiveView.show-source")
-                  : t("mobile.dynamic.ZipArchiveView.show-preview")}
-              </Toolbar.MenuAction>
-            ) : null}
-            {canAddToChat ? (
-              <Toolbar.MenuAction icon="plus.bubble" disabled={busy !== null} onPress={addToChat}>
-                {t("mobile.tools.ZipArchiveView.add-to-chat")}
-              </Toolbar.MenuAction>
-            ) : null}
-            <Toolbar.MenuAction icon="square.and.arrow.up" disabled={busy !== null} onPress={save}>
-              {t("mobile.tools.ZipArchiveView.save-file")}
-            </Toolbar.MenuAction>
-          </Toolbar.Menu>
-        </Toolbar>
-      )}
       {content.status === "failed" ? (
         <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6">
           <EmptyState

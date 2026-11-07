@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { useTranslate } from "../../i18n";
 import {
   type LinkedPrompt,
@@ -24,19 +25,43 @@ const OPENER_STORAGE_KEY = "t3code:prompt-link-opener";
 const Opener = Schema.NullOr(Schema.Literals(["app", "browser"]));
 
 interface LinkSummary {
+  readonly title: string;
+  readonly description: string;
   readonly prompt: LinkedPrompt | null;
   readonly details: ReadonlyArray<string>;
 }
 
+const promptHeader = (t: TFunction) => ({
+  title: t("web.ui.HostedPromptLinkLanding.open-this-prompt"),
+  description: t(
+    "web.ui.HostedPromptLinkLanding.it-opens-as-a-draft-nothing-runs-until-you-press-send",
+  ),
+});
+
 function summarize(
   appPath: string,
+  t: TFunction,
 ): { ok: true; value: LinkSummary } | { ok: false; error: string } {
   const url = new URL(appPath, window.location.origin);
   if (url.pathname !== "/new") {
     const prompt = parseThreadLinkPrompt(url.search);
-    return prompt.ok
-      ? { ok: true, value: { prompt: prompt.value, details: ["Opens one of your threads."] } }
-      : prompt;
+    if (!prompt.ok) return prompt;
+    return {
+      ok: true,
+      value:
+        prompt.value === null
+          ? {
+              title: t("release4262.open-this-thread"),
+              description: t("release4262.it-opens-in-t3-code-if-you-re-connected-to-the-m"),
+              prompt: null,
+              details: [],
+            }
+          : {
+              ...promptHeader(t),
+              prompt: prompt.value,
+              details: [t("release4262.opens-one-of-your-threads")],
+            },
+    };
   }
   const link = parseNewThreadLink(url.search);
   if (!link.ok) return link;
@@ -44,16 +69,23 @@ function summarize(
     const { owner, name, number } = link.value.pullRequest;
     return {
       ok: true,
-      value: { prompt: link.value.prompt, details: [`Pull request ${owner}/${name}#${number}`] },
+      value: {
+        ...promptHeader(t),
+        prompt: link.value.prompt,
+        details: [`Pull request ${owner}/${name}#${number}`],
+      },
     };
   }
   const { repository, provider, model } = link.value;
   return {
     ok: true,
     value: {
+      ...promptHeader(t),
       prompt: link.value.prompt,
       details: [
-        repository ? `Repository ${repository.owner}/${repository.name}` : "No project",
+        repository
+          ? `Repository ${repository.owner}/${repository.name}`
+          : t("mobile.threads.NewTaskDraftScreen.no-project"),
         ...(provider ? [`Model ${model ? `${provider} ${model}` : provider}`] : []),
       ],
     },
@@ -100,7 +132,7 @@ function HostedPromptLinkLanding({
   readonly onChoose: (choice: "app" | "browser", remember: boolean) => void;
 }) {
   const t = useTranslate();
-  const summary = summarize(appPath);
+  const summary = summarize(appPath, t);
   const [remember, setRemember] = useState(false);
   const deepLink = promptLinkDeepLink(appPath);
   const onPhone = /android|iphone|ipad/i.test(navigator.userAgent);
@@ -124,15 +156,10 @@ function HostedPromptLinkLanding({
     );
   }
 
-  const { prompt, details } = summary.value;
+  const { title, description, prompt, details } = summary.value;
   return (
     <StandalonePage>
-      <StandalonePageHeader
-        title={t("web.ui.HostedPromptLinkLanding.open-this-prompt")}
-        description={t(
-          "web.ui.HostedPromptLinkLanding.it-opens-as-a-draft-nothing-runs-until-you-press-send",
-        )}
-      />
+      <StandalonePageHeader title={title} description={description} />
       {prompt !== null && prompt.hiddenCharacters > 0 ? (
         <Alert className="mt-5" variant="error">
           <AlertTitle>
@@ -150,7 +177,9 @@ function HostedPromptLinkLanding({
           {prompt.text}
         </pre>
       ) : null}
-      <p className="mt-3 text-xs text-muted-foreground">{details.join(" · ")}</p>
+      {details.length > 0 ? (
+        <p className="mt-3 text-xs text-muted-foreground">{details.join(" · ")}</p>
+      ) : null}
       <div className="mt-6 flex flex-wrap gap-2">
         <Button render={<a href={deepLink} />} onClick={() => onChoose("app", remember)}>
           {onPhone

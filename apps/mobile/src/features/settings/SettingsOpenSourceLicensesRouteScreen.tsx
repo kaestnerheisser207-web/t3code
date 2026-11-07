@@ -1,7 +1,6 @@
 import { useTranslate } from "../../i18n";
 import { NativeScrollView } from "../../native/NativeScrollViewMarker";
-import { SearchField } from "../../components/ui/SearchField";
-import { Toolbar } from "../../components/ui/Toolbar";
+import { useSearchToolbarInset } from "../../components/ui/useBarInset";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import { LegendList } from "@legendapp/list/react-native";
 import { type StaticScreenProps, useNavigation } from "@react-navigation/native";
@@ -12,20 +11,14 @@ import {
   thirdPartyLicenseEntryKey,
   type ThirdPartyLicenseEntry,
 } from "@t3tools/shared/thirdPartyLicenses";
-import { useMemo, useRef, useState } from "react";
-import { Linking, Platform, Pressable, type TextInputInstance, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Linking, Platform, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { AppText as Text } from "../../components/ui/AppText";
 import { ListRow } from "../../components/ui/ListRow";
 import { SettingsScreen } from "./components/SettingsScreen";
-import { NativeStackScreenOptions } from "../../native/StackHeader";
-import {
-  createNativeMailSearchToolbarItem,
-  NATIVE_MAIL_SEARCH_TOOLBAR_CONTENT_INSET,
-} from "../layout/native-mail-search-toolbar";
-import { useNativeMailSearchToolbar } from "../../native/use-native-mail-search-toolbar";
 
 import { getMobileThirdPartyLicenses } from "./mobileThirdPartyLicenses";
 
@@ -56,11 +49,19 @@ function LicenseRow(props: {
 
 export function SettingsOpenSourceLicensesRouteScreen() {
   const t = useTranslate();
-  const searchRef = useRef<TextInputInstance>(null);
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
-  const usesNativeMailSearchToolbar = useNativeMailSearchToolbar();
+  const search = {
+    value: query,
+    onChangeText: setQuery,
+    placeholder: t("mobile.settings.SettingsOpenSourceLicensesRouteScreen.search-packages"),
+    accessibilityLabel: t(
+      "mobile.settings.SettingsOpenSourceLicensesRouteScreen.search-open-source-licenses",
+    ),
+    clearAccessibilityLabel: t("release4262.clear-package-search"),
+  };
+  const searchInset = useSearchToolbarInset(search);
   const manifest = useMobileThirdPartyLicenses();
   const entries = manifest?.entries ?? [];
   const filteredEntries = filterThirdPartyLicenseEntries(entries, query);
@@ -94,50 +95,14 @@ export function SettingsOpenSourceLicensesRouteScreen() {
   return (
     <SettingsScreen
       title={t("mobile.settings.SettingsOpenSourceLicensesRouteScreen.open-source-licenses")}
+      search={search}
     >
-      {Platform.OS === "ios" ? (
-        <NativeStackScreenOptions
-          options={{
-            unstable_headerToolbarItems: usesNativeMailSearchToolbar
-              ? () => [
-                  createNativeMailSearchToolbarItem({
-                    onSearchTextChange: setQuery,
-                    placeholder: "Search packages",
-                    searchTextChangeId: "open-source-licenses-search-text",
-                    showsSearchDismissButton: true,
-                  }),
-                ]
-              : undefined,
-            headerSearchBarOptions: usesNativeMailSearchToolbar
-              ? undefined
-              : {
-                  allowToolbarIntegration: true,
-                  autoCapitalize: "none",
-                  hideNavigationBar: false,
-                  hideWhenScrolling: false,
-                  obscureBackground: false,
-                  onCancelButtonPress: () => setQuery(""),
-                  onChangeText: (event) => setQuery(event.nativeEvent.text),
-                  placeholder: "Search packages",
-                },
-          }}
-        />
-      ) : null}
-      {Platform.OS === "ios" && !usesNativeMailSearchToolbar ? (
-        <Toolbar placement="bottom">
-          <Toolbar.SearchBarSlot />
-        </Toolbar>
-      ) : null}
-
       <LegendList
-        renderScrollComponent={Platform.OS === "ios" ? NativeScrollView : undefined}
+        renderScrollComponent={NativeScrollView}
         className="flex-1"
         contentContainerStyle={{
-          paddingBottom: usesNativeMailSearchToolbar
-            ? NATIVE_MAIL_SEARCH_TOOLBAR_CONTENT_INSET + 18
-            : Platform.OS === "ios"
-              ? 18
-              : Math.max(insets.bottom, 18) + 18,
+          paddingBottom:
+            searchInset + (Platform.OS === "ios" ? 18 : Math.max(insets.bottom, 18) + 18),
         }}
         contentInsetAdjustmentBehavior="automatic"
         data={filteredEntries}
@@ -153,25 +118,6 @@ export function SettingsOpenSourceLicensesRouteScreen() {
               )}
             </Text>
           </View>
-        }
-        ListHeaderComponent={
-          Platform.OS !== "ios" ? (
-            <View className="px-5 pt-4 pb-5">
-              <SearchField
-                inputRef={searchRef}
-                autoFocus={false}
-                accessibilityLabel={t(
-                  "mobile.settings.SettingsOpenSourceLicensesRouteScreen.search-open-source-licenses",
-                )}
-                clearAccessibilityLabel="Clear package search"
-                onChangeText={setQuery}
-                placeholder={t(
-                  "mobile.settings.SettingsOpenSourceLicensesRouteScreen.search-packages",
-                )}
-                value={query}
-              />
-            </View>
-          ) : null
         }
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}

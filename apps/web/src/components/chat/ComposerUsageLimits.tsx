@@ -104,7 +104,7 @@ export function modelFallbackBannerItem(
       t("usageReview.fallback-usage", { provider: defaultProviderName }) +
       (resetsAt
         ? t("usageReview.fallback-resets", {
-            time: formatUpcomingTimestamp(resetsAt, timestampFormat, undefined, locale),
+            time: formatUpcomingTimestamp(resetsAt, timestampFormat, undefined, undefined, locale),
           })
         : ""),
     actions: (

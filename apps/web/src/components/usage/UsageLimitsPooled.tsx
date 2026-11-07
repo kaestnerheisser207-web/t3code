@@ -202,6 +202,7 @@ function SegmentPopover({
               window.resetsAt,
               timestampFormat,
               now,
+              undefined,
               dateI18n.resolvedLanguage,
             )}
             {usageText(t, resetsIn ? ` · ${resetsIn.replace("resets in ", "in ")}` : "")}

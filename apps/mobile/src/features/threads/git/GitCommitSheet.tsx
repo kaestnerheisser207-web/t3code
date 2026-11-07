@@ -10,7 +10,6 @@ import { formatDiffCount } from "@t3tools/client-runtime/diff-count";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SymbolView } from "../../../components/ui/AppSymbol";
-import { NativeStackScreenOptions } from "../../../native/StackHeader";
 import { AppText as Text, AppTextInput as TextInput } from "../../../components/ui/AppText";
 import { cn } from "../../../lib/cn";
 import { useEnvironmentQuery } from "../../../state/query";
@@ -73,7 +72,6 @@ export function GitCommitSheet(_props: GitCommitSheetProps) {
   const android = Platform.OS === "android";
   const header = (
     <SheetHeader
-      presentation={android ? "inline" : "native"}
       title={t("mobile.threads.GitCommitSheet.commit-changes")}
       subtitle={gitStatus.data?.refName ?? t("mobile.dynamic.GitCommitSheet.detached-head")}
       onCancel={() => navigation.goBack()}
@@ -89,12 +87,6 @@ export function GitCommitSheet(_props: GitCommitSheetProps) {
       className="bg-sheet ios:flex-1 android:flex-col-reverse"
       style={android ? { maxHeight: windowHeight * 0.92 } : undefined}
     >
-      {android ? (
-        <NativeStackScreenOptions
-          options={{ sheetCornerRadius: 28, sheetAllowedDetents: "fitToContents" }}
-        />
-      ) : null}
-      {android ? null : header}
       <ScreenContent fitToContents>
         <ScrollView
           nestedScrollEnabled
@@ -256,7 +248,7 @@ export function GitCommitSheet(_props: GitCommitSheetProps) {
           </View>
         </ScrollView>
       </ScreenContent>
-      {android ? header : null}
+      {header}
     </View>
   );
 }

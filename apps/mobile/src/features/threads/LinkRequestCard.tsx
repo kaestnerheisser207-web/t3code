@@ -27,7 +27,7 @@ import {
 import * as Option from "effect/Option";
 import * as Result from "effect/Result";
 import { useMemo, useRef, useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, View, type ColorValue } from "react-native";
+import { Pressable, ScrollView, View, type ColorValue } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SymbolView, type AppSymbolName } from "../../components/ui/AppSymbol";
@@ -40,6 +40,7 @@ import { useAtomCommand } from "../../state/use-atom-command";
 import { ListChoiceRow as SettingsChoiceRow } from "../../components/ui/ListChoiceRow";
 import { SettingsSection } from "../settings/components/SettingsSection";
 import { Button } from "../../components/ui/Button";
+import { Sheet } from "../../components/ui/Sheet";
 import { RUNTIME_MODE_CHOICES } from "./thread-settings-options";
 
 /** The same five levels as web's access picker: read-only, then the runtime modes. */
@@ -335,26 +336,22 @@ function LinkRequestSheet(props: {
   };
 
   return (
-    <Modal
-      animationType="slide"
-      presentationStyle={Platform.OS === "ios" ? "pageSheet" : "fullScreen"}
+    <Sheet
+      title={
+        pickMachine ? t("mobile.dynamic.LinkRequestCard.link-a-machine") : `Link ${targetName}`
+      }
+      onClose={props.onClose}
       // An answer that lands after a close would still link, and would close a reopened sheet.
-      onRequestClose={() => {
-        if (!busy) props.onClose();
-      }}
+      dismissDisabled={busy}
     >
       <ScrollView
         className="flex-1 bg-sheet-solid"
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="gap-5 p-5"
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-1">
-          <Text className="font-t3-bold text-lg text-foreground">
-            {pickMachine
-              ? t("mobile.dynamic.LinkRequestCard.link-a-machine")
-              : t("mobile.dynamic.LinkRequestCard.link-param", { targetName: targetName })}
-          </Text>
           <Text className="font-sans text-sm leading-5 text-foreground-muted">
             {t(
               "mobile.threads.LinkRequestCard.agents-here-can-then-launch-message-and-wait-on-threads-there-it-appears-in-that-machine-s-connections-where-it-can-be-revoked",
@@ -505,7 +502,7 @@ function LinkRequestSheet(props: {
           fullWidth
         />
       </ScrollView>
-    </Modal>
+    </Sheet>
   );
 }
 

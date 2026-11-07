@@ -1,3 +1,4 @@
+import * as Schema from "effect/Schema";
 import { useTranslate } from "../../i18n";
 import { ListRow } from "../../components/ui/ListRow";
 import * as Dialog from "../../components/ui/Dialog";
@@ -9,7 +10,6 @@ import {
   StackActions,
   useIsFocused,
   useNavigation,
-  useRoute,
   type StaticScreenProps,
 } from "@react-navigation/native";
 import type { EnvironmentId } from "@t3tools/contracts";
@@ -37,7 +37,7 @@ import { CloudEnvironmentRows } from "./CloudEnvironmentRows";
 import { autoConnectReport, devAutoConnectAttemptAtom } from "./devAutoConnect";
 import { splitEnvironmentSections } from "./environmentSections";
 import { leaveSettingsPage } from "../settings/settings-navigation";
-import { workspaceHasColumns } from "../workspace/workspace-selection-store";
+import { workspaceHasColumns } from "../layout/workspace/workspace-selection-store";
 
 type ConnectionsNewRouteParams = {
   readonly mode?: string;
@@ -45,6 +45,8 @@ type ConnectionsNewRouteParams = {
   readonly autoConnect?: string;
   readonly routeFor?: EnvironmentId;
 };
+
+const isPairingQrPayloadEmptyError = Schema.is(PairingQrPayloadEmptyError);
 
 export function ConnectionsNewRouteScreen({
   route,
@@ -73,7 +75,6 @@ function PairingForm({
   const { connectionPairingUrl, onChangeConnectionPairingUrl, onConnectPress } =
     useRemoteConnections();
   const navigation = useNavigation();
-  const routeName = useRoute().name;
   const insets = useSafeAreaInsets();
   const [initialPairing] = useState(() => parsePairingUrl(routePairingUrl || connectionPairingUrl));
   const [hostInput, setHostInput] = useState(initialPairing.host);
@@ -146,7 +147,7 @@ function PairingForm({
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Dialog.alert(
         t("mobile.connection.invalidQr"),
-        error instanceof PairingQrPayloadEmptyError
+        isPairingQrPayloadEmptyError(error)
           ? t("mobile.connection.emptyQr")
           : error instanceof Error
             ? error.message
@@ -185,7 +186,6 @@ function PairingForm({
 
   return (
     <SettingsScreen
-      formSheet={routeName === "ConnectionsNew"}
       title={t("mobile.connect.ConnectionsNewRouteScreen.add-environment")}
       actions={[
         {

@@ -128,7 +128,6 @@ export function PullRequestFilterSearchScreen({
       clearAccessibilityLabel={
         kind === "labels" ? t("pr.actions.clearLabelSearch") : "Clear author search"
       }
-      searchTextChangeId="pr-filter-option-search"
       query={query}
       onQueryChange={setQuery}
     >

@@ -134,7 +134,13 @@ function WindowBar({
   const [barRef, paceMark] = usePaceMark(timeLeft);
   const resetsIn = formatResetsIn(window, now);
   const resetsAt = window.resetsAt
-    ? formatUpcomingTimestamp(window.resetsAt, timestampFormat, now, dateI18n.resolvedLanguage)
+    ? formatUpcomingTimestamp(
+        window.resetsAt,
+        timestampFormat,
+        now,
+        undefined,
+        dateI18n.resolvedLanguage,
+      )
     : null;
   const summary = usageAccessibilityLabel(t, {
     account: usageWindowLabel(t, window.label),

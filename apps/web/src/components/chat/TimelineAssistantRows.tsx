@@ -201,6 +201,7 @@ function AssistantMessageMeta({
               message.updatedAt,
               ctx.timestampFormat,
               undefined,
+              undefined,
               dateI18n.resolvedLanguage,
             )}
           </TooltipTrigger>

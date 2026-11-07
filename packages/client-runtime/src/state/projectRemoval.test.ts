@@ -6,7 +6,8 @@ import { planProjectRemoval } from "./projectRemoval.ts";
 it("keeps removal scope and unloaded thread counts when the confirmation is localized", () => {
   const environmentId = EnvironmentId.make("local");
   const projectId = ProjectId.make("shared-id");
-  const selected = { environmentId, projectId };
+  const lineage = { relationshipToParent: null, sideChat: false } as never;
+  const selected = { environmentId, projectId, lineage };
   const options = {
     members: [
       {
@@ -20,7 +21,7 @@ it("keeps removal scope and unloaded thread counts when the confirmation is loca
     groupMemberCount: 2,
     hasOtherMembers: true,
     displayName: "demo",
-    threads: [selected, { environmentId: EnvironmentId.make("remote"), projectId }],
+    threads: [selected, { environmentId: EnvironmentId.make("remote"), projectId, lineage }],
     unloadedThreadCount: 3,
   };
   const english = planProjectRemoval(options);

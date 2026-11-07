@@ -1,3 +1,4 @@
+import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import {
@@ -22,6 +23,8 @@ import { serverEnvironment } from "../../state/server";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { SettingsSection } from "./components/SettingsSection";
 import { SettingsSwitchRow } from "./components/SettingsSwitchRow";
+import { ListChoiceRow } from "../../components/ui/ListChoiceRow";
+import type { ToolCallVisibility } from "@t3tools/contracts/settings";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { planAutoSettleSettingsSync, type AutoSettleSettings } from "./autoSettleSettingsSync";
 import { useSettingsEnvironmentFilter } from "./settings-environment-filter";
@@ -44,6 +47,7 @@ export function SettingsLabsRouteScreen() {
         contentContainerClassName="gap-6 px-5 pt-4"
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) + 18 }}
       >
+        <ToolCallVisibilitySection />
         <BetaSettingsSection />
         <LegacySettingsSection />
       </ScrollView>
@@ -278,9 +282,47 @@ function BetaSettingsSection() {
         })}
       </SettingsSection>
       <Text className="px-2 text-sm text-foreground-muted">
-        {t(
-          "mobile.settings.ThreadSettingsSections.let-agents-on-a-machine-work-on-your-other-machines-and-theirs-on-it-turn-it-on-for-each-machine-while-it-is-off-nothing-new-starts-over-a-link-tasks-already-running-finish",
-        )}
+        Let agents on a machine work on your other machines, and theirs on it. Turn it on for each
+        machine. While off, nothing new starts over a link; running tasks finish.
+      </Text>
+    </View>
+  );
+}
+
+const TOOL_CALL_VISIBILITY_OPTIONS: ReadonlyArray<{
+  readonly value: ToolCallVisibility;
+  readonly labelKey: TranslationKey;
+}> = [
+  { value: "showAll", labelKey: "web.dynamic.PullRequestChecksPopover.show-all" },
+  { value: "hideSuccessful", labelKey: "release4262.hide-successful" },
+  { value: "hideAll", labelKey: "release4262.hide-all" },
+  { value: "zen", labelKey: "release4262.zen" },
+];
+
+function ToolCallVisibilitySection() {
+  const t = useTranslate();
+  const savePreferences = useAtomSet(updateMobilePreferencesAtom);
+  const preferences = useAtomValue(mobilePreferencesAtom);
+  const selected = AsyncResult.isSuccess(preferences)
+    ? (preferences.value.toolCallVisibility ?? "showAll")
+    : null;
+
+  return (
+    <View className="gap-3">
+      <SettingsSection title={t("release4262.beta-tool-calls-in-chat")}>
+        {TOOL_CALL_VISIBILITY_OPTIONS.map((option, index) => (
+          <ListChoiceRow
+            key={option.value}
+            label={t(option.labelKey)}
+            selected={selected === option.value}
+            separated={index > 0}
+            disabled={selected === null}
+            onPress={() => savePreferences({ toolCallVisibility: option.value })}
+          />
+        ))}
+      </SettingsSection>
+      <Text className="px-2 text-sm text-foreground-muted">
+        {t("release4262.tool-calls-detail")}
       </Text>
     </View>
   );
