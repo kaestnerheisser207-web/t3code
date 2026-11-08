@@ -208,22 +208,6 @@ rules to connected environments that support shared settings. Offline environmen
 and older servers keep their previous values. Changing a rule does not reopen
 already settled threads.
 
-## See all work on a board
-
-On web and desktop, click **Board** at the bottom of the sidebar, or choose **Open board** in the
-command palette, to see every thread from every connected machine as a card in one of five
-columns: **Needs you**, **Working**, **Ready**, **Snoozed**, and **Settled**. A thread that waits
-for an approval, an answer, or a plan decision, or whose run failed, is in **Needs you**.
-Subagents do not get their own cards; their parent's card shows how many are running.
-
-Pick a project at the top to see only its threads, or turn on **Group by project** to give each
-project its own row. The same project on several machines shares one row. These choices are kept
-per device.
-
-Drag a card onto **Settled** to settle it, or from **Settled** or **Snoozed** back onto **Ready**
-to un-settle or wake it. The other columns follow what the agent is doing, so they do not accept
-drops. Cards from a machine that is offline cannot be moved until it reconnects.
-
 ## Link a pull request
 
 The server finds the PR for each unsettled thread's saved branch, even when your
