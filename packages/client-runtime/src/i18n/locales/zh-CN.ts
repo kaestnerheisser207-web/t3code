@@ -1,3 +1,4 @@
+import { release4340ZhCN } from "./release4340.zh-CN.ts";
 import { release4262ZhCN } from "./release4262.zh-CN.ts";
 import { release4066ZhCN } from "./release4066.zh-CN.ts";
 import { usageReviewZhCN } from "./usage-review.zh-CN.ts";
@@ -136,6 +137,7 @@ import type { en } from "./en.ts";
 export const zhCN = {
   ...release4066ZhCN,
   ...release4262ZhCN,
+  ...release4340ZhCN,
   ...usageReviewZhCN,
   ...release016ZhCN,
   "settings.secrets": "凭证",

@@ -1237,7 +1237,7 @@ function ThreadSettingsModelsScreen() {
           session.hasLegacyModels,
         ]}
         confirm={{
-          label: session.pendingModel ? t("modelFilter.saveSettings") : t("modelFilter.done"),
+          label: session.pendingModel ? t("modelFilter.save") : t("modelFilter.done"),
           onPress: commitAndClose,
         }}
         hideBottomBorder

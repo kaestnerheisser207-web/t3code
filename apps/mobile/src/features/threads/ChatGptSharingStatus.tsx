@@ -19,10 +19,11 @@ export function ChatGptSharingStatus({ provider }: { provider: ServerProvider | 
         className="min-h-11 flex-row items-center gap-2"
         onPress={() => {
           Dialog.alert(
-            "ChatGPT sharing is on",
+            t("release4340.chatgpt-sharing-on"),
             [
               provider?.auth.email,
-              "Eligible usage uses your ChatGPT plan. Credit settings and limits are managed in ChatGPT.",
+              t("release4340.chatgpt-sharing-eligible-usage"),
+              t("release4340.chatgpt-speed-notice"),
             ]
               .filter(Boolean)
               .join("\n\n"),

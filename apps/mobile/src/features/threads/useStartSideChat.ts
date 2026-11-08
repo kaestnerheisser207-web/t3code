@@ -6,7 +6,13 @@ import {
   squashAtomCommandFailure,
   type AtomCommandResult,
 } from "@t3tools/client-runtime/state/runtime";
-import { MessageId, ThreadId, type ScopedThreadRef } from "@t3tools/contracts";
+import {
+  MessageId,
+  ThreadId,
+  type ModelSelection,
+  type RuntimeMode,
+  type ScopedThreadRef,
+} from "@t3tools/contracts";
 
 import * as Dialog from "../../components/ui/Dialog";
 import { uuidv4 } from "../../lib/uuid";
@@ -18,12 +24,14 @@ import { useOpenLinkedThread } from "./useOpenLinkedThread";
 
 /**
  * Forks `source` at its latest stable point into a side chat, sends `prompt` there, and opens
- * it like any linked thread. Resolves false when the side chat did not start.
+ * it like any linked thread. Resolves false when the side chat did not start. `settings` are
+ * what the parent's composer would send, which its thread gets only on its next send.
  */
 export function useStartSideChat() {
   const t = useTranslate();
   const forkSideChat = useAtomCommand(threadEnvironment.forkSideChat, { reportFailure: false });
   const deleteThread = useAtomCommand(threadEnvironment.delete, { reportFailure: false });
+  const setRuntimeMode = useAtomCommand(threadEnvironment.setRuntimeMode, { reportFailure: false });
   const startTurn = useAtomCommand(threadEnvironment.startTurn, { reportFailure: false });
   const openLinkedThread = useOpenLinkedThread();
 
@@ -36,7 +44,11 @@ export function useStartSideChat() {
     Dialog.alert("Side chat not started", error instanceof Error ? error.message : fallback);
   };
 
-  return async (source: ScopedThreadRef, prompt: string): Promise<boolean> => {
+  return async (
+    source: ScopedThreadRef,
+    prompt: string,
+    settings: { readonly runtimeMode: RuntimeMode; readonly modelSelection: ModelSelection },
+  ): Promise<boolean> => {
     const targetThreadId = ThreadId.make(uuidv4());
     const fork = await forkSideChat({
       environmentId: source.environmentId,
@@ -48,7 +60,7 @@ export function useStartSideChat() {
       },
     });
     if (fork._tag === "Failure") {
-      alertFailure(fork, "Could not start a side chat.");
+      alertFailure(fork, t("release4340.side-chat-start-failed"));
       return false;
     }
     // Drops the empty side chat a failed start leaves behind; one that got its message stays.
@@ -72,6 +84,21 @@ export function useStartSideChat() {
       discard();
       return false;
     }
+    if (settings.runtimeMode !== sideChat.runtimeMode) {
+      const mode = await setRuntimeMode({
+        environmentId: source.environmentId,
+        input: {
+          threadId: targetThreadId,
+          runtimeMode: settings.runtimeMode,
+          createdAt: new Date().toISOString(),
+        },
+      });
+      if (mode._tag === "Failure") {
+        alertFailure(mode, t("release4340.side-chat-mode-failed"));
+        discard();
+        return false;
+      }
+    }
     const turn = await startTurn({
       environmentId: source.environmentId,
       input: {
@@ -82,14 +109,15 @@ export function useStartSideChat() {
           text: prompt,
           attachments: [],
         },
+        modelSelection: settings.modelSelection,
         titleSeed: deriveThreadTitleSeed({ text: prompt, attachments: [] }),
-        runtimeMode: sideChat.runtimeMode,
+        runtimeMode: settings.runtimeMode,
         interactionMode: "default",
         createdAt: new Date().toISOString(),
       },
     });
     if (turn._tag === "Failure") {
-      alertFailure(turn, "Could not send the side chat message.");
+      alertFailure(turn, t("release4340.side-chat-send-failed"));
       discard();
       return false;
     }

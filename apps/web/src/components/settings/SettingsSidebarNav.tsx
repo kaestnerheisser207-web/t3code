@@ -57,7 +57,6 @@ import {
   type SettingsSearchItem,
 } from "./settingsSearch";
 import { useAvailableSettingsSearchItems } from "./useAvailableSettingsSearchItems";
-import { validateSettingsScopeSearch } from "./settingsScope";
 import { useSettingsSectionNavigation } from "./useSettingsSectionNavigation";
 import { workspaceAreaProps } from "../../lib/workspaceFocus";
 import { useTranslate } from "../../i18n";
@@ -139,8 +138,6 @@ export function SettingsSidebarNav({ pathname }: { pathname: string }) {
   );
   const navigate = useNavigate();
   const currentHash = useLocation({ select: (location) => location.hash });
-  const currentSearch = useLocation({ select: (location) => location.search });
-  const scopeSearch = validateSettingsScopeSearch(currentSearch);
   const activePath = SETTINGS_DETAIL_PAGE_PARENTS[pathname] ?? pathname;
   const navPaths = SETTINGS_NAV_GROUPS.flatMap((group) => group.paths);
   const sectionNavigation = useSettingsSectionNavigation(
@@ -154,10 +151,7 @@ export function SettingsSidebarNav({ pathname }: { pathname: string }) {
   const [compactSearchOpen, setCompactSearchOpen] = useState(false);
   const [activeResultIndex, setActiveResultIndex] = useState(0);
 
-  const searchableItems = localizeSettingsSearchItems(
-    useAvailableSettingsSearchItems(scopeSearch),
-    t,
-  );
+  const searchableItems = localizeSettingsSearchItems(useAvailableSettingsSearchItems(), t);
   const groupLabels: Record<string, string> = {
     Agents: t("settings.groups.agents"),
     Code: t("settings.groups.code"),

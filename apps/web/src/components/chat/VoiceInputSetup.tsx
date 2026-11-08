@@ -1,4 +1,3 @@
-import { useTranslate } from "../../i18n";
 import { useStableCallback } from "~/hooks/useStableCallback";
 import { listBrowserMicrophones, type BrowserMicrophone } from "../../speech/browserMicrophones";
 import type {
@@ -14,6 +13,8 @@ import { useClientSettings, updateClientSettings } from "../../hooks/useSettings
 import { useEnvironment } from "../../state/environments";
 import { AuthSettingsWriteScope } from "@t3tools/contracts";
 import { useEnvironmentScope } from "../../state/session";
+import { useTranslate } from "../../i18n";
+import { languageLabel } from "../settings/SpeechLanguageSelect";
 import { Button } from "../ui/button";
 import { Dialog } from "../ui/dialog";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../ui/select";
@@ -25,9 +26,12 @@ export function VoiceInputSetup(props: {
   step: number;
   status: EnvironmentSpeechStatus | null;
   model: EnvironmentSpeechModel | null;
+  /** The language the offered model was chosen for. */
+  language: string | null;
   downloading: boolean;
   error: string | null;
   onOpenChange(open: boolean): void;
+  onRetryCatalog: (() => void) | null;
   onDownload(): void;
   onCancelDownload(): void;
   onStartRecording(): void;
@@ -47,7 +51,7 @@ export function VoiceInputSetup(props: {
       setMicrophones(await listBrowserMicrophones());
       setMicrophoneError(null);
     } catch {
-      setMicrophoneError("Could not list microphones. You can still use the system default.");
+      setMicrophoneError(t("release4340.could-not-list-microphones"));
     }
     setLoadingMicrophones(false);
   });
@@ -64,7 +68,7 @@ export function VoiceInputSetup(props: {
   );
   const selectedMicrophoneLabel = selectedMicrophone
     ? (microphones.find((device) => device.deviceId === selectedMicrophone)?.label ??
-      "Selected microphone (Unavailable)")
+      t("release4340.selected-microphone-unavailable"))
     : t("settings.controls.systemDefault");
   const status = props.status?.supported ? props.status : null;
   const model = props.model;
@@ -80,58 +84,68 @@ export function VoiceInputSetup(props: {
       <WizardPopup>
         <WizardHeader
           title={t("release4262.set-up-voice-input")}
-          description={`Transcribe speech on ${environment?.label ?? "your transcription environment"} and use voice input across environments.`}
+          description={t("release4340.voice-setup-description", {
+            environment: environment?.label ?? t("release4340.your-transcription-environment"),
+          })}
         >
-          <WizardSteps steps={["Model", "Ready to dictate"]} currentStep={props.step} />
+          <WizardSteps
+            steps={[t("release4340.step-model"), t("release4340.step-ready-to-dictate")]}
+            currentStep={props.step}
+          />
         </WizardHeader>
         <WizardPanel>
           {props.step === 0 ? (
             <section className="space-y-3 text-sm">
-              <div className="rounded-lg border border-border/70 bg-card/60 p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-medium">
-                    {status?.model ?? t("release4262.english-transcription-model")}
-                  </h3>
-                  {status?.modelId === "handy-computer/parakeet-unified-en-0.6b-gguf" ? (
-                    <span className="text-xs font-medium text-primary">
-                      {t("release4262.recommended-for-english")}
-                    </span>
+              {model ? (
+                <div className="rounded-lg border border-border/70 bg-card/60 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-medium">{model.name}</h3>
+                    {model?.recommended && props.language ? (
+                      <span className="text-xs font-medium text-primary">
+                        {t("release4340.recommended-for-language", {
+                          language: languageLabel(props.language),
+                        })}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-muted-foreground">
+                    {t("release4340.download-model-to", {
+                      size: Math.round(model.size / 1024 / 1024),
+                      environment:
+                        environment?.label ?? t("release4340.your-transcription-environment"),
+                    })}
+                  </p>
+                  <p className="mt-2 text-muted-foreground">{t("release4340.silero-notice")}</p>
+                  {props.downloading ? (
+                    <div role="status" className="mt-4 space-y-1 text-muted-foreground">
+                      <div
+                        role="progressbar"
+                        aria-label={t("release4262.speech-model-download-progress")}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={progress ?? undefined}
+                        className="h-1 overflow-hidden rounded-full bg-muted"
+                      >
+                        <div
+                          className="h-full bg-primary transition-[width] duration-200"
+                          style={{ width: `${progress ?? 0}%` }}
+                        />
+                      </div>
+                      <p className="text-xs">
+                        {model?.state === "verifying"
+                          ? t("release4262.verifying-download")
+                          : progress === null
+                            ? t("release4262.starting-download")
+                            : t("release4340.percent-downloaded", { progress })}
+                      </p>
+                    </div>
                   ) : null}
                 </div>
-                <p className="mt-2 text-muted-foreground">
-                  Download the {status ? Math.round(status.size / 1024 / 1024) : 697} MB model to{" "}
-                  {environment?.label ?? "your transcription environment"}. Microphone audio is sent
-                  there for transcription, as chosen in Voice settings.
+              ) : !props.error ? (
+                <p role="status" className="text-muted-foreground">
+                  {t("release4340.loading-transcription-models")}
                 </p>
-                <p className="mt-2 text-muted-foreground">
-                  Silero (1.2 MB), used for silence filtering and pause detection, downloads
-                  alongside the speech model. An installed copy is reused.
-                </p>
-                {props.downloading ? (
-                  <div role="status" className="mt-4 space-y-1 text-muted-foreground">
-                    <div
-                      role="progressbar"
-                      aria-label={t("release4262.speech-model-download-progress")}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={progress ?? undefined}
-                      className="h-1 overflow-hidden rounded-full bg-muted"
-                    >
-                      <div
-                        className="h-full bg-primary transition-[width] duration-200"
-                        style={{ width: `${progress ?? 0}%` }}
-                      />
-                    </div>
-                    <p className="text-xs">
-                      {model?.state === "verifying"
-                        ? t("release4262.verifying-download")
-                        : progress === null
-                          ? t("release4262.starting-download")
-                          : `${progress}% downloaded`}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
+              ) : null}
               {props.error ? (
                 <p role="alert" className="text-destructive">
                   {props.error}
@@ -170,7 +184,7 @@ export function VoiceInputSetup(props: {
                       </SelectItem>
                       {selectedIsUnavailable ? (
                         <SelectItem value={`device:${selectedMicrophone}`}>
-                          Selected microphone (Unavailable)
+                          {t("release4340.selected-microphone-unavailable")}
                         </SelectItem>
                       ) : null}
                       {microphones.map((device) => (
@@ -210,25 +224,34 @@ export function VoiceInputSetup(props: {
           {props.step === 0 ? (
             <>
               <Button variant="outline" onClick={() => openSettings("speech-models")}>
-                {t("release4262.choose-another-model-or-language")}
+                {model
+                  ? t("release4262.choose-another-model-or-language")
+                  : t("release4340.choose-a-model-or-language")}
               </Button>
+              {props.onRetryCatalog ? (
+                <Button onClick={props.onRetryCatalog}>
+                  {t("release4340.retry-loading-models")}
+                </Button>
+              ) : null}
               {props.downloading ? (
                 <Button variant="outline" disabled={!canManage} onClick={props.onCancelDownload}>
                   {t("release4262.cancel-download")}
                 </Button>
               ) : null}
-              <Button
-                disabled={!canManage || props.downloading || !status}
-                onClick={props.onDownload}
-              >
-                {props.downloading
-                  ? "Downloading…"
-                  : props.error
-                    ? t("release4262.retry-download")
-                    : canManage
-                      ? t("release4262.download-model")
-                      : t("release4262.ask-an-environment-admin-to-download")}
-              </Button>
+              {model ? (
+                <Button
+                  disabled={!canManage || props.downloading || !status}
+                  onClick={props.onDownload}
+                >
+                  {props.downloading
+                    ? t("release4340.downloading")
+                    : props.error
+                      ? t("release4340.try-again")
+                      : canManage
+                        ? t("release4262.download-model")
+                        : t("release4262.ask-an-environment-admin-to-download")}
+                </Button>
+              ) : null}
             </>
           ) : (
             <>

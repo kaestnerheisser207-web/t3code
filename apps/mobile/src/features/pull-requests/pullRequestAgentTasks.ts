@@ -2,6 +2,8 @@ import {
   sourceControlClients,
   type ChangeRequestTerminology,
 } from "@t3tools/client-runtime/source-control-clients";
+import type { MenuAction } from "@react-native-menu/menu";
+import { mobileI18n } from "../../i18n";
 import type { PullRequestDetail, PullRequestLinkedThreadsResult } from "@t3tools/contracts";
 
 export type PullRequestAgentTask = "ask" | "explain" | "feedback" | "conflicts" | "watch";
@@ -11,7 +13,53 @@ export function pullRequestAgentThread(
   threadId?: string,
 ) {
   if (threadId) return threads.find((thread) => thread.id === threadId);
-  return threads.length === 1 ? threads[0] : undefined;
+  return threads.length === 1 && !threads[0]?.settled && !threads[0]?.archivedAt
+    ? threads[0]
+    : undefined;
+}
+
+export function pullRequestAgentThreadActions(
+  threads: PullRequestLinkedThreadsResult["threads"],
+  task: PullRequestAgentTask,
+  canAsk: boolean,
+): MenuAction[] {
+  const active: MenuAction[] = [];
+  const settled: MenuAction[] = [];
+  for (const thread of threads) {
+    const action = {
+      id: `${task}:${thread.id}`,
+      title: thread.title,
+      subtitle: thread.archivedAt
+        ? mobileI18n.t("release4340.archived-thread")
+        : thread.settled
+          ? mobileI18n.t("thread.notice.settled")
+          : mobileI18n.t("pr.controls.continueThread"),
+      image: "bubble.left.and.bubble.right",
+      attributes: { disabled: task !== "ask" && Boolean(thread.archivedAt) },
+    };
+    (thread.settled ? settled : active).push(action);
+  }
+  return [
+    ...(canAsk
+      ? [
+          {
+            id: `${task}:new`,
+            title: mobileI18n.t("release4340.start-a-new-thread"),
+            image: "plus",
+          },
+        ]
+      : []),
+    ...active,
+    ...(settled.length
+      ? [
+          {
+            id: `${task}:settled`,
+            title: mobileI18n.t("release4340.settled-threads"),
+            subactions: settled,
+          },
+        ]
+      : []),
+  ];
 }
 
 export function pullRequestAgentPrompt(
@@ -38,26 +86,31 @@ export function pullRequestAgentActions(pr: PullRequestDetail, canWatch: boolean
   return [
     {
       task: "ask",
-      title: "Ask a question",
+      title: mobileI18n.t("web.dynamic.PullRequestActionsMenu.ask-a-question"),
       icon: "bubble.left.and.text.bubble.right",
       disabled: false,
     },
-    { task: "explain", title: `Explain this ${shortLabel}`, icon: "book", disabled: false },
+    {
+      task: "explain",
+      title: mobileI18n.t("web.dynamic.PullRequestActionsMenu.explain-this-param", { shortLabel }),
+      icon: "book",
+      disabled: false,
+    },
     {
       task: "feedback",
-      title: "Address feedback",
+      title: mobileI18n.t("release4340.address-feedback"),
       icon: "wrench.and.screwdriver",
       disabled: pr.state !== "open",
     },
     {
       task: "conflicts",
-      title: "Resolve conflicts",
+      title: mobileI18n.t("web.dynamic.PullRequestDetailActions.resolve-conflicts"),
       icon: "arrow.triangle.branch",
       disabled: pr.state !== "open" || pr.mergeability !== "conflicting",
     },
     {
       task: "watch",
-      title: `Watch ${shortLabel}`,
+      title: mobileI18n.t("release4340.watch-change-request", { shortLabel }),
       icon: "eye",
       disabled: pr.state !== "open" || !canWatch,
     },
