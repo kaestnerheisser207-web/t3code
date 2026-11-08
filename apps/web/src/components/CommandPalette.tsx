@@ -77,6 +77,7 @@ import {
   MonitorIcon,
   PinIcon,
   PinOffIcon,
+  SquareKanbanIcon,
   SquarePenIcon,
   TextSearchIcon,
   UserPlusIcon,
@@ -1707,6 +1708,27 @@ function OpenCommandPaletteDialog(props: {
       },
     });
   }
+
+  actionItems.push({
+    kind: "action",
+    value: "action:board",
+    searchTerms: [
+      "Open board",
+      "board",
+      "kanban",
+      "tasks",
+      "overview",
+      "status",
+      "columns",
+      "看板",
+      "任务",
+    ],
+    title: t("board.open"),
+    icon: <SquareKanbanIcon className={ITEM_ICON_CLASS} />,
+    run: async () => {
+      await navigate({ to: "/board" });
+    },
+  });
 
   actionItems.push({
     kind: "action",
