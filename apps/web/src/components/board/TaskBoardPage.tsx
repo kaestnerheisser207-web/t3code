@@ -21,11 +21,15 @@ import { useNavigate } from "@tanstack/react-router";
 import * as Schema from "effect/Schema";
 import { BotIcon, GitBranchIcon, Rows3Icon } from "lucide-react";
 import { memo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 
 import { isElectron } from "../../env";
 import { useTranslate } from "../../i18n";
+import { useNowMinute } from "../../hooks/useNowMinute";
+import { useClientSettings } from "../../hooks/useSettings";
+import { formatRelativeTimeLabel, formatUpcomingTimestamp } from "../../timestampFormat";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { useSidebarProjectGroups } from "../../hooks/useSidebarProjectGroups";
 import { useThreadActions } from "../../hooks/useThreadActions";
@@ -43,7 +47,6 @@ import {
 } from "../../state/olderSettledShelf";
 import { readEnvironmentScope } from "../../state/session";
 import { buildThreadRouteParams } from "../../threadRoutes";
-import { RelativeTime } from "../RelativeTime";
 import {
   resolveThreadStatusPill,
   type ThreadStatusPill,
@@ -496,14 +499,14 @@ function BoardCardContent(props: BoardCardProps) {
       </span>
       <span className="flex min-w-0 items-center gap-2 text-2xs text-muted-foreground">
         {meta ? <span className="min-w-0 truncate">{meta}</span> : null}
-        {props.offline ? <span>{t("board.offline")}</span> : null}
+        {props.offline ? <span className="shrink-0">{t("board.offline")}</span> : null}
         <span className="ml-auto shrink-0">
           {props.column === "snoozed" && thread.snoozedUntil ? (
             <>
-              {t("board.wakes")} <RelativeTime timestamp={thread.snoozedUntil} />
+              {t("board.wakes")} <BoardTime timestamp={thread.snoozedUntil} upcoming />
             </>
           ) : (
-            <RelativeTime
+            <BoardTime
               timestamp={
                 props.column === "settled" && thread.settledAt
                   ? thread.settledAt
@@ -515,4 +518,21 @@ function BoardCardContent(props: BoardCardProps) {
       </span>
     </>
   );
+}
+
+// Subscribes to the minute tick itself, as the sidebar's labels do, so only the label re-renders.
+function BoardTime(props: { timestamp: string; upcoming?: boolean }) {
+  const { i18n } = useTranslation();
+  const nowMinute = useNowMinute();
+  const timestampFormat = useClientSettings((settings) => settings.timestampFormat);
+  const nowMs = Date.parse(`${nowMinute}:00.000Z`);
+  return props.upcoming
+    ? formatUpcomingTimestamp(
+        props.timestamp,
+        timestampFormat,
+        nowMs,
+        undefined,
+        i18n.resolvedLanguage,
+      )
+    : formatRelativeTimeLabel(props.timestamp, nowMs, i18n.resolvedLanguage);
 }
