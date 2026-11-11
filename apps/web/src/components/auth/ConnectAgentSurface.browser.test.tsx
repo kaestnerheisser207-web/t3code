@@ -25,19 +25,27 @@ it("preserves authorization hosts and raw errors when changing the interface lan
     </I18nextProvider>,
   );
   await expect.element(screen.getByText("workspace.example.test", { exact: true })).toBeVisible();
-  await expect.element(screen.getByText("client.example.test", { exact: true })).toBeVisible();
-  await expect.element(screen.getByRole("button", { name: "批准", exact: true })).toBeDisabled();
-  await userEvent.fill(screen.getByLabelText("配对码", { exact: true }), "test-code");
+  const redirectHost = screen.getByText("client.example.test", { exact: false });
+  await expect.element(redirectHost).toBeVisible();
+  await expect
+    .element(redirectHost)
+    .toHaveTextContent("client.example.test · 运行此服务的人将获得这些访问权限");
+  await expect
+    .element(screen.getByRole("button", { name: "批准只读", exact: true }))
+    .toBeDisabled();
+  await userEvent.fill(screen.getByLabelText("登录码", { exact: true }), "test-code");
   transport.run.mockResolvedValueOnce({
     kind: "error",
     message: "raw: pairing denied [test-code]",
   });
-  await userEvent.click(screen.getByRole("button", { name: "批准", exact: true }));
+  await userEvent.click(screen.getByRole("button", { name: "批准自动", exact: true }));
   await expect
     .element(screen.getByText("raw: pairing denied [test-code]", { exact: true }))
     .toBeVisible();
   await act(() => instance.changeLanguage("en"));
-  await expect.element(screen.getByRole("button", { name: "Approve", exact: true })).toBeEnabled();
+  await expect
+    .element(screen.getByRole("button", { name: "Approve Auto", exact: true }))
+    .toBeEnabled();
   await expect
     .element(screen.getByText("raw: pairing denied [test-code]", { exact: true }))
     .toBeVisible();

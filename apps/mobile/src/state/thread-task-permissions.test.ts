@@ -65,6 +65,12 @@ const state = vi.hoisted(() => ({
   },
 }));
 
+vi.mock("../i18n", async () => {
+  const { createI18n } = await import("@t3tools/client-runtime/i18n");
+  const instance = createI18n();
+  return { mobileI18n: instance, useTranslate: () => instance.t };
+});
+
 vi.mock("react", () => ({
   useCallback: <A>(callback: A) => callback,
   useEffect: () => {},
