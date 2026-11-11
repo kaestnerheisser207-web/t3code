@@ -58,6 +58,8 @@ interface UpdateEverythingDialogProps {
   readonly disabledReason?: string | null;
   /** The confirmed work is starting; it cannot be cancelled from here. */
   readonly busy?: boolean;
+  /** Machines are still looking for provider updates, so more rows can appear. */
+  readonly checking?: boolean;
 }
 
 type UpdateEverythingDialogContentProps = Omit<
@@ -105,6 +107,7 @@ function UpdateEverythingDialogContent({
   notes = [],
   disabledReason = null,
   busy = false,
+  checking = false,
 }: UpdateEverythingDialogContentProps) {
   const t = useTranslate();
   const stopped = useAtomValue(
@@ -159,6 +162,11 @@ function UpdateEverythingDialogContent({
           {version !== null && providerCount > 0 ? " · " : null}
           {providerCount > 0
             ? t("web.dynamic.UpdateEverythingDialog.providerUpdateCount", { count: providerCount })
+            : null}
+          {checking
+            ? t("release4491.text792", {
+                value0: version !== null || providerCount > 0 ? " · " : "",
+              })
             : null}
         </AlertDialogDescription>
       </AlertDialogHeader>

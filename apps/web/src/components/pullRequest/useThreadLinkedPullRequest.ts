@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import {
   type EnvironmentId,
   type ProjectId,
@@ -25,7 +26,7 @@ export function useThreadLinkedPullRequest(input: {
   readonly projectId: ProjectId | null;
   readonly projectRepository: string | null;
   readonly threadBranch: string | null;
-  readonly gitStatus: VcsStatusResult | null;
+  readonly gitStatus: Pick<VcsStatusResult, "refName" | "pr"> | null;
 }) {
   const { serverThreadRef, persisted, projectId, projectRepository, threadBranch, gitStatus } =
     input;
@@ -89,7 +90,7 @@ export function useThreadLinkedPullRequest(input: {
       toastManager.add(
         stackedThreadToast({
           type: "error",
-          title: "Unable to update the thread pull request",
+          title: webI18n.t("release4491.text593"),
           description: error instanceof Error ? error.message : "An error occurred.",
         }),
       );

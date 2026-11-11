@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import {
   STATIC_KEYBINDING_COMMANDS,
   type KeybindingCommand,
@@ -60,6 +61,7 @@ export type KeybindingCommandOption = KeybindingCommand;
 const CORE_WHEN_VARIABLES = [
   "terminalFocus",
   "terminalOpen",
+  "previewOpen",
   "isWeb",
   "isDesktop",
   "true",
@@ -125,7 +127,7 @@ export function parseWhenExpressionDraft(
   if (!ast) {
     return {
       ok: false,
-      message: "Use variables with !, &&, ||, and parentheses.",
+      message: webI18n.t("release4491.text636"),
     };
   }
 
@@ -210,19 +212,31 @@ export interface KeybindingGroup {
 const KEYBINDING_GROUPS = [
   {
     id: "navigation",
-    title: "Navigation",
+    titleKey: "mobile.appearance.AndroidNavigationAppearanceSection.navigation",
     prefixes: ["sidebar", "rightPanel", "commandPalette", "filePicker", "projectSearch", "editor"],
   },
-  { id: "threads", title: "Threads", prefixes: ["thread", "chat", "pullRequest"] },
-  { id: "composer", title: "Composer", prefixes: ["composer", "modelPicker"] },
-  { id: "terminal", title: "Terminal", prefixes: ["terminal"] },
-  { id: "preview", title: "Preview & diff", prefixes: ["preview", "diff"] },
-  { id: "appearance", title: "Appearance", prefixes: ["theme", "appearance", "themeEditor"] },
-  { id: "scripts", title: "Project scripts", prefixes: ["script"] },
+  { id: "threads", titleKey: "settings.threads", prefixes: ["thread", "chat", "pullRequest"] },
+  {
+    id: "composer",
+    titleKey: "settings.panels.ChatSettingsPanel.composer",
+    prefixes: ["composer", "modelPicker"],
+  },
+  {
+    id: "terminal",
+    titleKey: "mobile.appearance.TerminalAppearanceSection.terminal",
+    prefixes: ["terminal"],
+  },
+  { id: "preview", titleKey: "release4491.text640", prefixes: ["preview", "diff"] },
+  {
+    id: "appearance",
+    titleKey: "settings.appearance",
+    prefixes: ["theme", "appearance", "themeEditor"],
+  },
+  { id: "scripts", titleKey: "web.ui.ProjectScriptsControl.project-scripts", prefixes: ["script"] },
 ] as const;
-const OTHER_KEYBINDING_GROUP = { id: "other", title: "Other" } as const;
+const OTHER_KEYBINDING_GROUP = { id: "other", titleKey: "usage.chart.other" } as const;
 
-function keybindingGroupFor(command: KeybindingCommand): { id: string; title: string } {
+function keybindingGroupFor(command: KeybindingCommand) {
   const prefix = String(command).split(".")[0] ?? "";
   return (
     KEYBINDING_GROUPS.find((group) => (group.prefixes as ReadonlyArray<string>).includes(prefix)) ??
@@ -242,7 +256,7 @@ export function groupKeybindingRows(
   }
   return [...KEYBINDING_GROUPS, OTHER_KEYBINDING_GROUP].flatMap((group) => {
     const groupRows = rowsByGroup.get(group.id);
-    return groupRows ? [{ id: group.id, title: group.title, rows: groupRows }] : [];
+    return groupRows ? [{ id: group.id, title: webI18n.t(group.titleKey), rows: groupRows }] : [];
   });
 }
 

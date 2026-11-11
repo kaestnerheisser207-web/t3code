@@ -1,3 +1,4 @@
+import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import type { TFunction } from "i18next";
 import { useTranslate } from "../../i18n";
 import { useState, type ReactNode } from "react";
@@ -91,6 +92,32 @@ function readFieldBooleanDefault(
   return Option.isSome(decoded) && typeof decoded.value === "boolean" ? decoded.value : undefined;
 }
 
+const PROVIDER_SETTINGS_TEXT_KEYS: Readonly<Record<string, TranslationKey>> = {
+  "Binary path": "settings.pages.CodexSetupSection.binary-path",
+  "Shadow home path": "settings.pages.CodexSetupSection.shadow-home-path",
+  "CODEX_HOME path": "release4491.codex-home",
+  "CLAUDE_CONFIG_DIR path": "release4491.claude-home",
+  "Launch arguments": "release4491.launch-args",
+  "Path to the Codex binary used by this instance.": "release4491.codex-binary-description",
+  "Custom Codex home and config directory.": "release4491.codex-home-description",
+  "Account-specific Codex home. Keeps auth.json separate while sharing state from CODEX_HOME.":
+    "release4491.codex-shadow-description",
+  "Additional CLI arguments passed to codex app-server on session start.":
+    "release4491.codex-args-description",
+  "Path to the Claude binary used by this instance.": "release4491.claude-binary-description",
+  "Custom Claude home and config directory. Keeps .claude.json and .claude separate.":
+    "release4491.claude-home-description",
+  "Additional CLI arguments passed on session start.": "release4491.launch-args-description",
+  "When you return": "release4491.compact-on-return",
+  "Before the cache expires (beta)": "release4491.compact-before-expiry",
+  seconds: "release4491.seconds",
+};
+
+function providerSettingsText(text: string, t: TFunction | undefined) {
+  const key = PROVIDER_SETTINGS_TEXT_KEYS[text];
+  return t && key ? t(key) : text;
+}
+
 export function deriveProviderSettingsFields(
   definition: SettingsFormDefinition,
   value?: unknown,
@@ -128,7 +155,7 @@ export function deriveProviderSettingsFields(
           label:
             isLocalAcp && key === "commandPath"
               ? (t?.("settings.model.executable") ?? "Executable")
-              : (annotatedTitle ?? titleizeFieldKey(key)),
+              : providerSettingsText(annotatedTitle ?? titleizeFieldKey(key), t),
           ...(isLocalAcp && key === "commandPath"
             ? {
                 description:
@@ -136,7 +163,7 @@ export function deriveProviderSettingsFields(
                   "Executable name or path on this environment.",
               }
             : annotatedDescription !== undefined
-              ? { description: annotatedDescription }
+              ? { description: providerSettingsText(annotatedDescription, t) }
               : {}),
           ...(isLocalAcp && key === "commandPath"
             ? { placeholder: "e.g. dsh" }

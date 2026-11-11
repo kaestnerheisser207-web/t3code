@@ -68,9 +68,12 @@ export interface SettingsSearchItem {
   readonly providerSettingsOnly?: boolean;
   readonly localBackendManagementOnly?: boolean;
   readonly localEnvironmentOnly?: boolean;
+  readonly primaryEnvironmentOnly?: boolean;
   readonly wslAvailableOnly?: boolean;
   readonly managedTunnelOnly?: boolean;
   readonly peerLinksOnly?: boolean;
+  readonly fastWorktreeCheckoutOnly?: boolean;
+  readonly textGeneratorsOnly?: boolean;
   readonly secondary?: boolean;
   readonly requiresThreadAutoSettlement?: boolean;
 }
@@ -85,6 +88,10 @@ export interface SettingsSearchAvailability {
   readonly hasThreadAutoSettlement: boolean;
   readonly managedTunnelActive?: boolean;
   readonly hasPeerLinkHost?: boolean;
+  readonly hasFastWorktreeCheckoutEnvironment?: boolean;
+  /** An environment without a provider allow-list, which hides text generators. */
+  readonly hasTextGeneratorsEnvironment?: boolean;
+  readonly hasPrimaryEnvironment?: boolean;
 }
 
 export const SETTINGS_SECTION_KEYS = {
@@ -471,21 +478,22 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     id: "boring-sidebar",
     titleKey: "settings.items.boring-sidebar.title",
     to: "/settings/labs",
-    searchTerms: ["beta folders project tree legacy old classic sidebar"],
+    searchTerms: ["beta folders project tree classic sidebar"],
   },
   {
     id: "boring-sidebar-multiline",
     titleKey: "release4066.text150",
     to: "/settings/labs",
+    // Shown inside the boring sidebar row only while it is on, so search lands on the parent.
+    targetId: "boring-sidebar",
     searchTerms: ["beta boring sidebar folder rows multiline branch pull request details"],
   },
   {
     id: "tool-call-visibility",
-    title: "Tool calls in chat",
     titleKey: "release4262.tool-calls-in-chat",
-    to: "/settings/labs",
+    to: "/settings/chat",
     searchTerms: [
-      "beta hide tool calls commands edits searches work log activity quiet chat zen final answers only",
+      "hide tool calls commands edits searches work log activity quiet chat zen final answers only",
     ],
   },
   {
@@ -503,6 +511,13 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     searchTerms: ["beta link another machine vps peer agents work there delegate"],
   },
   {
+    id: "prompt-suggestions-beta",
+    titleKey: "release4491.text646",
+    to: "/settings/labs",
+    scope: "environment",
+    searchTerms: ["beta tab autocomplete predict next message claude codex ghost text"],
+  },
+  {
     id: "simlock-hosts",
     titleKey: "release4066.text180",
     to: "/settings/labs",
@@ -510,8 +525,15 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     searchTerms: ["beta alpha simlock callstack simulator emulator ios android pool lease gateway"],
   },
   {
+    id: "worktree-fast-checkout",
+    titleKey: "release4491.text150",
+    to: "/settings/labs",
+    scope: "environment",
+    fastWorktreeCheckoutOnly: true,
+    searchTerms: ["beta fast worktree checkout clone apfs copy-on-write cache macos speed"],
+  },
+  {
     id: "voice-transcription-destination",
-    title: "Transcribe with",
     titleKey: "release4340.transcribe-with",
     to: "/settings/voice",
     searchTerms: [
@@ -520,35 +542,30 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "voice-microphone",
-    title: "Microphone",
-    titleKey: "device.options.microphone",
+    titleKey: "mobile.settings.microphone",
     to: "/settings/voice",
     searchTerms: ["mic input audio device"],
   },
   {
     id: "dictation-shortcut-mode",
-    title: "Dictation shortcut",
     titleKey: "release4262.dictation-shortcut",
     to: "/settings/voice",
     searchTerms: ["speech voice keyboard hotkey hold toggle auto"],
   },
   {
     id: "speech-language",
-    title: "Transcription language",
     titleKey: "release4262.transcription-language",
     to: "/settings/voice",
     searchTerms: ["speech voice translate english auto detect"],
   },
   {
     id: "speech-dictionary",
-    title: "Dictionary",
     titleKey: "release4262.dictionary",
     to: "/settings/voice",
     searchTerms: ["speech voice transcription vocabulary names glossary alias"],
   },
   {
     id: "speech-project-dictionary",
-    title: "Project dictionary",
     titleKey: "release4262.project-dictionary",
     to: "/settings/voice",
     scope: "project-defaults",
@@ -558,7 +575,6 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "speech-post-processing-model",
-    title: "Cleanup model",
     titleKey: "release4262.cleanup-model",
     to: "/settings/voice",
     scope: "environment",
@@ -566,35 +582,30 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "speech-correction-word",
-    title: "Correction cue",
     titleKey: "release4262.correction-cue",
     to: "/settings/voice",
     searchTerms: ["speech voice cleanup sorry scratch that fix mistake"],
   },
   {
     id: "speech-silence-filtering",
-    title: "Silence filtering",
     titleKey: "release4262.silence-filtering",
     to: "/settings/voice",
     searchTerms: ["voice speech vad silero pauses noise"],
   },
   {
     id: "remove-filler-words",
-    title: "Remove filler words",
     titleKey: "release4262.remove-filler-words",
     to: "/settings/voice",
     searchTerms: ["voice speech transcription hesitation um uh cleanup"],
   },
   {
     id: "speech-post-processing",
-    title: "Clean up transcripts with a provider",
-    titleKey: "release4262.clean-up-transcripts-with-a-provider",
+    titleKey: "release4491.text763",
     to: "/settings/voice",
     searchTerms: ["speech transcription polish clean provider prompt post-processing"],
   },
   {
     id: "speech-models",
-    title: "Transcription models",
     titleKey: "release4262.transcription-models",
     to: "/settings/voice",
     searchTerms: [
@@ -603,21 +614,18 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "speech-hardware",
-    title: "Transcription hardware and model unloading",
     titleKey: "release4262.transcription-hardware-and-model-unloading",
     to: "/settings/voice",
     searchTerms: ["speech voice stt advanced gpu cpu acceleration memory unload idle"],
   },
   {
     id: "microphone-test",
-    title: "Test microphone",
     titleKey: "release4262.test-microphone",
     to: "/settings/voice",
     searchTerms: ["test mic audio playback loopback record input level"],
   },
   {
     id: "transcription-test",
-    title: "Test model",
     titleKey: "release4262.test-model",
     to: "/settings/voice",
     searchTerms: ["test voice speech model transcription recognition"],
@@ -793,7 +801,6 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "ghq-clone-layout",
-    title: "Clone into host folders",
     titleKey: "release4262.clone-into-host-folders",
     to: "/settings/threads",
     scope: "environment-defaults",
@@ -865,6 +872,13 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     searchTerms: ["phone tablet iPhone iPad iOS Android App Store Google Play QR"],
   },
   {
+    id: "welcome-page",
+    titleKey: "release4491.text786",
+    to: "/settings/about",
+    primaryEnvironmentOnly: true,
+    searchTerms: ["onboarding setup first run getting started agents import projects"],
+  },
+  {
     id: "privacy-policy",
     titleKey: "settings.items.privacy-policy.title",
     to: "/settings/about",
@@ -888,18 +902,6 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     id: "open-source-licenses",
     titleKey: "settings.items.open-source-licenses.title",
     to: "/settings/about",
-  },
-  {
-    id: "legacy-plan-mode",
-    titleKey: "settings.items.legacy-plan-mode.title",
-    to: "/settings/labs",
-    searchTerms: ["build plan composer old"],
-  },
-  {
-    id: "legacy-context-window-indicator",
-    titleKey: "settings.items.legacy-context-window-indicator.title",
-    to: "/settings/labs",
-    searchTerms: ["composer meter usage tokens circle old"],
   },
   {
     id: "keybindings",
@@ -963,6 +965,16 @@ const SETTINGS_SEARCH_DEFINITIONS = [
       "usage sources CLIProxyAPI CLI proxy hub quota subscription limits management key add remove",
     ],
     providerSettingsOnly: true,
+  },
+  {
+    id: "text-generators",
+    titleKey: "release4491.text787",
+    to: "/settings/providers",
+    searchTerms: [
+      "model api api key openai openrouter anthropic ollama lm studio custom endpoint base url thread titles commit messages",
+    ],
+    providerSettingsOnly: true,
+    textGeneratorsOnly: true,
   },
   {
     id: "provider-health-check-interval",
@@ -1134,18 +1146,18 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   ...sourceControlHostSearchItems(sourceControlClients.definitions),
   {
     id: "source-control-writing-style",
-    titleKey: "settings.items.source-control-writing-style.title",
+    titleKey: "release4491.text691",
     to: "/settings/source-control",
     searchTerms: [
-      "repository conventions conventional commits custom instructions change descriptions request titles",
+      "repository conventions conventional commits custom instructions commit messages change pr pull request merge request titles descriptions body style prompt write my own",
     ],
     environmentOnly: true,
   },
   {
     id: "follow-change-request-templates",
-    titleKey: "settings.items.follow-change-request-templates.title",
+    titleKey: "release4491.text698",
     to: "/settings/source-control",
-    searchTerms: ["repository pr pull request description structure"],
+    searchTerms: ["repository pr pull request merge request change request description structure"],
     environmentOnly: true,
   },
   {
@@ -1375,7 +1387,6 @@ const SPLIT_SETTINGS_PATHS: ReadonlySet<string> = new Set([
 // Section anchors that moved but are not search results themselves.
 const MOVED_SECTION_ANCHORS: Readonly<Record<string, SettingsPath>> = {
   "authorized-clients": "/settings/access",
-  "legacy-features": "/settings/labs",
   "text-generation": "/settings/threads",
   about: "/settings/about",
 };
@@ -1487,10 +1498,14 @@ export function filterAvailableSettingsSearchItems(
       (!item.providerSettingsOnly || availability.hasProviderSettingsEnvironment) &&
       (!item.localBackendManagementOnly || availability.canManageLocalBackend) &&
       (!item.localEnvironmentOnly || !availability.localEnvironmentDisabled) &&
+      (!item.primaryEnvironmentOnly || availability.hasPrimaryEnvironment === true) &&
       (!item.wslAvailableOnly || availability.isWslSettingsRowVisible) &&
       (!item.requiresThreadAutoSettlement || availability.hasThreadAutoSettlement) &&
       (!item.managedTunnelOnly || availability.managedTunnelActive === true) &&
-      (!item.peerLinksOnly || availability.hasPeerLinkHost === true),
+      (!item.peerLinksOnly || availability.hasPeerLinkHost === true) &&
+      (!item.fastWorktreeCheckoutOnly ||
+        availability.hasFastWorktreeCheckoutEnvironment === true) &&
+      (!item.textGeneratorsOnly || availability.hasTextGeneratorsEnvironment === true),
   );
 }
 

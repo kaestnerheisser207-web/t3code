@@ -86,7 +86,7 @@ function EmptyContentSearchDialog() {
       aria-label={t("web.ui.ProjectContentSearchDialog.search-project-contents")}
       escapeLabel="Back"
       footerActionLabel="Open file"
-      inputProps={{ disabled: true, placeholder: "Search project contents…" }}
+      inputProps={{ disabled: true, placeholder: t("release4491.text594") }}
       mode="none"
       panelSize="fill"
       testId="project-content-search"
@@ -202,8 +202,9 @@ function OpenContentSearchDialog(props: {
       inputProps={{
         className: "pe-30",
         disabled: !search.canReadFiles,
-        placeholder: `Search in ${target.projectName}`,
+        placeholder: t("release4491.text597", { value0: target.projectName }),
         onKeyDown: (event) => {
+          if (event.nativeEvent.isComposing || event.keyCode === 229) return;
           if (event.key === "ArrowDown" && matches.length > 0) {
             event.preventDefault();
             setSelectedIndex((current) => (current + 1) % matches.length);

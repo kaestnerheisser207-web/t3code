@@ -148,12 +148,15 @@ function ModelStats(props: { readonly model: EnvironmentSpeechModel; readonly la
           ],
         ] as const)
       : []),
-    ...(data && data.secondsPer30s !== null
+    ...(data && data.secondsPer30s.accelerated !== null
       ? ([
           [
             "speed",
             <>
-              <Text className="font-t3-medium text-foreground">{data.secondsPer30s} s</Text> / 30 s
+              <Text className="font-t3-medium text-foreground">
+                {data.secondsPer30s.accelerated} s
+              </Text>{" "}
+              / 30 s
             </>,
           ],
         ] as const)
@@ -249,7 +252,7 @@ export function VoiceModelRow(props: {
           description={
             model.state === "verifying"
               ? t("release4262.verifying-download")
-              : `${Math.round((progress ?? 0) * 100)}% downloaded · Tap to cancel`
+              : t("release4491.text156", { value0: Math.round((progress ?? 0) * 100) })
           }
           disabled={!voice.canManage || voice.busy}
           onPress={() => voice.cancel(model)}
@@ -257,7 +260,7 @@ export function VoiceModelRow(props: {
         <Progress
           className="bg-grouped-card px-4 pb-3"
           value={model.state === "verifying" ? undefined : progress}
-          label={`${model.name} download progress`}
+          label={t("release4491.text157", { value0: model.name })}
         />
       </View>
     );
@@ -300,19 +303,18 @@ export function VoiceModelSection(props: {
   return (
     <SettingsSection
       title={title}
-      footer={
-        voice.canManage
-          ? undefined
-          : `This connection can’t change settings on ${props.label}. Add a transcription model using T3 Code on that machine.`
-      }
+      footer={voice.canManage ? undefined : t("release4491.text158", { value0: props.label })}
     >
       <ListRow
         label={active?.model ?? t("release4262.no-model-selected")}
         description={
           pending
             ? pending.state === "verifying"
-              ? `Verifying ${pending.name}…`
-              : `Downloading ${pending.name} · ${Math.round((progress ?? 0) * 100)}%`
+              ? t("release4491.text159", { value0: pending.name })
+              : t("release4491.text160", {
+                  value0: pending.name,
+                  value1: Math.round((progress ?? 0) * 100),
+                })
             : active
               ? formatBytes(active.size)
               : t("release4262.choose-a-transcription-model-to-dictate-on-this-")

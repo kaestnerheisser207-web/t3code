@@ -338,7 +338,7 @@ export function ThreadDetailsPrRow({
           pending: handoff === "conflicts",
           destructive: true,
           suffix: <ArrowUpRightIcon aria-hidden className="size-3 shrink-0" />,
-          tooltip: "Check the branch out and resolve the conflicts in a new thread",
+          tooltip: t("release4491.text398"),
           onClick: startResolveConflicts,
         }
       : rowAction === "ready"
@@ -348,7 +348,7 @@ export function ThreadDetailsPrRow({
             pending: actionPending,
             destructive: false,
             suffix: null,
-            tooltip: `Mark this ${terminology.singular} as ready for review`,
+            tooltip: t("release4491.text399", { value0: terminology.singular }),
             onClick: () => void perform("ready"),
           }
         : rowAction === "fix"
@@ -358,7 +358,7 @@ export function ThreadDetailsPrRow({
               pending: handoff === "findings",
               destructive: true,
               suffix: <ArrowUpRightIcon aria-hidden className="size-3 shrink-0" />,
-              tooltip: "Fix the failing checks in a new thread",
+              tooltip: t("release4491.text400"),
               onClick: startFixChecks,
             }
           : rowAction === "merge"
@@ -368,7 +368,10 @@ export function ThreadDetailsPrRow({
                 pending: actionPending,
                 destructive: false,
                 suffix: null,
-                tooltip: `Merge this ${terminology.singular} (${selectedMergeMethod})`,
+                tooltip: t("release4491.text401", {
+                  value0: terminology.singular,
+                  value1: selectedMergeMethod,
+                }),
                 onClick: () => setConfirmingMerge(true),
               }
             : null;
@@ -424,7 +427,7 @@ export function ThreadDetailsPrRow({
             size="sm"
             part={part}
             multiline={wrap}
-            className={wrap ? "items-start [&>svg]:mt-0.5" : undefined}
+            className={wrap ? "items-start [&>svg]:mt-px" : undefined}
             aria-label={openAriaLabel}
             onClick={onOpen}
             onAuxClick={onOpen}

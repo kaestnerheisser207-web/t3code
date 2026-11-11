@@ -1,6 +1,6 @@
 import { useTranslate } from "../../i18n";
 import type { EnvironmentId, PullRequestRef, PullRequestReviewGuideStop } from "@t3tools/contracts";
-import { SparklesIcon, TriangleAlertIcon } from "lucide-react";
+import { ScrollTextIcon, TriangleAlertIcon } from "lucide-react";
 import { useEffect, useEffectEvent } from "react";
 
 import type { ReviewCommentContext } from "~/reviewCommentContext";
@@ -96,7 +96,7 @@ export function PullRequestGuideTab({
   const writeButton = (label: string, size: "sm" | "xs") =>
     canWrite ? (
       <Button size={size} variant="outline" disabled={running} onClick={() => void write()}>
-        {running ? <Spinner /> : <SparklesIcon aria-hidden className="size-3.5" />}
+        {running ? <Spinner /> : <ScrollTextIcon aria-hidden className="size-3.5" />}
         {running ? t("web.dynamic.PullRequestGuideTab.reading-the-change") : label}
       </Button>
     ) : null;
@@ -116,7 +116,7 @@ export function PullRequestGuideTab({
             ? t("web.dynamic.PullRequestGuideTab.writing-a-review-guide")
             : failure === null
               ? t("web.dynamic.PullRequestGuideTab.no-review-guide-yet")
-              : "Could not write a review guide"}
+              : t("release4491.text587")}
         </p>
         <p className="max-w-md text-xs text-muted-foreground">
           {running
@@ -154,7 +154,7 @@ export function PullRequestGuideTab({
             t("web.dynamic.PullRequestGuideTab.written-before-the-latest-push")
           ) : (
             <>
-              {`Could not rewrite this guide. ${FAILURE_HINT}`}
+              {t("release4491.text588", { value0: FAILURE_HINT })}
               <FailureDetails detail={failure} />
             </>
           )}

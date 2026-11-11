@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n";
 import type { EnvironmentId, SourceControlSignInPrompt } from "@t3tools/contracts";
 import {
   readHostCredentialSettings,
@@ -8,8 +9,9 @@ import {
 import * as Cause from "effect/Cause";
 import * as Clipboard from "expo-clipboard";
 import { useRef, useState } from "react";
-import { Alert, Linking } from "react-native";
+import { Linking } from "react-native";
 
+import * as Dialog from "../../../components/ui/Dialog";
 import { useEnvironmentQuery } from "../../../state/query";
 import { serverEnvironment } from "../../../state/server";
 import { sourceControlEnvironment } from "../../../state/sourceControl";
@@ -98,6 +100,7 @@ function AppSignInRow(props: {
   readonly appSignIn: SourceControlAppSignIn;
   readonly disabled: boolean;
 }) {
+  const t = useTranslate();
   const { environment, definition, appSignIn } = props;
   const environmentId = environment.environmentId;
   const host = appSignIn.hosts[0] ?? "";
@@ -113,13 +116,13 @@ function AppSignInRow(props: {
   const attempt = useRef<SourceControlSignInPrompt | null>(null);
   const input = { provider: definition.kind, host };
   const updateSettings = useAtomCommand(serverEnvironment.updateSettings, {
-    label: `sign out of ${appSignIn.appName}`,
+    label: t("release4491.text167", { value0: appSignIn.appName }),
   });
   const [pending, setPending] = useState<SourceControlSignInPrompt | "starting" | null>(null);
 
   const showCode = (prompt: SourceControlSignInPrompt) => {
     void Clipboard.setStringAsync(prompt.userCode).catch(() => undefined);
-    Alert.alert(
+    Dialog.alert(
       prompt.userCode,
       `Enter this code on GitHub, then approve ${appSignIn.appName}. It is copied. The server finishes signing in even if you leave the app.`,
       [
@@ -142,7 +145,7 @@ function AppSignInRow(props: {
     const started = await start({ environmentId, input });
     if (started._tag !== "Success") {
       setPending(null);
-      Alert.alert("Could not start the sign-in", failureMessage(started.cause));
+      Dialog.alert("Could not start the sign-in", failureMessage(started.cause));
       return;
     }
     const prompt = started.value;
@@ -154,7 +157,7 @@ function AppSignInRow(props: {
     attempt.current = null;
     setPending(null);
     if (finished._tag !== "Success") {
-      Alert.alert("Sign-in did not finish", failureMessage(finished.cause));
+      Dialog.alert("Sign-in did not finish", failureMessage(finished.cause));
     }
   };
 
@@ -171,7 +174,7 @@ function AppSignInRow(props: {
 
   const onPress = () => {
     if (signedIn) {
-      Alert.alert(
+      Dialog.alert(
         appSignIn.appName,
         "Signed in. GitHub requests use the app's higher rate limit, in repositories where the app is installed.",
         [

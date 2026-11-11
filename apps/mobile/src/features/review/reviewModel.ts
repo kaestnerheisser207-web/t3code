@@ -1,3 +1,4 @@
+import { mobileI18n } from "../../i18n";
 import { parsePatchFiles } from "@pierre/diffs/utils/parsePatchFiles";
 import type { ChangeTypes, FileDiffMetadata } from "@pierre/diffs/types";
 import {
@@ -270,8 +271,8 @@ export function getReviewFilePreviewState(file: ReviewRenderableFile): ReviewFil
     return {
       kind: "suppressed",
       reason: "non-text",
-      title: "Non-text file",
-      message: "Diff preview is not available for this file format.",
+      title: mobileI18n.t("release4491.text102"),
+      message: mobileI18n.t("release4491.text103"),
       actionLabel: null,
     };
   }
@@ -282,8 +283,8 @@ export function getReviewFilePreviewState(file: ReviewRenderableFile): ReviewFil
     return {
       kind: "suppressed",
       reason: "large",
-      title: "Large diff",
-      message: "Large diffs are not rendered by default.",
+      title: mobileI18n.t("release4491.text104"),
+      message: mobileI18n.t("release4491.text105"),
       actionLabel: "Load diff",
     };
   }
@@ -609,7 +610,9 @@ export function buildReviewParsedDiff(
   try {
     const cacheKey = buildPatchCacheKey(text, cacheScope);
     const patchId = getReviewPatchId(cacheKey);
-    const parsedPatches = runDiffParserSilently(() => parsePatchFiles(text, cacheKey));
+    const parsedPatches = runDiffParserSilently(() =>
+      parsePatchFiles(text, { cacheKeyPrefix: cacheKey }),
+    );
     const rawFiles = new Map<string, string | null>();
     if (!truncated) {
       for (const rawFile of text.split(/(?=^diff --git )/m)) {

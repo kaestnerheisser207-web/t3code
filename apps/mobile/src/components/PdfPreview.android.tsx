@@ -75,17 +75,16 @@ export function PdfPreview(props: { readonly uri: string }) {
       </View>
     );
   }
-  if (localUri === null) return <FilePreviewLoading message="Loading PDF..." background="card" />;
+  if (localUri === null)
+    return <FilePreviewLoading message={t("release4491.text041")} background="card" />;
 
   return (
     <Pdf
       source={{ uri: localUri }}
-      page={pdfInitialPage(props.uri)}
-      fitPolicy={0}
-      trustAllCerts={false}
+      initialPage={pdfInitialPage(props.uri) - 1}
       enableAnnotationRendering
       enableDoubleTapZoom
-      onPressLink={(href) => {
+      onLinkPress={({ url: href }) => {
         const url = pdfLinkUrl(href, props.uri);
         if (url !== null) void tryOpenExternalUrl(url, "file-preview");
       }}

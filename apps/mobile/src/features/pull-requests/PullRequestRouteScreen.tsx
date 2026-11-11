@@ -209,7 +209,8 @@ function PullRequestIdentity(props: {
           {pr.author?.login ?? t("mobile.dynamic.PullRequestRouteScreen.unknown-author")}
         </Text>
         <Text className="shrink text-right text-2xs text-foreground-muted" numberOfLines={1}>
-          Updated <RelativeTime timestamp={pr.updatedAt} /> ago
+          {t("release4491.text089")}
+          <RelativeTime timestamp={pr.updatedAt} /> ago
         </Text>
       </View>
       <View className="flex-row items-start gap-1.5">
@@ -405,8 +406,7 @@ export function PullRequestRouteScreen({ route }: StaticScreenProps<PullRequestP
     requestedSection.current = next;
     scrollOffsets.current[next] = offset;
     currentScrollOffset.current = { tab: next, offset };
-    // LegendList clamps to its measured rows, which leave out the short-tab minHeight below.
-    scrollViews.current[next]?.getNativeScrollRef().scrollTo({ y: offset, animated: false });
+    scrollViews.current[next]?.scrollToOffset({ offset, animated: false });
     setSection(next);
   };
   const tabContent = activityContent;
@@ -469,8 +469,10 @@ export function PullRequestRouteScreen({ route }: StaticScreenProps<PullRequestP
       filesContent.refresh();
     });
   const jumpToFiles = () => {
-    scrollViews.current.overview?.scrollToOffset({
-      offset: bodyY.current + filesY.current - contentTopInset,
+    scrollViews.current.overview?.scrollToIndex({
+      index: 0,
+      viewPosition: 0,
+      viewOffset: -filesY.current,
       animated: true,
     });
     pendingFilesJump.current = false;
@@ -488,7 +490,9 @@ export function PullRequestRouteScreen({ route }: StaticScreenProps<PullRequestP
       <View className="flex-1 android:bg-header ios:bg-screen">
         <AppBar
           title={`#${params.number}`}
-          subtitle={connected ? params.repository : `${params.repository} · Offline`}
+          subtitle={
+            connected ? params.repository : t("release4491.text091", { value0: params.repository })
+          }
           onBack={layout.usesSplitView ? undefined : returnToList}
           menus={[
             {
@@ -631,13 +635,13 @@ export function PullRequestRouteScreen({ route }: StaticScreenProps<PullRequestP
                       currentScrollOffset.current = { tab, offset };
                   }}
                   className="flex-1"
-                  renderScrollComponent={NativeScrollView}
-                  // UIKit owns the bar's inset, so a minimizing bar and a resized column
-                  // move the list in the same frame as the bar.
-                  contentInsetAdjustmentBehavior="automatic"
-                  contentInsetStartAdjustment={contentTopInset}
-                  // RN scrollTo clamps against raw insets and ignores the automatic bar inset.
-                  scrollToOverflowEnabled
+                  renderScrollComponent={Platform.OS === "ios" ? NativeScrollView : undefined}
+                  contentInsetAdjustmentBehavior="never"
+                  contentInset={
+                    Platform.OS === "ios"
+                      ? { top: contentTopInset, bottom: contentBottomInset }
+                      : undefined
+                  }
                   refreshControl={
                     <RefreshControl
                       refreshing={section === tab && pullRefresh.refreshing}
@@ -646,17 +650,19 @@ export function PullRequestRouteScreen({ route }: StaticScreenProps<PullRequestP
                   }
                   alwaysBounceVertical
                   scrollsToTop={section === tab}
-                  onContentSizeChange={() => {
+                  onItemSizeChanged={({ itemKey }) => {
                     if (
                       tab !== "overview" ||
                       section !== "overview" ||
+                      itemKey !== "overview:body" ||
                       !pendingDescriptionJump.current
                     )
                       return;
                     pendingDescriptionJump.current = false;
-                    // Collapse changes the scroll range; restore the heading after that layout commits.
-                    scrollViews.current.overview?.scrollToOffset({
-                      offset: bodyY.current + descriptionY.current - contentTopInset,
+                    scrollViews.current.overview?.scrollToIndex({
+                      index: 0,
+                      viewPosition: 0,
+                      viewOffset: -descriptionY.current,
                       animated: false,
                     });
                   }}
@@ -1264,7 +1270,7 @@ function PullRequestFileRouteContent({ route }: PullRequestFileRouteProps) {
           ) : !result.isPending && !result.error && !seekingFile ? (
             <EmptyState
               title={t("mobile.review.PullRequestRouteScreen.diff-unavailable")}
-              detail={`Open this ${terminology.singular} on its provider to view the changes.`}
+              detail={t("release4491.text095", { value0: terminology.singular })}
               variant="plain"
             />
           ) : null}

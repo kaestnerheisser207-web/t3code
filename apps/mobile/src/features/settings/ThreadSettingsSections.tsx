@@ -1,4 +1,3 @@
-import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
 import {
@@ -11,6 +10,7 @@ import { AutoSettleDaysField } from "./components/AutoSettleDaysField";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
+import type { ComponentProps } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -23,8 +23,6 @@ import { serverEnvironment } from "../../state/server";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { SettingsSection } from "./components/SettingsSection";
 import { SettingsSwitchRow } from "./components/SettingsSwitchRow";
-import { ListChoiceRow } from "../../components/ui/ListChoiceRow";
-import type { ToolCallVisibility } from "@t3tools/contracts/settings";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { planAutoSettleSettingsSync, type AutoSettleSettings } from "./autoSettleSettingsSync";
 import { useSettingsEnvironmentFilter } from "./settings-environment-filter";
@@ -47,9 +45,20 @@ export function SettingsLabsRouteScreen() {
         contentContainerClassName="gap-6 px-5 pt-4"
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) + 18 }}
       >
-        <ToolCallVisibilitySection />
-        <BetaSettingsSection />
-        <LegacySettingsSection />
+        <MachineBetaSection
+          title={t("settings.items.linked-environments.title")}
+          icon="link"
+          capability="peerLinks"
+          setting="linkedEnvironmentsEnabled"
+          description={t("release4491.text149")}
+        />
+        <MachineBetaSection
+          title={t("release4491.text150")}
+          icon="bolt.circle"
+          capability="fastWorktreeCheckout"
+          setting="fastWorktreeCheckout"
+          description={t("release4491.text151")}
+        />
       </ScrollView>
     </SettingsScreen>
   );
@@ -240,116 +249,67 @@ export function NewThreadSettingsSection() {
   );
 }
 
-/** Per machine, since each machine's own setting decides whether it links and answers links. */
-function BetaSettingsSection() {
+type MachineBetaSetting = "linkedEnvironmentsEnabled" | "fastWorktreeCheckout";
+
+/** One switch per connected machine that offers the beta, since each machine's own setting decides. */
+function MachineBetaSection({
+  title,
+  icon,
+  capability,
+  setting,
+  description,
+}: {
+  readonly title: string;
+  readonly icon: ComponentProps<typeof SettingsSwitchRow>["icon"];
+  readonly capability: "peerLinks" | "fastWorktreeCheckout";
+  readonly setting: MachineBetaSetting;
+  readonly description: string;
+}) {
   const t = useTranslate();
   const { environments } = useEnvironments();
   const supported = environments.filter(
     (environment) =>
       environment.connection.phase === "connected" &&
-      environment.serverConfig?.environment.capabilities.peerLinks === true,
+      environment.serverConfig?.environment.capabilities[capability] === true,
   );
   const writable = useEnvironmentsWithScope(supported, AuthSettingsWriteScope);
   const updateSettings = useAtomCommand(serverEnvironment.updateSettings, {
-    label: "linked environments beta update",
+    label: t("release4491.text152", { value0: setting }),
     reportFailure: true,
   });
   if (supported.length === 0) return null;
   return (
     <View className="gap-3">
-      <SettingsSection title={t("mobile.settings.ThreadSettingsSections.beta-linked-environments")}>
+      <SettingsSection title={t("release4491.beta-title", { title })}>
         {supported.map((environment) => {
           const policy = environment.serverConfig?.managedPolicy;
-          const managed = isManagedSettingPath(policy, "linkedEnvironmentsEnabled");
+          const managed = isManagedSettingPath(policy, setting);
           return (
             <SettingsSwitchRow
               key={environment.environmentId}
-              icon="link"
+              icon={icon}
               label={environment.label}
               {...(managed
                 ? { subtitle: t("release4066.text189", { value0: policy?.organization ?? "" }) }
                 : {})}
-              value={environment.serverConfig?.settings.linkedEnvironmentsEnabled === true}
+              value={environment.serverConfig?.settings[setting] === true}
               disabled={managed || !writable.has(environment.environmentId)}
               onValueChange={(value) =>
                 void updateSettings({
                   environmentId: environment.environmentId,
-                  input: { patch: { linkedEnvironmentsEnabled: value } },
+                  input: {
+                    patch:
+                      setting === "linkedEnvironmentsEnabled"
+                        ? { linkedEnvironmentsEnabled: value }
+                        : { fastWorktreeCheckout: value },
+                  },
                 })
               }
             />
           );
         })}
       </SettingsSection>
-      <Text className="px-2 text-sm text-foreground-muted">
-        Let agents on a machine work on your other machines, and theirs on it. Turn it on for each
-        machine. While off, nothing new starts over a link; running tasks finish.
-      </Text>
-    </View>
-  );
-}
-
-const TOOL_CALL_VISIBILITY_OPTIONS: ReadonlyArray<{
-  readonly value: ToolCallVisibility;
-  readonly labelKey: TranslationKey;
-}> = [
-  { value: "showAll", labelKey: "web.dynamic.PullRequestChecksPopover.show-all" },
-  { value: "hideSuccessful", labelKey: "release4262.hide-successful" },
-  { value: "hideAll", labelKey: "release4262.hide-all" },
-  { value: "zen", labelKey: "release4262.zen" },
-];
-
-function ToolCallVisibilitySection() {
-  const t = useTranslate();
-  const savePreferences = useAtomSet(updateMobilePreferencesAtom);
-  const preferences = useAtomValue(mobilePreferencesAtom);
-  const selected = AsyncResult.isSuccess(preferences)
-    ? (preferences.value.toolCallVisibility ?? "showAll")
-    : null;
-
-  return (
-    <View className="gap-3">
-      <SettingsSection title={t("release4262.beta-tool-calls-in-chat")}>
-        {TOOL_CALL_VISIBILITY_OPTIONS.map((option, index) => (
-          <ListChoiceRow
-            key={option.value}
-            label={t(option.labelKey)}
-            selected={selected === option.value}
-            separated={index > 0}
-            disabled={selected === null}
-            onPress={() => savePreferences({ toolCallVisibility: option.value })}
-          />
-        ))}
-      </SettingsSection>
-      <Text className="px-2 text-sm text-foreground-muted">
-        {t("release4262.tool-calls-detail")}
-      </Text>
-    </View>
-  );
-}
-
-function LegacySettingsSection() {
-  const t = useTranslate();
-  const savePreferences = useAtomSet(updateMobilePreferencesAtom);
-  const preferences = useAtomValue(mobilePreferencesAtom);
-  const planModeEnabled =
-    AsyncResult.isSuccess(preferences) && preferences.value.planModeEnabled === true;
-
-  return (
-    <View className="gap-3">
-      <SettingsSection title={t("mobile.settings.ThreadSettingsSections.legacy")}>
-        <SettingsSwitchRow
-          icon="hammer"
-          label={t("mobile.settings.ThreadSettingsSections.plan-mode")}
-          value={planModeEnabled}
-          onValueChange={(value) => savePreferences({ planModeEnabled: value })}
-        />
-      </SettingsSection>
-      <Text className="px-2 text-sm text-foreground-muted">
-        {t(
-          "mobile.settings.ThreadSettingsSections.opt-into-retired-interfaces-kept-for-compatibility-plan-mode-restores-the-build-plan-control-otherwise-every-task-runs-in-build-mode",
-        )}
-      </Text>
+      <Text className="px-2 text-sm text-foreground-muted">{description}</Text>
     </View>
   );
 }

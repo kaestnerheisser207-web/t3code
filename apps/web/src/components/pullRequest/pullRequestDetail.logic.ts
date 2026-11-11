@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { stripInlineContextReferences } from "~/lib/composerContextReferences";
 import type { Nodes as MdastNodes } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
@@ -707,7 +708,7 @@ export function buildPullRequestTimeline(
       id: "created",
       at: detail.createdAt,
       kind: "opened" as const,
-      title: `opened this ${term}`,
+      title: webI18n.t("release4491.text589", { value0: term }),
       body: null,
       markdown: false,
       url: null,
@@ -723,7 +724,7 @@ export function buildPullRequestTimeline(
       id: commit.oid,
       at: commit.committedDate,
       kind: "commit" as const,
-      title: `Commit ${commit.oid.slice(0, 7)}`,
+      title: webI18n.t("release4066.text201", { value0: commit.oid.slice(0, 7) }),
       body: commit.messageHeadline || null,
       markdown: false,
       url: null,
@@ -757,7 +758,7 @@ export function buildPullRequestTimeline(
             id: "merged",
             at: detail.mergedAt,
             kind: "merged" as const,
-            title: `${capitalizeTerm(term)} merged`,
+            title: webI18n.t("release4491.text591", { value0: capitalizeTerm(term) }),
             body: null,
             markdown: false,
             url: null,
@@ -777,7 +778,7 @@ export function buildPullRequestTimeline(
             id: "closed",
             at: detail.closedAt,
             kind: "closed" as const,
-            title: `${capitalizeTerm(term)} closed`,
+            title: webI18n.t("release4491.text592", { value0: capitalizeTerm(term) }),
             body: null,
             markdown: false,
             url: null,
@@ -799,9 +800,14 @@ const FINDING_BODY_MAX_LENGTH = 1_000;
 
 function bounded(value: string): string {
   const trimmed = value.trim();
-  return trimmed.length <= FINDING_BODY_MAX_LENGTH
-    ? trimmed
-    : `${trimmed.slice(0, FINDING_BODY_MAX_LENGTH - 3)}...`;
+  if (trimmed.length <= FINDING_BODY_MAX_LENGTH) return trimmed;
+  let end = FINDING_BODY_MAX_LENGTH - 3;
+  const previous = trimmed.charCodeAt(end - 1);
+  const next = trimmed.charCodeAt(end);
+  if (previous >= 0xd800 && previous <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) {
+    end -= 1;
+  }
+  return `${trimmed.slice(0, end)}...`;
 }
 
 function boundedField(value: string): string {

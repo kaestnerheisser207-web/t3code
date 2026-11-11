@@ -172,11 +172,8 @@ export function PullRequestActionToolbar(props: {
               >
                 <View pointerEvents="none">
                   <IconButton
-                    icon="sparkles"
-                    accessibilityLabel={t(
-                      "mobile.dynamic.PullRequestControls.param-agent-actions",
-                      { shortLabel: shortLabel },
-                    )}
+                    icon="ellipsis.bubble"
+                    accessibilityLabel={t("release4491.text086", { value0: shortLabel })}
                     disabled={agent.disabled}
                   />
                 </View>
@@ -250,11 +247,9 @@ export function PullRequestActionToolbar(props: {
   const agentControl = showAgentControls ? (
     <Toolbar.Menu
       identifier="pull-request-agent"
-      icon="sparkles"
+      icon="ellipsis.bubble"
       title={t("mobile.review.PullRequestControls.ai-helpers")}
-      accessibilityLabel={t("mobile.dynamic.PullRequestControls.param-agent-actions", {
-        shortLabel: shortLabel,
-      })}
+      accessibilityLabel={t("release4491.text086", { value0: shortLabel })}
       disabled={agent.disabled}
       separateBackground
     >

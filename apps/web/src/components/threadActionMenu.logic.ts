@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import type { TFunction } from "i18next";
 import type { ContextMenuItem } from "@t3tools/contracts";
 import type { SnoozePreset } from "@t3tools/client-runtime/state/thread-settled";
@@ -43,7 +44,7 @@ export function buildDraftActionMenuItems(
     readonly hasBranch: boolean;
     readonly hasProject: boolean;
   },
-  t?: TFunction,
+  t: TFunction = webI18n.t,
 ): ReadonlyArray<ContextMenuItem<DraftActionMenuId>> {
   return [
     {
@@ -133,11 +134,17 @@ export function threadActionRequiresOperate(action: ThreadActionMenuId): boolean
 
 export function buildThreadActionMenuItems(
   state: ThreadActionMenuState,
-  t?: TFunction,
+  t: TFunction = webI18n.t,
 ): ReadonlyArray<ContextMenuItem<ThreadActionMenuId>> {
   const items: ReadonlyArray<ContextMenuItem<ThreadActionMenuId>> = [
     ...(state.canFind
-      ? [{ id: "find" as const, label: "Find in thread", icon: "text-search" }]
+      ? [
+          {
+            id: "find" as const,
+            label: t("web.ui.ThreadFindBar.find-in-thread"),
+            icon: "text-search",
+          },
+        ]
       : []),
     ...(state.branch
       ? [
@@ -247,7 +254,7 @@ export function buildThreadActionMenuItems(
       ? [
           {
             id: "turn-into-project" as const,
-            label: "Turn into project",
+            label: t("release3904.turn-into-project"),
             icon: "folder-plus",
             disabled: state.isRunning,
           },
@@ -262,12 +269,12 @@ export function buildThreadActionMenuItems(
             children: [
               {
                 id: "auto-settle:enabled" as const,
-                label: t?.("nativeMenu.enabled") ?? "Enabled",
+                label: t("release4491.text222"),
                 checked: state.autoSettleEnabled,
               },
               {
                 id: "auto-settle:disabled" as const,
-                label: t?.("nativeMenu.disabled") ?? "Disabled",
+                label: t("settings.dynamic.never"),
                 checked: !state.autoSettleEnabled,
               },
             ],

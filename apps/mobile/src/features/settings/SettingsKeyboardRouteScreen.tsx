@@ -3,6 +3,7 @@ import { useTranslate } from "../../i18n";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
+import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText as Text } from "../../components/ui/AppText";
@@ -14,6 +15,8 @@ import { mobilePreferencesAtom, updateMobilePreferencesAtom } from "../../state/
 import { ListChoiceRow as SettingsChoiceRow } from "../../components/ui/ListChoiceRow";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { SettingsSection } from "./components/SettingsSection";
+
+const SEND_MODIFIER = Platform.OS === "android" ? "Ctrl" : "Command";
 
 const ENTER_BEHAVIOR_OPTIONS: ReadonlyArray<{
   readonly behavior: ComposerEnterBehavior;
@@ -28,7 +31,7 @@ const ENTER_BEHAVIOR_OPTIONS: ReadonlyArray<{
   {
     behavior: "newline",
     labelKey: "options.newline",
-    descriptionKey: "options.newlineDescription",
+    descriptionKey: "release4491.text119",
   },
 ];
 
@@ -56,7 +59,11 @@ export function SettingsKeyboardRouteScreen() {
             <SettingsChoiceRow
               key={option.behavior}
               label={t(option.labelKey)}
-              description={t(option.descriptionKey)}
+              description={
+                option.behavior === "newline"
+                  ? t("release4491.text119", { value0: SEND_MODIFIER })
+                  : t(option.descriptionKey)
+              }
               selected={selectedBehavior === option.behavior}
               separated={index > 0}
               disabled={!preferencesReady}

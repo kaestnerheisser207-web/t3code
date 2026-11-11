@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { pipe } from "effect/Function";
 import {
   IMAGE_DIMENSIONS_HEADER_BYTES,
@@ -490,7 +491,10 @@ export function openRtf(bytes: ArrayBuffer): OfficeWorkerResult {
   let completedLength = 0;
   const finishPage = () => {
     if (pages.length >= 500) throw new Error("Rich text preview limited to 500 pages.");
-    pages.push({ title: `Page ${pages.length + 1}`, html: `<p>${html}</p>` });
+    pages.push({
+      title: webI18n.t("release4491.text444", { value0: pages.length + 1 }),
+      html: `<p>${html}</p>`,
+    });
     completedLength += html.length;
     html = "";
   };
@@ -565,6 +569,8 @@ export function openRtf(bytes: ArrayBuffer): OfficeWorkerResult {
       const match = /^([a-z]+)(-?\d+)? ?/i.exec(source.slice(i));
       if (!match) {
         if (next === "~") emit("\u00a0");
+        // A backslash before a line break is \par; TextEdit ends paragraphs this way.
+        else if ((next === "\n" || next === "\r") && !state.skip) html += "<br>";
         i++;
         continue;
       }

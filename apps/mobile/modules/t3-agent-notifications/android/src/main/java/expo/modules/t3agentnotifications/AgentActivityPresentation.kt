@@ -135,7 +135,7 @@ internal class ActivityPresentation(
   }
 
   val chip = when {
-    !active -> null
+    !active -> if (phase == ActivityPhase.FAILED) text("failed", "Failed") else text("done", "Done")
     phase == null -> data["activity_chip"]?.takeIf { it.isNotBlank() }?.take(7) ?: text("active", "Active")
     phase == ActivityPhase.RUNNING && activeCount > 1 ->
       text("liveCount", "${if (activeCount > 9) "9+" else activeCount} live", if (activeCount > 9) "9+" else activeCount)

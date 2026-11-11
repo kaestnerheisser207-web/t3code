@@ -1,3 +1,5 @@
+import { mobileI18n } from "../../i18n";
+import { useContentTopInset } from "../../components/ui/useBarInset";
 import { useTranslate } from "../../i18n";
 import { usePaneRole } from "../../components/ui/Pane";
 import { ScreenContent } from "../../components/ui/ScreenContent";
@@ -152,16 +154,18 @@ function deriveEmptyState(props: {
   const { catalogState } = props;
   if (catalogState.isLoadingConnections) {
     return {
-      title: "Loading environments",
-      detail: "Checking saved environments on this device.",
+      title: mobileI18n.t("mobile.connect.T3ConnectProfilePage.loading-environments"),
+      detail: mobileI18n.t("release4491.text067"),
       loading: true,
     };
   }
 
   if (!catalogState.hasConnections) {
     return {
-      title: "No environments connected",
-      detail: "Add an environment to load projects and start coding sessions.",
+      title: mobileI18n.t("mobile.surfaces.WorkspaceEmptyDetail.no-environments-connected"),
+      detail: mobileI18n.t(
+        "mobile.surfaces.WorkspaceEmptyDetail.add-an-environment-to-load-projects-and-start-coding-sessions",
+      ),
       loading: false,
     };
   }
@@ -191,23 +195,23 @@ function deriveEmptyState(props: {
     catalogState.connectionError === null
   ) {
     return {
-      title: "Connecting to environment",
-      detail: "Loading projects and threads from the saved environment.",
+      title: mobileI18n.t("release4491.text070"),
+      detail: mobileI18n.t("release4491.text071"),
       loading: true,
     };
   }
 
   if (props.projectCount === 0 && catalogState.hasLoadedShellSnapshot) {
     return {
-      title: "No projects found",
-      detail: "The connected environment did not report any projects.",
+      title: mobileI18n.t("release4491.text072"),
+      detail: mobileI18n.t("release4491.text073"),
       loading: false,
     };
   }
 
   return {
-    title: "No threads yet",
-    detail: "Create a task to start a new coding runtime in one of your connected projects.",
+    title: mobileI18n.t("sidebar.noThreads"),
+    detail: mobileI18n.t("release4491.text075"),
     loading: false,
   };
 }
@@ -264,6 +268,7 @@ export function HomeScreen(props: HomeScreenProps) {
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const homeScrollGesture = useNativeGesture();
   const insets = useSafeAreaInsets();
+  const contentTopInset = useContentTopInset();
   const emptyTopInset = useWorkspaceListEmptyTopInset();
   const { fabClearance } = useAndroidControlSizing();
   const screenMetrics = useNativeLayoutMetrics();
@@ -328,7 +333,7 @@ export function HomeScreen(props: HomeScreenProps) {
   useSearchScrollRestoration(searchMode, () => {
     if (restoredOffset === undefined) return;
     void listRef.current?.scrollToOffset({
-      offset: restoredOffset - (Platform.OS === "ios" ? insets.top : 0),
+      offset: restoredOffset - contentTopInset,
       animated: false,
     });
   });
@@ -349,7 +354,7 @@ export function HomeScreen(props: HomeScreenProps) {
     if (workspace)
       workspace.recordScrollOffset(
         "threads",
-        Math.max(0, event.nativeEvent.contentOffset.y + (Platform.OS === "ios" ? insets.top : 0)),
+        Math.max(0, event.nativeEvent.contentOffset.y + contentTopInset),
       );
     clearTimeout(activationTimerRef.current);
     activationTimerRef.current = setTimeout(
@@ -808,7 +813,7 @@ export function HomeScreen(props: HomeScreenProps) {
                 onTouchStart={(event) => trackListTouches(event, true)}
                 onTouchEnd={(event) => trackListTouches(event, false)}
                 onTouchCancel={(event) => trackListTouches(event, false)}
-                renderScrollComponent={renderHomeScrollView}
+                renderScrollComponent={Platform.OS === "ios" ? renderHomeScrollView : undefined}
                 data={threadListV2Items}
                 renderItem={renderV2Item}
                 keyExtractor={v2KeyExtractor}
@@ -839,17 +844,11 @@ export function HomeScreen(props: HomeScreenProps) {
                 }
                 ListEmptyComponent={v2ListEmpty}
                 style={{ flex: 1 }}
-                automaticallyAdjustsScrollIndicatorInsets
-                // UIKit owns the bar's inset, so a minimizing bar and a resized column move
-                // the list in the same frame as the bar.
-                contentInsetAdjustmentBehavior="automatic"
-                contentInsetStartAdjustment={Platform.OS === "ios" ? insets.top : 0}
-                // RN scrollTo clamps against raw insets and ignores the automatic bar inset.
-                scrollToOverflowEnabled
+                automaticallyAdjustsScrollIndicatorInsets={Platform.OS === "ios"}
+                contentInsetAdjustmentBehavior="never"
+                contentInset={Platform.OS === "ios" ? { top: contentTopInset } : undefined}
                 initialScrollOffset={
-                  initialScrollOffset > 0
-                    ? initialScrollOffset - (Platform.OS === "ios" ? insets.top : 0)
-                    : undefined
+                  initialScrollOffset > 0 ? initialScrollOffset - contentTopInset : undefined
                 }
                 showsVerticalScrollIndicator={false}
                 keyboardDismissMode="on-drag"
@@ -863,7 +862,7 @@ export function HomeScreen(props: HomeScreenProps) {
                     (contentSideInsets?.right ?? 0) + (sidebarSurface ? 8 : 0) + androidListGutter,
                   paddingBottom:
                     Platform.OS === "ios"
-                      ? iosBottomClearance - (columnMetrics?.safeArea.bottom ?? insets.bottom)
+                      ? iosBottomClearance
                       : (workspace?.bottomClearance ??
                         Math.max(insets.bottom, 16) +
                           (Platform.OS === "android" ? fabClearance : 88)),

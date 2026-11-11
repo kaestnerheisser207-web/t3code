@@ -34,25 +34,27 @@ import { AppState, useWindowDimensions } from "react-native";
 import { OverlayPortal } from "../../components/ui/OverlayPortal";
 import { useAppearancePreferences } from "../settings/appearance/AppearancePreferencesProvider";
 import { useScaledTextRole } from "../settings/appearance/useScaledTextRole";
-import type { CustomSnoozeSheet as SharedCustomSnoozeSheet } from "./CustomSnoozeSheet.shared";
 import {
   applySnoozePickerDate,
   applySnoozePickerTime,
   snoozeDateToPickerDate,
 } from "./customSnoozeDate";
 
-type Props = Parameters<typeof SharedCustomSnoozeSheet>[0];
+type Props = {
+  readonly onClose: () => void;
+  readonly onSnooze: (snoozedUntil: string) => void;
+};
 
 const roundedCorner = Shape.RoundedCorner;
 
 const modes = [
-  { value: "date", label: "Date and time" },
-  { value: "duration", label: "Duration" },
+  { value: "date", labelKey: "web.ui.CustomSnoozeDialog.date-and-time" },
+  { value: "duration", labelKey: "mobile.threads.CustomSnoozeSheet.shared.duration" },
 ] as const;
 const units = [
-  { value: "minutes", label: "Minutes" },
-  { value: "hours", label: "Hours" },
-  { value: "days", label: "Days" },
+  { value: "minutes", labelKey: "web.ui.CustomSnoozeDialog.minutes" },
+  { value: "hours", labelKey: "web.ui.CustomSnoozeDialog.hours" },
+  { value: "days", labelKey: "web.ui.CustomSnoozeDialog.days" },
 ] as const;
 
 function systemUses24HourClock() {
@@ -150,7 +152,10 @@ export function CustomSnoozeSheet(props: Props) {
                 <RNHostView matchContents={{ vertical: true }} modifiers={[fillMaxWidth()]}>
                   <SegmentedControl
                     variant="card"
-                    options={modes}
+                    options={modes.map((option) => ({
+                      value: option.value,
+                      label: t(option.labelKey),
+                    }))}
                     selected={mode}
                     onSelect={(value) => {
                       setMode(value);
@@ -239,7 +244,10 @@ export function CustomSnoozeSheet(props: Props) {
                   <RNHostView matchContents={{ vertical: true }} modifiers={[fillMaxWidth()]}>
                     <SegmentedControl
                       variant="card"
-                      options={units}
+                      options={units.map((option) => ({
+                        value: option.value,
+                        label: t(option.labelKey),
+                      }))}
                       selected={unit}
                       onSelect={setUnit}
                     />
@@ -300,7 +308,10 @@ function SnoozeDateTimePicker(props: {
       is24Hour={props.is24Hour}
       showVariantToggle={false}
       elementColors={props.colors}
-      onDateSelected={props.onChange}
+      // Null marks incomplete input; keep the last valid date.
+      onDateSelected={(date) => {
+        if (date) props.onChange(date);
+      }}
     />
   );
 }

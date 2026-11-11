@@ -988,9 +988,7 @@ function DeviceIntegrationControls({
             >
               {pending === `update-${tool}`
                 ? t("web.dynamic.IntegrationsSettings.updating")
-                : t("web.dynamic.IntegrationsSettings.update-to-vparam", {
-                    requiredVersion: version.requiredVersion,
-                  })}
+                : t("web.ui.UpdateEverythingDialog.update")}
             </Button>
           ) : null}
           {state.supportsToolInspection ? (

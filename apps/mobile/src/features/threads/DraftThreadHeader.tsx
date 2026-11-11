@@ -51,9 +51,7 @@ export function DraftThreadHeader(props: {
       title={t("mobile.threads.DraftThreadHeader.new-thread")}
       subtitle=""
       hasThreadCwd={props.cwd !== null}
-      fileInspectorSupported={false}
       inspectorMode={null}
-      onToggleInspector={openFiles}
       onOpenFilesInspector={openFiles}
       gitControls={{
         environmentId,

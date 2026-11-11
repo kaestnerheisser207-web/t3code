@@ -33,7 +33,7 @@ export function ScheduledTaskPromptField(props: {
       <Text className="text-sm text-foreground-muted">
         {t("mobile.settings.ScheduledTaskPromptField.prompt")}
       </Text>
-      <View className="relative">
+      <View className="flex-row items-end">
         <TextInput
           accessibilityLabel={t("mobile.settings.ScheduledTaskPromptField.prompt")}
           value={props.value}
@@ -48,18 +48,16 @@ export function ScheduledTaskPromptField(props: {
             "mobile.settings.ScheduledTaskPromptField.what-should-the-agent-do-each-time",
           )}
           placeholderTextColorClassName="accent-foreground-muted"
-          className="max-h-40 min-h-24 font-sans text-base text-foreground"
+          className="max-h-40 min-h-24 min-w-0 flex-1 font-sans text-base text-foreground"
         />
         {showsIdleTrigger ? (
-          <View className="absolute right-0 bottom-0 rounded-full bg-card">
-            <ComposerDictationStartAction
-              state={voice.state}
-              isAvailable={voice.isAvailable}
-              disabled={props.disabled}
-              onStart={voice.start}
-              onCancel={voice.cancel}
-            />
-          </View>
+          <ComposerDictationStartAction
+            state={voice.state}
+            isAvailable={voice.isAvailable}
+            disabled={props.disabled}
+            onStart={voice.start}
+            onCancel={voice.cancel}
+          />
         ) : null}
       </View>
       <ComposerDictationError

@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import type { TFunction } from "i18next";
 import type {
   EnvironmentId,
@@ -28,6 +29,7 @@ import {
 } from "lucide-react";
 import { Fragment } from "react";
 import { tickTextContent } from "~/lib/tickTextContent";
+import { BackgroundWorkDetails } from "./BackgroundWorkDetails";
 import { Button, InlineButton } from "../ui/button";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import type { ComposerBannerStackItem } from "./ComposerBannerStack";
@@ -52,7 +54,7 @@ export function childInputNowItem(
     readonly parentAwaitingUser: boolean;
     readonly onOpenThread: (threadId: ThreadId, environmentId: EnvironmentId) => void;
   },
-  t?: TFunction,
+  t: TFunction = webI18n.t,
 ): (ThreadNowItem & { readonly waitingLabel: string }) | null {
   const { childThreadInputs, onOpenThread } = input;
   const first = childThreadInputs[0];
@@ -83,8 +85,8 @@ export function childInputNowItem(
     actions: (
       <InlineButton onClick={() => onOpenThread(first.id, first.environmentId)}>
         {first.hasPendingApprovals
-          ? (t?.("child.openApproval") ?? "Open approval")
-          : (t?.("child.openQuestion") ?? "Open question")}
+          ? (t?.("child.openApproval") ?? t("child.openApproval"))
+          : (t?.("child.openQuestion") ?? t("child.openQuestion"))}
       </InlineButton>
     ),
   };
@@ -98,7 +100,7 @@ export function goalNowItem(
     readonly isWorking: boolean;
     readonly onSendCommand: (text: string, failureMessage: string) => Promise<void>;
   },
-  t?: TFunction,
+  t: TFunction = webI18n.t,
 ): ThreadNowItem {
   const { isWorking, onSendCommand } = input;
   const presentation = presentProviderGoal(input.goal, isWorking, t);
@@ -123,7 +125,7 @@ export function goalNowItem(
                 )
               }
             >
-              {t?.("goal.resume") ?? t?.("goal.resume") ?? "Resume"}
+              {t?.("goal.resume") ?? t?.("goal.resume") ?? t("goal.resume")}
             </InlineButton>
             <span aria-hidden>·</span>
           </>
@@ -134,7 +136,7 @@ export function goalNowItem(
             void onSendCommand("/goal clear", t?.("goal.clearFailed") ?? "Failed to clear goal.")
           }
         >
-          {t?.("goal.clear") ?? t?.("goal.clear") ?? "Clear"}
+          {t?.("goal.clear") ?? t?.("goal.clear") ?? t("web.ui.DeviceToolsPanel.clear")}
         </InlineButton>
       </>
     ),
@@ -173,7 +175,9 @@ export function runStopNowItem(input: {
         />
         {unresponsive && input.canForceStop ? (
           <InlineButton disabled={input.forceStopping} onClick={input.onForceStop}>
-            {input.forceStopping ? "Force stopping..." : "Force stop"}
+            {input.forceStopping
+              ? webI18n.t("release4491.text389")
+              : webI18n.t("release4491.text390")}
           </InlineButton>
         ) : null}
       </>
@@ -182,19 +186,18 @@ export function runStopNowItem(input: {
 }
 
 /** Background commands and subagents, for the end of the timeline. */
-export function backgroundWorkNowItem(
-  input: {
-    readonly threadId: ThreadId;
-    readonly tasks: ReadonlyArray<OrchestrationV2PendingBackgroundTask>;
-    readonly turnItems: ThreadStructure["turnItems"];
-    readonly stopDisabled: boolean;
-    readonly stopping: boolean;
-    readonly onStop: () => Promise<void>;
-    readonly onOpenThread: (threadId: ThreadId) => void;
-  },
-  t?: TFunction,
-): ThreadNowItem | null {
-  const { onOpenThread } = input;
+export function backgroundWorkNowItem(input: {
+  readonly t?: TFunction;
+  readonly environmentId: EnvironmentId;
+  readonly threadId: ThreadId;
+  readonly tasks: ReadonlyArray<OrchestrationV2PendingBackgroundTask>;
+  readonly turnItems: ThreadStructure["turnItems"];
+  readonly stopDisabled: boolean;
+  readonly stopping: boolean;
+  readonly onStop: () => Promise<void>;
+  readonly onOpenThread: (threadId: ThreadId) => void;
+}): ThreadNowItem | null {
+  const { onOpenThread, t = webI18n.t } = input;
   const presentation = presentPendingBackgroundWork(input.tasks, t);
   if (presentation === null) return null;
   const rows = presentation.items.map((task) => {
@@ -235,8 +238,8 @@ export function backgroundWorkNowItem(
       only && typeof only.label !== "string" && only.task.label !== only.task.kind ? (
         <>
           {presentation.waiting
-            ? (t?.("lifecycle.waiting") ?? "Waiting")
-            : (t?.("lifecycle.running") ?? "Running")}{" "}
+            ? (t?.("lifecycle.waiting") ?? t("activity.waiting"))
+            : (t?.("lifecycle.running") ?? t("web.ui.DeviceToolVersions.running"))}{" "}
           · {only.label}
         </>
       ) : (
@@ -267,16 +270,25 @@ export function backgroundWorkNowItem(
             className="tabular-nums"
           />
         )}
+        <BackgroundWorkDetails
+          environmentId={input.environmentId}
+          threadId={input.threadId}
+          tasks={input.tasks}
+          turnItems={input.turnItems}
+          onOpenThread={onOpenThread}
+        />
         {onlyThreadId === undefined ? null : (
           <InlineButton tone="muted" onClick={() => onOpenThread(onlyThreadId)}>
-            {t?.("background.open") ?? t?.("background.open") ?? "Open"}
+            {t?.("background.open") ??
+              t?.("background.open") ??
+              t("web.ui.ThreadPullRequestsPanel.open")}
           </InlineButton>
         )}
         <InlineButton disabled={input.stopDisabled} onClick={() => void input.onStop()}>
           {t?.(input.stopping ? "background.stopping" : "background.stop") ??
             (input.stopping
-              ? (t?.("background.stopping") ?? "Stopping...")
-              : (t?.("background.stop") ?? "Stop"))}
+              ? (t?.("background.stopping") ?? t("background.stopping"))
+              : (t?.("background.stop") ?? t("mobile.threads.PendingUserInputCard.stop")))}
         </InlineButton>
       </>
     ),
@@ -293,7 +305,7 @@ export function branchMismatchBannerItem(
     readonly onRestore: () => void;
     readonly onDismiss: () => void;
   },
-  t?: TFunction,
+  t: TFunction = webI18n.t,
 ): ComposerBannerStackItem {
   const { mismatch } = input;
   return {
@@ -306,7 +318,7 @@ export function branchMismatchBannerItem(
           {t?.("branch.changedFrom") ??
             t?.("branch.changedFrom") ??
             t?.("branch.changedFrom") ??
-            "Branch changed from"}
+            t("branch.changedFrom")}
         </span>
         <Tooltip>
           <TooltipTrigger
@@ -325,7 +337,10 @@ export function branchMismatchBannerItem(
                 previous: mismatch.threadBranch,
                 current: mismatch.currentBranch,
               }) ??
-              `This thread last ran on ${mismatch.threadBranch}. Sending will continue on ${mismatch.currentBranch}.`}
+              t("release4491.text394", {
+                value0: mismatch.threadBranch,
+                value1: mismatch.currentBranch,
+              })}
           </TooltipPopup>
         </Tooltip>
       </span>
@@ -334,8 +349,8 @@ export function branchMismatchBannerItem(
       <Button size="xs" variant="ghost" disabled={input.restoreDisabled} onClick={input.onRestore}>
         {t?.(input.restoring ? "branch.restoring" : "branch.restore") ??
           (input.restoring
-            ? (t?.("branch.restoring") ?? "Restoring...")
-            : (t?.("branch.restore") ?? "Restore branch"))}
+            ? (t?.("branch.restoring") ?? t("branch.restoring"))
+            : (t?.("branch.restore") ?? t("branch.restore")))}
       </Button>
     ),
     dismissLabel: t?.("branch.dismiss") ?? "Dismiss branch change notice",

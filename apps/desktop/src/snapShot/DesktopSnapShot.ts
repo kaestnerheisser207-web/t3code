@@ -1,3 +1,4 @@
+import { desktopI18n } from "../i18n.ts";
 // @effect-diagnostics globalTimers:off -- Capture timeouts and Electron overlay animation timers run at native callback boundaries outside Effect fibers.
 
 import { pipe } from "effect/Function";
@@ -508,7 +509,6 @@ async function captureSource({
       ({ source, png } = await captureRegionWindowSnapshot(
         regionSnapShotPool,
         active,
-        snapShotFlashBounds(active, platform),
         snapShotThumbnailSize(active),
       ));
     } else {
@@ -547,7 +547,7 @@ async function captureSource({
       }
     }
     const accessibleIdentity = active
-      ? { ...active, bounds: snapShotFlashBounds(active, platform) }
+      ? active
       : linuxWindow?.processId
         ? {
             title: linuxWindow.title,
@@ -746,13 +746,13 @@ function probeGlobalShortcut(accelerator: string): DesktopSnapShotShortcutAvaila
     if (!Electron.globalShortcut.register(accelerator, () => undefined)) {
       return {
         available: false,
-        message: "This shortcut is already used by the system or another app.",
+        message: desktopI18n.t("release4491.text001"),
       };
     }
     Electron.globalShortcut.unregister(accelerator);
     return { available: true, message: null };
   } catch {
-    return { available: false, message: "The system could not register this shortcut." };
+    return { available: false, message: desktopI18n.t("release4491.text002") };
   }
 }
 
@@ -1063,18 +1063,18 @@ export const make = Effect.gen(function* () {
   ) {
     const mode = captureMode(environment.platform);
     if (mode === "unavailable") {
-      return { available: false, message: "SnapShots are not supported on this platform." };
+      return { available: false, message: desktopI18n.t("release4491.text003") };
     }
     if (mode === "portal" && niriSocketPath()) {
       return {
         available: false,
-        message: "Configure the capture shortcut in your Niri config, not in T3 Code.",
+        message: desktopI18n.t("release4491.text004"),
       };
     }
     if (mode === "portal" && isHyprlandCaptureSession()) {
       return {
         available: false,
-        message: "Change the capture binding in your Hyprland config, then save it.",
+        message: desktopI18n.t("release4491.text005"),
       };
     }
     if (isModifierPairShortcut(shortcut)) {
@@ -1111,7 +1111,7 @@ export const make = Effect.gen(function* () {
         Effect.match({
           onSuccess: () => ({
             available: true,
-            message: "Your desktop will confirm this shortcut when you save it.",
+            message: desktopI18n.t("release4491.text006"),
           }),
           onFailure: (error) => ({
             available: false,
@@ -1195,7 +1195,7 @@ export const make = Effect.gen(function* () {
           mode === "unavailable"
             ? environment.platform === "linux"
               ? "SnapShots require a Wayland session. X11 capture is not supported."
-              : "SnapShots are not supported on this platform."
+              : desktopI18n.t("release4491.text003")
             : null,
       });
       return;

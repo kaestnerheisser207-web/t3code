@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import {
   CLOUD_SPEECH_LABELS,
   CloudSpeechProvider,
@@ -5,6 +6,8 @@ import {
   isSecretReference,
   secretReferencesInSettings,
   type ServerSettings,
+  SimlockDeviceHostConfig,
+  TextGeneratorConfig,
   UsageLimitSourceConfig,
 } from "@t3tools/contracts";
 import { getProviderClient } from "@t3tools/client-runtime/provider-clients";
@@ -17,7 +20,9 @@ type SecretUseSettings = Pick<
   | "providerInstances"
   | "sourceControlHosts"
   | "usageLimitSources"
+  | "textGenerators"
   | "easDeviceHosts"
+  | "simlockDeviceHosts"
   | "cloudSpeechCredentials"
 >;
 
@@ -89,13 +94,29 @@ export function secretProviderUses(
         source,
       ),
     ),
+    ...Object.entries(settings.textGenerators).flatMap(([id, generator]) =>
+      uses(
+        { settingsSchema: TextGeneratorConfig },
+        `text-generator:${id}`,
+        generator.label ?? generator.baseUrl,
+        generator,
+      ),
+    ),
     ...settings.easDeviceHosts.flatMap((host) =>
       uses({ settingsSchema: EasDeviceHostConfig }, `eas:${host.id}`, host.label, host),
+    ),
+    ...settings.simlockDeviceHosts.flatMap((host) =>
+      uses({ settingsSchema: SimlockDeviceHostConfig }, `simlock:${host.id}`, host.label, host),
     ),
     ...CloudSpeechProvider.literals.flatMap((provider) => {
       const credential = settings.cloudSpeechCredentials[provider];
       return isSecretReference(credential) && credential.provider === providerId
-        ? [{ id: `voice:${provider}`, label: `Voice · ${CLOUD_SPEECH_LABELS[provider]}` }]
+        ? [
+            {
+              id: `voice:${provider}`,
+              label: webI18n.t("release4491.text676", { value0: CLOUD_SPEECH_LABELS[provider] }),
+            },
+          ]
         : [];
     }),
   ];

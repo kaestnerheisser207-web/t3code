@@ -1,3 +1,4 @@
+import { release4491En } from "./release4491.en.ts";
 import { release4340En } from "./release4340.en.ts";
 import { release4262En } from "./release4262.en.ts";
 import { release4066En } from "./release4066.en.ts";
@@ -134,6 +135,7 @@ import { settingsEn } from "./settings.en.ts";
 import { wizardEn } from "./wizard.en.ts";
 
 export const en = {
+  ...release4491En,
   ...release4066En,
   ...release4262En,
   ...release4340En,

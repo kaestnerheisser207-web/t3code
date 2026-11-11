@@ -1,39 +1,33 @@
-import type { TranslationKey } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { useAuth } from "@clerk/react";
 import { Link } from "@tanstack/react-router";
 import { managedCapabilityDenial } from "@t3tools/contracts";
-import { ToolCallVisibility } from "@t3tools/contracts/settings";
-import * as Schema from "effect/Schema";
 
 import { hasCloudPublicConfig } from "~/cloud/publicConfig";
 import { useT3ConnectAuthPrompt } from "../clerk/useT3ConnectAuthPrompt";
 import { Button } from "../ui/button";
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { ScopedSwitch } from "./ScopedSwitch";
 import { SettingsPageContainer, SettingsRow, SettingsSection } from "./settingsLayout";
 import { searchableSetting } from "./settingsSearch";
-import { LegacyFeaturesSection } from "./SettingsPanels";
 import { useScopedSettings, useUpdateScopedSettings } from "./useScopedSettings";
-import { useOptionalSettingsScope } from "./SettingsScopeContext";
+import { useOptionalSettingsScope, useSettingsScope } from "./SettingsScopeContext";
 import { firstManagedDenial, usePrimaryManagedPolicy } from "~/state/managedPolicy";
 
-/** Features still settling in, and legacy behavior kept for people who rely on it. */
+/** Features still settling in. */
 export function LabsSettingsPanel() {
   const t = useTranslate();
   return (
     <SettingsPageContainer>
       <SettingsSection id="beta" title={t("settings.pages.LabsSettingsPanel.beta")}>
         <BoringSidebarRow />
-        <BoringSidebarMultilineRow />
-        <ToolCallVisibilityRow />
         {/* Clerk is only mounted when this build has T3 Connect. */}
         {hasCloudPublicConfig() ? <GuestLinksRowWithSignIn /> : <GuestLinksRow />}
         <LinkedEnvironmentsRow />
+        <PromptSuggestionsRow />
         <SimlockHostsRow />
+        <FastWorktreeCheckoutRow />
       </SettingsSection>
-      <LegacyFeaturesSection />
     </SettingsPageContainer>
   );
 }
@@ -50,15 +44,18 @@ function BoringSidebarRow() {
       )}
       control={
         <Switch
-          checked={settings.boringSidebarEnabled || settings.legacySidebarEnabled}
-          // Turning it off also clears the opt-in of the removed legacy sidebar.
-          onCheckedChange={(checked) =>
-            updateSettings({ boringSidebarEnabled: Boolean(checked), legacySidebarEnabled: false })
-          }
+          checked={settings.boringSidebarEnabled}
+          onCheckedChange={(checked) => updateSettings({ boringSidebarEnabled: Boolean(checked) })}
           aria-label={t("settings.pages.LabsSettingsPanel.boring-sidebar-group-by-project")}
         />
       }
-    />
+    >
+      {settings.boringSidebarEnabled ? (
+        <div className="mt-2 mb-2 border-l-2 border-border/60 ps-3">
+          <BoringSidebarMultilineRow />
+        </div>
+      ) : null}
+    </SettingsRow>
   );
 }
 
@@ -70,7 +67,8 @@ function BoringSidebarMultilineRow() {
   return (
     <SettingsRow
       {...searchableSetting("boring-sidebar-multiline")}
-      description={t("release4066.text149")}
+      className="px-0 py-2 sm:px-0"
+      description={t("release4491.text644")}
       control={
         <Switch
           checked={settings.boringSidebarMultilineRows}
@@ -79,55 +77,6 @@ function BoringSidebarMultilineRow() {
           }
           aria-label={t("release4066.text150")}
         />
-      }
-    />
-  );
-}
-
-const TOOL_CALL_VISIBILITY_LABELS: Record<ToolCallVisibility, TranslationKey> = {
-  showAll: "web.dynamic.PullRequestChecksPopover.show-all",
-  hideSuccessful: "release4262.hide-successful",
-  hideAll: "release4262.hide-all",
-  zen: "release4262.zen",
-};
-
-const isToolCallVisibility = Schema.is(ToolCallVisibility);
-
-function ToolCallVisibilityRow() {
-  const t = useTranslate();
-  const settings = useScopedSettings();
-  const updateSettings = useUpdateScopedSettings();
-  return (
-    <SettingsRow
-      {...searchableSetting("tool-call-visibility")}
-      description={t("release4262.hide-the-commands-edits-and-searches-agents-run-")}
-      control={
-        <div className="w-full sm:w-40">
-          <Select
-            value={settings.toolCallVisibility}
-            onValueChange={(value) => {
-              if (isToolCallVisibility(value)) updateSettings({ toolCallVisibility: value });
-            }}
-          >
-            <SelectTrigger
-              size="sm"
-              className="w-full min-w-0"
-              aria-label={t("release4262.tool-calls-in-chat")}
-            >
-              <SelectValue>
-                {t(TOOL_CALL_VISIBILITY_LABELS[settings.toolCallVisibility])}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectPopup align="end" alignItemWithTrigger={false}>
-              <SelectItem value="showAll">
-                {t("web.dynamic.PullRequestChecksPopover.show-all")}
-              </SelectItem>
-              <SelectItem value="hideSuccessful">{t("release4262.hide-successful")}</SelectItem>
-              <SelectItem value="hideAll">{t("release4262.hide-all")}</SelectItem>
-              <SelectItem value="zen">{t("release4262.zen")}</SelectItem>
-            </SelectPopup>
-          </Select>
-        </div>
       }
     />
   );
@@ -234,6 +183,30 @@ function LinkedEnvironmentsRow() {
   );
 }
 
+function PromptSuggestionsRow() {
+  const t = useTranslate();
+  const settings = useScopedSettings();
+  const updateSettings = useUpdateScopedSettings();
+  return (
+    <SettingsRow
+      serverScoped
+      {...searchableSetting("prompt-suggestions-beta")}
+      settingKeys={["promptSuggestionsEnabled"]}
+      description={t("release4491.text645")}
+      control={
+        <ScopedSwitch
+          settingKeys={["promptSuggestionsEnabled"]}
+          checked={settings.promptSuggestionsEnabled}
+          onCheckedChange={(checked) =>
+            updateSettings({ promptSuggestionsEnabled: Boolean(checked) })
+          }
+          aria-label={t("release4491.text646")}
+        />
+      }
+    />
+  );
+}
+
 function SimlockHostsRow() {
   const t = useTranslate();
   const settings = useScopedSettings();
@@ -254,7 +227,7 @@ function SimlockHostsRow() {
           >
             Simlock
           </a>{" "}
-          pool, added in{" "}
+          {t("release4491.text648")}{" "}
           <Link to="/settings/devices" className="underline underline-offset-2">
             {t("device.menu.devices")}
           </Link>
@@ -269,6 +242,40 @@ function SimlockHostsRow() {
             updateSettings({ simlockDeviceHostsEnabled: Boolean(checked) })
           }
           aria-label={t("release4066.text153")}
+        />
+      }
+    />
+  );
+}
+
+/** Shows only when every machine in scope is a Mac, since only macOS servers honor it. */
+function FastWorktreeCheckoutRow() {
+  const t = useTranslate();
+  const { scope, connectedEnvironments } = useSettingsScope();
+  const settings = useScopedSettings();
+  const updateSettings = useUpdateScopedSettings();
+  if (
+    scope.kind === "project" ||
+    scope.kind === "checkout" ||
+    connectedEnvironments.length === 0 ||
+    connectedEnvironments.some(
+      (environment) =>
+        environment.serverConfig?.environment.capabilities.fastWorktreeCheckout !== true,
+    )
+  )
+    return null;
+  return (
+    <SettingsRow
+      serverScoped
+      {...searchableSetting("worktree-fast-checkout")}
+      settingKeys={["fastWorktreeCheckout"]}
+      description={t("release4491.text151")}
+      control={
+        <ScopedSwitch
+          settingKeys={["fastWorktreeCheckout"]}
+          checked={settings.fastWorktreeCheckout}
+          onCheckedChange={(checked) => updateSettings({ fastWorktreeCheckout: Boolean(checked) })}
+          aria-label={t("release4491.text150")}
         />
       }
     />

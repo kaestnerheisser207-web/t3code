@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import { useTranslate } from "../i18n";
 import {
   parseScopedThreadKey,
@@ -193,7 +194,7 @@ export async function navigateAfterThreadDeletion(navigate: () => Promise<void>)
     toastManager.add(
       stackedThreadToast({
         type: "error",
-        title: "Thread deleted, but navigation failed",
+        title: webI18n.t("release4491.text802"),
         description: error instanceof Error ? error.message : "An error occurred.",
       }),
     );
@@ -267,7 +268,7 @@ function threadOperationFailure(target: ScopedThreadRef) {
     : AsyncResult.failure(
         Cause.fail(
           new EnvironmentAuthorizationError({
-            message: "This connection cannot change threads.",
+            message: webI18n.t("thread.action.noPermission"),
             requiredScope: AuthOrchestrationOperateScope,
           }),
         ),
@@ -325,6 +326,10 @@ export function useThreadActions() {
     reportFailure: false,
   });
   const loadWorktreeThreadIds = useAtomQueryRunner(orchestrationEnvironment.worktreeThreadIds, {
+    reportFailure: false,
+    refresh: true,
+  });
+  const loadThreadFamily = useAtomQueryRunner(orchestrationEnvironment.threadFamily, {
     reportFailure: false,
     refresh: true,
   });
@@ -443,13 +448,40 @@ export function useThreadActions() {
     if (permissionFailure) return permissionFailure;
     const resolved = resolveThreadTarget(target);
     if (!resolved) {
+      let threads = readEnvironmentThreadRefs(target.environmentId).flatMap((ref) => {
+        const shell = readThreadShell(ref);
+        return shell === null ? [] : [{ id: shell.id, lineage: shell.lineage }];
+      });
+      if (
+        appAtomRegistry.get(environmentServerConfigsAtom).get(target.environmentId)
+          ?.shellThreadFamilies
+      ) {
+        const family = await loadThreadFamily({
+          environmentId: target.environmentId,
+          input: { threadId: target.threadId },
+        });
+        if (family._tag === "Success") threads = [...family.value.threads];
+      }
       const result = await deleteThreadMutation({
         environmentId: target.environmentId,
         input: { threadId: target.threadId },
       });
       if (result._tag === "Success") {
+        for (const ref of [
+          target,
+          ...threads
+            .filter(
+              (entry) =>
+                entry.lineage.sideChat === true && entry.lineage.parentThreadId === target.threadId,
+            )
+            .map((entry) => scopeThreadRef(target.environmentId, entry.id)),
+        ]) {
+          releaseComposerDraftUploads(ref);
+          clearComposerDraftForThread(ref);
+        }
         expireThreadUndos(target, [...LIST_PLACEMENT_UNDO_KINDS, "archive"]);
         refreshArchivedThreadsForEnvironment(target.environmentId);
+        clearTerminalUiState(target);
         clearDeletedThreadPanelState(target);
       }
       return result;
@@ -570,6 +602,15 @@ export function useThreadActions() {
     refreshArchivedThreadsForEnvironment(threadRef.environmentId);
     releaseComposerDraftUploads(threadRef);
     clearComposerDraftForThread(threadRef);
+    // The server deletes the thread's side chats with it.
+    for (const entry of threads) {
+      if (entry.lineage.sideChat !== true || entry.lineage.parentThreadId !== threadRef.threadId) {
+        continue;
+      }
+      const sideChatRef = scopeThreadRef(threadRef.environmentId, entry.id);
+      releaseComposerDraftUploads(sideChatRef);
+      clearComposerDraftForThread(sideChatRef);
+    }
     clearProjectDraftThreadById(
       scopeProjectRef(threadRef.environmentId, thread.projectId),
       threadRef,

@@ -1,5 +1,6 @@
+import { webI18n } from "../../i18n";
+import { isListedThreadLineage, isWebhookDedupeTemplate } from "@t3tools/contracts";
 import type { TFunction } from "i18next";
-import { isWebhookDedupeTemplate } from "@t3tools/contracts";
 import {
   EnvironmentId,
   MAX_WEBHOOK_DELIVERY_AGE_MINUTES,
@@ -13,7 +14,9 @@ import {
   type RuntimeMode,
   type ProviderInteractionMode,
   type ServerSettings,
+  type ThreadId,
 } from "@t3tools/contracts";
+import type { EnvironmentThreadShell } from "@t3tools/client-runtime/state/models";
 import {
   parseMaxDeliveryAge,
   parseWebhookFilterDrafts,
@@ -110,7 +113,7 @@ export function toDateTimeLocalValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export function scheduleDraftErrors(draft: DraftState, t?: TFunction) {
+export function scheduleDraftErrors(draft: DraftState, t: TFunction = webI18n.t) {
   if (draft.scheduleMode === "once") {
     const runAt = new Date(draft.runAt);
     if (Number.isNaN(runAt.getTime()))
@@ -134,8 +137,8 @@ export function scheduleDraftErrors(draft: DraftState, t?: TFunction) {
   if (parseMaxDeliveryAge(draft.maxDeliveryAgeMinutes) === undefined)
     return [
       {
-        title: "Invalid age limit",
-        description: `Enter whole minutes from 1 to ${MAX_WEBHOOK_DELIVERY_AGE_MINUTES}, or leave it blank.`,
+        title: t("mobile.schedule.invalidAge"),
+        description: t("release4491.text767", { value0: MAX_WEBHOOK_DELIVERY_AGE_MINUTES }),
       },
     ];
   const errors: Array<{ title: string; description: string }> = [];
@@ -145,15 +148,15 @@ export function scheduleDraftErrors(draft: DraftState, t?: TFunction) {
   ] as const) {
     if (value.trim() && !isWebhookDedupeTemplate(value.trim()))
       errors.push({
-        title: "Invalid webhook settings",
-        description: `${label} must contain a valid request placeholder.`,
+        title: t("mobile.schedule.invalidWebhook"),
+        description: t("release4491.text769", { value0: label }),
       });
   }
   const window = draft.coalesceWindowSeconds.trim();
   if (window && (!Number.isInteger(Number(window)) || Number(window) < 10 || Number(window) > 3600))
     errors.push({
-      title: "Invalid webhook settings",
-      description: "Coalesce window must be whole seconds from 10 to 3600.",
+      title: t("mobile.schedule.invalidWebhook"),
+      description: t("release4491.text770"),
     });
   return errors;
 }
@@ -260,7 +263,8 @@ export function taskToDraft(task: ScheduledTask): DraftState {
     scheduleMode: schedule.type === "fixed_time" ? "fixed" : schedule.type,
     intervalMinutes:
       schedule.type === "interval" ? String(Math.max(1, schedule.everyMs / 60_000)) : "15",
-    timeOfDay: schedule.type === "fixed_time" ? schedule.timeOfDay : "09:00",
+    // A time input shows nothing for an unpadded hour such as 9:05, which agents may save.
+    timeOfDay: schedule.type === "fixed_time" ? schedule.timeOfDay.padStart(5, "0") : "09:00",
     runAt: schedule.type === "once" ? toDateTimeLocalValue(new Date(schedule.runAt)) : "",
     savedRunAt: schedule.type === "once" ? schedule.runAt : "",
     weekdays,
@@ -303,6 +307,59 @@ export function taskToDraft(task: ScheduledTask): DraftState {
     filters,
     savedFilters: filters,
   };
+}
+
+export function moveDraftToThread(
+  draft: DraftState,
+  thread: { readonly id: ThreadId; readonly projectId: ProjectId },
+): DraftState {
+  return {
+    ...draft,
+    threadId: thread.id,
+    projectId: thread.projectId,
+    threadMode: draft.threadMode === "new_thread" ? "continue" : draft.threadMode,
+  };
+}
+
+/** Leaves the thread but keeps the mode. Matches MCP: new threads stay out of the shared checkout. */
+export function unbindDraftFromThread(draft: DraftState): DraftState {
+  if (!draft.threadId) return draft;
+  return {
+    ...draft,
+    threadId: "",
+    ...(draft.workspaceMode === "root"
+      ? { workspaceMode: "worktree" as const, startFromOrigin: true }
+      : {}),
+  };
+}
+
+export function changeDraftProject(draft: DraftState, projectId: string): DraftState {
+  if (projectId === draft.projectId) return draft;
+  return { ...unbindDraftFromThread(draft), projectId };
+}
+
+/** Threads a task can move to. The current one is left out; the picker always shows it. */
+export function scheduledTaskDestinationThreads(
+  threads: ReadonlyArray<EnvironmentThreadShell>,
+  target: {
+    readonly environmentId: EnvironmentId;
+    readonly projectId: string;
+    readonly currentThreadId: ThreadId | null;
+    readonly query: string;
+  },
+): ReadonlyArray<EnvironmentThreadShell> {
+  const search = target.query.trim().toLocaleLowerCase();
+  return threads
+    .filter(
+      (thread) =>
+        thread.environmentId === target.environmentId &&
+        thread.projectId === target.projectId &&
+        thread.id !== target.currentThreadId &&
+        thread.archivedAt === null &&
+        isListedThreadLineage(thread.lineage) &&
+        thread.title.toLocaleLowerCase().includes(search),
+    )
+    .toSorted((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 }
 
 export function scheduledTaskDefaultModel(

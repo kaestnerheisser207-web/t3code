@@ -17,16 +17,15 @@ import { Pressable, StatusBar, View } from "react-native";
 import Animated, { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SymbolView } from "../../components/ui/AppSymbol";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { AppText } from "../../components/ui/AppText";
 import { ControlPill } from "../../components/ui/ControlPill";
 import { Menu } from "../../components/ui/Menu";
 import { GlassSurface } from "../../components/ui/GlassSurface";
 import {
-  androidHeaderMenuActions,
-  findHeaderMenuAction,
-} from "../../components/ui/headerMenu.android";
+  findAppBarMenuItem,
+  menuActionsFromAppBarItems,
+} from "../../components/ui/menuActionItems";
 import { AppBar } from "../../components/ui/AppBar";
 import { useBarOverlap } from "../../components/ui/useBarInset";
 import type { AppBarMenuItem } from "../../components/ui/AppBar.types";
@@ -159,7 +158,7 @@ export function DevicePreviewScreen({
       )
       .map((host) => ({
         id: `retry-${host.id}`,
-        title: `Retry ${host.label}`,
+        title: t("release4491.text050", { value0: host.label }),
         icon: "arrow.clockwise" as const,
         onPress: () => {
           void retryHost({ environmentId, input: { retryHostId: host.id } });
@@ -389,21 +388,18 @@ function DeviceOptionsMenu({ items }: { readonly items: ReadonlyArray<AppBarMenu
   const t = useTranslate();
   return (
     <Menu
-      actions={androidHeaderMenuActions(items)}
+      actions={menuActionsFromAppBarItems(items)}
       isAnchoredToRight
       title={t("mobile.tools.DevicePreviewRouteScreen.device-options")}
       onPressAction={({ nativeEvent }) => {
-        const action = findHeaderMenuAction(items, nativeEvent.event);
+        const action = findAppBarMenuItem(items, nativeEvent.event);
         if (action && !action.disabled) action.onPress();
       }}
     >
-      <Pressable
+      <ControlPill
+        icon="ellipsis"
         accessibilityLabel={t("mobile.tools.DevicePreviewRouteScreen.device-options")}
-        accessibilityRole="button"
-        className="size-11 items-center justify-center rounded-full bg-subtle"
-      >
-        <SymbolView name="ellipsis" size={18} tintColorClassName="accent-icon" />
-      </Pressable>
+      />
     </Menu>
   );
 }

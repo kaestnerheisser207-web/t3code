@@ -17,7 +17,7 @@ import { downloadAndShareAttachment } from "../lib/attachmentDownload";
 import { assetImageSource } from "../lib/assetImageSource";
 import { useAssetUrlState, useRefreshAssetUrl } from "../state/assets";
 import { AppText as Text } from "./ui/AppText";
-import { FilePreviewModal } from "./FilePreviewModal";
+import { FilePreviewModal } from "./ui/FilePreviewModal";
 import { PresentationSource } from "./ui/NativePresentation";
 
 export function ComposerContextAttachment(props: {
@@ -102,7 +102,7 @@ export function ComposerContextAttachment(props: {
           />
         </Pressable>
       ) : null}
-      {error || (!local && asset._tag === "Failure") ? (
+      {error || (!local && asset._tag === t("release4491.text027")) ? (
         <Text className="text-foreground-muted">
           {error ??
             t(

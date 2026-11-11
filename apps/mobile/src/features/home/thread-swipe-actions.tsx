@@ -1,3 +1,4 @@
+import { mobileI18n } from "../../i18n";
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { Menu } from "../../components/ui/Menu";
 import type { MenuAction } from "@react-native-menu/menu";
@@ -88,10 +89,10 @@ function resolveSecondaryAction(input: {
   if (input.secondaryAction === null) return null;
   if (input.secondaryAction === undefined) {
     return {
-      accessibilityLabel: `Delete ${input.threadTitle}`,
+      accessibilityLabel: mobileI18n.t("release4491.text077", { value0: input.threadTitle }),
       tone: "danger",
       icon: "trash",
-      label: "Delete",
+      label: mobileI18n.t("desktop.menu.delete"),
       onPress: () => {
         input.close();
         input.onDelete();
@@ -391,10 +392,10 @@ export function ThreadSwipeable(props: ThreadSwipeableProps) {
     }
   }, [commitPrimaryAction, content, fullSwipeAction, onDelete]);
   const handleRelease = useCallback(
-    (translation: SharedValue<number>) => {
+    (translation: SharedValue<number>, canceled: boolean) => {
       "worklet";
       if (dismissing.value) return true;
-      if (-translation.value >= fullSwipeThreshold) {
+      if (!canceled && -translation.value >= fullSwipeThreshold) {
         runOnJS(commitFullSwipe)();
         return true;
       }
