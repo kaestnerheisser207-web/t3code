@@ -30,6 +30,19 @@ type UndoNotice = {
 
 export const useThreadUndoNotice = create<{ notice: UndoNotice | null }>(() => ({ notice: null }));
 
+const UNDONE_ACTION = {
+  Settled: "settle",
+  Snoozed: "snooze",
+  Unpinned: "unpin",
+  Archived: "archive",
+  Discarded: "discard",
+} satisfies Record<UndoOptions["action"], string>;
+
+function countLabel(action: UndoOptions["action"], count: number) {
+  const noun = action === "Discarded" ? "draft" : "thread";
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
 const UNDO_ACTION_KEYS = {
   Settled: "release3904.undo-settled",
   Snoozed: "release3904.undo-snoozed",
@@ -111,6 +124,7 @@ function refreshNotice() {
       // Claim before awaiting to prevent repeated actions restoring a group twice.
       for (const entry of current) entry.claim.finish();
       refreshNotice();
+      let undone = 0;
       await Promise.all(
         current.map(async ({ undo, failureTitle }) => {
           const reportFailure = (error: unknown) => {
@@ -124,7 +138,8 @@ function refreshNotice() {
           };
           try {
             const result = await undo();
-            if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
+            if (result._tag === "Success") undone++;
+            else if (!isAtomCommandInterrupted(result)) {
               reportFailure(squashAtomCommandFailure(result));
             }
           } catch (error) {
@@ -132,6 +147,10 @@ function refreshNotice() {
           }
         }),
       );
+      // Failures already raise a toast, so only what was actually restored is spoken.
+      if (undone > 0) {
+        announce(`Undid ${UNDONE_ACTION[latest.action]} of ${countLabel(latest.action, undone)}`);
+      }
     },
   });
 }

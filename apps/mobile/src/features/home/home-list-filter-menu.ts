@@ -1,11 +1,27 @@
 import { mobileI18n } from "../../i18n";
 import type { EnvironmentId } from "@t3tools/contracts";
+import * as Arr from "effect/Array";
+import * as Order from "effect/Order";
 
 import type { AppBarMenuItem } from "../../components/ui/AppBar.types";
+import type { WorkspaceEnvironment } from "../../state/workspaceModel";
 
 export interface HomeListFilterMenuEnvironment {
   readonly environmentId: EnvironmentId;
   readonly label: string;
+}
+
+export function homeListFilterEnvironments(environments: ReadonlyArray<WorkspaceEnvironment>) {
+  return Arr.sort(
+    environments
+      .filter((environment) => environment.isEnabled)
+      .map((environment) => ({
+        environmentId: environment.environmentId,
+        label: environment.environmentLabel,
+        connectionState: environment.connectionState,
+      })),
+    Order.mapInput(Order.String, (environment: { readonly label: string }) => environment.label),
+  );
 }
 
 export interface HomeListFilterMenuProject {
@@ -46,11 +62,11 @@ export function buildHomeListFilterMenuItems(props: {
   if (props.projects.length > 0) {
     items.push({
       id: "project",
-      title: "Project",
+      title: mobileI18n.t("pr.filters.project"),
       items: [
         {
           id: "project:all",
-          title: "All projects",
+          title: mobileI18n.t("pr.filters.allProjects"),
           subtitle: "Show threads from every project",
           selected: props.selectedProjectKey === null,
           onPress: () => props.onProjectChange(null),

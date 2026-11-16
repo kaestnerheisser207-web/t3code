@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import type { DesktopUpdateActionResult, DesktopUpdateState } from "@t3tools/contracts";
 
 export type DesktopUpdateButtonAction = "download" | "install" | "none";
@@ -94,6 +95,13 @@ export function getDesktopUpdateButtonTooltip(state: DesktopUpdateState): string
   ) {
     return `Update ${state.notAppliedVersion} did not apply. Click to retry.`;
   }
+  if (
+    (state.status === "available" || state.status === "error") &&
+    state.errorContext === "download" &&
+    state.availableVersion
+  ) {
+    return `Download failed for ${state.availableVersion}. Click to retry.`;
+  }
   if (state.status === "available") {
     return `Update ${state.availableVersion ?? "available"} ready to download`;
   }
@@ -106,9 +114,6 @@ export function getDesktopUpdateButtonTooltip(state: DesktopUpdateState): string
     return `Update ${state.downloadedVersion ?? state.availableVersion ?? "ready"} downloaded. Click to restart and install.`;
   }
   if (state.status === "error") {
-    if (state.errorContext === "download" && state.availableVersion) {
-      return `Download failed for ${state.availableVersion}. Click to retry.`;
-    }
     if (state.errorContext === "install" && state.downloadedVersion) {
       return `Install failed for ${state.downloadedVersion}. Click to retry.`;
     }
@@ -161,6 +166,9 @@ export function getDesktopUpdateIdleTooltip(
 ) {
   const disabledReason = getDesktopUpdateDisabledReason(state, managedDenial);
   return disabledReason
-    ? { title: "Updates unavailable", detail: disabledReason }
-    : { title: "Check for updates", detail: null };
+    ? { title: webI18n.t("desktop.updates.unavailable"), detail: disabledReason }
+    : {
+        title: webI18n.t("mobile.settings.OutdatedServerUpdateSection.check-for-updates"),
+        detail: null,
+      };
 }

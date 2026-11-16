@@ -14,6 +14,7 @@ import {
 import { squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
 import {
   clampMcpAppHeight,
+  MCP_APP_COLOR_SCHEME_PARAM,
   MCP_APP_DEFAULT_HEIGHT,
   MCP_APP_MAX_HEIGHT,
   mcpAppAllowAttribute,
@@ -130,7 +131,12 @@ export function McpAppFrame(props: {
   // The frame keeps its first URL: a re-minted one would reload the app.
   const [src, setSrc] = useState<string | null>(null);
   const asset = useLongLivedAssetUrl(src === null ? props.environmentId : null, resource);
-  if (src === null && asset._tag === "Success") setSrc(asset.url);
+  if (src === null && asset._tag === "Success") {
+    // The app paints before `ui/initialize`, so it reads the initial scheme from its URL.
+    const url = new URL(asset.url);
+    url.searchParams.set(MCP_APP_COLOR_SCHEME_PARAM, theme.appearance);
+    setSrc(url.toString());
+  }
 
   const detail = useTurnItemDetail({
     environmentId: props.environmentId,
@@ -259,7 +265,7 @@ export function McpAppFrame(props: {
       flushSync(() => setDisplayMode("inline"));
       const approved = await requestConfirmDialog(message);
       if (approved === undefined) {
-        throw new McpAppHostRefusal({ message: "T3 could not ask for approval here." });
+        throw new McpAppHostRefusal({ message: t("release4761.text159") });
       }
       return approved;
     };
@@ -279,12 +285,13 @@ export function McpAppFrame(props: {
         const info = await readLive().toolInfo({ environmentId, input: { ...input, name } });
         if (info._tag !== "Success") throw commandFailure(info);
         if (!info.value.callable)
-          throw new McpAppHostRefusal({ message: "This app cannot call that tool." });
+          throw new McpAppHostRefusal({ message: t("release4761.text093") });
         if (!info.value.readOnly) {
           const approved = await ask(
             `Allow ${app.server} to run ${info.value.title ?? name}?\n${JSON.stringify(args, null, 2)}`,
           );
-          if (approved !== true) throw new McpAppHostRefusal({ message: "Declined by the user." });
+          if (approved !== true)
+            throw new McpAppHostRefusal({ message: t("release4262.declined-by-the-user") });
         }
         const result = await readLive().callTool({
           environmentId,
@@ -304,16 +311,16 @@ export function McpAppFrame(props: {
       },
       openLink: async (url) => {
         if (document.activeElement !== frameRef.current || !navigator.userActivation?.isActive) {
-          throw new McpAppHostRefusal({ message: "Links open only from a click in the app." });
+          throw new McpAppHostRefusal({ message: t("release4761.text161") });
         }
         window.open(url, "_blank", "noopener,noreferrer");
       },
       sendMessage: async (text) => {
         const send = readLive().props.onSendMessage;
-        if (send === undefined)
-          throw new McpAppHostRefusal({ message: "Messages are not available here." });
+        if (send === undefined) throw new McpAppHostRefusal({ message: t("release4761.text162") });
         const approved = await ask(`Send this message from ${app.server}?\n${text}`);
-        if (approved !== true) throw new McpAppHostRefusal({ message: "Declined by the user." });
+        if (approved !== true)
+          throw new McpAppHostRefusal({ message: t("release4262.declined-by-the-user") });
         await send(text);
       },
       updateModelContext: async (context) => {
@@ -348,7 +355,8 @@ export function McpAppFrame(props: {
       downloadFile: async (files) => {
         const names = files.map((file) => file.name).join(", ");
         const approved = await ask(`Save ${names} from ${app.server}?`);
-        if (approved !== true) throw new McpAppHostRefusal({ message: "Declined by the user." });
+        if (approved !== true)
+          throw new McpAppHostRefusal({ message: t("release4262.declined-by-the-user") });
         for (const file of files) {
           let bytes: Uint8Array | undefined;
           let mimeType = file.mimeType ?? "application/octet-stream";
@@ -379,7 +387,10 @@ export function McpAppFrame(props: {
           setDisplayMode("inline");
           return;
         }
-        void host.teardown().then(() => setClosed(true));
+        // A replacement document may have mounted while this one wound down.
+        void host.teardown().then(() => {
+          if (hostRef.current === host) setClosed(true);
+        });
       },
       onSizeChanged: (size) => {
         // Ignore fullscreen height when restoring inline sizing.

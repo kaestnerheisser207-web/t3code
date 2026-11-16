@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import { useTranslate } from "../i18n";
 import { writeTextToClipboard } from "../hooks/useCopyToClipboard";
 import { formatFilePathForClipboard } from "@t3tools/client-runtime/media-actions";
@@ -110,7 +111,7 @@ function showWorkspaceContextMenu(event: ReactMouseEvent, workspacePath: string)
   event.preventDefault();
   event.stopPropagation();
   void api.contextMenu
-    .show([{ id: "copy-path", label: "Copy full path", icon: "copy" }], {
+    .show([{ id: "copy-path", label: webI18n.t("files.action.copyFull"), icon: "copy" }], {
       x: event.clientX,
       y: event.clientY,
     })
@@ -118,20 +119,12 @@ function showWorkspaceContextMenu(event: ReactMouseEvent, workspacePath: string)
       if (action !== "copy-path") return;
       const clipboardPath = formatFilePathForClipboard(workspacePath);
       void writeTextToClipboard(clipboardPath, "workspace path").then(
-        (didCopy) => {
-          if (didCopy) {
-            toastManager.add({
-              type: "success",
-              title: "Path copied",
-              description: clipboardPath,
-            });
-          }
-        },
+        undefined,
         (error: unknown) => {
           toastManager.add(
             stackedThreadToast({
               type: "error",
-              title: "Failed to copy path",
+              title: webI18n.t("menuFeedback.copyPathFailed"),
               description: error instanceof Error ? error.message : "An error occurred.",
             }),
           );

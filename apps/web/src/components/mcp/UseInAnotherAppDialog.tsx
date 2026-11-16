@@ -15,7 +15,7 @@ import {
   sessionGrantsScope,
 } from "@t3tools/contracts";
 import { useNavigate } from "@tanstack/react-router";
-import { Check, Copy } from "lucide";
+import { CheckIcon, CopyIcon } from "lucide-react";
 import * as Option from "effect/Option";
 import { Atom } from "effect/reactivity";
 import * as Result from "effect/Result";
@@ -47,7 +47,6 @@ import { useEnvironmentScope, useEnvironmentSessionState } from "~/state/session
 import { useAtomCommand } from "~/state/use-atom-command";
 import { useT3ConnectAuthPrompt } from "../clerk/useT3ConnectAuthPrompt";
 import { CommandBlock } from "../CommandBlock";
-import { MorphIcon } from "../MorphIcon";
 import { AccessOption, accessConfig } from "../auth/ConnectAgentSurface";
 import { useAccessEnvironment } from "../settings/useAccessEnvironment";
 import { Button } from "../ui/button";
@@ -707,10 +706,7 @@ function PrimaryAction({ app, mcpUrl }: { readonly app: McpApp; readonly mcpUrl:
           ? {}
           : {
               actionProps: {
-                children:
-                  appLink === null
-                    ? `Open ${app.name}`
-                    : t("release4491.open-app-web", { value0: app.name }),
+                children: appLink === null ? `Open ${app.name}` : `Get ${app.name}`,
                 onClick: () => openLink(link),
               },
             }),
@@ -811,7 +807,7 @@ function CopyRow({ label, value }: { readonly label: string; readonly value: str
         aria-label={t("release4491.text499", { value0: label })}
         onClick={() => copyToClipboard(value, undefined)}
       >
-        <MorphIcon className="size-3.5" icon={isCopied ? Check : Copy} />
+        {isCopied ? <CheckIcon className="size-3.5" /> : <CopyIcon className="size-3.5" />}
       </Button>
     </div>
   );

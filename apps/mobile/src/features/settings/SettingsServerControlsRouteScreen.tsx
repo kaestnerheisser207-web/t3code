@@ -46,6 +46,8 @@ import {
 import { PullRequestGlyph } from "../pull-requests/pullRequestGlyphs";
 import { AutoSettleSettingsRows } from "./ThreadSettingsSections";
 import { supportsSharedSettingsSync } from "@t3tools/client-runtime/state/shared-settings";
+import { isSourceControlProviderOffered } from "@t3tools/client-runtime/operations/projects";
+import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 
 type SettingsPage = "threads" | "source-control" | "worktrees" | "maintenance";
 
@@ -424,6 +426,31 @@ function ServerSettingsDetail(props: { readonly page: SettingsPage }) {
                     canWrite={(environmentId) => writableEnvironments.has(environmentId)}
                   />
                 )}
+                {projectSelected ? null : (
+                  <SettingsSection title={t("release4761.text067")}>
+                    {sourceControlClients.definitions.map((definition) => {
+                      const offered = displayTargets.map((target) =>
+                        isSourceControlProviderOffered(
+                          target.settings.offeredSourceControlProviders,
+                          definition.kind,
+                        ),
+                      );
+                      return (
+                        <SettingsSwitchRow
+                          key={definition.kind}
+                          label={definition.pickerLabel}
+                          value={
+                            offered.every((value) => value === offered[0]) ? offered[0]! : null
+                          }
+                          disabled={disabledFor("offeredSourceControlProviders")}
+                          onValueChange={(value) =>
+                            write({ offeredSourceControlProviders: { [definition.kind]: value } })
+                          }
+                        />
+                      );
+                    })}
+                  </SettingsSection>
+                )}
                 <SettingsSection title={t("mobile.dynamic.WorkspaceDock.pull-requests")}>
                   <SettingsSwitchRow
                     icon={PullRequestGlyph.merged}
@@ -593,6 +620,21 @@ function ServerSettingsDetail(props: { readonly page: SettingsPage }) {
                       value={uniform("continueThreadsAfterServerUpdate")}
                       disabled={disabledFor("continueThreadsAfterServerUpdate")}
                       onValueChange={(value) => write({ continueThreadsAfterServerUpdate: value })}
+                    />
+                  </View>
+                  <View className="border-t border-border-subtle">
+                    <SettingsSwitchRow
+                      icon="bolt.circle"
+                      label={t("release4761.text068")}
+                      subtitle={managedSubtitle(
+                        "keepAwakeWhileAgentsWork",
+                        projectSelected
+                          ? "Environment-wide setting. Select All projects to change it."
+                          : "Stop the computer from sleeping while agents work. Closing a laptop lid still sleeps it.",
+                      )}
+                      value={uniform("keepAwakeWhileAgentsWork")}
+                      disabled={disabledFor("keepAwakeWhileAgentsWork")}
+                      onValueChange={(value) => write({ keepAwakeWhileAgentsWork: value })}
                     />
                   </View>
                 </SettingsSection>

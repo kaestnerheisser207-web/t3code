@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import {
   ClientCapabilities,
   PlatformConnectionSource,
@@ -142,6 +143,24 @@ const layerWakeups = Wakeups.layer({
             }),
         ).pipe(Effect.asVoid),
       ),
+      // A window left visible beside another app never fires visibilitychange when refocused.
+      Stream.callback<"application-focused">((queue) =>
+        Effect.acquireRelease(
+          Effect.sync(() => {
+            const listener = () => {
+              if (document.visibilityState === "visible") {
+                Queue.offerUnsafe(queue, "application-focused");
+              }
+            };
+            window.addEventListener("focus", listener);
+            return listener;
+          }),
+          (listener) =>
+            Effect.sync(() => {
+              window.removeEventListener("focus", listener);
+            }),
+        ).pipe(Effect.asVoid),
+      ),
       managedRelayAccountChanges(appAtomRegistry).pipe(
         Stream.map(() => "credentials-changed" as const),
       ),
@@ -220,7 +239,7 @@ export const provisionDesktopSshEnvironment = Effect.fn(
   if (pairingToken === null) {
     return yield* new ConnectionBlockedError({
       reason: "authentication",
-      detail: "The SSH environment did not issue a pairing credential.",
+      detail: webI18n.t("release4761.text417"),
     });
   }
   const descriptor = yield* Effect.tryPromise({
@@ -338,7 +357,7 @@ const layerCapabilities = Layer.effectContext(
         if (session === null) {
           return yield* new ConnectionBlockedError({
             reason: "authentication",
-            detail: "Sign in to T3 Connect to connect this environment.",
+            detail: webI18n.t("release4761.text019"),
           });
         }
         const token = yield* session.readClerkToken().pipe(
@@ -353,7 +372,7 @@ const layerCapabilities = Layer.effectContext(
         if (token === null) {
           return yield* new ConnectionBlockedError({
             reason: "authentication",
-            detail: "The T3 Connect session is unavailable.",
+            detail: webI18n.t("release4761.text020"),
           });
         }
         return token;
@@ -379,7 +398,7 @@ const layerCapabilities = Layer.effectContext(
           if (bridge === undefined) {
             return yield* new ConnectionBlockedError({
               reason: "unsupported",
-              detail: "SSH environments are only available in the desktop app.",
+              detail: webI18n.t("release4761.text021"),
             });
           }
           return yield* provisionDesktopSshEnvironment(bridge, target, expectedEnvironmentId);
@@ -390,7 +409,7 @@ const layerCapabilities = Layer.effectContext(
         if (bridge === undefined) {
           return yield* new ConnectionBlockedError({
             reason: "unsupported",
-            detail: "SSH environments are only available in the desktop app.",
+            detail: webI18n.t("release4761.text021"),
           });
         }
         return yield* prepareDesktopSshEnvironment(bridge, input);

@@ -1,4 +1,3 @@
-import { updateReasonText } from "../sidebar/updateEverything.i18n";
 import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { settlePromise, squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
@@ -9,6 +8,7 @@ import { useState } from "react";
 import { AsyncResult } from "effect/reactivity";
 
 import { APP_VERSION } from "~/branding";
+import { isLocalEnvironmentDisabled } from "~/localEnvironment";
 import { useDesktopUpdateState } from "~/state/desktopUpdate";
 import { useEnvironments } from "~/state/environments";
 import { npmReleaseAtom, npmReleaseFailureMessage } from "~/state/npmRelease";
@@ -20,7 +20,11 @@ import {
   type ChannelSwitchRelease,
 } from "../sidebar/updateEverything.logic";
 import { isHostedByThisApp, useUpdateEverything } from "../sidebar/useUpdateEverything";
-import { localUpdaterStaysPut, prepareLocalTrackSwitch } from "./updateTrackSwitch.logic";
+import {
+  localUpdaterStaysPut,
+  nothingToMove,
+  prepareLocalTrackSwitch,
+} from "./updateTrackSwitch.logic";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -88,6 +92,15 @@ function SwitchPlan({
   const [checking, setChecking] = useState(false);
   const everything = useUpdateEverything(switchesLocal ? release.version : null, release);
   const label = channelSwitchLabel(release.channel, t);
+  const idle = nothingToMove({
+    label,
+    channel: release.channel,
+    savedChannel: updateState?.channel ?? null,
+    switchesLocal,
+    crossesLocal,
+    rows: everything.rows,
+    hasTargets: everything.hasUpdates,
+  });
   // This app's reinstall restarts every server it hosts, so each of their databases must allow it.
   const localBlocked = localSwitchBlockReason(
     APP_VERSION,
@@ -97,6 +110,7 @@ function SwitchPlan({
       databaseMigration: environment.serverConfig?.environment.databaseMigration,
     })),
     window.desktopBridge?.getLocalEnvironmentBootstraps().length ?? 0,
+    !isLocalEnvironmentDisabled(),
   );
 
   const run = async () => {
@@ -174,9 +188,7 @@ function SwitchPlan({
       providerCount={0}
       rows={everything.rows}
       notes={[
-        ...(everything.rows.length === 0 && !crossesLocal
-          ? [t("release3904.switch-current", { channel: label })]
-          : []),
+        ...(idle.note === null ? [] : [idle.note]),
         ...(crossesLocal && updatesOff
           ? [t("release3904.this-app-s-updates-are-off-here-so-reinstall-it-yourself-to-switch")]
           : []),
@@ -192,9 +204,9 @@ function SwitchPlan({
       }
       busy={checking}
       disabledReason={
-        !switchesLocal || localBlocked === null
-          ? null
-          : t("release3904.switch-blocked", { reason: updateReasonText(localBlocked, t) })
+        switchesLocal && localBlocked !== null
+          ? `This app cannot switch: ${localBlocked}.`
+          : idle.disabledReason
       }
       onConfirm={() => void run()}
     />

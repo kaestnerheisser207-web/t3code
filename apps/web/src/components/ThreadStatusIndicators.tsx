@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import type { TFunction } from "i18next";
 import { useTranslate } from "../i18n";
 import { pipe } from "effect/Function";
@@ -10,6 +11,7 @@ import { useSupportsMultiplePullRequests } from "~/hooks/useSupportsMultiplePull
 import { useStableCallback } from "~/hooks/useStableCallback";
 
 import { pullRequestDetailToVcsStatus } from "@t3tools/client-runtime/state/pull-requests";
+import type { EnvironmentThreadShell } from "@t3tools/client-runtime/state/shell";
 import {
   resolveEnvironmentMachineKind,
   type EnvironmentId,
@@ -116,6 +118,41 @@ export function useLinkedThreadPullRequest(
           baseUrl: "",
         },
       };
+}
+
+/** The pull request a thread shows: its current link, else the one found for its branch. */
+export function useThreadDisplayedPullRequest(
+  environmentId: EnvironmentId,
+  thread: Pick<
+    EnvironmentThreadShell,
+    "pullRequests" | "linkedPullRequest" | "branchPullRequest"
+  > | null,
+  branchPr: ThreadPr = null,
+  branchSourceControlProvider?: VcsStatusResult["sourceControlProvider"],
+) {
+  const supportsLinks = useSupportsMultiplePullRequests(environmentId);
+  const linkedStatus = useLinkedThreadPullRequest(
+    environmentId,
+    thread?.linkedPullRequest,
+    true,
+    thread?.pullRequests,
+    thread?.branchPullRequest,
+  );
+  const currentLink = supportsLinks
+    ? resolveThreadCurrentPullRequestLink(thread?.pullRequests ?? [])
+    : null;
+  const pr = linkedStatus?.pr ?? (currentLink === null ? branchPr : null);
+  return {
+    currentLink,
+    badge: supportsLinks ? resolveThreadPullRequestBadge(thread?.pullRequests) : null,
+    pr,
+    status: prStatusIndicator(
+      pr,
+      linkedStatus?.sourceControlProvider ?? branchSourceControlProvider,
+    ),
+    number: currentLink?.number ?? pr?.number,
+    url: currentLink?.url ?? pr?.url,
+  };
 }
 
 function linkedPullRequestReference(fallback: ThreadLinkedPullRequest) {
@@ -475,7 +512,7 @@ export function resolveDisplayedThreadPr(input: {
     threadBranch !== null &&
     gitStatus !== null &&
     gitStatus.refName === threadBranch &&
-    gitStatus.pr != null
+    gitStatus.pr?.state === "open"
   ) {
     return gitStatus.pr;
   }
@@ -489,17 +526,12 @@ export function resolveDisplayedThreadPrProvider(input: {
   linkedPullRequest?: ThreadLinkedPullRequest | null | undefined;
   linkedPullRequestStatus?: LinkedThreadPullRequestStatus | null | undefined;
 }): VcsStatusResult["sourceControlProvider"] | undefined {
-  const { threadBranch, gitStatus, linkedPullRequest, linkedPullRequestStatus } = input;
+  const { gitStatus, linkedPullRequest, linkedPullRequestStatus } = input;
   if (linkedPullRequest != null) {
     return linkedPullRequestStatus?.sourceControlProvider;
   }
-  if (
-    threadBranch !== null &&
-    gitStatus !== null &&
-    gitStatus.refName === threadBranch &&
-    gitStatus.pr != null
-  ) {
-    return gitStatus.sourceControlProvider;
+  if (resolveDisplayedThreadPr(input) !== null) {
+    return gitStatus?.sourceControlProvider;
   }
 
   return undefined;
@@ -512,7 +544,7 @@ export function terminalStatusFromRunningIds(
     return null;
   }
   return {
-    label: "Terminal process running",
+    label: webI18n.t("release4761.text144"),
     colorClass: "text-teal-600 dark:text-teal-300/90",
     pulse: true,
   };

@@ -1,5 +1,6 @@
+import { usageResetCreditChoices } from "@t3tools/client-runtime/i18n";
 import { usageWindowLabel, usageText } from "@t3tools/client-runtime/i18n";
-import { usageResetCreditsSummary } from "@t3tools/client-runtime/i18n";
+
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import * as Dialog from "../../components/ui/Dialog";
@@ -15,6 +16,7 @@ import {
   type ServerProviderUsageWindow,
 } from "@t3tools/contracts";
 import {
+  type ResetCreditChoice,
   formatResetsIn,
   limitsNotice,
   paceOf,
@@ -264,13 +266,11 @@ export function ResetCredits(props: {
   const [status, setStatus] = useState<string | null>(null);
   if (dense && credits.availableCount === 0 && status === null) return null;
 
-  const summary = usageResetCreditsSummary(t, credits, now);
-
-  const redeem = async () => {
+  const redeem = async (choice: ResetCreditChoice) => {
     if (!readEnvironmentScope(environmentId, AuthProvidersManageScope)) return;
     setBusy(true);
     setStatus(null);
-    const result = await consume({ environmentId, input });
+    const result = await consume({ environmentId, input: choice.input });
     setBusy(false);
     if (result._tag === "Success") {
       setStatus(result.value.warning ?? OUTCOME_TEXT[result.value.outcome]);
@@ -283,42 +283,44 @@ export function ResetCredits(props: {
     );
   };
 
-  const confirm = () => {
+  const confirm = (choice: ResetCreditChoice) => {
     if (!readEnvironmentScope(environmentId, AuthProvidersManageScope)) return;
-    Dialog.alert(t("usageReview.reset-title"), t("usageReview.reset-description"), [
+    Dialog.alert(t("usageReview.reset-title"), choice.confirmDescription, [
       { text: t("usageReview.reset-cancel"), style: "cancel" },
-      { text: t("usageReview.reset-action"), onPress: () => void redeem() },
+      { text: t("usageReview.reset-action"), onPress: () => void redeem(choice) },
     ]);
   };
 
   return (
-    <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
-      <Text className="text-xs tabular-nums text-foreground-tertiary">{summary}</Text>
-      {credits.availableCount > 0 ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: busy || !canManageProviders }}
-          disabled={busy || !canManageProviders}
-          onPress={confirm}
-          className={
-            dense
-              ? "rounded-full bg-subtle-strong px-2.5 py-1 disabled:opacity-[0.45]"
-              : "min-h-[44px] justify-center rounded-full bg-subtle-strong px-3 py-1.5 disabled:opacity-[0.45]"
-          }
-        >
-          <Text
-            className={
-              dense
-                ? "text-xs font-t3-medium text-foreground"
-                : "text-sm font-t3-medium text-foreground"
-            }
-          >
-            {busy
-              ? t("mobile.dynamic.UsageLimitsSection.using")
-              : t("mobile.dynamic.UsageLimitsSection.use-reset")}
-          </Text>
-        </Pressable>
-      ) : null}
+    <View className="gap-1">
+      {usageResetCreditChoices(t, credits, input, now).map((choice) => (
+        <View key={choice.key} className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
+          <Text className="text-xs tabular-nums text-foreground-tertiary">{choice.summary}</Text>
+          {choice.availableCount > 0 ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ disabled: busy || !canManageProviders }}
+              disabled={busy || !canManageProviders}
+              onPress={() => confirm(choice)}
+              className={
+                dense
+                  ? "rounded-full bg-subtle-strong px-2.5 py-1 disabled:opacity-[0.45]"
+                  : "min-h-[44px] justify-center rounded-full bg-subtle-strong px-3 py-1.5 disabled:opacity-[0.45]"
+              }
+            >
+              <Text
+                className={
+                  dense
+                    ? "text-xs font-t3-medium text-foreground"
+                    : "text-sm font-t3-medium text-foreground"
+                }
+              >
+                {busy ? t("mobile.dynamic.UsageLimitsSection.using") : choice.actionLabel}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ))}
       {!canManageProviders ? (
         <Text className="text-xs text-foreground-tertiary">
           {t("mobile.review.UsageLimitsSection.this-connection-cannot-manage-provider-accounts")}

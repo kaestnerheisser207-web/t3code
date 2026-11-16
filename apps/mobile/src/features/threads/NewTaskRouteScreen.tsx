@@ -1,3 +1,4 @@
+import { mobileI18n } from "../../i18n";
 import { useTranslate } from "../../i18n";
 import { isDraftThreadRoute } from "./thread-route-state";
 import * as Dialog from "../../components/ui/Dialog";
@@ -30,6 +31,7 @@ import { ProjectFavicon } from "../../components/ProjectFavicon";
 import { useProjects, useServerConfigs } from "../../state/entities";
 import { projectEnvironment } from "../../state/projects";
 import { useAtomCommand } from "../../state/use-atom-command";
+import { retargetSavedNewTaskDraft } from "../../state/use-composer-drafts";
 import { useRemoteConnectionStatus } from "../../state/use-remote-environment-registry";
 import type { WorkspaceState } from "../../state/workspaceModel";
 import { useWorkspaceState } from "../../state/workspace";
@@ -45,6 +47,8 @@ import { useSelectWorkspaceDetail } from "../layout/workspace/useSelectWorkspace
 
 type NewTaskRouteParams = {
   readonly incomingShareId?: string | string[];
+  /** An existing draft whose project is gone; the chosen project takes it over. */
+  readonly draftId?: string | string[];
   readonly prompt?: string | string[];
   readonly repo?: string | string[];
   readonly pr?: string | string[];
@@ -59,16 +63,16 @@ function deriveProjectEmptyState(catalogState: WorkspaceState): {
 } {
   if (catalogState.isLoadingConnections) {
     return {
-      title: "Loading environments",
-      detail: "Checking saved environments on this device.",
+      title: mobileI18n.t("mobile.connect.T3ConnectProfilePage.loading-environments"),
+      detail: mobileI18n.t("release4491.text067"),
       loading: true,
     };
   }
 
   if (!catalogState.hasConnections) {
     return {
-      title: "No environments connected",
-      detail: "Add an environment before creating a task.",
+      title: mobileI18n.t("mobile.dynamic.ThreadNavigationSidebar.no-environments-connected"),
+      detail: mobileI18n.t("release4761.text097"),
       loading: false,
     };
   }
@@ -98,15 +102,15 @@ function deriveProjectEmptyState(catalogState: WorkspaceState): {
     catalogState.connectionError === null
   ) {
     return {
-      title: "Connecting to environment",
-      detail: "Loading projects from the saved environment.",
+      title: mobileI18n.t("release4491.text070"),
+      detail: mobileI18n.t("release4761.text098"),
       loading: true,
     };
   }
 
   return {
-    title: "No projects found",
-    detail: "The connected environment did not report any projects.",
+    title: mobileI18n.t("release4491.text072"),
+    detail: mobileI18n.t("release4491.text073"),
     loading: false,
   };
 }
@@ -118,6 +122,7 @@ function NewTaskHeader(props: {
   readonly searchText: string;
   readonly onSearchTextChange: (text: string) => void;
 }) {
+  const t = useTranslate();
   const navigation = useNavigation();
   const goBack = () => {
     if (navigation.canGoBack()) navigation.goBack();
@@ -134,7 +139,7 @@ function NewTaskHeader(props: {
           props.canAddProject
             ? [
                 {
-                  accessibilityLabel: "Add project",
+                  accessibilityLabel: t("web.palette.add-project"),
                   icon: "plus",
                   onPress: () => navigation.dispatch(StackActions.push("AddProject")),
                 },
@@ -144,7 +149,7 @@ function NewTaskHeader(props: {
         search={{
           value: props.searchText,
           onChangeText: props.onSearchTextChange,
-          placeholder: "Search projects",
+          placeholder: t("settings.dynamic.searchProjects"),
         }}
       />
     </>
@@ -166,6 +171,9 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
     ? route.params.incomingShareId[0]
     : route.params?.incomingShareId;
   const incomingShare = routeShareId ? getShare(routeShareId) : null;
+  const routeDraftId = Array.isArray(route.params?.draftId)
+    ? route.params.draftId[0]
+    : route.params?.draftId;
   const incomingShareSubtitle = incomingShare
     ? incomingShare.attachments.length === 0
       ? "Choose a project for what you shared"
@@ -230,17 +238,34 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
       : navigation.getParent();
     const rootState = root?.getState();
     const threadRoute = rootState?.routes[rootState.index - 1];
-    if (isDraftThreadRoute(threadRoute)) {
+    if (routeDraftId === undefined && isDraftThreadRoute(threadRoute)) {
       setProject(project);
       root?.goBack();
       return;
     }
+    // Restamp only on choice, so backing out leaves the draft as it was.
+    const retargeted =
+      routeDraftId === undefined
+        ? false
+        : await retargetSavedNewTaskDraft(routeDraftId, {
+            environmentId: project.environmentId,
+            projectId: project.id,
+          }).then(
+            (found) => found,
+            () => null,
+          );
+    if (retargeted === null) {
+      Dialog.alert("Could not change project", "Saved drafts could not be loaded. Try again.");
+      return;
+    }
+    const draftId = retargeted ? routeDraftId : undefined;
     selectDetail({
       name: "Thread",
       params: {
         draft: {
           environmentId: String(project.environmentId),
           projectId: String(project.id),
+          draftId,
           incomingShareId: incomingShare?.id,
         },
       },
@@ -510,7 +535,7 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
                           faviconPath={scope.representative.faviconPath}
                           projectIcon={scope.representative.projectIcon}
                           size={24}
-                          projectTitle={scope.title}
+                          projectTitle={scope.representative.title}
                           workspaceRoot={scope.representative.workspaceRoot}
                         />
                       }
@@ -535,7 +560,7 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
                           faviconPath={scope.representative.faviconPath}
                           projectIcon={scope.representative.projectIcon}
                           size={20}
-                          projectTitle={scope.title}
+                          projectTitle={scope.representative.title}
                           workspaceRoot={scope.representative.workspaceRoot}
                         />
                       </View>

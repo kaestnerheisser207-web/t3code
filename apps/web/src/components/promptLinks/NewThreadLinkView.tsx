@@ -144,7 +144,7 @@ export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
       replace: true,
     }).catch(() => null);
     if (opened === null) {
-      setState({ status: "failed", message: "T3 Code could not open a new thread." });
+      setState({ status: "failed", message: t("release4761.text252") });
       return;
     }
     setState({ status: "opened" });
@@ -187,7 +187,7 @@ export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
     if (project === null) {
       setState({
         status: "failed",
-        message: "None of your machines can start a thread without a project right now.",
+        message: t("release4761.text253"),
       });
       return;
     }
@@ -210,19 +210,17 @@ export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
     if (environmentId === null || serverConfig === null || newProjectsRoot === null) {
       setState({
         status: "failed",
-        message:
-          "This machine cannot clone from a link. Update T3 Code on it, or clone the repository from the command palette.",
+        message: t("release4761.text254"),
       });
       return;
     }
     setState({ status: "opening" });
-    const projectId = newProjectId();
     const remoteUrl = `https://github.com/${repository.owner}/${repository.name}.git`;
     const settings = serverConfig.settings;
     const result = await startProjectClone({
       environmentId,
       input: {
-        projectId,
+        projectId: newProjectId(),
         title: repository.name,
         createdAt: new Date().toISOString(),
         remoteUrl,
@@ -252,18 +250,19 @@ export function NewThreadLinkView({ link }: { readonly link: NewThreadLink }) {
       environmentId,
       `https://github.com/${repository.owner}/${repository.name}.git`,
     );
-    const project = await waitForProject(scopeProjectRef(environmentId, projectId), 5_000).catch(
-      () => null,
-    );
+    const project = await waitForProject(
+      scopeProjectRef(environmentId, result.value.projectId),
+      5_000,
+    ).catch(() => null);
     if (project === null) {
-      setState({ status: "failed", message: "The clone started, but its project did not appear." });
+      setState({ status: "failed", message: t("release4761.text255") });
       return;
     }
     if (link.kind === "pull-request") {
       setState({
         status: "failed",
         title: `Cloning ${repository.owner}/${repository.name}`,
-        message: "Open this link again when the clone finishes.",
+        message: t("release4761.text256"),
       });
       return;
     }

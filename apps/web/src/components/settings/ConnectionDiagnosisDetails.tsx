@@ -156,7 +156,6 @@ export function ConnectionDiagnosisPanel({
   const t = useTranslate();
   const { copyToClipboard } = useCopyToClipboard({
     target: "connection diagnostics",
-    onCopy: () => toastManager.add({ type: "success", title: t("diagnosis.copied") }),
     onError: (error) =>
       toastManager.add(
         stackedThreadToast({

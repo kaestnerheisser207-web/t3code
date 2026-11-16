@@ -27,15 +27,33 @@ function formattersFor(locale: string | undefined) {
 export function formatMessageTimestamp(
   input: string,
   nowMs: number = Date.now(),
+  localeOrFormatter: string | Intl.DateTimeFormat = new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  }),
   locale?: string,
 ): string {
   const timestamp = Date.parse(input);
   if (Number.isNaN(timestamp)) return "";
   const date = new Date(timestamp);
   const now = new Date(nowMs);
-  const formatters = formattersFor(locale);
-  const time = formatters.time.format(date);
+  const formatters = formattersFor(
+    typeof localeOrFormatter === "string" ? localeOrFormatter : locale,
+  );
+  const timeFormatter = typeof localeOrFormatter === "string" ? formatters.time : localeOrFormatter;
+  const time = timeFormatter.format(date);
   if (date.toDateString() === now.toDateString()) return time;
   const sameYear = date.getFullYear() === now.getFullYear();
   return `${(sameYear ? formatters.date : formatters.dateWithYear).format(date)} ${time}`;
+}
+
+/** `is24Hour` overrides the locale's hour cycle with the system clock preference when known. */
+export function createMessageTimeFormatter(is24Hour: boolean | undefined, locale?: string) {
+  const timeFormatter = new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    ...(is24Hour === undefined ? {} : { hourCycle: is24Hour ? "h23" : "h12" }),
+  });
+  return (input: string, nowMs?: number): string =>
+    formatMessageTimestamp(input, nowMs, timeFormatter, locale);
 }

@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import type {
   AssetCreateUrlResult,
   AssetResource,
@@ -85,7 +86,9 @@ export async function openUrlInPreview<E>(input: {
       url: input.url,
       viewport: defaults.viewport,
       profileId: input.profileId ?? defaults.profileId,
-      ...(runtime === undefined ? {} : { runtime }),
+      ...(runtime === undefined
+        ? {}
+        : { runtime, zoomFactor: defaults.zoomFactor, colorScheme: defaults.appearance }),
     },
   });
   return mapAtomCommandResult(result, (snapshot) => {
@@ -127,7 +130,7 @@ export async function openFileInPreview<AssetError, PreviewError>(input: {
     return AsyncResult.failure(
       Cause.fail(
         new BrowserPreviewUnavailableError({
-          message: "The integrated browser is unavailable in this runtime.",
+          message: webI18n.t("release4761.text122"),
         }),
       ),
     );

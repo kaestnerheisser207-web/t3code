@@ -145,7 +145,11 @@ function ProjectOverviewContent(props: {
   const t = useTranslate();
   const { isRemoving, setIsRemoving, startRemoval, finishRemoval } = props;
   const representative = props.members[0]!;
-  const displayName = deriveProjectGroupLabel({ representative, members: props.members });
+  const displayName = deriveProjectGroupLabel({
+    groupKey: props.group.key,
+    representative,
+    members: props.members,
+  });
   const [draftName, setDraftName] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const threads = useThreadShells();
@@ -373,7 +377,7 @@ function ProjectOverviewContent(props: {
       </SettingsSection>
 
       {canOrganize ? (
-        <SettingsSection title="Organize">
+        <SettingsSection title={t("release4761.text051")}>
           <SettingsSwitchRow
             icon="pin"
             label={t("chat.ui.pin")}

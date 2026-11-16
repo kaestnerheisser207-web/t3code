@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { useTranslate } from "../../i18n";
 import { Trans, useTranslation } from "react-i18next";
 import { ThreadHoverCardPopup } from "../ThreadHoverCard";
@@ -22,7 +23,10 @@ import {
   type HandoffTimelineRun,
   resolveModelSwitchChange,
 } from "@t3tools/client-runtime/handoff";
-import { formatSubagentDisplayTitle } from "@t3tools/client-runtime/state/subagent-display";
+import {
+  formatSubagentDisplayTitle,
+  subagentCardDetail,
+} from "@t3tools/client-runtime/state/subagent-display";
 import {
   ProviderDriverKind,
   type ModelSelection,
@@ -55,6 +59,7 @@ import {
   applyProviderInstanceSettings,
   brandProviderInstanceEntries,
   deriveProviderInstanceEntries,
+  hasInstanceBadge,
   shouldShowInstanceBadge,
   type ProviderInstanceEntry,
 } from "../../providerInstances";
@@ -188,14 +193,14 @@ const STATUS_VISUALS: Record<
   OrchestrationV2TurnItem["status"],
   { dotClass: string; label: string }
 > = {
-  pending: { dotClass: "bg-info", label: "Queued" },
-  running: { dotClass: "bg-info", label: "Running" },
-  waiting: { dotClass: "bg-info", label: "Waiting" },
-  idle: { dotClass: "bg-muted-foreground/50", label: "Idle · resumable" },
-  completed: { dotClass: "bg-success", label: "Completed" },
-  failed: { dotClass: "bg-destructive", label: "Failed" },
-  cancelled: { dotClass: "bg-muted-foreground/60", label: "Stopped" },
-  interrupted: { dotClass: "bg-muted-foreground/60", label: "Stopped" },
+  pending: { dotClass: "bg-info", label: webI18n.t("lifecycle.pending") },
+  running: { dotClass: "bg-info", label: webI18n.t("lifecycle.running") },
+  waiting: { dotClass: "bg-info", label: webI18n.t("lifecycle.waiting") },
+  idle: { dotClass: "bg-muted-foreground/50", label: webI18n.t("lifecycle.idle") },
+  completed: { dotClass: "bg-success", label: webI18n.t("lifecycle.completed") },
+  failed: { dotClass: "bg-destructive", label: webI18n.t("lifecycle.failed") },
+  cancelled: { dotClass: "bg-muted-foreground/60", label: webI18n.t("lifecycle.cancelled") },
+  interrupted: { dotClass: "bg-muted-foreground/60", label: webI18n.t("lifecycle.cancelled") },
 };
 
 function subagentStatusVisual(status: OrchestrationV2TurnItem["status"]) {
@@ -208,17 +213,6 @@ const SETTLED_SUBAGENT_STATUSES = new Set<OrchestrationV2TurnItem["status"]>([
   "cancelled",
   "interrupted",
 ]);
-
-const GENERIC_CHILD_END = /^Child task ended with status\b/i;
-
-function plainDetail(text: string): string {
-  return text
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/`/g, "")
-    .replace(/^[ \t]*[-*][ \t]+/gm, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function isoOrNull(value: DateTime.Utc | null | undefined): string | null {
   return value ? DateTime.formatIso(value) : null;
@@ -234,6 +228,7 @@ function SubagentAvatar({
   iconUrl,
   accentColor,
   showBadge,
+  anyInstanceBadge,
   status,
   className,
 }: {
@@ -242,6 +237,7 @@ function SubagentAvatar({
   iconUrl?: string | undefined;
   accentColor?: string | undefined;
   showBadge: boolean;
+  anyInstanceBadge: boolean;
   status?: OrchestrationV2TurnItem["status"] | undefined;
   className?: string;
 }) {
@@ -270,8 +266,8 @@ function SubagentAvatar({
       {status ? (
         <span
           className={cn(
-            "absolute size-2 rounded-full ring-2 ring-background",
-            showBadge ? "-left-px -top-px" : "-right-px -bottom-px",
+            "absolute -right-px size-2 rounded-full ring-2 ring-background",
+            anyInstanceBadge ? "-top-px" : "-bottom-px",
             subagentStatusVisual(status).dotClass,
           )}
         />
@@ -322,6 +318,9 @@ export function EnvironmentSubagentAvatar({
     const entry = all.find((candidate) => candidate.instanceId === providerInstanceId);
     return entry !== undefined && shouldShowInstanceBadge(entry, all);
   });
+  const anyInstanceBadge = useAtomValue(providersAtom, (providers) =>
+    hasInstanceBadge(entries(providers)),
+  );
   const iconUrl = useAtomValue(
     providersAtom,
     (providers) =>
@@ -335,6 +334,7 @@ export function EnvironmentSubagentAvatar({
       iconUrl={iconUrl}
       accentColor={accentColor}
       showBadge={showBadge}
+      anyInstanceBadge={anyInstanceBadge}
     />
   );
 }
@@ -464,8 +464,7 @@ function SubagentTimelineLink(props: {
   const progress = (agent?.progress ?? props.progress)?.trim();
   const settled = SETTLED_SUBAGENT_STATUSES.has(status ?? liveStatus);
   const rawDetail = settled ? result || progress : progress || result;
-  const detail =
-    rawDetail && !GENERIC_CHILD_END.test(rawDetail) ? plainDetail(rawDetail) || null : null;
+  const detail = subagentCardDetail(rawDetail);
   const failed = status === "failed";
   const timing = {
     status: liveStatus,

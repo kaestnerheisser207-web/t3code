@@ -46,15 +46,6 @@ export function ThemeEditorHost() {
         );
         return false;
       }
-      toastManager.add(
-        stackedThreadToast({
-          type: "success",
-          title: t("theme.actions.updated", { theme: savedTheme.label }),
-          description: t("theme.actions.addedPalette", {
-            appearance: t(`web.dynamic.ThemeEditorPanel.${mergedAppearance}`),
-          }),
-        }),
-      );
       return true;
     }
     if (!created) {
@@ -64,15 +55,6 @@ export function ThemeEditorHost() {
         themeHalves?.light === savedTheme.id ||
         themeHalves?.dark === savedTheme.id;
       if (wasActive) refreshTheme();
-      toastManager.add(
-        stackedThreadToast({
-          type: "success",
-          title: t("theme.actions.saved", { theme: savedTheme.label }),
-          description: wasActive
-            ? t("theme.actions.changesActive")
-            : t("theme.actions.changesSaved"),
-        }),
-      );
       return true;
     }
 
@@ -86,13 +68,6 @@ export function ThemeEditorHost() {
       );
       return false;
     }
-    toastManager.add(
-      stackedThreadToast({
-        type: "success",
-        title: t("theme.actions.created", { theme: savedTheme.label }),
-        description: t("theme.actions.active"),
-      }),
-    );
     return true;
   };
 

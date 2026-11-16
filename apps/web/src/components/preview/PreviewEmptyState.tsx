@@ -1,5 +1,6 @@
 import { useTranslate } from "../../i18n";
 import type { EnvironmentId, ScopedThreadRef } from "@t3tools/contracts";
+import { parseUrl } from "@t3tools/shared/url";
 import { Globe, History, RadioTower } from "lucide-react";
 
 import type { BrowserHistoryEntry } from "~/browserHistoryStore";
@@ -32,7 +33,7 @@ export function PreviewEmptyState({
     environmentId,
     configuredUrls,
   });
-  const recents = recentEntries.filter((entry) => URL.canParse(entry.url)).slice(0, 8);
+  const recents = recentEntries.filter((entry) => parseUrl(entry.url) !== null).slice(0, 8);
 
   if (servers.length === 0 && recents.length === 0) {
     return (
@@ -41,10 +42,7 @@ export function PreviewEmptyState({
           <Globe className="size-4.5 text-muted-foreground" />
         </EmptyMedia>
         <EmptyTitle>{t("web.ui.PreviewEmptyState.no-preview-yet")}</EmptyTitle>
-        <EmptyDescription>
-          Type a URL above, or run a dev script. Local servers this thread starts will show up here
-          automatically.
-        </EmptyDescription>
+        <EmptyDescription>{t("release4761.text246")}</EmptyDescription>
       </Empty>
     );
   }

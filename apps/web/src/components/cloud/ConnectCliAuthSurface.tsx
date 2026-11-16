@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { useTranslate } from "../../i18n";
 import { useAuth, useClerk } from "@clerk/react";
 import { readConnectAuthorizeRequest } from "@t3tools/shared/connectAuth";
@@ -10,13 +11,13 @@ import {
 import { isElectron } from "../../env";
 import { StandalonePage, StandalonePageHeader } from "../ui/standalone-page";
 import { resolveClerkSignInProps } from "../clerk/authRedirect";
+import { retryClerkLoad, useClerkLoadFailed } from "../clerk/clerkLoadFailure";
 import { Button } from "../ui/button";
 
 const invalidLinkMessage = {
   context: "Authorization request",
-  title: "This connect link is incomplete",
-  description:
-    "The link is missing its authorization request. Re-run `t3 connect` in your terminal and open the freshly printed URL.",
+  title: webI18n.t("release4761.text233"),
+  description: webI18n.t("release4761.text234"),
 } as const;
 
 export function ConnectCliAuthorizeSurface() {
@@ -24,6 +25,7 @@ export function ConnectCliAuthorizeSurface() {
   const [request] = useState(() => readConnectAuthorizeRequest(new URL(window.location.href)));
   const clerk = useClerk();
   const { isLoaded, isSignedIn } = useAuth();
+  const loadFailed = useClerkLoadFailed();
   const signInOpened = useRef(false);
   const redirecting = useRef(false);
 
@@ -83,7 +85,13 @@ export function ConnectCliAuthorizeSurface() {
               )
         }
       />
-      {isLoaded && !isSignedIn ? (
+      {loadFailed ? (
+        <div className="mt-6">
+          <Button type="button" onClick={retryClerkLoad}>
+            {t("web.dynamic.ProviderAuthenticationSection.retry-sign-in")}
+          </Button>
+        </div>
+      ) : isLoaded && !isSignedIn ? (
         <div className="mt-6">
           <Button type="button" onClick={openSignIn}>
             {t("web.ui.ConnectCliAuthSurface.sign-in")}

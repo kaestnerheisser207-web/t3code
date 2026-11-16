@@ -1,5 +1,7 @@
+import { webI18n } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { type AtomCommandSuccess, runAtomCommand } from "@t3tools/client-runtime/state/runtime";
+import { sentMessageFromToolItem } from "@t3tools/shared/toolOutput";
 import { Atom, type AtomRegistry } from "effect/reactivity";
 import type { TimelineEntry } from "../../session-logic";
 import { environmentThreadDetails, threadEnvironment } from "../../state/threads";
@@ -38,15 +40,14 @@ const MAX_CITATION_PAGES = 20;
 
 const COULD_NOT_LOAD = {
   _tag: "failed",
-  title: "Could not load the cited response",
-  description:
-    "Load earlier turns, then click the citation to try again. Your saved quote is unchanged.",
+  title: webI18n.t("release4761.text185"),
+  description: webI18n.t("release4761.text186"),
 } as const;
 
 const UNAVAILABLE = {
   _tag: "failed",
-  title: "The cited response is unavailable",
-  description: "It may have been removed. The selected text is still saved in your citation.",
+  title: webI18n.t("release4761.text187"),
+  description: webI18n.t("release4761.text188"),
 } as const;
 
 /**
@@ -68,8 +69,8 @@ export async function loadCitedHistory(input: {
     if (thread.message === "other") {
       return {
         _tag: "failed",
-        title: "The citation does not refer to an assistant response",
-        description: "The selected text is still saved in your citation.",
+        title: webI18n.t("release4761.text189"),
+        description: webI18n.t("release4761.text190"),
       };
     }
     if (!thread.hasMoreHistory) return UNAVAILABLE;
@@ -92,13 +93,17 @@ export function resolveCitationPhase(input: {
 }): CitationPhase {
   if (input.history._tag === "failed") return { _tag: "failed" };
   const source = input.entries.find(
-    (entry) => entry.kind === "message" && entry.message.id === input.messageId,
+    (entry) =>
+      (entry.kind === "message" && entry.message.id === input.messageId) ||
+      (entry.kind === "sent-message" && entry.id === input.messageId),
   );
   // The history store can hold the message a render before the entries do.
   if (!source) return { _tag: "loading" };
-  if (source.kind !== "message" || source.message.role !== "assistant") return { _tag: "failed" };
+  if (source.kind === "message" && source.message.role !== "assistant") return { _tag: "failed" };
   const row = input.rows.find(
-    (candidate) => candidate.kind === "message" && candidate.message.id === input.messageId,
+    (candidate) =>
+      (candidate.kind === "message" && candidate.message.id === input.messageId) ||
+      (candidate.kind === "sent-message" && candidate.id === input.messageId),
   );
   if (row) return { _tag: "ready", rowId: row.id };
   return { _tag: "expanding" };
@@ -127,12 +132,16 @@ export function citedThreadSnapshot(input: {
   }
   // Older pages merge into the visible turn items, not the message list.
   const item = input.thread.projection.visibleTurnItems.find(
-    (row) =>
-      (row.item.type === "assistant_message" || row.item.type === "user_message") &&
-      row.item.messageId === input.messageId,
+    ({ item }) =>
+      ((item.type === "assistant_message" || item.type === "user_message") &&
+        item.messageId === input.messageId) ||
+      (item.type === "dynamic_tool" &&
+        item.id === input.messageId &&
+        item.status === "completed" &&
+        sentMessageFromToolItem(item) !== undefined),
   )?.item;
   return {
-    message: item === undefined ? null : item.type === "assistant_message" ? "assistant" : "other",
+    message: item === undefined ? null : item.type === "user_message" ? "other" : "assistant",
     hasMoreHistory: input.history.hasMoreHistory,
   };
 }
@@ -206,7 +215,7 @@ const citedHistoryAtom = Atom.family(
           );
           return result._tag === "Success"
             ? result.value
-            : { _tag: "error", message: "Could not load history." };
+            : { _tag: "error", message: webI18n.t("release4761.text192") };
         },
       }).then((outcome) => {
         if (outcome._tag === "aborted") return;

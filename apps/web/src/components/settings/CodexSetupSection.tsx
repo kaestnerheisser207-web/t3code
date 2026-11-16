@@ -491,7 +491,7 @@ function ManagedCodexSetup({
         await ensureLocalApi().shell.openExternal(authorizationUrl);
       }
     } catch {
-      setError(t("codex.setup.redirectHint"));
+      setError("Could not finish sign-in on this computer. Try again.");
     }
   };
 
@@ -1006,6 +1006,18 @@ function ManagedCodexSetup({
               </Button>
             ) : authenticated ? (
               <>
+                {updateAvailable ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={unavailable || busy}
+                    onClick={() =>
+                      void run(() => startInstall({ environmentId, input: { instanceId } }))
+                    }
+                  >
+                    {t("release4761.text276")}
+                  </Button>
+                ) : null}
                 <Button
                   size="sm"
                   variant="outline"

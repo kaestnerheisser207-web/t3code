@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import type { ChatComposerProps } from "./ChatComposer";
 import {
   type ChatFileAttachment,
@@ -18,6 +19,8 @@ import {
   composerFileNeedsReattach,
 } from "../../composerDraftStore";
 import { type ComposerPromptEditorHandle } from "../ComposerPromptEditorTiptap";
+import type { PendingUserInputProgress } from "../../pendingUserInput";
+import type { ComposerAttachmentInsertion } from "../composerAttachmentInsertion";
 import { type PendingUserInput } from "../../session-logic";
 import {
   changeQuestionAttachmentPreparation,
@@ -26,7 +29,10 @@ import {
 import {
   classifyComposerAttachmentFile,
   composerFileAttachmentMimeType,
+  composerImageSourceKey,
+  readComposerImageBytes,
   normalizeComposerImageFileMimeType,
+  rememberComposerImageSource,
 } from "./composerAttachmentFiles";
 import {
   fileAttachmentTooLargeMessage,
@@ -48,6 +54,7 @@ import { toastManager } from "../ui/toast";
 import { type RefObject, useRef } from "react";
 import {
   addPreparingComposerImages,
+  getPreparingComposerImages,
   isPreparingComposerImage,
   removePreparingComposerImages,
 } from "./preparingComposerImages";
@@ -58,7 +65,7 @@ import {
  */
 export function useComposerAttachmentIntake(input: {
   readonly activeThreadId: ChatComposerProps["activeThreadId"];
-  readonly activePendingProgress: ChatComposerProps["activePendingProgress"];
+  readonly activePendingProgress: PendingUserInputProgress | null;
   readonly activePendingIsResponding: boolean;
   readonly pendingUserInputs: ReadonlyArray<PendingUserInput>;
   readonly supportsQuestionAttachments: boolean;
@@ -81,8 +88,10 @@ export function useComposerAttachmentIntake(input: {
   readonly insertAttachmentReferences: (
     references: ReadonlyArray<ComposerContextReference>,
     selection?: { start: number; end: number },
+    pendingInsertion?: ComposerAttachmentInsertion,
   ) => boolean;
 }) {
+  const t = useTranslate();
   const {
     activeThreadId,
     activePendingProgress,
@@ -129,7 +138,7 @@ export function useComposerAttachmentIntake(input: {
     ) {
       toastManager.add({
         type: "error",
-        title: "This question cannot accept attachments.",
+        title: t("release4761.text197"),
       });
       return false;
     }
@@ -241,19 +250,30 @@ export function useComposerAttachmentIntake(input: {
     }
     if (acceptedImages.length === 0) return insertedAny;
 
+    // The store drops a repeated image only after compressing it, so a likely repeat prepares
+    // without a tile instead of flashing one. Only the store decides it is a duplicate.
+    const imageSourceKeys = new Set(
+      [...composerImagesRef.current, ...getPreparingComposerImages(attachmentTargetKey)].map(
+        (image) => composerImageSourceKey(image.file),
+      ),
+    );
     // The draft image reuses its placeholder's id and thumbnail so the strip tile stays exactly
     // as it is when the compressed file replaces it.
-    const preparingImages = acceptedImages.map((file) => ({
-      id: randomUUID(),
-      name: file.name || "image",
-      file,
-    }));
+    const preparingImages = acceptedImages.map((file) => {
+      const sourceKey = composerImageSourceKey(file);
+      const hidden = imageSourceKeys.has(sourceKey);
+      imageSourceKeys.add(sourceKey);
+      return { id: randomUUID(), name: file.name || "image", file, hidden };
+    });
     addPreparingComposerImages(attachmentTargetKey, preparingImages);
     if (questionAttachmentTarget)
       changeQuestionAttachmentPreparation(questionAttachmentTarget, acceptedImages.length);
     const compressed: { id: string; file: File }[] = [];
     // Keyed by image so a failure whose tile was removed (even mid-compression) is not reported.
     const compressionErrors = new Map<string, string>();
+    const pendingInsertion = imageAttachmentsGetChips
+      ? composerEditorRef.current?.captureAttachmentInsertion()
+      : undefined;
     for (const { id, file } of preparingImages) {
       // Removed from the strip while an earlier image was compressing.
       if (!isPreparingComposerImage(attachmentTargetKey, id)) continue;
@@ -272,9 +292,12 @@ export function useComposerAttachmentIntake(input: {
         );
         continue;
       }
-      inheritComposerImageThumbnail(file, result.file);
+      await inheritComposerImageThumbnail(file, result.file);
+      await readComposerImageBytes(result.file);
+      rememberComposerImageSource(file, result.file);
       compressed.push({ id, file: result.file });
     }
+    pendingInsertion?.dispose();
     const questionDiscarded =
       questionAttachmentTarget !== null &&
       !useQuestionAttachmentPreparation.getState().counts[questionAttachmentTarget];
@@ -312,7 +335,11 @@ export function useComposerAttachmentIntake(input: {
     }
     if (storedImages.length > 0 && imageAttachmentsGetChips) {
       insertedAny =
-        insertAttachmentReferences(storedImages.map(imageContextReference)) || insertedAny;
+        insertAttachmentReferences(
+          storedImages.map(imageContextReference),
+          undefined,
+          pendingInsertion,
+        ) || insertedAny;
     }
     // Only failures are reported here. Success must not pass `null`: by
     // now other work (a failed send, an overlapping paste) may have set a
@@ -397,8 +424,8 @@ export function useComposerAttachmentIntake(input: {
       }
       toastManager.add({
         type: "error",
-        title: "Pasted text is too large for this message",
-        description: "Remove some text or an attachment, then paste again.",
+        title: t("release4761.text198"),
+        description: t("release4761.text199"),
         data: { hideCopyButton: true },
       });
       return true;
@@ -419,8 +446,8 @@ export function useComposerAttachmentIntake(input: {
       if (!wouldExceedInputLimit) return false;
       toastManager.add({
         type: "error",
-        title: "Pasted text is too large to attach",
-        description: "Reduce the clipboard contents or save a smaller excerpt as a file.",
+        title: t("release4761.text200"),
+        description: t("release4761.text201"),
         data: { hideCopyButton: true },
       });
       return true;

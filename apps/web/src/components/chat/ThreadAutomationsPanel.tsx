@@ -1,4 +1,5 @@
-import type { TFunction } from "i18next";
+import { webI18n } from "../../i18n";
+
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
@@ -19,7 +20,8 @@ import {
 
 import { ThreadDetailsSection } from "./ThreadDetailsSection";
 import { cn } from "../../lib/utils";
-import { ScheduledRelativeLabel, scheduleLabel } from "../settings/ScheduledTasksSettings";
+import { ScheduledRelativeLabel } from "../settings/ScheduledTasksSettings";
+import { scheduleLabel } from "../settings/scheduledTasksSettings.logic";
 import { useEnvironmentQuery } from "../../state/query";
 import { serverEnvironment } from "../../state/server";
 import { useAtomCommand } from "../../state/use-atom-command";
@@ -40,16 +42,16 @@ const STATUS_DOT_CLASS: Record<ScheduledTask["lastRunStatus"], string> = {
   failed: "bg-destructive",
 };
 
-function taskScheduleLine(task: ScheduledTask, t: TFunction) {
+function taskScheduleLine(task: ScheduledTask, timeZone: string | undefined) {
   return (
     <>
-      {scheduleLabel(task.schedule, t)}
+      {scheduleLabel(task.schedule, timeZone, task.nextRunAt)}
       {task.blockedByPolicy !== undefined ? (
         ` · ${task.blockedByPolicy}`
       ) : task.enabled && task.nextRunAt !== null ? (
         <>
           <Trans
-            t={t}
+            t={webI18n.t}
             i18nKey="automation.next"
             components={{ time: <ScheduledRelativeLabel value={task.nextRunAt} /> }}
           />
@@ -57,7 +59,7 @@ function taskScheduleLine(task: ScheduledTask, t: TFunction) {
       ) : task.enabled ? (
         ""
       ) : (
-        t("automation.paused")
+        webI18n.t("automation.paused")
       )}
     </>
   );
@@ -187,12 +189,14 @@ export function ThreadAutomationsPanel(props: {
                   {task.title}
                 </span>
                 <p className="truncate text-2xs text-muted-foreground">
-                  {taskScheduleLine(task, t)}
+                  {taskScheduleLine(task, tasksQuery.data?.timeZone)}
                 </p>
               </TooltipTrigger>
               <TooltipPopup side="left">
                 <p className="font-medium">{task.title}</p>
-                <p className="text-muted-foreground">{taskScheduleLine(task, t)}</p>
+                <p className="text-muted-foreground">
+                  {taskScheduleLine(task, tasksQuery.data?.timeZone)}
+                </p>
               </TooltipPopup>
             </Tooltip>
             <Tooltip>

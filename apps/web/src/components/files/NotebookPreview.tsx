@@ -101,11 +101,8 @@ export default function NotebookPreview(props: {
         className="border-b border-border/60 px-3 py-2 text-xs text-muted-foreground tabular-nums"
         role="status"
       >
-        {t("files.preview.cells", {
-          count: props.notebook.cells.length,
-          cells: props.notebook.cells.length.toLocaleString(),
-          language: props.notebook.language,
-        })}
+        {props.notebook.cells.length.toLocaleString()}{" "}
+        {props.notebook.cells.length === 1 ? "cell" : "cells"} · {props.notebook.language}
         {props.sizeBytes !== undefined
           ? ` · ${props.sizeBytes === 0 ? t("files.preview.bytes", { count: 0 }) : formatAttachmentSize(props.sizeBytes)}`
           : ""}

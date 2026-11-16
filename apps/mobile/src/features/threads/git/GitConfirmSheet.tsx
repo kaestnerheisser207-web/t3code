@@ -6,13 +6,11 @@ import * as Arr from "effect/Array";
 import * as Result from "effect/Result";
 import { StackActions, useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import { useCallback, useMemo } from "react";
-import { Platform, ScrollView, useWindowDimensions, View } from "react-native";
-
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View } from "react-native";
 
 import { SheetHeader } from "../../../components/ui/SheetHeader";
-import { ScreenContent } from "../../../components/ui/ScreenContent";
-import { AppText as Text } from "../../../components/ui/AppText";
+import { FitSheet } from "../../../components/ui/FitSheet";
+import { SheetIntro } from "../../../components/ui/SheetIntro";
 import { useSelectedThreadGitActions } from "../../../state/use-selected-thread-git-actions";
 import { useSelectedThreadGitState } from "../../../state/use-selected-thread-git-state";
 import { useThreadSelection } from "../../../state/use-thread-selection";
@@ -31,8 +29,6 @@ type GitConfirmSheetProps = StaticScreenProps<{
 export function GitConfirmSheet(props: GitConfirmSheetProps) {
   const t = useTranslate();
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
   const gitState = useSelectedThreadGitState();
   const gitActions = useSelectedThreadGitActions();
   const { canWriteSourceControl, canChangeThreadBranch } = gitActions;
@@ -120,65 +116,38 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
   ]);
 
   return (
-    <View
-      collapsable={false}
-      className="bg-sheet ios:flex-1 android:flex-col-reverse"
-      style={Platform.OS === "android" ? { maxHeight: windowHeight * 0.92 } : undefined}
+    <FitSheet
+      header={
+        <SheetHeader
+          title={t("mobile.threads.GitConfirmSheet.confirm-action")}
+          onClose={() => navigation.goBack()}
+        />
+      }
+      showsVerticalScrollIndicator={false}
     >
-      <ScreenContent fitToContents>
-        <ScrollView
-          nestedScrollEnabled
-          className="android:shrink android:grow-0 ios:flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="android:gap-2 android:p-2"
-          contentContainerStyle={
-            Platform.OS === "android"
-              ? { paddingBottom: Math.max(insets.bottom, 18) + 8 }
-              : undefined
-          }
-        >
-          <View className="android:gap-2 android:rounded-[20px] android:bg-card android:p-3 ios:items-center ios:gap-1 ios:px-5 ios:pb-3 ios:pt-4">
-            {Platform.OS !== "android" ? (
-              <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
-                {t("mobile.threads.GitConfirmSheet.confirm")}
-              </Text>
-            ) : null}
-            <Text className="android:text-xl android:font-t3-medium ios:text-center ios:text-3xl ios:font-t3-bold">
-              {copy?.title ?? t("mobile.dynamic.GitConfirmSheet.run-action-on-default-branch")}
-            </Text>
-            <Text className="text-foreground-secondary leading-normal android:text-base ios:text-center ios:text-sm ios:font-medium">
-              {copy?.description ?? t("mobile.dynamic.GitConfirmSheet.choose-how-to-continue")}
-            </Text>
-          </View>
-
-          <View
-            className="android:gap-2 ios:gap-3 ios:px-5 ios:pt-2"
-            style={
-              Platform.OS === "android"
-                ? undefined
-                : { paddingBottom: Math.max(insets.bottom, 18) + 8 }
-            }
-          >
-            <SheetActionButton
-              icon="arrow.right.circle"
-              label={copy?.continueLabel ?? t("mobile.dynamic.GitConfirmSheet.continue")}
-              disabled={!canWriteSourceControl}
-              onPress={() => void continuePendingAction()}
-            />
-            <SheetActionButton
-              icon="arrow.branch"
-              label={t("mobile.threads.GitConfirmSheet.feature-branch-continue")}
-              disabled={!canChangeThreadBranch}
-              tone="primary"
-              onPress={() => void movePendingActionToFeatureBranch()}
-            />
-          </View>
-        </ScrollView>
-      </ScreenContent>
-      <SheetHeader
-        title={t("mobile.threads.GitConfirmSheet.confirm-action")}
-        onClose={() => navigation.goBack()}
+      <SheetIntro
+        eyebrow={t("mobile.threads.GitConfirmSheet.confirm")}
+        title={copy?.title ?? t("mobile.dynamic.GitConfirmSheet.run-action-on-default-branch")}
+        description={
+          copy?.description ?? t("mobile.dynamic.GitConfirmSheet.choose-how-to-continue")
+        }
       />
-    </View>
+
+      <View className="gap-3">
+        <SheetActionButton
+          icon="arrow.right.circle"
+          label={copy?.continueLabel ?? t("mobile.dynamic.GitConfirmSheet.continue")}
+          disabled={!canWriteSourceControl}
+          onPress={() => void continuePendingAction()}
+        />
+        <SheetActionButton
+          icon="arrow.branch"
+          label={t("mobile.threads.GitConfirmSheet.feature-branch-continue")}
+          disabled={!canChangeThreadBranch}
+          tone="primary"
+          onPress={() => void movePendingActionToFeatureBranch()}
+        />
+      </View>
+    </FitSheet>
   );
 }

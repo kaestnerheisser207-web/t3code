@@ -99,7 +99,7 @@ export function HtmlRenderFrame(props: {
                         toastManager.add({
                           type: "error",
                           title: t("mobile.threads.HtmlRenderWebView.page-unavailable"),
-                          description: "Reconnect to the environment and try again.",
+                          description: t("release4761.text151"),
                         });
                     }}
                   />
@@ -115,7 +115,7 @@ export function HtmlRenderFrame(props: {
           {expandedSrc !== null ? (
             <HtmlRenderDialog
               src={expandedSrc}
-              title={title}
+              htmlRender={props.htmlRender}
               threadRef={props.threadRef}
               onClose={() => setExpandedSrc(null)}
             />

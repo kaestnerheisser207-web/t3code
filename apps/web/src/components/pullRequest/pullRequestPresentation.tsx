@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import type { TFunction } from "i18next";
 import { useTranslate } from "../../i18n";
 import { Spinner } from "~/components/ui/spinner";
@@ -18,6 +19,7 @@ import {
   CircleDotIcon,
   CircleSlashIcon,
   CircleXIcon,
+  OctagonXIcon,
   UserCheckIcon,
   UserRoundIcon,
   UserRoundXIcon,
@@ -42,24 +44,35 @@ export function PullRequestLabelChip({
   label,
   size = "sm",
   className,
+  focusable = false,
   children,
 }: {
-  label: Pick<PullRequestLabel, "name" | "color">;
+  label: Pick<PullRequestLabel, "name" | "color" | "description">;
   size?: "sm" | "default";
   className?: string;
+  focusable?: boolean;
   children?: ReactNode;
 }) {
   const color = pullRequestLabelColor(label.color);
-  return (
+  const badge = (
     <Badge
       size={size}
       variant={color ? "label" : "secondary"}
       className={cn("min-w-0 max-w-40 shrink justify-start", className)}
+      {...(focusable && label.description ? { tabIndex: 0 } : {})}
       {...(color ? { style: { "--label": color } as CSSProperties } : {})}
     >
       <span className="truncate">{label.name}</span>
+      {label.description ? <span className="sr-only">: {label.description}</span> : null}
       {children}
     </Badge>
+  );
+  if (!label.description) return badge;
+  return (
+    <Tooltip>
+      <TooltipTrigger render={badge} />
+      <TooltipPopup>{label.description}</TooltipPopup>
+    </Tooltip>
   );
 }
 
@@ -204,21 +217,41 @@ export function PullRequestConflictGlyph({
 }
 
 const CHECK_STATUS_PRESENTATION = {
-  pending: { label: "Running", Icon: Spinner, toneClassName: "text-amber-500" },
+  pending: {
+    label: webI18n.t("lifecycle.running"),
+    Icon: Spinner,
+    toneClassName: "text-amber-500",
+  },
   "action-required": {
-    label: "Awaiting action",
+    label: webI18n.t("web.pr.checks.awaitingAction"),
     Icon: CircleDotIcon,
     toneClassName: "text-amber-600 dark:text-amber-400/90",
   },
   success: {
-    label: "Passed",
+    label: webI18n.t("pr.status.passed"),
     Icon: CircleCheckIcon,
     toneClassName: "text-emerald-600 dark:text-emerald-300/90",
   },
-  failure: { label: "Failed", Icon: CircleXIcon, toneClassName: "text-destructive" },
-  cancelled: { label: "Cancelled", Icon: CircleXIcon, toneClassName: "text-destructive" },
-  skipped: { label: "Skipped", Icon: CircleSlashIcon, toneClassName: "text-muted-foreground/70" },
-  neutral: { label: "Neutral", Icon: CircleDashedIcon, toneClassName: "text-muted-foreground/70" },
+  failure: {
+    label: webI18n.t("lifecycle.failed"),
+    Icon: CircleXIcon,
+    toneClassName: "text-destructive",
+  },
+  cancelled: {
+    label: webI18n.t("pr.status.cancelled"),
+    Icon: OctagonXIcon,
+    toneClassName: "text-muted-foreground/70",
+  },
+  skipped: {
+    label: webI18n.t("pr.status.skipped"),
+    Icon: CircleSlashIcon,
+    toneClassName: "text-muted-foreground/70",
+  },
+  neutral: {
+    label: webI18n.t("pr.status.neutral"),
+    Icon: CircleDashedIcon,
+    toneClassName: "text-muted-foreground/70",
+  },
 } as const satisfies Record<
   PullRequestCheckStatus,
   { label: string; Icon: typeof CircleCheckIcon | typeof Spinner; toneClassName: string }
@@ -266,17 +299,17 @@ export function PullRequestCheckStatusIcon({ status }: { status: PullRequestChec
 
 const CHECKS_STATE_PRESENTATION = {
   passing: {
-    label: "All checks have passed",
+    label: webI18n.t("web.pr.checks.passing"),
     Icon: CircleCheckIcon,
     toneClassName: CHECK_STATUS_PRESENTATION.success.toneClassName,
   },
   failing: {
-    label: "Some checks were not successful",
+    label: webI18n.t("web.pr.checks.failing"),
     Icon: CircleXIcon,
     toneClassName: "text-destructive",
   },
   pending: {
-    label: "Some checks haven't completed yet",
+    label: webI18n.t("web.pr.checks.pending"),
     Icon: CircleDotIcon,
     toneClassName: "text-amber-600 dark:text-amber-400/90",
   },
@@ -302,7 +335,7 @@ export function pullRequestChecksState(
 
 const REVIEW_OUTCOME_PRESENTATION = {
   approved: {
-    label: "Approved",
+    label: webI18n.t("pr.filters.approved"),
     Icon: CircleCheckIcon,
     toneClassName: "text-emerald-600 dark:text-emerald-300/90",
     ringClassName: "ring-2 ring-emerald-500 dark:ring-emerald-400",
@@ -312,7 +345,7 @@ const REVIEW_OUTCOME_PRESENTATION = {
     badgeVariant: "success",
   },
   "changes-requested": {
-    label: "Changes requested",
+    label: webI18n.t("pr.filters.changesRequested"),
     Icon: CircleXIcon,
     toneClassName: "text-destructive",
     ringClassName: "ring-2 ring-destructive",
@@ -321,7 +354,7 @@ const REVIEW_OUTCOME_PRESENTATION = {
     badgeVariant: "error",
   },
   dismissed: {
-    label: "Review dismissed",
+    label: webI18n.t("web.pr.review.dismissed"),
     Icon: CircleDashedIcon,
     toneClassName: "text-muted-foreground/70",
     ringClassName: "ring-2 ring-muted-foreground/60",

@@ -1,47 +1,58 @@
+import { mobileI18n } from "../../i18n";
 import type { StatusTone } from "../../components/StatusPill";
 import type { RemoteClientConnectionState } from "../../lib/connection";
 
-export function connectionTone(state: RemoteClientConnectionState): StatusTone {
+export function connectionTone(
+  state: RemoteClientConnectionState,
+  awaitingApproval?: boolean,
+): StatusTone {
+  if (state === "reconnecting" && awaitingApproval) {
+    return {
+      label: mobileI18n.t("composer.ui.waiting-for-approval"),
+      pillClassName: "bg-update",
+      textClassName: "text-update-foreground",
+    };
+  }
   switch (state) {
     case "connected":
       return {
-        label: "Connected",
+        label: mobileI18n.t("connection.connected"),
         pillClassName: "bg-adaptive-emerald-500-a12-a16",
         textClassName: "text-adaptive-emerald-700-300",
       };
     case "reconnecting":
       return {
-        label: "Reconnecting",
+        label: mobileI18n.t("release4761.text028"),
         pillClassName: "bg-warning",
         textClassName: "text-warning-foreground",
       };
     case "connecting":
       return {
-        label: "Connecting",
+        label: mobileI18n.t("activity.connecting"),
         pillClassName: "bg-update",
         textClassName: "text-update-foreground",
       };
     case "unsupported":
       return {
-        label: "Client not supported",
+        label: mobileI18n.t("connection.unsupported"),
         pillClassName: "bg-subtle",
         textClassName: "text-foreground-secondary",
       };
     case "error":
       return {
-        label: "Connection failed",
+        label: mobileI18n.t("connection.failed"),
         pillClassName: "bg-danger",
         textClassName: "text-danger-foreground",
       };
     case "offline":
       return {
-        label: "Offline",
+        label: mobileI18n.t("release4262.offline"),
         pillClassName: "bg-danger",
         textClassName: "text-danger-foreground",
       };
     case "available":
       return {
-        label: "Available",
+        label: mobileI18n.t("connection.available"),
         pillClassName: "bg-subtle",
         textClassName: "text-foreground-secondary",
       };

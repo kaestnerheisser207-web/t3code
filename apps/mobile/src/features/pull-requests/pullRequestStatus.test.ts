@@ -109,9 +109,8 @@ describe("mobile overview check status", () => {
     expect(
       pullRequestChecksSummary({ checks: [check("success"), check("pending"), check("failure")] }),
     ).toMatchObject({ title: "1 check failing", count: "1 of 3" });
-    const checks = [check("success"), check("pending"), check("failure")];
-    const translated = pullRequestChecksSummary({ checks }, createI18n("zh-CN").t);
-    expect(translated).toMatchObject({ title: "1 项检查未通过", count: "1/3" });
-    expect(translated.tint).toBe(pullRequestChecksSummary({ checks }).tint);
+    expect(
+      pullRequestChecksSummary({ checks: [check("success"), check("cancelled")] }),
+    ).toMatchObject({ title: "1 check failing", tint: "accent-danger-foreground" });
   });
 });

@@ -1,3 +1,4 @@
+import { mobileI18n } from "../../i18n";
 import type { TFunction } from "i18next";
 import type {
   PullRequestActivity,
@@ -12,28 +13,28 @@ import { PullRequestGlyph } from "./pullRequestGlyphs";
 
 const STATES = {
   open: {
-    label: "Open",
+    label: mobileI18n.t("pr.filters.open"),
     icon: PullRequestGlyph.pullRequest,
     tint: "accent-adaptive-emerald-600-400",
     text: "text-adaptive-emerald-600-400",
     background: "bg-adaptive-emerald-500-a12-a16",
   },
   merged: {
-    label: "Merged",
+    label: mobileI18n.t("pr.merge.status.merged"),
     icon: PullRequestGlyph.merged,
     tint: "accent-adaptive-violet-600-400",
     text: "text-adaptive-violet-600-400",
     background: "bg-adaptive-violet-500-a12-a16",
   },
   closed: {
-    label: "Closed",
+    label: mobileI18n.t("pr.merge.status.closed"),
     icon: PullRequestGlyph.closed,
     tint: "accent-danger-foreground",
     text: "text-danger-foreground",
     background: "bg-danger",
   },
   draft: {
-    label: "Draft",
+    label: mobileI18n.t("pr.status.draft"),
     icon: PullRequestGlyph.draft,
     tint: "accent-icon-muted",
     text: "text-foreground-muted",
@@ -121,8 +122,12 @@ export function checkStatus(check: PullRequestCheck, t?: TFunction) {
   }
 }
 
+export function isFailingCheck(check: PullRequestCheck) {
+  return check.status === "failure" || check.status === "cancelled";
+}
+
 export function pullRequestChecksSummary(pr: Pick<PullRequestDetail, "checks">, t?: TFunction) {
-  const failed = pr.checks.filter((check) => check.status === "failure").length;
+  const failed = pr.checks.filter(isFailingCheck).length;
   const required = pr.checks.filter((check) => check.status === "action-required").length;
   const pending = pr.checks.filter((check) => check.status === "pending").length;
   const passed = pr.checks.filter((check) => check.status === "success").length;

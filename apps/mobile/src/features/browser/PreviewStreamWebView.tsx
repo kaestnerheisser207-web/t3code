@@ -1,3 +1,4 @@
+import { mobileI18n } from "../../i18n";
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import { Button } from "../../components/ui/Button";
@@ -93,9 +94,9 @@ async function sendFilesToPage(chooser: PreviewStreamFileChooser, pick: boolean)
 
 function offerDownload(download: PreviewStreamDownload) {
   Dialog.alert(`Downloaded ${download.fileName}`, undefined, [
-    { text: "Not now", style: "cancel" },
+    { text: mobileI18n.t("web.ui.ConnectOnboardingDialog.not-now"), style: "cancel" },
     {
-      text: "Save or share",
+      text: mobileI18n.t("release4761.text018"),
       onPress: () =>
         void downloadAndShareAttachment({
           url: download.url,
@@ -417,7 +418,7 @@ function PreviewStreamDocumentView({
                 onPictureInPicture?.(message, message.detail);
                 return;
               case "status":
-                clearBootstrapTimer();
+                if (message.status !== "connecting") clearBootstrapTimer();
                 if (message.status === "error") {
                   fail(message.detail ?? "Browser stream failed.");
                   return;

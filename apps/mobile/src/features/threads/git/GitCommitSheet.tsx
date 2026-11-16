@@ -1,13 +1,12 @@
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../../i18n";
-import { ScreenContent } from "../../../components/ui/ScreenContent";
+import { FitSheet } from "../../../components/ui/FitSheet";
 import { SheetHeader } from "../../../components/ui/SheetHeader";
 import { Button } from "../../../components/ui/Button";
 import { useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import { useState } from "react";
-import { Platform, Pressable, ScrollView, useWindowDimensions, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { formatDiffCount } from "@t3tools/client-runtime/diff-count";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SymbolView } from "../../../components/ui/AppSymbol";
 import { AppText as Text, AppTextInput as TextInput } from "../../../components/ui/AppText";
@@ -27,8 +26,6 @@ type GitCommitSheetProps = StaticScreenProps<{
 export function GitCommitSheet(_props: GitCommitSheetProps) {
   const t = useTranslate();
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
   const { selectedThread } = useThreadSelection();
   const { selectedThreadCwd } = useSelectedThreadWorktree();
   const gitState = useSelectedThreadGitState();
@@ -69,186 +66,169 @@ export function GitCommitSheet(_props: GitCommitSheetProps) {
     });
   };
 
-  const android = Platform.OS === "android";
-  const header = (
-    <SheetHeader
-      title={t("mobile.threads.GitCommitSheet.commit-changes")}
-      subtitle={gitStatus.data?.refName ?? t("mobile.dynamic.GitCommitSheet.detached-head")}
-      onCancel={() => navigation.goBack()}
-      accessibilityLabel={t("mobile.threads.GitCommitSheet.cancel-commit")}
-    />
-  );
-
   return (
-    // Material sheet drags follow the first nested-scrolling native view, and the inline
-    // header's Compose button is one, so Android renders content first and reverses the column.
-    <View
-      collapsable={false}
-      className="bg-sheet ios:flex-1 android:flex-col-reverse"
-      style={android ? { maxHeight: windowHeight * 0.92 } : undefined}
+    <FitSheet
+      header={
+        <SheetHeader
+          title={t("mobile.threads.GitCommitSheet.commit-changes")}
+          subtitle={gitStatus.data?.refName ?? t("mobile.dynamic.GitCommitSheet.detached-head")}
+          onCancel={() => navigation.goBack()}
+          accessibilityLabel={t("mobile.threads.GitCommitSheet.cancel-commit")}
+        />
+      }
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      automaticallyAdjustKeyboardInsets
+      contentContainerClassName="px-5 pt-4 gap-5"
     >
-      <ScreenContent fitToContents>
-        <ScrollView
-          nestedScrollEnabled
-          contentInsetAdjustmentBehavior="automatic"
-          className="android:shrink android:grow-0 ios:flex-1"
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          automaticallyAdjustKeyboardInsets
-          contentContainerClassName="px-5 pt-4 pb-6 gap-5"
-          contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) + 18 }}
-        >
-          {isDefaultRef ? (
-            <Text className="text-sm text-warning-foreground">
-              {t(
-                "mobile.threads.GitCommitSheet.you-re-on-the-default-branch-you-can-create-a-new-branch-when-committing",
-              )}
+      {isDefaultRef ? (
+        <Text className="text-sm text-warning-foreground">
+          {t(
+            "mobile.threads.GitCommitSheet.you-re-on-the-default-branch-you-can-create-a-new-branch-when-committing",
+          )}
+        </Text>
+      ) : null}
+      <View className="gap-2">
+        <Text className="text-sm font-t3-medium text-foreground">
+          {t("mobile.threads.GitCommitSheet.commit-message")}
+        </Text>
+        <TextInput
+          multiline
+          accessibilityLabel={t("mobile.threads.GitCommitSheet.commit-message")}
+          value={dialogCommitMessage}
+          onChangeText={setDialogCommitMessage}
+          placeholder={t("mobile.threads.GitCommitSheet.describe-your-changes")}
+          textAlignVertical="top"
+          className="min-h-24 rounded-xl bg-subtle px-4 py-3 text-base"
+        />
+        <Text className="text-xs text-foreground-muted">
+          {t("mobile.threads.GitCommitSheet.leave-empty-to-generate-a-message-automatically")}
+        </Text>
+      </View>
+      <View>
+        <View className="flex-row items-center justify-between gap-2 pb-2">
+          <View className="flex-1 gap-1">
+            <Text className="text-base font-t3-bold text-foreground">
+              {t("mobile.threads.GitCommitSheet.changed-files")}
             </Text>
-          ) : null}
-          <View className="gap-2">
-            <Text className="text-sm font-t3-medium text-foreground">
-              {t("mobile.threads.GitCommitSheet.commit-message")}
-            </Text>
-            <TextInput
-              multiline
-              accessibilityLabel={t("mobile.threads.GitCommitSheet.commit-message")}
-              value={dialogCommitMessage}
-              onChangeText={setDialogCommitMessage}
-              placeholder={t("mobile.threads.GitCommitSheet.describe-your-changes")}
-              textAlignVertical="top"
-              className="min-h-24 rounded-xl bg-subtle px-4 py-3 text-base"
-            />
             <Text className="text-xs text-foreground-muted">
-              {t("mobile.threads.GitCommitSheet.leave-empty-to-generate-a-message-automatically")}
+              <Trans
+                t={t}
+                i18nKey="mobile.rich.GitCommitSheet.part-of-part-selected-part-part"
+                components={{
+                  value0: <>{selectedFiles.length}</>,
+                  value1: <>{allFiles.length}</>,
+                  value2: <>{formatDiffCount(selectedInsertions)}</>,
+                  value3: <>{formatDiffCount(selectedDeletions)}</>,
+                }}
+              />
             </Text>
           </View>
-          <View>
-            <View className="flex-row items-center justify-between gap-2 pb-2">
-              <View className="flex-1 gap-1">
-                <Text className="text-base font-t3-bold text-foreground">
-                  {t("mobile.threads.GitCommitSheet.changed-files")}
-                </Text>
-                <Text className="text-xs text-foreground-muted">
-                  <Trans
-                    t={t}
-                    i18nKey="mobile.rich.GitCommitSheet.part-of-part-selected-part-part"
-                    components={{
-                      value0: <>{selectedFiles.length}</>,
-                      value1: <>{allFiles.length}</>,
-                      value2: <>{formatDiffCount(selectedInsertions)}</>,
-                      value3: <>{formatDiffCount(selectedDeletions)}</>,
-                    }}
-                  />
-                </Text>
-              </View>
-              {allFiles.length > 0 ? (
-                <Button
-                  label={
-                    allSelected
-                      ? t("mobile.dynamic.GitCommitSheet.deselect-all")
-                      : t("mobile.dynamic.GitCommitSheet.select-all")
-                  }
-                  tone="text"
-                  onPress={() =>
-                    setExcludedFiles(
-                      allSelected ? new Set(allFiles.map((file) => file.path)) : new Set(),
-                    )
-                  }
-                />
-              ) : null}
-            </View>
-            {allFiles.length === 0 ? (
-              <Text className="py-4 text-sm text-foreground-muted">
-                {t("mobile.threads.GitCommitSheet.no-changed-files-to-commit")}
-              </Text>
-            ) : (
-              allFiles.map((file) => {
-                const included = !excludedFiles.has(file.path);
-                const slash = file.path.lastIndexOf("/");
-                const name = file.path.slice(slash + 1);
-                const directory = slash >= 0 ? file.path.slice(0, slash) : null;
-                return (
-                  <Pressable
-                    key={file.path}
-                    className="min-h-16 flex-row items-center gap-3 border-t border-border-subtle py-3"
-                    accessibilityRole="checkbox"
-                    accessibilityLabel={file.path}
-                    accessibilityState={{ checked: included }}
-                    onPress={() =>
-                      setExcludedFiles((current) => {
-                        const next = new Set(current);
-                        if (next.has(file.path)) next.delete(file.path);
-                        else next.add(file.path);
-                        return next;
-                      })
-                    }
-                  >
-                    <View
-                      className={cn(
-                        "size-5 items-center justify-center rounded-full",
-                        included ? "bg-primary" : "border border-input-border",
-                      )}
-                    >
-                      {included ? (
-                        <SymbolView
-                          name="checkmark"
-                          size={13}
-                          tintColorClassName="accent-primary-foreground"
-                        />
-                      ) : null}
-                    </View>
-                    <View className="flex-1 gap-1">
-                      <Text
-                        numberOfLines={1}
-                        ellipsizeMode="middle"
-                        className="text-sm font-t3-medium text-foreground"
-                      >
-                        {name}
-                      </Text>
-                      {directory ? (
-                        <Text
-                          numberOfLines={1}
-                          ellipsizeMode="middle"
-                          className="text-xs text-foreground-muted"
-                        >
-                          {directory}
-                        </Text>
-                      ) : null}
-                    </View>
-                    <View className="flex-row gap-2">
-                      <Text className="text-xs text-adaptive-emerald-700-300">
-                        +{formatDiffCount(file.insertions)}
-                      </Text>
-                      <Text className="text-xs text-adaptive-rose-700-300">
-                        −{formatDiffCount(file.deletions)}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              })
-            )}
-          </View>
-          <View className="gap-2">
+          {allFiles.length > 0 ? (
             <Button
-              label={t("mobile.threads.GitCommitSheet.commit-changes")}
-              icon="checkmark"
-              tone="primary"
-              fullWidth
-              disabled={!canWriteSourceControl || noneSelected || busy}
-              onPress={() => void runCommitAction(false)}
-            />
-            <Button
-              label={t("mobile.threads.GitCommitSheet.commit-on-a-new-branch")}
-              icon="arrow.branch"
+              label={
+                allSelected
+                  ? t("mobile.dynamic.GitCommitSheet.deselect-all")
+                  : t("mobile.dynamic.GitCommitSheet.select-all")
+              }
               tone="text"
-              fullWidth
-              disabled={!canWriteSourceControl || !canChangeThreadBranch || noneSelected || busy}
-              onPress={() => void runCommitAction(true)}
+              onPress={() =>
+                setExcludedFiles(
+                  allSelected ? new Set(allFiles.map((file) => file.path)) : new Set(),
+                )
+              }
             />
-          </View>
-        </ScrollView>
-      </ScreenContent>
-      {header}
-    </View>
+          ) : null}
+        </View>
+        {allFiles.length === 0 ? (
+          <Text className="py-4 text-sm text-foreground-muted">
+            {t("mobile.threads.GitCommitSheet.no-changed-files-to-commit")}
+          </Text>
+        ) : (
+          allFiles.map((file) => {
+            const included = !excludedFiles.has(file.path);
+            const slash = file.path.lastIndexOf("/");
+            const name = file.path.slice(slash + 1);
+            const directory = slash >= 0 ? file.path.slice(0, slash) : null;
+            return (
+              <Pressable
+                key={file.path}
+                className="min-h-16 flex-row items-center gap-3 border-t border-border-subtle py-3"
+                accessibilityRole="checkbox"
+                accessibilityLabel={file.path}
+                accessibilityState={{ checked: included }}
+                onPress={() =>
+                  setExcludedFiles((current) => {
+                    const next = new Set(current);
+                    if (next.has(file.path)) next.delete(file.path);
+                    else next.add(file.path);
+                    return next;
+                  })
+                }
+              >
+                <View
+                  className={cn(
+                    "size-5 items-center justify-center rounded-full",
+                    included ? "bg-primary" : "border border-input-border",
+                  )}
+                >
+                  {included ? (
+                    <SymbolView
+                      name="checkmark"
+                      size={13}
+                      tintColorClassName="accent-primary-foreground"
+                    />
+                  ) : null}
+                </View>
+                <View className="flex-1 gap-1">
+                  <Text
+                    numberOfLines={1}
+                    ellipsizeMode="middle"
+                    className="text-sm font-t3-medium text-foreground"
+                  >
+                    {name}
+                  </Text>
+                  {directory ? (
+                    <Text
+                      numberOfLines={1}
+                      ellipsizeMode="middle"
+                      className="text-xs text-foreground-muted"
+                    >
+                      {directory}
+                    </Text>
+                  ) : null}
+                </View>
+                <View className="flex-row gap-2">
+                  <Text className="text-xs text-adaptive-emerald-700-300">
+                    +{formatDiffCount(file.insertions)}
+                  </Text>
+                  <Text className="text-xs text-adaptive-rose-700-300">
+                    −{formatDiffCount(file.deletions)}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })
+        )}
+      </View>
+      <View className="gap-2">
+        <Button
+          label={t("mobile.threads.GitCommitSheet.commit-changes")}
+          icon="checkmark"
+          tone="primary"
+          fullWidth
+          disabled={!canWriteSourceControl || noneSelected || busy}
+          onPress={() => void runCommitAction(false)}
+        />
+        <Button
+          label={t("mobile.threads.GitCommitSheet.commit-on-a-new-branch")}
+          icon="arrow.branch"
+          tone="text"
+          fullWidth
+          disabled={!canWriteSourceControl || !canChangeThreadBranch || noneSelected || busy}
+          onPress={() => void runCommitAction(true)}
+        />
+      </View>
+    </FitSheet>
   );
 }

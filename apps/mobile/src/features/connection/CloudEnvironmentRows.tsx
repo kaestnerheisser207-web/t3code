@@ -207,6 +207,7 @@ function ConnectedCloudEnvironmentRow(props: {
       connectionError={enabled || unsupported ? props.environment.connectionError : null}
       connectionErrorTraceId={enabled ? props.environment.connectionErrorTraceId : null}
       connectionState={enabled || unsupported ? props.environment.connectionState : "available"}
+      awaitingApproval={enabled && presentation?.connection.awaitingApproval === true}
       errorExpanded={props.errorExpanded}
       label={props.environment.environmentLabel}
       machine={resolveEnvironmentMachineKind(
@@ -273,6 +274,8 @@ function CloudEnvironmentRowShell(props: {
   readonly connectionError: string | null;
   readonly connectionErrorTraceId: string | null;
   readonly connectionState: EnvironmentConnectionPhase;
+  /** Waiting on the host to approve this device: say so plainly, not as a failure. */
+  readonly awaitingApproval?: boolean;
   readonly disabled?: boolean;
   readonly errorExpanded: boolean;
   readonly label: string;
@@ -288,16 +291,14 @@ function CloudEnvironmentRowShell(props: {
   const shouldPulse = isRetrying;
   const statusText =
     props.statusText ??
-    environmentStatusText(
-      {
-        phase: props.connectionState,
-        error: props.connectionError,
-        traceId: props.connectionErrorTraceId,
-      },
-      t,
-    );
+    environmentStatusText({
+      phase: props.connectionState,
+      error: props.connectionError,
+      traceId: props.connectionErrorTraceId,
+      ...(props.awaitingApproval ? { awaitingApproval: true as const } : {}),
+    });
   const statusClassName =
-    props.connectionError && props.connectionState !== "unsupported"
+    props.connectionError && props.connectionState !== "unsupported" && !props.awaitingApproval
       ? "text-danger-foreground"
       : "text-foreground-muted";
   const [errorMeasurement, setErrorMeasurement] = useState<{

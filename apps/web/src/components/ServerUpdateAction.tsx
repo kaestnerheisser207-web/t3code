@@ -214,6 +214,7 @@ export function ServerUpdatesAction({
             t("updates.desktopConfirmMany", {
               servers: desktopTargets.map((target) => target.serverLabel).join(", "),
             }),
+            { initialFocus: "confirm" },
           )) ?? true;
         if (!confirmed) return;
       }
@@ -289,19 +290,17 @@ export function ServerUpdateAction({
   const canUpdate = useAtomValue(sessionStateAtom, canUpdateServer);
   const updatesDenial = managedUpdatesDenial(useManagedPolicy(environmentId));
   const update = useServerUpdate();
+  const updatesInstall =
+    installation?.kind === "npm-global" || installation?.kind === "t3-launcher";
   const { copyToClipboard } = useCopyToClipboard<{ command: string }>({
-    target: installation?.kind === "npm-global" ? "update command" : "relaunch command",
+    target: updatesInstall ? "update command" : "relaunch command",
     onCopy: ({ command }) => {
       toastManager.add({
         type: "success",
-        title:
-          installation?.kind === "npm-global"
-            ? t("updates.commandCopied")
-            : t("updates.relaunchCopied"),
-        description:
-          installation?.kind === "npm-global"
-            ? t("updates.runCommand", { command, server: serverLabel })
-            : t("updates.relaunchCommand", { command, server: serverLabel }),
+        title: updatesInstall ? t("updates.commandCopied") : t("updates.relaunchCopied"),
+        description: updatesInstall
+          ? t("updates.runCommand", { command, server: serverLabel })
+          : t("updates.relaunchCommand", { command, server: serverLabel }),
       });
     },
     onError: (error) => {
@@ -324,6 +323,7 @@ export function ServerUpdateAction({
       const confirmed =
         (await requestConfirmDialog(
           `Update the T3 Code desktop app that runs the ${serverLabel}? It will close and relaunch on that machine.`,
+          { initialFocus: "confirm" },
         )) ?? true;
       if (!confirmed) {
         return;
@@ -369,7 +369,7 @@ export function ServerUpdateAction({
     selfUpdate === null ? manualServerUpdateCommand(targetVersion, installation) : null;
   const actionLabel =
     manualCommand !== null
-      ? installation?.kind === "npm-global"
+      ? updatesInstall
         ? t("settings.pages.ProviderInstanceCard.copy-update-command")
         : "Copy relaunch command"
       : (label ?? t("theme.actions.update"));

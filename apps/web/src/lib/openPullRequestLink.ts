@@ -1,3 +1,5 @@
+import { useTranslate } from "../i18n";
+import { parsePullRequestAnchor } from "@t3tools/shared/pullRequestAnchor";
 import type { EnvironmentId, ScopedThreadRef } from "@t3tools/contracts";
 import { useAtomValue } from "@effect/atom-react";
 import { useNavigate } from "@tanstack/react-router";
@@ -14,7 +16,7 @@ import { canOpenLinksInApp } from "../browser/browserLinkTarget";
 import { useOpenLink } from "../browser/useOpenLink";
 import { useClientSettings } from "../hooks/useSettings";
 import { stackedThreadToast, toastManager } from "../components/ui/toast";
-import { selectActiveRightPanel, useRightPanelStore } from "../rightPanelStore";
+import { useRightPanelStore } from "../rightPanelStore";
 import {
   selectThreadBranchBaseRef,
   selectThreadDiffPanelSelection,
@@ -60,6 +62,7 @@ export function useOpenChangeRequestLink(
   targetEnvironmentId?: EnvironmentId,
   onCommitUnavailable?: () => void,
 ) => boolean {
+  const t = useTranslate();
   const navigate = useNavigate();
   const primaryEnvironmentId = usePrimaryEnvironmentId();
   const openInApp = useClientSettings((settings) => settings.pullRequestLinksOpenInApp);
@@ -89,6 +92,7 @@ export function useOpenChangeRequestLink(
       });
       if (target === null) return false;
       const { project, repository, number, host } = target;
+      const revealUrl = parsePullRequestAnchor(targetUrl) === null ? undefined : targetUrl;
       const pullRequestsSearch = {
         repository,
         number,
@@ -106,6 +110,7 @@ export function useOpenChangeRequestLink(
           ...(host === undefined ? {} : { host }),
           repository,
           url: targetUrl,
+          ...(revealUrl === undefined ? {} : { revealUrl }),
           number,
         });
         if (!resolvedThreadRef) {
@@ -124,7 +129,12 @@ export function useOpenChangeRequestLink(
       }
       void navigate({
         to: "/pull-requests",
-        search: { involvement: "all", state: "all", ...pullRequestsSearch },
+        search: {
+          involvement: "all",
+          state: "all",
+          ...pullRequestsSearch,
+          ...(revealUrl === undefined ? {} : { selectedUrl: revealUrl }),
+        },
       });
       return true;
     };
@@ -140,6 +150,14 @@ export function useOpenChangeRequestLink(
     const parsedCommit = sourceControlClients.parseCommitUrl(targetUrl, identity?.provider);
     // Shift and Alt keep their browser meaning (new window, download) on commit links.
     if (parsedCommit !== null && (event.shiftKey || event.altKey)) return false;
+    // A plain commit link stays a workspace commit; one naming a file or line opens the PR's diff.
+    const anchor = parsePullRequestAnchor(targetUrl);
+    if (anchor !== null && anchor.kind !== "code" && openPullRequest()) {
+      event.preventDefault();
+      event.stopPropagation();
+      return true;
+    }
+
     if (
       parsedCommit !== null &&
       commitThread &&
@@ -183,12 +201,7 @@ export function useOpenChangeRequestLink(
               (source) => source.kind === "commit" && source.headRef === commit.sha,
             )
           ) {
-            const diffOpen =
-              selectActiveRightPanel(
-                useRightPanelStore.getState().byThreadKey,
-                resolvedThreadRef,
-              ) === "diff";
-            useDiffPanelStore.getState().selectCommit(resolvedThreadRef, commit.sha, !diffOpen);
+            useDiffPanelStore.getState().selectCommit(resolvedThreadRef, commit.sha);
             useRightPanelStore.getState().open(resolvedThreadRef, "diff");
             return;
           }
@@ -202,7 +215,7 @@ export function useOpenChangeRequestLink(
             const toastId = toastManager.add(
               stackedThreadToast({
                 type: "info",
-                title: "This commit is not in the thread's workspace",
+                title: t("release4761.text430"),
                 actionProps: {
                   children: "Open link",
                   onClick: () => {
@@ -230,6 +243,7 @@ export function useOpenChangeRequestLink(
 }
 
 export function useOpenPrLink(threadRef?: ScopedThreadRef) {
+  const t = useTranslate();
   const openChangeRequest = useOpenChangeRequestLink(threadRef);
   const openLink = useOpenLink(threadRef);
   return (event: MouseEvent<HTMLElement>, prUrl: string, targetThreadRef?: ScopedThreadRef) => {
@@ -249,7 +263,7 @@ export function useOpenPrLink(threadRef?: ScopedThreadRef) {
       toastManager.add(
         stackedThreadToast({
           type: "error",
-          title: "Unable to open pull request link",
+          title: t("release4761.text431"),
           description: error instanceof Error ? error.message : "An error occurred.",
         }),
       );

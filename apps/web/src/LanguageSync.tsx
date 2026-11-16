@@ -37,8 +37,7 @@ export function LanguageSync() {
   useEffect(() => {
     if (!hydrated) return;
     const synchronize = () => {
-      const desktopLocale = window.desktopBridge?.getSystemLocale();
-      const languages = desktopLocale ? [desktopLocale] : navigator.languages;
+      const languages = navigator.languages;
       const language = resolveLanguage(preference, languages);
       void webI18n.changeLanguage(language);
       document.documentElement.lang = language;

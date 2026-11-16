@@ -10,6 +10,7 @@ import { SETTINGS_SECTION_KEYS } from "./settingsSearch";
 
 const SETTINGS_BREADCRUMB_KEYS: Readonly<Record<string, TranslationKey>> = {
   ...SETTINGS_SECTION_KEYS,
+  "/settings/diagnostics": "settings.diagnostics",
   "/settings/open-source-licenses": "settings.openSourceLicenses",
 };
 

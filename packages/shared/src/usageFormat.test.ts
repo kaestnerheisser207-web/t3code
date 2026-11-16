@@ -1,15 +1,9 @@
+import { formatDayShort, formatRelativeHourShort, formatUsd } from "./usageFormat.ts";
 // @effect-diagnostics globalDate:off -- A fixed instant keeps calendar-window assertions deterministic.
 import { describe, expect, it, vi } from "vite-plus/test";
 import type { UsageSource } from "@t3tools/contracts";
 
-import {
-  formatDayShort,
-  formatRelativeHourShort,
-  formatUsd,
-  formatHourShort,
-  makeWindow,
-  usageSourceMessages,
-} from "./usageFormat.ts";
+import { formatHourShort, formatTokens, makeWindow, usageSourceMessages } from "./usageFormat.ts";
 
 function malformedSource(count: number, overrides: Partial<UsageSource> = {}): UsageSource {
   return {
@@ -194,5 +188,13 @@ describe("hourly usage formatting", () => {
     } finally {
       resolvedOptions.mockRestore();
     }
+  });
+});
+
+describe("token formatting", () => {
+  it("moves to the next unit when rounding reaches it", () => {
+    expect(formatTokens(999_999)).toBe("1M");
+    expect(formatTokens(999_999_999)).toBe("1B");
+    expect(formatTokens(-999_999)).toBe("-1M");
   });
 });

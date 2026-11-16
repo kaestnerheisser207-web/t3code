@@ -1,3 +1,4 @@
+import { useTranslate } from "../../i18n";
 import {
   createElement,
   useCallback,
@@ -47,6 +48,12 @@ export interface NativeReviewDiffRow {
   readonly commentText?: string;
   readonly commentRangeLabel?: string;
   readonly commentSectionTitle?: string;
+  /** A notice drawn in the warning colors. */
+  readonly tone?: "warning";
+  /** A notice that reports taps through `onPressNotice`. */
+  readonly actionable?: boolean;
+  /** Where a cut line's note starts in `content`. */
+  readonly noteStart?: number;
 }
 
 export interface NativeReviewDiffWordDiffRange {
@@ -74,6 +81,8 @@ export interface NativeReviewDiffTheme {
   readonly deleteBar: string;
   readonly addText: string;
   readonly deleteText: string;
+  readonly warningText: string;
+  readonly warningBackground: string;
 }
 
 export interface NativeReviewDiffStyle {
@@ -151,6 +160,9 @@ export interface NativeReviewDiffViewProps extends ViewProps {
     }>,
   ) => void;
   readonly onToggleComment?: (event: NativeSyntheticEvent<{ readonly commentId?: string }>) => void;
+  readonly onPressNotice?: (
+    event: NativeSyntheticEvent<{ readonly rowId?: string; readonly fileId?: string }>,
+  ) => void;
 }
 
 export interface NativeReviewDiffViewHandle {
@@ -277,6 +289,7 @@ function getExpoViewConfig(moduleName: string) {
 }
 
 function NativeReviewDiffView(props: NativeReviewDiffViewProps) {
+  const t = useTranslate();
   const [failedRowsJson, setFailedRowsJson] = useState<string | null>(null);
   const onRowsFailure = useCallback(() => setFailedRowsJson(props.rowsJson), [props.rowsJson]);
   if (failedRowsJson !== null && failedRowsJson !== props.rowsJson) setFailedRowsJson(null);
@@ -295,8 +308,8 @@ function NativeReviewDiffView(props: NativeReviewDiffViewProps) {
         ],
       },
       createElement(EmptyState, {
-        title: "Could not display diff",
-        detail: "Try loading the diff view again.",
+        title: t("release4761.text029"),
+        detail: t("release4761.text030"),
         variant: "plain",
         actionLabel: "Retry diff",
         onAction: () => {

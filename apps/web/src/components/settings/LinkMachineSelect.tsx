@@ -1,13 +1,32 @@
 import { useTranslate } from "../../i18n";
-import type { LinkableMachine } from "@t3tools/client-runtime/link-request";
+import {
+  ANOTHER_ADDRESS,
+  type LinkableMachine,
+  linkDestination,
+} from "@t3tools/client-runtime/link-request";
 import { useId } from "react";
 
 import { EnvironmentMachineIcon } from "../EnvironmentMachineIcon";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Badge } from "../ui/badge";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../ui/select";
 
-/** The machine choice for linking by an address typed in. */
-export const ANOTHER_ADDRESS = "another-address";
+/**
+ * Shown wherever a link goes to an address this app does not already have for a
+ * machine, with where that address leads.
+ */
+export function LinkAddressWarning({ address }: { readonly address: string }) {
+  const t = useTranslate();
+  return (
+    <Alert variant="warning">
+      <AlertTitle>{t("release4761.text087")}</AlertTitle>
+      <AlertDescription>
+        {t("release4761.text088")}
+        <span className="block break-all">{linkDestination(address)}</span>
+      </AlertDescription>
+    </Alert>
+  );
+}
 
 /** Whether a machine is linked already, or how this app knows it when not connected to it. */
 export function LinkMachineBadge({ machine }: { readonly machine: LinkableMachine }) {

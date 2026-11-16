@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import { Trans } from "react-i18next";
 import { useTranslate } from "../i18n";
 import {
@@ -48,6 +49,7 @@ export interface ServerBrowserHandle {
   readonly navigate: (url: string) => void;
   readonly history: (delta: -1 | 1) => void;
   readonly reload: (options?: { readonly ignoreCache?: boolean }) => void;
+  readonly stopLoading: () => void;
   readonly viewport: (setting: PreviewViewportSetting) => void;
   readonly canvas: () => HTMLCanvasElement | null;
 }
@@ -112,7 +114,7 @@ async function copyPageText(text: string) {
   } catch {
     const id = toastManager.add({
       type: "info",
-      title: "The page copied text",
+      title: webI18n.t("release4761.text120"),
       actionProps: {
         children: "Copy",
         onClick: () => {
@@ -192,7 +194,7 @@ export function ServerBrowserSurface(props: {
     void uploadPreviewStreamFiles(chooser, files).catch((cause: unknown) =>
       toastManager.add({
         type: "error",
-        title: "Could not send the files to the page",
+        title: t("release4761.text121"),
         description: cause instanceof Error ? cause.message : undefined,
       }),
     );
@@ -314,6 +316,7 @@ export function ServerBrowserSurface(props: {
       history: (delta) => send({ type: "history", delta }),
       reload: (options) =>
         send({ type: "reload", ...(options?.ignoreCache ? { ignoreCache: true } : {}) }),
+      stopLoading: () => send({ type: "stopLoading" }),
       viewport: (setting) => send({ type: "viewport", setting }),
       canvas: () => (!pdfUrl && hasFrameRef.current ? canvasRef.current : null),
     }),

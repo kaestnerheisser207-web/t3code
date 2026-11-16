@@ -135,8 +135,10 @@ function KeybindingsSearchInput({
         onKeyDown={(event) => {
           if (event.key !== "Escape") return;
           event.preventDefault();
-          if (query.length > 0) onChange("");
-          else event.currentTarget.blur();
+          if (query.length > 0) {
+            event.stopPropagation();
+            onChange("");
+          } else event.currentTarget.blur();
         }}
         placeholder={t("settings.pages.KeybindingsSettings.search-keybindings")}
         aria-label={t("settings.pages.KeybindingsSettings.search-keybindings")}
@@ -515,8 +517,8 @@ function WhenExpressionNodeEditor({
             <SelectValue />
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} matchTriggerWidth={false}>
-            <SelectItem value="and">and</SelectItem>
-            <SelectItem value="or">or</SelectItem>
+            <SelectItem value={t("release4761.text298")}>{t("release4761.text298")}</SelectItem>
+            <SelectItem value={t("release4761.text299")}>{t("release4761.text299")}</SelectItem>
           </SelectContent>
         </Select>
         <Button type="button" variant="outline" size="compact" onClick={addCondition}>
@@ -604,7 +606,11 @@ function WhenExpressionBuilder({
       updateExpressionValue(defaultWhenCondition());
       return;
     }
-    updateExpressionValue({ type: "and", left: value, right: defaultWhenCondition() });
+    updateExpressionValue({
+      type: t("release4761.text298"),
+      left: value,
+      right: defaultWhenCondition(),
+    });
   };
 
   const addRootGroup = () => {
@@ -613,7 +619,7 @@ function WhenExpressionBuilder({
       updateExpressionValue(group);
       return;
     }
-    updateExpressionValue({ type: "and", left: value, right: group });
+    updateExpressionValue({ type: t("release4761.text298"), left: value, right: group });
   };
 
   return (

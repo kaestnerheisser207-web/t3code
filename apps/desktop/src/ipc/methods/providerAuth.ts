@@ -1,3 +1,4 @@
+import { desktopI18n } from "../../i18n.ts";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import * as Option from "effect/Option";
@@ -23,12 +24,16 @@ export const receiveProviderAuthCallback = DesktopIpc.makeIpcMethod({
     const context = yield* Effect.context<ElectronShell.ElectronShell>();
     const runPromise = Effect.runPromiseWith(context);
     const callbackUrl = yield* Effect.tryPromise({
-      try: () =>
-        receiveCodexAuthCallback(authorizationUrl, (url) => runPromise(shell.openExternal(url))),
+      try: (signal) =>
+        receiveCodexAuthCallback(
+          authorizationUrl,
+          (url) => runPromise(shell.openExternal(url)),
+          undefined,
+          signal,
+        ),
       catch: () =>
         new CodexAuthCallbackError({
-          detail:
-            "Could not receive ChatGPT sign-in on this computer. Try again or paste the redirect URL.",
+          detail: desktopI18n.t("release4761.text012"),
         }),
     });
     const window = yield* windows.currentMainOrFirst;
@@ -44,6 +49,6 @@ export const cancelProviderAuthCallback = DesktopIpc.makeIpcMethod({
   handler: (authorizationUrl) =>
     Effect.try({
       try: () => cancelCodexAuthCallback(authorizationUrl),
-      catch: () => new CodexAuthCallbackError({ detail: "Invalid ChatGPT sign-in request." }),
+      catch: () => new CodexAuthCallbackError({ detail: desktopI18n.t("release4761.text013") }),
     }),
 });

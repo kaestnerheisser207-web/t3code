@@ -1,3 +1,4 @@
+import { desktopI18n } from "../i18n.ts";
 import type { DesktopUpdateState } from "@t3tools/contracts";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -81,7 +82,7 @@ const actionLink = (action: StartupRecoveryAction, label: string, primary = fals
 function describeOffer(offer: StartupRecoveryOffer): { text: string; action: string } {
   switch (offer._tag) {
     case "Checking":
-      return { text: "Checking for a newer version…", action: "" };
+      return { text: desktopI18n.t("release4761.text004"), action: "" };
     case "Update":
       return {
         text: `Version ${offer.version} is available. It can contain a fix.`,
@@ -99,12 +100,12 @@ function describeOffer(offer: StartupRecoveryOffer): { text: string; action: str
       };
     case "Releases":
       return {
-        text: "Get a different version from the releases page.",
+        text: desktopI18n.t("release4761.text005"),
         action: actionLink("releases", "Open releases", true),
       };
     case "ManagedPolicy":
       return {
-        text: "Your organization's managed policy stopped T3 Code from starting. Send the details below to your IT administrator.",
+        text: desktopI18n.t("release4761.text006"),
         action: "",
       };
   }
@@ -217,7 +218,6 @@ export const listen: Effect.Effect<
           const download = yield* updates.download;
           if (!download.completed) return;
         }
-        // Waits for a running background check; plain install would refuse.
         yield* updates.installPrepared(current.version);
         return;
       }
@@ -268,7 +268,7 @@ export const listen: Effect.Effect<
           minWidth: 420,
           minHeight: 320,
           show: false,
-          title: "T3 Code could not start",
+          title: desktopI18n.t("release4761.text007"),
           autoHideMenuBar: true,
           backgroundColor: shouldUseDarkColors ? "#000000" : "#ffffff",
           webPreferences: {

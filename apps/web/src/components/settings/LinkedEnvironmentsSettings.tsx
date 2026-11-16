@@ -2,7 +2,7 @@ import { Trans } from "react-i18next";
 import { runtimeModeText } from "@t3tools/client-runtime/i18n";
 import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
-import { linkRequestFailureMessage } from "@t3tools/client-runtime/link-request";
+import { ANOTHER_ADDRESS, linkRequestFailureMessage } from "@t3tools/client-runtime/link-request";
 import {
   AuthAccessWriteScope,
   type AuthMcpClientAccess,
@@ -43,8 +43,9 @@ import { Input } from "../ui/input";
 import { stackedThreadToast, toastManager } from "../ui/toast";
 import { ITEM_ROW_CLASSNAME, ITEM_ROW_INNER_CLASSNAME } from "./itemRows";
 import { LinkAccessPicker } from "./LinkAccessPicker";
-import { ANOTHER_ADDRESS, LinkMachineSelect } from "./LinkMachineSelect";
+import { LinkAddressWarning, LinkMachineSelect } from "./LinkMachineSelect";
 import { SettingsRow, SettingsSection } from "./settingsLayout";
+import { useLiveRefresh } from "../../hooks/useLiveRefresh";
 import { useNowMinute } from "../../hooks/useNowMinute";
 import { searchableSetting } from "./settingsSearch";
 
@@ -62,6 +63,19 @@ export function LinkedEnvironmentsSettings({
 }) {
   const t = useTranslate();
   const links = useEnvironmentQuery(peerLinkEnvironment.list({ environmentId, input: {} }));
+  // Links made outside this client bump nothing the shared list reads, so showing the panel
+  // asks again. Listing probes every linked environment, too costly for a timer nobody asked for.
+  // A list still loading counts as read now, so the next return to the window asks again.
+  useLiveRefresh(
+    () => {
+      if (!links.isPending) links.refresh();
+    },
+    {
+      key: `linked-environments:${environmentId}`,
+      intervalMs: null,
+      refreshOnShow: true,
+    },
+  );
   const canLink = useAtomValue(peerLinkEnvironment.link.permissionAtom(environmentId));
   const search = searchableSetting("linked-environments", t);
   return (
@@ -114,9 +128,10 @@ function LinkedEnvironmentRow({
   const canUnlink = useAtomValue(peerLinkEnvironment.unlink.permissionAtom(environmentId));
   const [busy, setBusy] = useState(false);
   const forget = async () => {
-    const confirmed = await (requestConfirmDialog(t("link.forget", { environment: link.label }), {
-      variant: "destructive",
-    }) ?? Promise.resolve(false));
+    const confirmed = await (requestConfirmDialog(
+      `Forget ${link.label}? Agents here stop working there. Revoke "T3 Code · …" in ${link.label}'s Sharing & access to end the session there too.`,
+      { variant: "destructive" },
+    ) ?? Promise.resolve(false));
     if (!confirmed) return;
     setBusy(true);
     const result = await unlink({ environmentId, input: { environmentId: link.environmentId } });
@@ -197,14 +212,20 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
   const link = useAtomCommand(peerLinkEnvironment.link, { label: "link environment" });
   const selected = choice ?? (machines.length === 0 ? ANOTHER_ADDRESS : null);
   const machine = machines.find((candidate) => candidate.environmentId === selected) ?? null;
-  // This client can mint a code there when it is connected to that
-  // environment with a session that may create pairing links.
   const targetId = machine?.environmentId ?? null;
   const connected = usePreparedConnection(targetId);
   const mayMint = useEnvironmentScope(targetId, AuthAccessWriteScope);
+  // A picked machine that left the list has no address here either.
+  const needsAddress = selected !== null && (machine === null || machine.urls.length === 0);
+  // This client mints a code there when it is connected with a session that may
+  // create pairing links, and only for its own addresses: anything can answer
+  // as that machine at one typed in, so that one gets a code the user fetched.
   const canMint =
-    targetId !== null && Option.isSome(connected) && mayMint && !mintFailed.has(targetId);
-  const needsAddress = selected === ANOTHER_ADDRESS || machine?.urls.length === 0;
+    targetId !== null &&
+    !needsAddress &&
+    Option.isSome(connected) &&
+    mayMint &&
+    !mintFailed.has(targetId);
   const ready =
     selected !== null &&
     (!needsAddress || address.trim().length > 0) &&
@@ -243,7 +264,8 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
             input: {
               url,
               ...(alternateUrls.length > 0 ? { alternateUrls } : {}),
-              ...(machine === null
+              // A typed address links alone: only this app's own addresses name a machine.
+              ...(machine === null || needsAddress
                 ? {}
                 : { expectedEnvironmentId: machine.environmentId, expectedLabel: machine.label }),
               pairingCode: code,
@@ -281,11 +303,7 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
           <DialogTitle>
             {t("settings.pages.LinkedEnvironmentsSettings.link-an-environment")}
           </DialogTitle>
-          <DialogDescription>
-            {t(
-              "settings.pages.LinkedEnvironmentsSettings.agents-here-can-then-launch-message-and-wait-on-threads-there-it-appears-in-that-environment-s-connections-where-it-can-be-revoked",
-            )}
-          </DialogDescription>
+          <DialogDescription>{t("release4761.text304")}</DialogDescription>
         </DialogHeader>
         <DialogPanel>
           <form
@@ -341,6 +359,7 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
                 ) : null}
               </label>
             ) : null}
+            {needsAddress && address.trim() ? <LinkAddressWarning address={address} /> : null}
             {selected === null || canMint ? null : (
               <label className="block space-y-1.5">
                 <span className="block text-xs font-medium text-foreground">
@@ -351,9 +370,7 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
                   onChange={(event) => setPairingCode(event.target.value)}
                   placeholder={
                     machine === null
-                      ? t(
-                          "web.dynamic.LinkedEnvironmentsSettings.from-that-environment-s-connections-or-t3-pair-there",
-                        )
+                      ? "From Sharing & access there, or t3 pair"
                       : t("web.dynamic.LinkedEnvironmentsSettings.paste-the-code")
                   }
                   disabled={busy}
@@ -363,11 +380,8 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
                 />
                 {machine !== null ? (
                   <span className="block text-xs text-muted-foreground">
-                    <Trans
-                      t={t}
-                      i18nKey="web.rich.LinkedEnvironmentsSettings.create-a-link-on-part-settings-connections-create-link-then-paste-its-code-here"
-                      components={{ value0: <>{machine.label}</> }}
-                    />
+                    Create a link on {machine.label}: Settings → Sharing & access → Authorized
+                    clients → Create link, then paste its code here.
                   </span>
                 ) : null}
               </label>

@@ -48,7 +48,7 @@ export {
   usageAccessibilityLabel,
   usageText,
   usageWindowLabel,
-  usageResetCreditsSummary,
+  usageResetCreditChoices,
 } from "./usage.ts";
 
 export { sessionPermissionsText } from "./permissions.ts";

@@ -1,6 +1,12 @@
+import { ProviderInstanceId } from "@t3tools/contracts";
 import { expect, it } from "vite-plus/test";
 import { createI18n } from "./index.ts";
-import { usageText, usageWindowLabel, usageResetCreditsSummary } from "./usage.ts";
+import {
+  usageText,
+  usageWindowLabel,
+  usageResetCreditsSummary,
+  usageResetCreditChoices,
+} from "./usage.ts";
 
 it("localizes quota periods and durations while retaining model names and unknown diagnostics", () => {
   const zh = createI18n("zh-CN").t;
@@ -25,6 +31,11 @@ it("keeps reset credits separate from quota, including empty and expired summari
   const now = Date.parse("2026-10-31T12:00:00Z");
   const zh = createI18n("zh-CN").t;
   const credits = { availableCount: 2, nextExpiresAt: "2026-10-31T13:00:00Z" };
+  const input = { instanceId: ProviderInstanceId.make("claude-account") };
+  const [choice] = usageResetCreditChoices(zh, credits, input, now);
+  expect(choice).toMatchObject({ key: "next", availableCount: 2, input });
+  expect(choice?.summary).toBe(usageResetCreditsSummary(zh, credits, now));
+  expect(choice?.confirmDescription).toBe(zh("usageReview.reset-description"));
   expect(usageResetCreditsSummary(zh, { availableCount: 0 }, now)).toBe("尚未累积重置券");
   expect(usageResetCreditsSummary(zh, credits, now)).toBe(
     "已累积 2 张重置券 · 最近一张将于1小时 0分钟后过期",

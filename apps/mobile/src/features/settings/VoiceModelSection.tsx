@@ -30,7 +30,6 @@ import {
   voiceSpeechModelsAtom,
   voiceSpeechStatusAtom,
 } from "../voice-input/voiceDestination";
-import { SettingsSection } from "./components/SettingsSection";
 
 const isDownloading = (model: EnvironmentSpeechModel) =>
   model.state === "downloading" || model.state === "verifying";
@@ -278,51 +277,63 @@ export function VoiceModelRow(props: {
   );
 }
 
-export function VoiceModelSection(props: {
+/** The environment's local-model method: chosen by its mark, opens the model list. */
+export function LocalModelChoice(props: {
   readonly environmentId: EnvironmentId;
   readonly label: string;
+  readonly selected: boolean;
+  readonly onSelect: () => void;
 }) {
   const t = useTranslate();
   const navigation = useNavigation();
   const voice = useVoiceModels(props.environmentId, props.label);
   const { status } = voice;
-  if (!voice.connection || !status) return null;
-  const title = `Transcription model on ${props.label}`;
-  if (!status.supported) {
+  const open = () =>
+    navigation.navigate("SettingsVoiceModels", { environmentId: props.environmentId });
+  if (!voice.connection || !status || !status.supported)
     return (
-      <SettingsSection title={title} footer={status.reason}>
-        {null}
-      </SettingsSection>
+      <ListChoiceRow
+        label={t("release4761.text073")}
+        description={
+          !voice.connection
+            ? "Not available on this environment"
+            : status?.supported === false
+              ? status.reason
+              : "Checking…"
+        }
+        selected={props.selected}
+        disabled
+        onPress={() => {}}
+      />
     );
-  }
 
   const active = status.state === "missing-model" ? null : status;
   const pending = voice.models.find(isDownloading);
   const progress =
     pending?.downloaded === undefined ? undefined : pending.downloaded / pending.size;
   return (
-    <SettingsSection
-      title={title}
-      footer={voice.canManage ? undefined : t("release4491.text158", { value0: props.label })}
-    >
-      <ListRow
-        label={active?.model ?? t("release4262.no-model-selected")}
-        description={
-          pending
-            ? pending.state === "verifying"
-              ? t("release4491.text159", { value0: pending.name })
-              : t("release4491.text160", {
-                  value0: pending.name,
-                  value1: Math.round((progress ?? 0) * 100),
-                })
-            : active
-              ? formatBytes(active.size)
-              : t("release4262.choose-a-transcription-model-to-dictate-on-this-")
-        }
-        onPress={() =>
-          navigation.navigate("SettingsVoiceModels", { environmentId: props.environmentId })
-        }
-      />
-    </SettingsSection>
+    <ListRow
+      label={active?.model ?? "Local model"}
+      description={
+        pending
+          ? pending.state === "verifying"
+            ? t("release4491.text159", { value0: pending.name })
+            : t("release4491.text160", {
+                value0: pending.name,
+                value1: Math.round((progress ?? 0) * 100),
+              })
+          : active
+            ? `Local model · ${formatBytes(active.size)}`
+            : voice.canManage
+              ? "No model installed · Choose one to download"
+              : `No model installed · Add one using T3 Code on ${props.label}`
+      }
+      selected={props.selected}
+      onPress={() => {
+        if (!props.selected) props.onSelect();
+        // Switching to an installed model needs no further step.
+        if (props.selected || !active) open();
+      }}
+    />
   );
 }

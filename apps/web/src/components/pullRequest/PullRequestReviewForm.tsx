@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { useTranslate } from "../../i18n";
 import { useAtomCommand } from "~/state/use-atom-command";
 import { capitalizeTerm } from "@t3tools/client-runtime/source-control-clients";
@@ -32,19 +33,19 @@ const VERDICTS: ReadonlyArray<{
 }> = [
   {
     value: "comment",
-    label: "Comment",
+    label: webI18n.t("pr.review.comment"),
     sent: () => "Review submitted",
     icon: <MessageSquareIcon className="size-3" />,
   },
   {
     value: "approve",
-    label: "Approve",
+    label: webI18n.t("pr.review.approve"),
     sent: (term) => `${capitalizeTerm(term)} approved`,
     icon: <CheckIcon className="size-3" />,
   },
   {
     value: "request-changes",
-    label: "Request changes",
+    label: webI18n.t("pr.review.requestChanges"),
     sent: () => "Changes requested",
     icon: <XCircleIcon className="size-3" />,
   },
@@ -125,7 +126,7 @@ export function PullRequestReviewForm({
     if (result._tag === "Failure") {
       toastManager.add({
         type: "error",
-        title: "The review could not be submitted",
+        title: t("release4761.text266"),
         description: readableFailure(
           squashAtomCommandFailure(result),
           "The host refused the review. Your draft is still here to try again.",
@@ -179,9 +180,7 @@ export function PullRequestReviewForm({
         }}
       />
       <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
-        <div className="mr-auto flex min-w-0 flex-wrap items-center gap-1">
-          <TextFieldSpeechControls speech={speech} disabled={pending} />
-        </div>
+        <TextFieldSpeechControls speech={speech} disabled={pending} />
         {offered.length > 1 ? (
           <Select
             value={selectedVerdict?.value ?? null}

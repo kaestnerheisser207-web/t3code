@@ -1,3 +1,4 @@
+import { webI18n } from "../i18n";
 import { useTranslate } from "../i18n";
 import { Trans } from "react-i18next";
 import { type SlowRpcAckRequest, subscribeSlowRpcAckRequests } from "../rpc/requestLatencyState";
@@ -9,7 +10,7 @@ function describeSlowRequests(requests: ReadonlyArray<SlowRpcAckRequest>): strin
     Math.min(...requests.map((request) => request.thresholdMs)) / 1000,
   );
 
-  return `${count} request${count === 1 ? "" : "s"} waiting longer than ${thresholdSeconds}s.`;
+  return webI18n.t("release4761.slowCount", { count, seconds: thresholdSeconds });
 }
 
 function SlowRequestDetails({ requests }: { requests: ReadonlyArray<SlowRpcAckRequest> }) {
@@ -52,11 +53,14 @@ export function startSlowRpcRequestToasts(): () => void {
       data: {
         expandableContent: <SlowRequestDetails requests={slowRequests} />,
         expandableDescriptionTrigger: true,
-        expandableLabels: { collapse: "Hide requests", expand: "Show requests" },
+        expandableLabels: {
+          collapse: webI18n.t("release4761.hideRequests"),
+          expand: webI18n.t("release4761.showRequests"),
+        },
       },
       description: describeSlowRequests(slowRequests),
       timeout: 0,
-      title: "Some requests are slow",
+      title: webI18n.t("release4761.slowTitle"),
       type: "warning" as const,
     };
 

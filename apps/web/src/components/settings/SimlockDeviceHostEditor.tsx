@@ -150,7 +150,7 @@ export function SimlockDeviceHostEditor(props: {
           </DialogHeader>
           <DialogPanel>
             <label className="block space-y-1.5 text-sm">
-              <span>Name</span>
+              <span>{t("settings.pages.ProjectSettingsPanel.name")}</span>
               <Input
                 autoFocus
                 required
@@ -163,7 +163,7 @@ export function SimlockDeviceHostEditor(props: {
               />
             </label>
             <label className="block space-y-1.5 text-sm">
-              <span>Gateway URL</span>
+              <span>{t("release4761.text351")}</span>
               <Input
                 required
                 type="url"
@@ -214,7 +214,7 @@ export function SimlockDeviceHostEditor(props: {
               {limit("maxLeaseMinutes", "Lease minutes", 5, 240)}
             </div>
             <p className="text-xs text-muted-foreground">
-              A lease ends after the lease minutes even while in use.
+              {t("release4761.text360")}
               {props.isNew ? null : " Saving restarts this host, which releases its devices."}
             </p>
             {problem === null || !gatewayUrl ? null : (
@@ -225,10 +225,11 @@ export function SimlockDeviceHostEditor(props: {
           </DialogPanel>
           <DialogFooter>
             <Button type="button" variant="ghost" disabled={props.busy} onClick={props.onClose}>
-              Cancel
+              {t("release4340.cancel")}
             </Button>
             <Button type="submit" disabled={props.busy || problem !== null}>
-              {props.busy ? <Spinner size="xs" /> : null} Save host
+              {props.busy ? <Spinner size="xs" /> : null}
+              {t("release4761.text361")}
             </Button>
           </DialogFooter>
         </form>
@@ -280,7 +281,7 @@ function SimlockTokenField(props: {
   const identity = AsyncResult.isSuccess(check) ? check.value : null;
   const status =
     props.gatewayUrl === null ? null : check._tag === "Initial" || check.waiting ? (
-      <span className="text-muted-foreground">Checking…</span>
+      <span className="text-muted-foreground">{t("web.dynamic.SnapShotSetupDialog.checking")}</span>
     ) : identity ? (
       <span className="text-muted-foreground">
         {identity.tokenSource === "env"
@@ -304,6 +305,7 @@ function SimlockTokenField(props: {
           key={inputKey}
           id={id}
           aria-label={t("release4262.agent-token")}
+          environmentId={props.environmentId}
           className="min-w-0 flex-1"
           configured={props.token.kind === "saved" && typeof props.saved === "string"}
           value={
@@ -342,7 +344,7 @@ function SimlockTokenField(props: {
             type="button"
             size="icon-sm"
             variant="ghost-destructive"
-            aria-label="Clear agent token"
+            aria-label={t("release4761.text362")}
             disabled={props.busy}
             onClick={() => {
               props.onChange({ kind: "cleared" });

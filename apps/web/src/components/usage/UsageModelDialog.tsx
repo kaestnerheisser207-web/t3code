@@ -66,8 +66,8 @@ export function UsageModelDialog({
       value: costUnknown ? t("mobile.dynamic.UsageRouteScreen.unpriced") : formatUsd(model.costUsd),
     },
     { label: t("usage.tab.tokens"), value: formatTokens(model.totalTokens) },
-    perMillion === null ? null : { label: "Per 1M tokens", value: formatUsd(perMillion) },
-    hitRate === null ? null : { label: "Cache hit", value: formatPercent(hitRate) },
+    perMillion === null ? null : { label: t("release4761.text413"), value: formatUsd(perMillion) },
+    hitRate === null ? null : { label: t("release4761.text414"), value: formatPercent(hitRate) },
   ].filter((stat) => stat !== null);
 
   return (
@@ -98,14 +98,14 @@ export function UsageModelDialog({
         </DialogHeader>
         <DialogPanel>
           <div className="flex flex-col gap-8">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
               {stats.map((stat) => (
                 <div key={stat.label} className="flex min-w-0 flex-col gap-0.5">
-                  <span className="text-xs text-muted-foreground">{stat.label}</span>
-                  <span className="text-2xl font-semibold text-foreground">{stat.value}</span>
+                  <dt className="text-xs text-muted-foreground">{stat.label}</dt>
+                  <dd className="text-2xl font-semibold text-foreground">{stat.value}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
 
             {/* Unpriced cost is unknown, not zero, so its trend shows tokens. */}
             <UsageProviderChart

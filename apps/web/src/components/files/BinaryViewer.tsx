@@ -1,4 +1,3 @@
-import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 /* oxlint-disable react/no-array-index-key -- Read-only cells retain their database row and column positions. */
 import {
@@ -37,6 +36,9 @@ type Archive = Extract<BinaryWorkerResult, { type: "archive" }>;
 type Database = Extract<BinaryWorkerResult, { type: "sqlite" }>;
 type Rows = Extract<BinaryWorkerResult, { type: "rows" }>;
 
+const countLabel = (count: number, one: string, many: string) =>
+  `${count.toLocaleString()} ${count === 1 ? one : many}`;
+
 function ArchiveFile(props: { readonly path: string; readonly bytes: Uint8Array<ArrayBuffer> }) {
   const t = useTranslate();
   const [url, setUrl] = useState<string | null>(null);
@@ -64,10 +66,7 @@ function ArchiveFile(props: { readonly path: string; readonly bytes: Uint8Array<
   }, [props.bytes, props.path, kind]);
   if (kind === "image")
     return url ? <PreviewImage key={url} src={url} name={props.path} /> : <FileSurfaceLoading />;
-  if (!text)
-    return (
-      <FileSurfaceFailure message="Only UTF-8 text and images can be opened inside an archive." />
-    );
+  if (!text) return <FileSurfaceFailure message={t("release4761.text238")} />;
   return (
     <>
       {text.truncated ? (
@@ -220,10 +219,7 @@ export default function BinaryViewer(props: {
             {selectedPath ?? (folder || t("web.dynamic.BinaryViewer.archive-contents"))}
           </span>
           <span className="shrink-0 text-muted-foreground">
-            {t("counts.archiveEntries", {
-              count: archive.entries.length,
-              formattedCount: archive.entries.length.toLocaleString(),
-            })}
+            {countLabel(archive.entries.length, "entry", "entries")}
             {sizeBytes !== null ? ` · ${formatAttachmentSize(sizeBytes)}` : ""}
           </span>
         </div>
@@ -245,20 +241,13 @@ export default function BinaryViewer(props: {
                   size="xs"
                 >
                   <SelectValue>
-                    {table.name} ({table.count.toLocaleString()} rows)
+                    {table.name} ({countLabel(table.count, "row", "rows")})
                   </SelectValue>
                 </SelectTrigger>
                 <SelectPopup>
                   {database.tables.map((item) => (
                     <SelectItem key={item.name} value={item.name}>
-                      <Trans
-                        t={t}
-                        i18nKey="web.rich.BinaryViewer.part-part-rows"
-                        components={{
-                          value0: <>{item.name}</>,
-                          value1: <>{item.count.toLocaleString()}</>,
-                        }}
-                      />
+                      {item.name} ({countLabel(item.count, "row", "rows")})
                     </SelectItem>
                   ))}
                 </SelectPopup>
@@ -292,10 +281,8 @@ export default function BinaryViewer(props: {
             className="border-b border-border/60 px-3 py-2 text-xs text-muted-foreground tabular-nums"
             role="status"
           >
-            {t("files.preview.rowsColumns", {
-              rows: table.count.toLocaleString(),
-              columns: rows?.columns.length ?? "…",
-            })}
+            {countLabel(table.count, "row", "rows")} ·{" "}
+            {rows ? countLabel(rows.columns.length, "column", "columns") : "… columns"}
             {sizeBytes !== null ? ` · ${formatAttachmentSize(sizeBytes)}` : ""}
           </div>
           <FileSurfaceNotice>

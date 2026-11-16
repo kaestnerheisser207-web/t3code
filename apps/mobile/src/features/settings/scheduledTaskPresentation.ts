@@ -1,9 +1,10 @@
+import { mobileI18n } from "../../i18n";
 import type { TFunction } from "i18next";
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-export function formatScheduledTaskInterval(everyMs: number, t: TFunction): string {
+export function formatScheduledTaskInterval(everyMs: number, t: TFunction = mobileI18n.t): string {
   const units = [
     [7 * DAY, "week"],
     [DAY, "day"],
@@ -31,8 +32,8 @@ function localCalendarDay(date: Date): number {
 export function formatNextScheduledTaskRun(
   nextRunAt: string,
   now: number,
-  t: TFunction,
-  locale: string,
+  t: TFunction = mobileI18n.t,
+  locale: string = mobileI18n.resolvedLanguage ?? "en",
 ): string {
   const next = new Date(nextRunAt);
   const current = new Date(now);
@@ -43,8 +44,9 @@ export function formatNextScheduledTaskRun(
   const days = localCalendarDay(next) - localCalendarDay(current);
   if (days === 0) {
     if (remaining < MINUTE) return t("schedule.nextSoon");
-    const unit = remaining < HOUR ? "minute" : "hour";
-    const count = Math.round(remaining / (remaining < HOUR ? MINUTE : HOUR));
+    const minutes = Math.round(remaining / MINUTE);
+    const unit = minutes < 60 ? "minute" : "hour";
+    const count = minutes < 60 ? minutes : Math.round(remaining / HOUR);
     return t(unit === "minute" ? "schedule.nextMinutes" : "schedule.nextHours", { count });
   }
 

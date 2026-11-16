@@ -1,3 +1,4 @@
+import { mobileI18n } from "../../i18n";
 import type { TFunction } from "i18next";
 import { sourceControlTerm } from "@t3tools/client-runtime/i18n";
 import {
@@ -29,12 +30,22 @@ type ActionDetail = Pick<
 };
 
 const MERGE_METHODS = {
-  squash: { title: "Squash and merge", description: "Combine the commits into one commit." },
-  merge: {
-    title: "Create a merge commit",
-    description: "Keep the commits and add a merge commit.",
+  squash: {
+    title: mobileI18n.t("pr.method.squash"),
+    description: mobileI18n.t("pr.method.squashHint"),
   },
-  rebase: { title: "Rebase and merge", description: "Add the commits without a merge commit." },
+  merge: {
+    title: mobileI18n.t("pr.method.merge"),
+    description: mobileI18n.t("pr.method.mergeHint"),
+  },
+  rebase: {
+    title: mobileI18n.t("pr.method.rebase"),
+    description: mobileI18n.t("pr.method.rebaseHint"),
+  },
+  "fast-forward": {
+    title: mobileI18n.t("release4761.text038"),
+    description: mobileI18n.t("release4761.text039"),
+  },
 } as const satisfies Record<PullRequestMergeMethod, { title: string; description: string }>;
 
 export function mergeMethodPresentation(method: PullRequestMergeMethod, t?: TFunction) {
@@ -105,6 +116,20 @@ export const PR_ACTION_ICONS = {
 
 export function allowedMergeMethods(pr: ActionDetail) {
   return pr.capabilities.mergeMethods.filter((method) => pr.mergeCapabilities[method]);
+}
+
+export function resolveMergeMethod(
+  pr: ActionDetail,
+  selected: PullRequestMergeMethod | null,
+  projectDefault: PullRequestMergeMethod | null,
+  lastUsed: PullRequestMergeMethod | undefined,
+) {
+  const methods = allowedMergeMethods(pr);
+  return (
+    [selected, projectDefault, lastUsed, "squash" as const].find(
+      (method) => method != null && methods.includes(method),
+    ) ?? methods[0]
+  );
 }
 
 export function allowedUpdateMethods(pr: ActionDetail) {

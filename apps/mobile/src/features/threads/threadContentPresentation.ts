@@ -1,4 +1,6 @@
+import { mobileI18n } from "../../i18n";
 import { type EnvironmentConnectionPhase } from "@t3tools/client-runtime/connection";
+import type { EnvironmentThreadStatus } from "@t3tools/client-runtime/state/threads";
 
 export type ThreadContentPresentation =
   | { readonly kind: "ready" }
@@ -21,14 +23,14 @@ export function projectThreadContentPresentation(input: {
   if (input.detailDeleted) {
     return {
       kind: "unavailable",
-      title: "Thread unavailable",
-      detail: "This thread was deleted or is no longer available.",
+      title: mobileI18n.t("mobile.tools.ThreadTerminalRouteScreen.thread-unavailable"),
+      detail: mobileI18n.t("release4761.text108"),
     };
   }
   if (input.detailError !== null) {
     return {
       kind: "unavailable",
-      title: "Could not load conversation",
+      title: mobileI18n.t("release4761.text109"),
       detail: input.detailError,
     };
   }
@@ -41,7 +43,16 @@ export function projectThreadContentPresentation(input: {
   }
   return {
     kind: "unavailable",
-    title: "Messages not cached",
-    detail: "Reconnect this environment to load the conversation.",
+    title: mobileI18n.t("release4761.text110"),
+    detail: mobileI18n.t("release4761.text111"),
   };
+}
+
+export function threadSyncStatusLabel(
+  status: EnvironmentThreadStatus,
+  presentation: ThreadContentPresentation["kind"],
+): string | null {
+  if (status !== "empty" && status !== "cached" && status !== "synchronizing") return null;
+  if (presentation === "ready") return "Syncing messages…";
+  return presentation === "loading" ? "Loading messages…" : null;
 }

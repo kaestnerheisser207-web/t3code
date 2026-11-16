@@ -1,3 +1,4 @@
+import { mobileI18n } from "../../i18n";
 import { useTranslate } from "../../i18n";
 import { findErrorTraceId } from "@t3tools/client-runtime/errors";
 import {
@@ -8,7 +9,8 @@ import type { MenuAction } from "@react-native-menu/menu";
 import type { EnvironmentId } from "@t3tools/contracts";
 import type { RelayClientEnvironmentRecord } from "@t3tools/contracts/relay";
 import { type ReactNode, useRef, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { RefreshControl } from "../../components/ui/RefreshControl";
 
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { SymbolView } from "../../components/ui/AppSymbol";
@@ -101,10 +103,10 @@ export function T3ConnectProfilePage() {
       traceId
         ? [
             {
-              text: "Copy trace ID",
+              text: t("web.dynamic.DiagnosticsSettings.copy-trace-id"),
               onPress: () => copyTextWithHaptic(traceId, { target: "connection-trace-id" }),
             },
-            { text: "OK", style: "cancel" },
+            { text: t("desktop.updates.ok"), style: "cancel" },
           ]
         : undefined,
     );
@@ -221,7 +223,12 @@ export function T3ConnectProfilePage() {
 }
 
 const ENVIRONMENT_MENU_ACTIONS = [
-  { id: "deregister", title: "Deregister", image: "trash", attributes: { destructive: true } },
+  {
+    id: "deregister",
+    title: mobileI18n.t("web.dynamic.T3ConnectUserProfilePage.deregister"),
+    image: "trash",
+    attributes: { destructive: true },
+  },
 ] satisfies MenuAction[];
 
 function ClerkSectionHeader(props: { readonly children: string }) {

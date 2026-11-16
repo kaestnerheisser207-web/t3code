@@ -1,3 +1,4 @@
+import { release4761ZhCN } from "./release4761.zh-CN.ts";
 import { release4491ZhCN } from "./release4491.zh-CN.ts";
 import { release4340ZhCN } from "./release4340.zh-CN.ts";
 import { release4262ZhCN } from "./release4262.zh-CN.ts";
@@ -136,6 +137,7 @@ import { wizardZhCN } from "./wizard.zh-CN.ts";
 import type { en } from "./en.ts";
 
 export const zhCN = {
+  ...release4761ZhCN,
   ...release4491ZhCN,
   ...release4066ZhCN,
   ...release4262ZhCN,

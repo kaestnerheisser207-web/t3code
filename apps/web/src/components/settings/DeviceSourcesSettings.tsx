@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { useTranslate } from "../../i18n";
 import { useAtomValue } from "@effect/atom-react";
 import { Fragment, useState, type ReactNode } from "react";
@@ -85,7 +86,7 @@ interface SourceRow {
   readonly description: ReactNode;
   readonly environments: ReadonlyArray<SourceEnvironment>;
   /**
-   * One machine or account every environment reaches the same way (an SSH host, EAS, a Simlock
+   * One machine or account every environment reaches the same way (an SSH host, Expo, a Simlock
    * pool), so its platforms are the same for all of them. Local simulators differ per machine.
    */
   readonly shared: boolean;
@@ -114,7 +115,8 @@ function hostStatus(
   state: DeviceServiceState | undefined,
   hostId: string,
 ): SourceStatus | undefined {
-  if (!state) return { tone: "pending", label: "Loading" };
+  if (!state)
+    return { tone: "pending", label: webI18n.t("mobile.dynamic.ThreadArrangementSheet.loading") };
   const status = state.hostStatuses[hostId];
   switch (status?.status) {
     case "ready": {
@@ -125,9 +127,9 @@ function hostStatus(
     }
     case "installing":
     case "starting":
-      return { tone: "pending", label: "Starting", detail: status.detail };
+      return { tone: "pending", label: webI18n.t("activity.starting"), detail: status.detail };
     case "failed":
-      return { tone: "error", label: "Failed", detail: status.detail };
+      return { tone: "error", label: webI18n.t("lifecycle.failed"), detail: status.detail };
     default:
       return undefined;
   }
@@ -240,7 +242,7 @@ export function DeviceSourcesSettings(props: {
     } catch (error) {
       toastManager.add({
         type: "error",
-        title: "Device host not saved",
+        title: t("release4761.text284"),
         description: error instanceof Error ? error.message : String(error),
       });
     }
@@ -264,7 +266,7 @@ export function DeviceSourcesSettings(props: {
           ),
         },
       })),
-      remove ? "EAS host not removed everywhere" : "EAS host not saved everywhere",
+      remove ? "Expo host not removed everywhere" : "Expo host not saved everywhere",
     );
     if (saved) setEditing(null);
   };
@@ -423,7 +425,7 @@ export function DeviceSourcesSettings(props: {
         if (!held)
           return { environmentId: member.environmentId, label: member.label, added: false };
         const status = testing.has(host.id)
-          ? ({ tone: "pending", label: "Testing connection" } as const)
+          ? ({ tone: "pending", label: t("release4761.text285") } as const)
           : hostStatus(member.state, held.host.id);
         return {
           environmentId: member.environmentId,
@@ -434,7 +436,7 @@ export function DeviceSourcesSettings(props: {
             status?.tone === "error" && member.state?.supportsHostRetry
               ? {
                   ...status,
-                  label: "Can't connect",
+                  label: t("release4761.text286"),
                   action: {
                     label: t("mobile.common.MediaVideoPlayer.retry"),
                     run: () => retry(member.environmentId, held.host.id),
@@ -472,7 +474,7 @@ export function DeviceSourcesSettings(props: {
         key: `eas:${host.id}`,
         shared: true,
         title: host.label,
-        kind: "EAS",
+        kind: "Expo",
         description: easSessionLimits(host),
         environments: active.map((member) => {
           const added = (member.settings?.easDeviceHosts ?? []).some(
@@ -536,7 +538,8 @@ export function DeviceSourcesSettings(props: {
       <MenuTrigger
         render={<Button size="sm" variant="outline" disabled={disabled || editing !== null} />}
       >
-        <PlusIcon className="size-3.5" /> Add source
+        <PlusIcon className="size-3.5" />
+        {t("release4761.text287")}
         <ChevronDownIcon className="size-3.5" />
       </MenuTrigger>
       <MenuPopup align="end">
@@ -563,7 +566,7 @@ export function DeviceSourcesSettings(props: {
               })
             }
           >
-            {t("settings.pages.EasDeviceHostsSettings.eas-simulator")}
+            Expo Simulators
           </MenuItem>
         ) : null}
         {props.supportsSimlock && simlockEnabled ? (

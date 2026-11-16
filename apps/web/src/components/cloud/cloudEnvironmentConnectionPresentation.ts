@@ -29,8 +29,8 @@ export function presentSavedCloudEnvironmentConnection(
       };
     case "reconnecting":
       return {
-        buttonLabel: t?.("connection.reconnecting") ?? "Reconnecting…",
-        statusText: connectionStatusText(connection, t),
+        buttonLabel: connection.awaitingApproval ? "Waiting for approval…" : "Reconnecting…",
+        statusText: connectionStatusText(connection),
         tone: "connecting",
       };
     case "unsupported":

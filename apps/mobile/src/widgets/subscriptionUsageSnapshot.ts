@@ -1,7 +1,9 @@
+import { mobileI18n } from "../i18n";
 import {
   collectLimitAccounts,
   collectLimitPools,
   type LimitAccount,
+  type LimitPoolWindow,
   type LimitPresentations,
 } from "@t3tools/shared/usageLimits";
 
@@ -52,6 +54,10 @@ export function createWidgetRefresher<Id>(refresh: (id: Id) => Promise<unknown>)
   };
 }
 
+// A reset at or before its account's observation already happened, so it cannot expire the snapshot.
+const isUpcoming = (reset: LimitPoolWindow["resets"][number]) =>
+  reset.at > Date.parse(reset.member.account.limits.checkedAt);
+
 function subscriptionUsageProps(
   accounts: readonly LimitAccount[],
   now: number,
@@ -75,7 +81,7 @@ function subscriptionUsageProps(
         if (!pool)
           return {
             name,
-            detail: "No limits available",
+            detail: mobileI18n.t("release4761.text118"),
             windows: [],
             expiresAt: 0,
             totalWindows: 0,
@@ -83,7 +89,9 @@ function subscriptionUsageProps(
         const checkedAt = Math.min(...pool.accounts.map((a) => Date.parse(a.limits.checkedAt)));
         const expiresAt = Math.min(
           checkedAt + SNAPSHOT_MAX_AGE,
-          ...pool.windows.flatMap((window) => window.resets.map((reset) => reset.at)),
+          ...pool.windows.flatMap((window) =>
+            window.resets.filter(isUpcoming).map((reset) => reset.at),
+          ),
         );
         const fresh = Number.isFinite(expiresAt) && expiresAt > now;
         const sortedWindows = [...pool.windows].sort(
@@ -116,7 +124,9 @@ function subscriptionUsageProps(
                 remaining: Math.round(window.remainingPercent),
                 ...(window.resets[0] ? { resetAt: window.resets[0].at } : {}),
                 reset: window.resets[0]
-                  ? `Next reset ${new Date(window.resets[0].at).toLocaleString(undefined, {
+                  ? `${isUpcoming(window.resets[0]) ? "Next reset" : "Reset"} ${new Date(
+                      window.resets[0].at,
+                    ).toLocaleString(undefined, {
                       month: "short",
                       day: "numeric",
                       hour: "numeric",
@@ -169,7 +179,12 @@ export function subscriptionUsageTimeline(snapshot: SubscriptionUsageSnapshot, n
       ...snapshot,
       providers: snapshot.providers.map((provider) =>
         provider.windows.length > 0 && provider.expiresAt <= date
-          ? { ...provider, detail: "Open T3 to refresh", windows: [], totalWindows: 0 }
+          ? {
+              ...provider,
+              detail: mobileI18n.t("release4761.text119"),
+              windows: [],
+              totalWindows: 0,
+            }
           : provider,
       ),
     },

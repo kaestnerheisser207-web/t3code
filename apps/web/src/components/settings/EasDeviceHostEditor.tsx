@@ -177,11 +177,7 @@ export function EasDeviceHostEditor(props: {
           }}
         >
           <DialogHeader>
-            <DialogTitle>
-              {props.isNew
-                ? t("web.dynamic.EasDeviceHostsSettings.add-eas-host")
-                : t("web.dynamic.EasDeviceHostsSettings.edit-eas-host")}
-            </DialogTitle>
+            <DialogTitle>{props.isNew ? "Add Expo host" : "Edit Expo host"}</DialogTitle>
             <DialogDescription>
               {t(
                 "settings.pages.EasDeviceHostsSettings.the-environment-s-server-signs-in-to-expo-and-starts-the-sessions-without-a-token-here-it-uses-expo-token-then-its-eas-login",
@@ -221,6 +217,7 @@ export function EasDeviceHostEditor(props: {
                         : ""
                   }
                   sources={secretSources}
+                  environmentId={props.environmentId}
                   onValidityChange={(valid) => {
                     setTokenValid(valid);
                     resetAccount();
@@ -295,7 +292,7 @@ export function EasDeviceHostEditor(props: {
               </Button>
             </div>
             <div className="space-y-1.5 text-sm">
-              <span>{t("settings.pages.EasDeviceHostsSettings.eas-project")}</span>
+              <span>Expo project</span>
               <Select
                 value={draft.appId ?? FROM_THREAD_PROJECT}
                 disabled={props.busy}
@@ -307,10 +304,7 @@ export function EasDeviceHostEditor(props: {
                   });
                 }}
               >
-                <SelectTrigger
-                  size="sm"
-                  aria-label={t("settings.pages.EasDeviceHostsSettings.eas-project")}
-                >
+                <SelectTrigger size="sm" aria-label="Expo project">
                   <SelectValue>
                     {(value: string) =>
                       value === FROM_THREAD_PROJECT
@@ -345,21 +339,8 @@ export function EasDeviceHostEditor(props: {
               {limit("idleMinutes", "Idle minutes", 60)}
             </div>
             <p className="text-xs text-muted-foreground">
-              <Trans
-                t={t}
-                i18nKey="web.rich.EasDeviceHostsSettings.expo-allows-sessions-of-up-to-40-minutes-on-free-accounts-and-115-on-paid-ones-and-ends-one-after-the-idle-minutes-without-activity-so-idle-minutes-must-be-smaller-than-session-minutes-part"
-                components={{
-                  value0: (
-                    <>
-                      {props.isNew
-                        ? null
-                        : t(
-                            "web.dynamic.EasDeviceHostsSettings.saving-restarts-this-host-which-stops-its-running-sessions",
-                          )}
-                    </>
-                  ),
-                }}
-              />
+              {t("release4761.text295")}
+              {props.isNew ? null : " Saving restarts this host and stops its running sessions."}
             </p>
             {problem === null ? null : (
               <p className="text-xs text-destructive" role="alert">

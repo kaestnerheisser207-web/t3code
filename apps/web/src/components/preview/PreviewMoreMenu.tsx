@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import type { DesktopPreviewColorScheme } from "@t3tools/contracts";
@@ -8,6 +9,7 @@ import {
   Menu,
   MenuItem,
   MenuPopup,
+  MenuShortcut,
   MenuRadioGroup,
   MenuRadioItem,
   MenuGroup,
@@ -24,9 +26,9 @@ const COLOR_SCHEME_OPTIONS: ReadonlyArray<{
   value: DesktopPreviewColorScheme;
   label: string;
 }> = [
-  { value: "system", label: "System" },
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
+  { value: "system", label: webI18n.t("web.dynamic.ThemeSettings.system") },
+  { value: "light", label: webI18n.t("web.dynamic.ThemeEditorPanel.light") },
+  { value: "dark", label: webI18n.t("web.dynamic.ThemeEditorPanel.dark") },
 ];
 
 export interface PreviewMoreMenuActions {
@@ -39,6 +41,7 @@ export interface PreviewMoreMenuActions {
   readonly clearCache: () => void;
   readonly openDevTools?: () => void;
   readonly toggleNativePictureInPicture?: () => void;
+  readonly find?: () => void;
 }
 
 interface Props {
@@ -50,6 +53,7 @@ interface Props {
   onToggleDeviceToolbar: () => void;
   nativePictureInPicture: boolean;
   profileName: string | undefined;
+  findShortcutLabel?: string | null;
   move?: { readonly label: string; readonly onMove: () => void };
 }
 
@@ -87,6 +91,7 @@ export function PreviewMoreMenu({
   onToggleDeviceToolbar,
   nativePictureInPicture,
   profileName,
+  findShortcutLabel,
   move,
 }: Props) {
   const t = useTranslate();
@@ -96,6 +101,12 @@ export function PreviewMoreMenu({
     <Menu>
       <MenuTriggerButton />
       <MenuPopup align="end" sideOffset={6}>
+        {actions.find ? (
+          <MenuItem onClick={actions.find} disabled={disabled}>
+            {t("release4761.text250")}
+            {findShortcutLabel ? <MenuShortcut>{findShortcutLabel}</MenuShortcut> : null}
+          </MenuItem>
+        ) : null}
         <MenuItem onClick={actions.hardReload} disabled={disabled}>
           {t("web.ui.PreviewMoreMenu.hard-reload")}
         </MenuItem>

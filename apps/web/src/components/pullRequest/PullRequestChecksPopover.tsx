@@ -1,4 +1,3 @@
-import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import type * as React from "react";
 import type {
@@ -197,24 +196,15 @@ export function PullRequestChecksPopover({
         {variant === "count" ? (
           <>
             {checks !== undefined && incompleteCount > 0 ? (
-              <span className="tabular-nums">
-                <Trans
-                  t={t}
-                  i18nKey="web.rich.PullRequestChecksPopover.part-part-checks"
-                  components={{
-                    value0: <>{checks.length - incompleteCount}</>,
-                    value1: <>{checks.length}</>,
-                  }}
-                />
+              // Clip the second line so "checks" disappears whole when the count must shrink.
+              <span className="h-lh min-w-0 overflow-hidden text-left whitespace-normal tabular-nums">
+                <span className="whitespace-nowrap">
+                  {checks.length - incompleteCount}/{checks.length}
+                </span>{" "}
+                checks
               </span>
             ) : failedCount > 0 ? (
-              <span className="tabular-nums">
-                <Trans
-                  t={t}
-                  i18nKey="web.rich.PullRequestChecksPopover.part-failed"
-                  components={{ value0: <>{failedCount}</> }}
-                />
-              </span>
+              <span className="min-w-0 truncate tabular-nums">{failedCount} failed</span>
             ) : null}
           </>
         ) : null}

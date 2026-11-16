@@ -1,10 +1,11 @@
+import { useTranslate } from "../i18n";
 import { scopeProjectRef } from "@t3tools/client-runtime/environment";
 import {
   type AtomCommandResult,
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
 } from "@t3tools/client-runtime/state/runtime";
-import { type EnvironmentId, TRIAGE_PROMPT_FILE_NAME } from "@t3tools/contracts";
+import type { EnvironmentId } from "@t3tools/contracts";
 import { useRouter } from "@tanstack/react-router";
 
 import { stackedThreadToast, toastManager } from "~/components/ui/toast";
@@ -26,9 +27,6 @@ const copyTriageCliCommand = () =>
     }),
   );
 
-/** A draft is a triage draft while its message still links the playbook file. */
-export const isTriagePrompt = (prompt: string) => prompt.includes(`[${TRIAGE_PROMPT_FILE_NAME}](`);
-
 /**
  * In-app `t3 triage`: the server writes the session files and starts cloning
  * the matching source, then a No project draft opens with the playbook linked.
@@ -36,6 +34,7 @@ export const isTriagePrompt = (prompt: string) => prompt.includes(`[${TRIAGE_PRO
  * the problem.
  */
 export function useStartTriage() {
+  const t = useTranslate();
   const router = useRouter();
   const { scratchWorkspaceRootFor } = useScratchProject();
   const handleNewThread = useNewThreadHandler();
@@ -47,7 +46,7 @@ export function useStartTriage() {
     toastManager.add(
       stackedThreadToast({
         type: "error",
-        title: "Could not start triage",
+        title: t("release4761.text425"),
         description: `${description} Run ${TRIAGE_CLI_COMMAND} in a terminal on that machine instead.`,
         timeout: 0,
         actionProps: { children: "Copy command", onClick: () => void copyTriageCliCommand() },
@@ -92,7 +91,7 @@ export function useStartTriage() {
     const pendingTimer = setTimeout(() => {
       pendingToastId = toastManager.add({
         type: "loading",
-        title: "Starting triage…",
+        title: t("release4761.text426"),
         timeout: 0,
       });
     }, 400);

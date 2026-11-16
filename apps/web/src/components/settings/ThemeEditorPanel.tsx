@@ -1,8 +1,16 @@
+import { useTranslate } from "../../i18n";
 import type { TFunction } from "i18next";
 import type { TranslationKey } from "@t3tools/client-runtime/i18n";
-import { useTranslate } from "../../i18n";
-import { MousePointer2Icon, PaintbrushIcon, PlusIcon, XIcon } from "lucide-react";
-import { ChevronDown, ChevronUp } from "lucide";
+import { webI18n } from "../../i18n";
+import {
+  MousePointer2Icon,
+  PaintbrushIcon,
+  PlusIcon,
+  XIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+} from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   applyThemeColorPreview,
@@ -28,12 +36,12 @@ import {
 import { useViewportSize } from "../../hooks/useViewportSize";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
-import { MorphIcon } from "~/components/MorphIcon";
 import { Input } from "../ui/input";
 import { Switch } from "../ui/switch";
 import { Toggle, ToggleGroup } from "../ui/toggle-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { getThemeRoleLabel, ThemeColorField } from "./ThemeColorPicker";
+import { ThemeCssEditor } from "./ThemeCssEditor";
 import {
   clearThemeInspectorHover,
   clearThemeInspectorHighlights,
@@ -61,36 +69,41 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
 }> = [
   {
     id: "foundation",
-    title: "Foundation",
+    title: webI18n.t("settings.extraUi.ThemeEditorPanel.foundation"),
     families: [
       {
         id: "background",
-        label: "Background",
+        label: webI18n.t("theme.role.canvas"),
         role: "canvas",
         roles: ["canvas", "chrome", "toolbar"],
       },
-      { id: "surface", label: "Surface", role: "surface", roles: ["surface"] },
+      {
+        id: "surface",
+        label: webI18n.t("theme.role.surface"),
+        role: "surface",
+        roles: ["surface"],
+      },
       {
         id: "raised-surface",
-        label: "Raised surface",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.raised-surface"),
         role: "surfaceRaised",
         roles: ["surfaceRaised"],
       },
       {
         id: "overlay",
-        label: "Overlay",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.overlay"),
         role: "surfaceOverlay",
         roles: ["surfaceOverlay"],
       },
       {
         id: "text",
-        label: "Text",
+        label: webI18n.t("theme.role.text"),
         role: "text",
         roles: ["text", "toolbarForeground", "toolbarControlForeground"],
       },
       {
         id: "muted-text",
-        label: "Muted text",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.muted-text"),
         role: "mutedForeground",
         roles: [
           "textMuted",
@@ -103,32 +116,32 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
       },
       {
         id: "border",
-        label: "Border",
+        label: webI18n.t("theme.role.border"),
         role: "border",
         roles: ["border", "toolbarBorder", "sidebarBorder"],
       },
-      { id: "input", label: "Input", role: "input", roles: ["input"] },
+      { id: "input", label: webI18n.t("usage.chart.input"), role: "input", roles: ["input"] },
     ],
   },
   {
     id: "brand-content",
-    title: "Brand & content",
+    title: webI18n.t("settings.extraUi.ThemeEditorPanel.brand-content"),
     families: [
       {
         id: "subtle-surface",
-        label: "Subtle surface",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.subtle-surface"),
         role: "secondary",
         roles: ["secondary", "secondaryForeground", "muted", "toolbarControl"],
       },
       {
         id: "highlight-surface",
-        label: "Highlight surface",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.highlight-surface"),
         role: "accentSurface",
         roles: ["accentSurface", "accentSurfaceForeground", "toolbarControlHover"],
       },
       {
         id: "accent",
-        label: "Accent",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.accent"),
         role: "accent",
         roles: [
           "accent",
@@ -142,19 +155,19 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
       },
       {
         id: "action",
-        label: "Action",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.action"),
         role: "messageAction",
         roles: ["messageAction", "messageActionForeground", "messageActionHover"],
       },
       {
         id: "message-surface",
-        label: "Message surface",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.message-surface"),
         role: "messageSurface",
         roles: ["messageSurface", "messageForeground"],
       },
       {
         id: "code-surface",
-        label: "Code surface",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.code-surface"),
         role: "codeBackground",
         roles: ["codeBackground", "codeForeground"],
       },
@@ -162,17 +175,17 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
   },
   {
     id: "search",
-    title: "Search",
+    title: webI18n.t("settings.extraUi.ThemeEditorPanel.search"),
     families: [
       {
         id: "search-matches",
-        label: "Search matches",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.search-matches"),
         role: "searchMatchBackground",
         roles: ["searchMatchBackground", "searchMatchForeground"],
       },
       {
         id: "current-match",
-        label: "Current match",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.current-match"),
         role: "searchMatchActiveBackground",
         roles: ["searchMatchActiveBackground", "searchMatchActiveForeground"],
       },
@@ -180,29 +193,29 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
   },
   {
     id: "context",
-    title: "Context",
+    title: webI18n.t("release3904.usage-context"),
     families: [
       {
         id: "sidebar-background",
-        label: "Sidebar background",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-background"),
         role: "sidebar",
         roles: ["sidebar", "sidebarForeground"],
       },
       {
         id: "sidebar-controls",
-        label: "Sidebar controls",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-controls"),
         role: "sidebarControlSurface",
         roles: ["sidebarControlSurface"],
       },
       {
         id: "sidebar-selection",
-        label: "Sidebar selection",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-selection"),
         role: "sidebarRowSelected",
         roles: ["sidebarRowHover", "sidebarRowActive", "sidebarRowSelected"],
       },
       {
         id: "terminal-background",
-        label: "Terminal background",
+        label: webI18n.t("settings.extraUi.ThemeEditorPanel.terminal-background"),
         role: "terminalBackground",
         roles: [
           "terminalBackground",
@@ -216,17 +229,17 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
   },
   {
     id: "status",
-    title: "Status",
+    title: webI18n.t("settings.extraUi.ThemeEditorPanel.status"),
     families: [
       {
         id: "error",
-        label: "Error",
+        label: webI18n.t("connection.diagnosis.error"),
         role: "error",
         roles: ["error", "errorForeground", "errorSurface"],
       },
       {
         id: "warning",
-        label: "Warning",
+        label: webI18n.t("theme.role.warning"),
         role: "warning",
         roles: ["warning", "warningForeground", "warningSurface"],
       },
@@ -386,6 +399,8 @@ export function ThemeEditorPanel({
     Record<ThemeAppearance, boolean>
   >({ light: false, dark: false });
   const [shouldRegenerateGuidedColors, setShouldRegenerateGuidedColors] = useState(false);
+  const [css, setCss] = useState("");
+  const [cssOpen, setCssOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [roleQuery, setRoleQuery] = useState("");
@@ -438,6 +453,8 @@ export function ThemeEditorPanel({
       setSimpleColorsDirtyByAppearance({ light: false, dark: false });
       setShouldRegenerateGuidedColors(sourceTheme !== null && sourceTheme.managed !== true);
       setColorsByAppearance(nextColors);
+      setCss(sourceTheme?.css ?? "");
+      setCssOpen(Boolean(sourceTheme?.css));
       setSelectedRole(null);
       setUsageCount(null);
       setIsInspecting(false);
@@ -456,6 +473,8 @@ export function ThemeEditorPanel({
             (theme.id === nameTargetId || theme.label.trim().toLowerCase() === normalizedName),
         ) ?? null);
   const takenAppearances = mergeTarget ? getThemeModes(mergeTarget) : [];
+  // A merge keeps the target's CSS when this draft has none.
+  const cssForSave = css.trim() ? css : (mergeTarget?.css ?? "");
   const editableAppearances = editingTheme ? getThemeModes(editingTheme) : null;
 
   const appearanceLockReason = (appearance: ThemeAppearance): string | null => {
@@ -491,8 +510,8 @@ export function ThemeEditorPanel({
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- applies the edited colors to the document as a live theme preview while the editor is open
   useEffect(() => {
     if (!open) return;
-    applyThemeColorPreview(colorsByAppearance[activeAppearance], activeAppearance);
-  }, [activeAppearance, colorsByAppearance, open]);
+    applyThemeColorPreview(colorsByAppearance[activeAppearance], activeAppearance, cssForSave);
+  }, [activeAppearance, colorsByAppearance, cssForSave, open]);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- restores the document theme when the editor closes or unmounts
   useEffect(() => {
@@ -729,7 +748,9 @@ export function ThemeEditorPanel({
     };
     const cancelInspection = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      // Esc leaves inspection only; Settings must not see it and close too.
       event.preventDefault();
+      event.stopImmediatePropagation();
       clearHover();
       clearInspectorSelection();
     };
@@ -802,6 +823,13 @@ export function ThemeEditorPanel({
       return;
     }
 
+    if (mergeTarget?.css && css.trim() && mergeTarget.css !== css) {
+      setError(
+        `“${mergeTarget.label}” has different custom CSS. Use the same CSS or pick another name.`,
+      );
+      return;
+    }
+
     try {
       const colorsForSave = !isAdvanced
         ? {
@@ -842,6 +870,7 @@ export function ThemeEditorPanel({
               ...Object.fromEntries(editedModes.map((mode) => [mode, colorsForSave[mode]])),
             },
             ...(mergeTarget.managed === true && !isAdvanced ? { managed: true } : {}),
+            ...(cssForSave ? { css: cssForSave } : {}),
           }),
           ...(mergeTarget.collection ? { collection: mergeTarget.collection } : {}),
         });
@@ -861,6 +890,7 @@ export function ThemeEditorPanel({
               ? { variants: { [variantAppearance]: colorsForSave[variantAppearance] } }
               : {}),
             ...(isAdvanced ? {} : { managed: true }),
+            ...(cssForSave ? { css: cssForSave } : {}),
           }),
           ...(editingTheme.collection ? { collection: editingTheme.collection } : {}),
         });
@@ -882,6 +912,7 @@ export function ThemeEditorPanel({
               [activeAppearance]: colorsForSave[activeAppearance],
             },
             ...(mergeTarget.managed === true && !isAdvanced ? { managed: true } : {}),
+            ...(cssForSave ? { css: cssForSave } : {}),
           }),
           ...(mergeTarget.collection ? { collection: mergeTarget.collection } : {}),
         });
@@ -893,6 +924,7 @@ export function ThemeEditorPanel({
             appearance: activeAppearance,
             colors: colorsForSave[activeAppearance],
             ...(isAdvanced ? {} : { managed: true }),
+            ...(cssForSave ? { css: cssForSave } : {}),
           }),
         );
       }
@@ -1196,6 +1228,13 @@ export function ThemeEditorPanel({
         isMinimized && "max-h-none",
       )}
       data-theme-editor-panel
+      onKeyDown={(event) => {
+        // Popups opened from the editor are portaled outside it and handle their own Esc.
+        if (event.key !== "Escape" || event.defaultPrevented) return;
+        if (!event.currentTarget.contains(event.target as Node)) return;
+        event.stopPropagation();
+        onOpenChange(false);
+      }}
       ref={panelRef}
       role="dialog"
       style={{
@@ -1278,7 +1317,7 @@ export function ThemeEditorPanel({
           variant="ghost"
           onClick={() => setIsMinimized(!isMinimized)}
         >
-          <MorphIcon icon={isMinimized ? ChevronUp : ChevronDown} />
+          {isMinimized ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </Button>
         <Button
           aria-label={t("settings.pages.ThemeEditorPanel.close-the-theme-editor")}
@@ -1303,6 +1342,23 @@ export function ThemeEditorPanel({
             <div className="space-y-3">
               {renderColorsHeader()}
               {renderColorFields()}
+            </div>
+            <div className="space-y-2">
+              <Button
+                aria-expanded={cssOpen}
+                size="xs"
+                variant="ghost"
+                onClick={() => setCssOpen(!cssOpen)}
+              >
+                {cssOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                {t("release4761.text368")}
+              </Button>
+              {cssOpen ? (
+                <>
+                  <p className="text-xs text-muted-foreground">{t("release4761.text374")}</p>
+                  <ThemeCssEditor value={css} onChange={setCss} />
+                </>
+              ) : null}
             </div>
           </div>
           <div className="flex items-center justify-end gap-2 border-t border-border/70 px-3 py-2">

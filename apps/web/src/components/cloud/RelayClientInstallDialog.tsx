@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { Trans } from "react-i18next";
 import { useTranslate } from "../../i18n";
 import { DownloadIcon } from "lucide-react";
@@ -14,6 +15,7 @@ import { Button } from "../ui/button";
 import {
   Dialog,
   DialogDescription,
+  DialogAction,
   DialogFooter,
   DialogHeader,
   DialogPanel,
@@ -24,13 +26,13 @@ const installSteps: ReadonlyArray<{
   readonly stage: RelayClientInstallProgressStage;
   readonly label: string;
 }> = [
-  { stage: "checking", label: "Checking current installation" },
-  { stage: "waiting_for_lock", label: "Waiting for installer" },
-  { stage: "downloading", label: "Downloading relay client" },
-  { stage: "verifying", label: "Verifying download" },
-  { stage: "installing", label: "Installing relay client" },
-  { stage: "validating", label: "Validating executable" },
-  { stage: "activating", label: "Activating installation" },
+  { stage: "checking", label: webI18n.t("relay.stage.checking") },
+  { stage: "waiting_for_lock", label: webI18n.t("relay.stage.waiting_for_lock") },
+  { stage: "downloading", label: webI18n.t("relay.stage.downloading") },
+  { stage: "verifying", label: webI18n.t("relay.stage.verifying") },
+  { stage: "installing", label: webI18n.t("relay.stage.installing") },
+  { stage: "validating", label: webI18n.t("relay.stage.validating") },
+  { stage: "activating", label: webI18n.t("relay.stage.activating") },
 ];
 
 export function RelayClientInstallDialog() {
@@ -135,9 +137,9 @@ export function RelayClientInstallDialog() {
             >
               {t("web.ui.RelayClientInstallDialog.cancel")}
             </Button>
-            <Button onClick={() => respondToRelayClientInstallConfirmation(true)}>
+            <DialogAction onClick={() => respondToRelayClientInstallConfirmation(true)}>
               {t("web.ui.RelayClientInstallDialog.download-and-install")}
-            </Button>
+            </DialogAction>
           </DialogFooter>
         ) : null}
       </DialogPopup>

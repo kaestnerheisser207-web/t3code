@@ -183,12 +183,7 @@ export function ProjectActionsSettings() {
         }
       />
       {mixed ? (
-        <SettingsRow
-          title={t("settings.pages.ProjectActionsSettings.different-actions-across-environments")}
-          description={t(
-            "settings.pages.ProjectActionsSettings.choose-one-environment-to-edit-its-list-adding-an-action-here-adds-it-on-every-selected-environment",
-          )}
-        />
+        <SettingsRow title={t("release4761.text310")} description={t("release4761.text311")} />
       ) : (
         <ProjectActionsList
           scripts={scripts}

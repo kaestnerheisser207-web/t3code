@@ -35,6 +35,7 @@ import {
   MenuSubPopup,
   MenuTrigger,
 } from "../ui/menu";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import {
   AntigravityIcon,
   CursorIcon,
@@ -287,17 +288,22 @@ export const OpenInPicker = memo(function OpenInPicker({
   const backgroundThread = use(BackgroundThreadContext);
   const options = resolveOpenInOptions(navigator.platform, effectiveEditors);
   const primaryOption = options.find(({ value }) => value === preferredEditor) ?? null;
-  const primaryLabel = isPanel ? `Open in ${primaryOption?.label ?? "editor"}` : "Open";
+  const primaryLabel = isPanel
+    ? t("ui.finish.openIn", { editor: primaryOption?.label ?? t("release4761.editor") })
+    : t("activity.open");
+
+  const unavailableReason =
+    remote.mode === "remote-unavailable"
+      ? t("release4761.noSshRoute", { environment: environmentLabel })
+      : remote.mode === "remote-links" && options.length === 0
+        ? t("release4761.openFromComputer", { environment: environmentLabel })
+        : null;
 
   const editorItems = (
     <>
-      {remote.mode === "remote-unavailable" ? (
+      {unavailableReason !== null ? (
         <MenuItem density={presentation === "menu" ? "touch" : "default"} disabled>
-          <Trans
-            t={t}
-            i18nKey="web.rich.OpenInPicker.no-ssh-route-to-part"
-            components={{ value0: <>{environmentLabel}</> }}
-          />
+          {unavailableReason}
         </MenuItem>
       ) : (
         <>
@@ -367,6 +373,52 @@ export const OpenInPicker = memo(function OpenInPicker({
     );
   }
 
+  const primaryControlLabel = compact
+    ? t("web.dynamic.OpenInPicker.open-file-in-preferred-editor")
+    : primaryLabel;
+  const primaryControl = (
+    <ThreadDetailsControl
+      aria-label={primaryControlLabel}
+      // Tooltip replaces the button data-slot, so toolbar theming needs a separate hook.
+      data-toolbar-control=""
+      size={isPanel ? "sm" : "xs"}
+      variant={isPanel ? "ghost" : "outline"}
+      part="primary"
+      panel={isPanel}
+      disabled={!preferredEditor || !openInCwd || !canOpenEditor}
+      {...(enableShortcut && !backgroundThread ? { [OPEN_FAVORITE_EDITOR_ATTRIBUTE]: "" } : {})}
+      onClick={() => {
+        if (!preferredEditor) return;
+        const label = editorLabelForPlatform(preferredEditor, navigator.platform);
+        void openInEditor(preferredEditor).then((opened) => {
+          if (opened) announce(`Opened in ${label}`);
+        });
+      }}
+    >
+      {primaryOption?.Icon ? (
+        <primaryOption.Icon
+          aria-hidden="true"
+          className={cn(
+            isPanel ? THREAD_DETAILS_PANEL_ICON_CLASS : "size-3.5",
+            getOpenInIconClass(primaryOption.kind),
+          )}
+        />
+      ) : isPanel ? (
+        <SquareArrowOutUpRightIcon aria-hidden="true" className={THREAD_DETAILS_PANEL_ICON_CLASS} />
+      ) : null}
+      <span
+        className={cn(
+          compact
+            ? "sr-only"
+            : "sr-only @3xl/header-actions:not-sr-only @3xl/header-actions:ml-0.5",
+          isPanel && cn("not-sr-only ml-0 min-w-0 truncate", THREAD_DETAILS_PANEL_LABEL_CLASS),
+        )}
+      >
+        {primaryLabel}
+      </span>
+    </ThreadDetailsControl>
+  );
+
   return (
     <ActionGroup
       aria-label={t("web.ui.OpenInPicker.open-in-editor")}
@@ -375,72 +427,41 @@ export const OpenInPicker = memo(function OpenInPicker({
         ? { className: THREAD_DETAILS_PANEL_SPLIT_GROUP_CLASS, ref: panelAnchorRef }
         : {})}
     >
-      <ThreadDetailsControl
-        aria-label={
-          compact ? t("web.dynamic.OpenInPicker.open-file-in-preferred-editor") : primaryLabel
-        }
-        size={isPanel ? "sm" : "xs"}
-        variant={isPanel ? "ghost" : "outline"}
-        part="primary"
-        panel={isPanel}
-        disabled={!preferredEditor || !openInCwd || !canOpenEditor}
-        {...(enableShortcut && !backgroundThread ? { [OPEN_FAVORITE_EDITOR_ATTRIBUTE]: "" } : {})}
-        onClick={() => {
-          if (!preferredEditor) return;
-          const label = editorLabelForPlatform(preferredEditor, navigator.platform);
-          void openInEditor(preferredEditor).then((opened) => {
-            if (opened) announce(`Opened in ${label}`);
-          });
-        }}
-      >
-        {primaryOption?.Icon ? (
-          <primaryOption.Icon
-            aria-hidden="true"
-            className={cn(
-              isPanel ? THREAD_DETAILS_PANEL_ICON_CLASS : "size-3.5",
-              getOpenInIconClass(primaryOption.kind),
-            )}
-          />
-        ) : isPanel ? (
-          <SquareArrowOutUpRightIcon
-            aria-hidden="true"
-            className={THREAD_DETAILS_PANEL_ICON_CLASS}
-          />
-        ) : null}
-        <span
-          className={cn(
-            compact
-              ? "sr-only"
-              : "sr-only @3xl/header-actions:not-sr-only @3xl/header-actions:ml-0.5",
-            isPanel && cn("not-sr-only ml-0 min-w-0 truncate", THREAD_DETAILS_PANEL_LABEL_CLASS),
-          )}
-        >
-          {primaryLabel}
-        </span>
-      </ThreadDetailsControl>
+      <Tooltip>
+        <TooltipTrigger render={primaryControl} />
+        <TooltipPopup side="top">{primaryControlLabel}</TooltipPopup>
+      </Tooltip>
       {isPanel ? (
         <span aria-hidden="true" className={THREAD_DETAILS_PANEL_SPLIT_SEPARATOR_CLASS} />
       ) : (
         <GroupSeparator {...(!compact ? { className: "hidden @3xl/header-actions:block" } : {})} />
       )}
       <Menu open={menuOpen} onOpenChange={setMenuOpen}>
-        <MenuTrigger
-          disabled={isHostEditorDenied}
-          render={
-            <ThreadDetailsControl
-              aria-label={t("web.ui.OpenInPicker.choose-editor")}
-              size={isPanel ? "sm" : "icon-xs"}
-              variant={isPanel ? "ghost" : "outline"}
-              part="secondary"
-              panel={isPanel}
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <MenuTrigger
+                disabled={isHostEditorDenied}
+                render={
+                  <ThreadDetailsControl
+                    aria-label={t("web.ui.OpenInPicker.choose-editor")}
+                    data-toolbar-control=""
+                    size={isPanel ? "sm" : "icon-xs"}
+                    variant={isPanel ? "ghost" : "outline"}
+                    part="secondary"
+                    panel={isPanel}
+                  />
+                }
+              />
+            }
+          >
+            <ChevronDownIcon
+              aria-hidden="true"
+              className={isPanel ? THREAD_DETAILS_PANEL_CHEVRON_CLASS : "size-4"}
             />
-          }
-        >
-          <ChevronDownIcon
-            aria-hidden="true"
-            className={isPanel ? THREAD_DETAILS_PANEL_CHEVRON_CLASS : "size-4"}
-          />
-        </MenuTrigger>
+          </TooltipTrigger>
+          <TooltipPopup side="top">{t("web.ui.OpenInPicker.choose-editor")}</TooltipPopup>
+        </Tooltip>
         <MenuPopup
           align="end"
           {...(isPanel ? { anchor: panelAnchorRef } : {})}

@@ -73,11 +73,8 @@ describe("searchSettings", () => {
     expect(searchSettings("文件夹会话显示两行", localized)[0]?.id).toBe("boring-sidebar-multiline");
     expect(searchSettings("Interface language", localized)[0]?.id).toBe("interface-language");
     expect(searchSettings("中文", localized)[0]?.to).toBe("/settings/general");
-    expect(
-      searchSettings("常规", localizeSettingsSearchItems(ITEMS, i18n.getFixedT("zh-CN"))).map(
-        (item) => item.id,
-      ),
-    ).toContain("word-wrap");
+    const spanish = (message: string) => (message === "Word wrap" ? "Ajuste de línea" : message);
+    expect(searchSettings("ajuste", ITEMS, spanish).map((item) => item.id)).toEqual(["word-wrap"]);
     for (const query of ["fallback", "fallback agent", "fallback model"]) {
       expect(searchSettings(query)[0]).toMatchObject({
         id: "fallback-model",
@@ -90,6 +87,13 @@ describe("searchSettings", () => {
   it("hides the Secrets page from nav and search while the secrets feature is disabled", () => {
     expect(SETTINGS_NAV_GROUPS.flatMap((group) => group.paths)).not.toContain("/settings/secrets");
     expect(searchSettings("1password").map((item) => item.to)).not.toContain("/settings/secrets");
+  });
+
+  it("finds the Scheduled tasks page", () => {
+    expect(searchSettings("scheduled tasks")[0]).toMatchObject({
+      id: "scheduled-tasks",
+      to: "/settings/scheduled-tasks",
+    });
   });
 
   it("matches normalized title substrings", () => {

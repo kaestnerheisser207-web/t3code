@@ -89,7 +89,7 @@ export function BackgroundWorkDetails(props: {
                         props.onOpenThread(childThreadId);
                       }}
                     >
-                      {t("mobile.threads.ThreadFeed.open-thread")}
+                      {t("web.ui.TimelineWorkEntryRow.open-subagent")}
                     </InlineButton>
                   ) : null}
                 </section>

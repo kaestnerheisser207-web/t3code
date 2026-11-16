@@ -13,7 +13,6 @@ import {
   RelayConnectionTarget,
   type SupervisorConnectionState,
 } from "./model.ts";
-import { createI18n } from "../i18n/index.ts";
 import {
   connectionStatusText,
   connectionStatusTitle,
@@ -161,19 +160,28 @@ describe("connection presentation", () => {
       error: "Disconnected.",
       traceId: "trace-1",
     });
-    const state = {
-      phase: "reconnecting" as const,
-      error: "Socket <closed> {{raw}}",
-      traceId: "trace-1",
-    };
-    const t = createI18n("zh-CN").t;
-    expect(connectionStatusTitle(state, t)).toBe(t("connection.retryFailed"));
-    expect(connectionStatusText(state, t)).toBe(
-      t("connection.retryReason", { reason: state.error }),
+    const awaitingApproval = presentConnectionState(
+      supervisorState({
+        phase: "backoff",
+        attempt: 1,
+        retryAt: 1,
+        lastFailure: new ConnectionTransientError({
+          reason: "approval-pending",
+          detail: "Approve this device on Mac mini. It shows code K7QM-2XFD.",
+          traceId: "trace-2",
+        }),
+      }),
     );
-    expect(connectionStatusText(state, t)).toContain("Socket <closed> {{raw}}");
-    expect(state.error).toBe("Socket <closed> {{raw}}");
-    expect(state.traceId).toBe("trace-1");
+    expect(awaitingApproval).toEqual({
+      phase: "reconnecting",
+      error: "Approve this device on Mac mini. It shows code K7QM-2XFD.",
+      traceId: "trace-2",
+      awaitingApproval: true,
+    });
+    expect(connectionStatusText(awaitingApproval)).toBe(
+      "Approve this device on Mac mini. It shows code K7QM-2XFD.",
+    );
+    expect(connectionStatusTitle(awaitingApproval)).toBe("Waiting for approval");
   });
 
   it("preserves an explicitly available environment while offline", () => {

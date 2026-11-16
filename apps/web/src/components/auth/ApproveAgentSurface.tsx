@@ -14,6 +14,7 @@ import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "rea
 import { isElectron } from "../../env";
 import { runConnectMcpApproval } from "../../state/connectMcpApproval";
 import { resolveClerkSignInProps } from "../clerk/authRedirect";
+import { retryClerkLoad, useClerkLoadFailed } from "../clerk/clerkLoadFailure";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
 import { StandalonePage, StandalonePageHeader } from "../ui/standalone-page";
@@ -88,6 +89,7 @@ export function ApproveAgentSurface() {
   );
   const clerk = useClerk();
   const { isLoaded, isSignedIn } = useAuth();
+  const loadFailed = useClerkLoadFailed();
   const session = useAtomValue(managedRelaySessionAtom);
   const signInOpened = useRef(false);
 
@@ -115,6 +117,18 @@ export function ApproveAgentSurface() {
 
   if (framed) {
     return <Message title={t("release4491.text320")} description={t("release4491.text321")} />;
+  }
+
+  if (loadFailed) {
+    return (
+      <Message title={t("release4761.text145")} description={t("release4761.text146")}>
+        <div className="mt-6">
+          <Button type="button" onClick={retryClerkLoad}>
+            {t("web.dynamic.ProviderAuthenticationSection.retry-sign-in")}
+          </Button>
+        </div>
+      </Message>
+    );
   }
 
   if (!isLoaded || (isSignedIn && session === null)) {

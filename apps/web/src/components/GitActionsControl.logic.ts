@@ -1,7 +1,10 @@
+import { getSourceControlPresentation } from "../sourceControlPresentation";
+import { webI18n } from "../i18n";
 import type { TFunction } from "i18next";
 import type {
   GitRunStackedActionResult,
   GitStackedAction,
+  ReviewDiffPreviewSource,
   VcsStatusResult,
 } from "@t3tools/contracts";
 import { isTemporaryWorktreeBranch } from "@t3tools/shared/git";
@@ -180,6 +183,81 @@ export function buildMenuItems(
       dialogAction: "create_pr",
     },
   ];
+}
+
+export function getMenuActionDisabledReason(
+  {
+    item,
+    gitStatus,
+    isBusy,
+    hasPrimaryRemote,
+  }: {
+    item: GitActionMenuItem;
+    gitStatus: VcsStatusResult | null;
+    isBusy: boolean;
+    hasPrimaryRemote: boolean;
+  },
+  t: TFunction = webI18n.t,
+): string | null {
+  if (!item.disabled) return null;
+  if (isBusy) return t("git.unavailable.busy");
+  if (!gitStatus) return t("git.unavailable.status");
+
+  const hasBranch = gitStatus.refName !== null;
+  const hasChanges = gitStatus.hasWorkingTreeChanges;
+  const isAhead = gitStatus.aheadCount > 0;
+  const isBehind = gitStatus.behindCount > 0;
+  const terminology = getSourceControlPresentation(gitStatus.sourceControlProvider, t).terminology;
+
+  if (item.id === "commit") {
+    if (!hasChanges) {
+      return t("git.unavailable.clean");
+    }
+    return t("git.unavailable.commit");
+  }
+
+  if (item.id === "push") {
+    if (!hasBranch) {
+      return t("git.unavailable.detachedPush");
+    }
+    if (isBehind) {
+      return t("git.unavailable.behindPush");
+    }
+    if (!gitStatus.hasUpstream && !hasPrimaryRemote) {
+      return t("git.unavailable.remotePush");
+    }
+    if (!isAhead) {
+      return t("git.unavailable.noCommitsPush");
+    }
+    return t("git.unavailable.push");
+  }
+
+  if (!hasBranch) {
+    return t("git.unavailable.detachedRequest", { kind: terminology.singular });
+  }
+  if (!gitStatus.hasUpstream && !hasPrimaryRemote) {
+    return t("git.unavailable.remoteRequest", { kind: terminology.singular });
+  }
+  if ((gitStatus.aheadOfDefaultCount ?? gitStatus.aheadCount) <= 0) {
+    return t("git.unavailable.noCommitsRequest", { kind: terminology.singular });
+  }
+  if (isBehind) {
+    return t("git.unavailable.behindRequest", { kind: terminology.singular });
+  }
+  return t("git.unavailable.request", { kind: terminology.singular });
+}
+
+export function hasUsableGitMenuContent(input: {
+  readonly menuItems: readonly GitActionMenuItem[];
+  readonly canWriteSourceControl: boolean;
+  readonly canPublishRepository: boolean;
+  readonly hasNotice: boolean;
+}): boolean {
+  return (
+    input.canPublishRepository ||
+    input.hasNotice ||
+    (input.canWriteSourceControl && input.menuItems.some((item) => !item.disabled))
+  );
 }
 
 export function resolveQuickAction(
@@ -437,20 +515,23 @@ export function resolveDefaultBranchActionDialogCopy(
   };
 }
 
-/** Clean trees cannot create feature branches because the server derives names from uncommitted changes. */
-export function resolveFeatureBranchUnavailableReason(
-  input: {
-    branchName: string;
-    hasWorkingTreeChanges: boolean;
-  },
-  t?: TFunction,
-): string | null {
-  if (input.hasWorkingTreeChanges) return null;
-  return (
-    t?.("git.default.noFeature", { branch: input.branchName }) ??
-    t?.("git.default.noFeature", { branch: input.branchName }) ??
-    `There are no changes to commit, so a feature branch can't be named. Create a branch yourself or continue on ${input.branchName}.`
-  );
+/** The server names a feature branch from the commit it makes, so the action must commit changes. */
+export function resolveFeatureBranchUnavailableReason(input: {
+  action: DefaultBranchConfirmableAction;
+  branchName: string;
+  hasWorkingTreeChanges: boolean;
+}): string | null {
+  if (!input.hasWorkingTreeChanges) {
+    return (
+      webI18n.t?.("git.default.noFeature", { branch: input.branchName }) ??
+      webI18n.t?.("git.default.noFeature", { branch: input.branchName }) ??
+      `There are no changes to commit, so a feature branch can't be named. Create a branch yourself or continue on ${input.branchName}.`
+    );
+  }
+  if (input.action === "push" || input.action === "create_pr") {
+    return `This action doesn't commit your changes, so a feature branch can't be named. Create a branch yourself or continue on ${input.branchName}.`;
+  }
+  return null;
 }
 
 export function resolveThreadBranchUpdate(
@@ -514,9 +595,21 @@ export type ChangesLineTotals = {
 
 // `branchChanges ?? workingTree` treats `{0,0}` as present, so a zero branch total hid a dirty
 // working tree and the Changes row read +0 while Diff still showed the work.
+// The Diff panel's branch comparison wins when it has file stats, so a remembered base or
+// hidden whitespace reads the same in the row as in the panel.
 export function resolveChangesTotals(
   status: VcsStatusResult | null | undefined,
+  branchPreview?: ReviewDiffPreviewSource | null,
 ): ChangesLineTotals | null {
+  if (branchPreview?.files) {
+    let insertions = 0;
+    let deletions = 0;
+    for (const file of branchPreview.files) {
+      insertions += file.additions;
+      deletions += file.deletions;
+    }
+    return { insertions, deletions, baseRef: branchPreview.baseRef };
+  }
   if (!status) return null;
   const branch = status.branchChanges;
   const tree = { ...status.workingTree, baseRef: null };

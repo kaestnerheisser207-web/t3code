@@ -1,5 +1,29 @@
+import { webI18n } from "../../i18n";
 import type { EnvironmentId, ThreadContextRecord } from "@t3tools/contracts";
 import { collectInlineContextIds } from "../../lib/composerContextReferences";
+import type { ComposerThreadDraftState } from "../../composerDraftStore";
+
+/** Compare immutable user content without copying image bytes or upload metadata. */
+export function composerDraftContentChanged(
+  before: ComposerThreadDraftState | null,
+  after: ComposerThreadDraftState | null,
+): boolean {
+  if (before === after) return false;
+  if (!before || !after) return true;
+  const sameIds = (left: ReadonlyArray<{ id: string }>, right: ReadonlyArray<{ id: string }>) =>
+    left.length === right.length && left.every((item, index) => item.id === right[index]?.id);
+  return (
+    before.prompt !== after.prompt ||
+    !sameIds(before.images, after.images) ||
+    !sameIds(before.files, after.files) ||
+    before.terminalContexts !== after.terminalContexts ||
+    before.previewAnnotations !== after.previewAnnotations ||
+    before.reviewComments !== after.reviewComments ||
+    before.threadContexts !== after.threadContexts ||
+    before.environmentContexts !== after.environmentContexts ||
+    before.replyTo !== after.replyTo
+  );
+}
 
 /** Attached threads the prompt still links to; replacing linked text leaves stale records. */
 export function referencedThreadContexts(draft: {
@@ -19,8 +43,8 @@ export function loadBalancingSendWarning(input: {
 }) {
   if (input.pending) {
     return {
-      title: "Checking machine resources",
-      description: "Resource checks are still running. You can choose a machine in the composer.",
+      title: webI18n.t("release4761.text193"),
+      description: webI18n.t("release4761.text194"),
     };
   }
   const noMachineReadsEveryThread =
@@ -29,7 +53,7 @@ export function loadBalancingSendWarning(input: {
       input.threadContexts.every((record) => record.environmentId === environmentId),
     );
   return {
-    title: "Choose a machine to continue",
+    title: webI18n.t("release4761.text195"),
     description: noMachineReadsEveryThread
       ? "No machine can read every attached thread. Choose a machine in the composer or remove the threads."
       : "No eligible machine has available resources. Choose a machine in the composer to override.",

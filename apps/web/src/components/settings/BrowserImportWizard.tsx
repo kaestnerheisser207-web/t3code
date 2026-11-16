@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogClose,
   DialogDescription,
+  DialogAction,
   DialogFooter,
   DialogHeader,
   DialogPanel,
@@ -217,6 +218,9 @@ function QuitStep({
         <Button onClick={onRechecked}>
           {t("settings.pages.BrowserImportWizard.i-ve-quit-it")}
         </Button>
+        <DialogAction onClick={onRechecked}>
+          {t("settings.pages.BrowserImportWizard.i-ve-quit-it")}
+        </DialogAction>
       </DialogFooter>
     </>
   );
@@ -649,7 +653,9 @@ function BlockedStep({
           {t("settings.pages.BrowserImportWizard.close")}
         </Button>
         {onRetry ? (
-          <Button onClick={onRetry}>{t("settings.pages.BrowserImportWizard.try-again")}</Button>
+          <DialogAction onClick={onRetry}>
+            {t("settings.pages.BrowserImportWizard.try-again")}
+          </DialogAction>
         ) : null}
       </DialogFooter>
     </>

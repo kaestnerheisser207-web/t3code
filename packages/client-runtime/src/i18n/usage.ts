@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import type { ServerProviderResetCredits } from "@t3tools/contracts";
-import { formatDuration } from "@t3tools/shared/usageLimits";
+import { formatDuration, resetCreditChoices } from "@t3tools/shared/usageLimits";
 import { usageReviewEn } from "./locales/usage-review.en.ts";
 
 const textKeys = new Map<string, keyof typeof usageReviewEn>();
@@ -102,4 +102,35 @@ export function usageAccessibilityLabel(
   ]
     .filter((part) => part !== null)
     .join(t("usage.accessibility.separator"));
+}
+
+export function usageResetCreditChoices(
+  t: TFunction,
+  credits: Parameters<typeof resetCreditChoices>[0],
+  input: Parameters<typeof resetCreditChoices>[1],
+  now: number,
+  compact = false,
+) {
+  return resetCreditChoices(credits, input, now, compact).map((choice, index) => {
+    const option = credits.options && "instanceId" in input ? credits.options[index] : undefined;
+    const expires = option?.expiresAt
+      ? usageText(t, formatDuration(Date.parse(option.expiresAt) - now))
+      : null;
+    return {
+      ...choice,
+      summary: option
+        ? t("release4761.resetOption", {
+            label: usageWindowLabel(t, option.label),
+            count: choice.availableCount,
+          }) + (expires ? t("release4761.resetExpiry", { duration: expires }) : "")
+        : usageResetCreditsSummary(t, credits, now, compact),
+      actionLabel: t(option ? "release4761.useOption" : "release4761.useReset"),
+      confirmDescription: option
+        ? t("release4761.resetConfirm", {
+            label: usageWindowLabel(t, option.label),
+            description: option.description,
+          })
+        : t("usageReview.reset-description"),
+    };
+  });
 }

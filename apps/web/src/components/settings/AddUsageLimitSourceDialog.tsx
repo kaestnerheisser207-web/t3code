@@ -1,6 +1,6 @@
 import { useTranslate } from "../../i18n";
 import type { EnvironmentId, SecretReference, UnifiedSettings } from "@t3tools/contracts";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { useUpdateEnvironmentSettings } from "../../hooks/useSettings";
 import { Button } from "../ui/button";
@@ -33,6 +33,7 @@ export function AddUsageLimitSourceDialog({
   readonly sources: UnifiedSettings["usageLimitSources"];
 }) {
   const t = useTranslate();
+  const formId = useId();
   const updateSettings = useUpdateEnvironmentSettings(environmentId);
   const [label, setLabel] = useState("");
   const [url, setUrl] = useState("");
@@ -87,6 +88,7 @@ export function AddUsageLimitSourceDialog({
         </DialogHeader>
         <DialogPanel>
           <form
+            id={formId}
             className="grid gap-4"
             onSubmit={(event) => {
               event.preventDefault();
@@ -114,6 +116,7 @@ export function AddUsageLimitSourceDialog({
                 aria-label={t("settings.pages.AddUsageLimitSourceDialog.management-key")}
                 value={keyDraft}
                 sources={secretSources}
+                environmentId={environmentId}
                 onChange={(event) => setKeyDraft(event.target.value)}
                 onSecretChange={(secret) => setKeyDraft(secret ?? "")}
                 onValidityChange={setKeyValid}
@@ -144,7 +147,7 @@ export function AddUsageLimitSourceDialog({
           >
             {t("settings.pages.AddUsageLimitSourceDialog.cancel")}
           </Button>
-          <Button onClick={save} disabled={!canSave}>
+          <Button type="submit" form={formId} disabled={!canSave}>
             {t("settings.pages.AddUsageLimitSourceDialog.add-hub")}
           </Button>
         </DialogFooter>

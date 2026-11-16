@@ -1,3 +1,4 @@
+import { webI18n } from "../../i18n";
 import { resources, type TranslationKey } from "@t3tools/client-runtime/i18n";
 import type { TFunction } from "i18next";
 import { HOSTED_APP_CHANNEL } from "~/branding";
@@ -12,6 +13,7 @@ import {
 } from "@t3tools/client-runtime/source-control-clients";
 import { DEFAULT_KEYBINDINGS } from "@t3tools/shared/keybindings";
 import * as Schema from "effect/Schema";
+import { msg } from "gt-react";
 import { TYPOGRAPHY_ADVANCED_STORAGE_KEY } from "../../appearanceFonts";
 import { writeLocalStorageValue } from "../../hooks/useLocalStorage";
 import { commandLabel } from "./KeybindingsSettings.logic";
@@ -120,17 +122,41 @@ export const SETTINGS_SECTION_KEYS = {
   "/settings/projects": "settings.projects",
 } as const satisfies Record<SettingsPath, TranslationKey>;
 
-export const SETTINGS_SECTION_LABELS = Object.fromEntries(
-  Object.entries(SETTINGS_SECTION_KEYS).map(([path, key]) => [path, resources.en.translation[key]]),
-) as Readonly<Record<SettingsPath, string>>;
+export const SETTINGS_SECTION_LABELS: Readonly<Record<SettingsPath, string>> = {
+  "/settings/diagnostics": msg("Diagnostics"),
+  "/settings/projects": msg("Projects"),
+  "/settings/general": msg("General"),
+  "/settings/appearance": msg("Appearance"),
+  "/settings/chat": msg("Chat"),
+  "/settings/diffs": msg("Diffs & pull requests"),
+  "/settings/keybindings": msg("Keybindings"),
+  "/settings/snap-shot": msg("SnapShots"),
+  "/settings/providers": msg("Providers"),
+  "/settings/threads": msg("Threads"),
+  "/settings/browser": msg("Browser"),
+  "/settings/devices": msg("Devices"),
+  "/settings/scheduled-tasks": msg("Scheduled tasks"),
+  "/settings/source-control": msg("Source control"),
+  "/settings/worktrees": msg("Worktrees"),
+  "/settings/connections": msg("Environments"),
+  "/settings/access": msg("Sharing & access"),
+  "/settings/secrets": msg("Secrets"),
+  "/settings/maintenance": msg("Maintenance"),
+  "/settings/labs": msg("Labs"),
+  "/settings/about": msg("About"),
+  "/settings/voice": msg("Voice"),
+  "/settings/archived": msg("Archive"),
+};
 
-/** Sidebar order. A group without a heading is set apart by space alone. */
+/** Sidebar order. A group with a hidden heading is set apart on screen by space alone. */
 export const SETTINGS_NAV_GROUPS: ReadonlyArray<{
-  readonly heading: string | null;
+  readonly heading: string;
+  readonly headingHidden?: true;
   readonly paths: ReadonlyArray<SettingsPath>;
 }> = [
   {
-    heading: null,
+    heading: msg("Preferences"),
+    headingHidden: true,
     paths: [
       "/settings/general",
       "/settings/appearance",
@@ -142,7 +168,7 @@ export const SETTINGS_NAV_GROUPS: ReadonlyArray<{
     ],
   },
   {
-    heading: "Agents",
+    heading: msg("Agents"),
     paths: [
       "/settings/providers",
       "/settings/threads",
@@ -152,11 +178,11 @@ export const SETTINGS_NAV_GROUPS: ReadonlyArray<{
     ],
   },
   {
-    heading: "Code",
+    heading: msg("Code"),
     paths: ["/settings/projects", "/settings/source-control", "/settings/worktrees"],
   },
   {
-    heading: "Connections",
+    heading: msg("Connections"),
     paths: [
       "/settings/connections",
       "/settings/access",
@@ -164,7 +190,8 @@ export const SETTINGS_NAV_GROUPS: ReadonlyArray<{
     ],
   },
   {
-    heading: null,
+    heading: msg("More"),
+    headingHidden: true,
     paths: ["/settings/maintenance", "/settings/labs", "/settings/about", "/settings/archived"],
   },
 ];
@@ -438,13 +465,13 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "project-grouping",
-    titleKey: "settings.items.project-grouping.title",
+    title: msg("Project grouping"),
     to: "/settings/general",
     searchTerms: ["combine matching repositories environments sidebar"],
   },
   {
     id: "project-order",
-    titleKey: "settings.items.project-order.title",
+    title: msg("Project order"),
     to: "/settings/general",
     searchTerms: ["sort projects sidebar manual created recent"],
   },
@@ -470,7 +497,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "working-shelf",
-    titleKey: "settings.items.working-shelf.title",
+    title: msg("Working section"),
     to: "/settings/general",
     searchTerms: ["hide fold running monitoring threads inbox sidebar shelf"],
   },
@@ -494,6 +521,22 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     to: "/settings/chat",
     searchTerms: [
       "hide tool calls commands edits searches work log activity quiet chat zen final answers only",
+    ],
+  },
+  {
+    id: "screen-reader-announcements",
+    title: webI18n.t("release4761.text341"),
+    to: "/settings/chat",
+    searchTerms: [
+      "accessibility a11y screen reader nvda jaws voiceover orca narrator speech announce read aloud messages activity steps",
+    ],
+  },
+  {
+    id: "screen-reader-window-title",
+    title: webI18n.t("release4761.text344"),
+    to: "/settings/chat",
+    searchTerms: [
+      "accessibility a11y screen reader nvda jaws voiceover orca narrator window title tab title alt tab taskbar thread status order working approval",
     ],
   },
   {
@@ -544,7 +587,7 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     id: "voice-microphone",
     titleKey: "mobile.settings.microphone",
     to: "/settings/voice",
-    searchTerms: ["mic input audio device"],
+    searchTerms: ["mic input audio device order priority preferred"],
   },
   {
     id: "dictation-shortcut-mode",
@@ -679,13 +722,21 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "in-app-notifications",
-    titleKey: "settings.items.in-app-notifications.title",
+    title: msg("In-app notifications"),
     to: "/settings/general",
     searchTerms: ["notification toast popup completion input approval failure"],
   },
   {
+    id: "language",
+    title: msg("Language"),
+    to: "/settings/general",
+    searchTerms: [
+      "locale translation english deutsch german español spanish français french português portuguese brasil brazilian chinese 中文 japanese 日本語 korean 한국어 russian русский sprache idioma langue 语言 言語 언어 язык",
+    ],
+  },
+  {
     id: "time-format",
-    titleKey: "settings.items.time-format.title",
+    title: msg("Time format"),
     to: "/settings/general",
     searchTerms: ["timestamp clock locale system browser os 12 hour 24 hour"],
   },
@@ -763,6 +814,13 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     ],
   },
   {
+    id: "keep-awake-while-agents-work",
+    title: webI18n.t("release4761.text068"),
+    to: "/settings/maintenance",
+    scope: "environment-defaults",
+    searchTerms: ["caffeinate sleep prevent stay awake power laptop lid inhibit"],
+  },
+  {
     id: "background-activity",
     titleKey: "settings.items.background-activity.title",
     to: "/settings/maintenance",
@@ -808,25 +866,25 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "unpin-confirmation",
-    titleKey: "settings.items.unpin-confirmation.title",
+    title: msg("Unpin confirmation"),
     to: "/settings/general",
     searchTerms: ["ask before thread pinned section"],
   },
   {
     id: "archive-confirmation",
-    titleKey: "settings.items.archive-confirmation.title",
+    title: msg("Archive confirmation"),
     to: "/settings/general",
     searchTerms: ["ask before thread second click inline action"],
   },
   {
     id: "delete-confirmation",
-    titleKey: "settings.items.delete-confirmation.title",
+    title: msg("Delete confirmation"),
     to: "/settings/general",
     searchTerms: ["ask before thread chat history"],
   },
   {
     id: "quit-confirmation",
-    titleKey: "settings.items.quit-confirmation.title",
+    title: msg("Quit shortcut"),
     to: "/settings/general",
     searchTerms: ["confirmation desktop app exit direct hold double click press twice"],
     desktopOnly: true,
@@ -982,6 +1040,11 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     to: "/settings/providers",
     searchTerms: ["refresh availability versions auth state models background probes seconds off"],
     providerSettingsOnly: true,
+  },
+  {
+    id: "scheduled-tasks",
+    title: webI18n.t("mobile.settings.SettingsScheduledTasksRouteScreen.scheduled-tasks"),
+    to: "/settings/scheduled-tasks",
   },
   {
     id: "agent-browser-access",
@@ -1256,6 +1319,15 @@ const SETTINGS_SEARCH_DEFINITIONS = [
     cloudOnly: true,
   },
   {
+    id: "connect-device-approval",
+    title: webI18n.t("release4761.text235"),
+    to: "/settings/access",
+    targetId: "connections-environment",
+    searchTerms: ["t3 connect devices approve deny trust revoke pairing code security account"],
+    cloudOnly: true,
+    managedTunnelOnly: true,
+  },
+  {
     id: "hold-webhooks-while-offline",
     localEnvironmentOnly: true,
     titleKey: "settings.items.hold-webhooks-while-offline.title",
@@ -1527,6 +1599,7 @@ export function settingsForThisPlatform(
 export function searchSettings(
   query: string,
   items: ReadonlyArray<SettingsSearchItem> = SETTINGS_SEARCH_ITEMS,
+  translate: (message: string) => string = (message) => message,
 ): ReadonlyArray<SettingsSearchItem> {
   const normalizedQuery = normalizeSearchText(query);
   if (normalizedQuery.length === 0) return [];
@@ -1538,6 +1611,9 @@ export function searchSettings(
       const fields = [
         title,
         normalizeSearchText(SETTINGS_SECTION_LABELS[item.to]),
+        // The labels as displayed, so search also works in the active language.
+        normalizeSearchText(translate(item.title)),
+        normalizeSearchText(translate(SETTINGS_SECTION_LABELS[item.to])),
         ...(item.searchTerms ?? []).map(normalizeSearchText),
       ];
       if (!queryTokens.every((token) => fields.some((field) => field.includes(token)))) return [];

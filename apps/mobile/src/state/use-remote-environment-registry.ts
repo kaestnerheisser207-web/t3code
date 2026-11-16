@@ -1,3 +1,4 @@
+import { useTranslate } from "../i18n";
 import * as Dialog from "../components/ui/Dialog";
 import { useAtomValue } from "@effect/atom-react";
 import { useNavigation } from "@react-navigation/native";
@@ -9,6 +10,7 @@ import { runAtomCommand } from "@t3tools/client-runtime/state/runtime";
 
 import { hasCloudPublicConfig } from "../features/cloud/publicConfig";
 import { useConnectionController } from "../features/connection/useConnectionController";
+import { useRetryEnvironment } from "../features/connection/useRetryEnvironment";
 import { environmentPresentations } from "./presentation";
 import { useWorkspaceConnectionState, useWorkspaceEnvironments } from "./workspace";
 import type { SavedRemoteConnection } from "../lib/connection";
@@ -100,7 +102,7 @@ const EMPTY_RUNTIME_STATE_ATOM = Atom.make<EnvironmentRuntimeState | null>(null)
   Atom.withLabel("mobile:environment-runtime-state:empty"),
 );
 
-const savedConnectionsByIdAtom = Atom.make((get) => {
+export const savedConnectionsByIdAtom = Atom.make((get) => {
   const catalog = get(environmentCatalog.catalogValueAtom);
   return Object.fromEntries(
     [...catalog.entries.keys()].flatMap((environmentId) => {
@@ -154,6 +156,7 @@ export function useRemoteConnectionStatus() {
 }
 
 export function useRemoteConnections() {
+  const t = useTranslate();
   const controller = useConnectionController();
   const navigation = useNavigation();
   const connectionPairingUrl = useAtomValue(connectionPairingUrlAtom);
@@ -166,8 +169,7 @@ export function useRemoteConnections() {
   const onConnectPress = (pairingUrl?: string, expectedEnvironmentId?: EnvironmentId) =>
     pairEnvironment(pairingUrl ?? connectionPairingUrl, expectedEnvironmentId);
 
-  const onReconnectEnvironment = (environmentId: EnvironmentId) =>
-    controller.retryEnvironment(environmentId);
+  const onReconnectEnvironment = useRetryEnvironment();
   const onSetEnvironmentEnabled = (environmentId: EnvironmentId, enabled: boolean) =>
     controller.setEnvironmentEnabled(environmentId, enabled);
   const onUpdateEnvironment = (
@@ -183,7 +185,7 @@ export function useRemoteConnections() {
       return;
     }
     const remove = {
-      text: "Remove",
+      text: t("web.dynamic.CliCommandSettingsRow.remove"),
       style: "destructive",
       onPress: () => {
         void controller.removeEnvironment(environmentId);
@@ -195,22 +197,22 @@ export function useRemoteConnections() {
         environmentId,
       );
       const openAccount = {
-        text: "Open T3 Account",
+        text: t("release4761.text116"),
         onPress: () => navigation.navigate("SettingsAuth"),
       };
       Dialog.alert(
         "Remove from this device?",
         `Forget ${environment.environmentLabel} and its cached threads on this device.\n\n${RELAY_REMOVAL_ACCOUNT_NOTE[registration]}`,
         registration === "unregistered" || !hasCloudPublicConfig()
-          ? [{ text: "Cancel", style: "cancel" }, remove]
-          : [{ text: "Cancel", style: "cancel" }, openAccount, remove],
+          ? [{ text: t("release4340.cancel"), style: "cancel" }, remove]
+          : [{ text: t("release4340.cancel"), style: "cancel" }, openAccount, remove],
       );
       return;
     }
     Dialog.alert(
       "Remove from this device?",
       `Forget ${environment.environmentLabel} and its cached threads on this device. Switch it off instead to keep it saved.`,
-      [{ text: "Cancel", style: "cancel" }, remove],
+      [{ text: t("release4340.cancel"), style: "cancel" }, remove],
     );
   };
 

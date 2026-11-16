@@ -1,3 +1,15 @@
+// Host timestamps may carry UTC offsets or mixed fractions, so text order is not time order.
+export function compareTimestamps(left: string, right: string): number {
+  return (Date.parse(left) || 0) - (Date.parse(right) || 0);
+}
+
+export function byTimestamp(newestFirst: boolean) {
+  return (left: { readonly date: string }, right: { readonly date: string }) =>
+    newestFirst
+      ? compareTimestamps(right.date, left.date)
+      : compareTimestamps(left.date, right.date);
+}
+
 import type { TFunction } from "i18next";
 
 export function relativeTime(
