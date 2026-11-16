@@ -88,7 +88,7 @@ async function startSession() {
 const click = (props: unknown) => (props as { onClick: () => unknown }).onClick();
 
 describe("recordPromptSent", () => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
 
   it("asks only after the focused page is idle", async () => {
     setup({ sent: 5 });
