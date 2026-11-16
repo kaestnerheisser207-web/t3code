@@ -69,41 +69,55 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
 }> = [
   {
     id: "foundation",
-    title: webI18n.t("settings.extraUi.ThemeEditorPanel.foundation"),
+    get title() {
+      return webI18n.t("settings.extraUi.ThemeEditorPanel.foundation");
+    },
     families: [
       {
         id: "background",
-        label: webI18n.t("theme.role.canvas"),
+        get label() {
+          return webI18n.t("theme.role.canvas");
+        },
         role: "canvas",
         roles: ["canvas", "chrome", "toolbar"],
       },
       {
         id: "surface",
-        label: webI18n.t("theme.role.surface"),
+        get label() {
+          return webI18n.t("theme.role.surface");
+        },
         role: "surface",
         roles: ["surface"],
       },
       {
         id: "raised-surface",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.raised-surface"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.raised-surface");
+        },
         role: "surfaceRaised",
         roles: ["surfaceRaised"],
       },
       {
         id: "overlay",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.overlay"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.overlay");
+        },
         role: "surfaceOverlay",
         roles: ["surfaceOverlay"],
       },
       {
         id: "text",
-        label: webI18n.t("theme.role.text"),
+        get label() {
+          return webI18n.t("theme.role.text");
+        },
         role: "text",
         roles: ["text", "toolbarForeground", "toolbarControlForeground"],
       },
       {
         id: "muted-text",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.muted-text"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.muted-text");
+        },
         role: "mutedForeground",
         roles: [
           "textMuted",
@@ -116,32 +130,49 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
       },
       {
         id: "border",
-        label: webI18n.t("theme.role.border"),
+        get label() {
+          return webI18n.t("theme.role.border");
+        },
         role: "border",
         roles: ["border", "toolbarBorder", "sidebarBorder"],
       },
-      { id: "input", label: webI18n.t("usage.chart.input"), role: "input", roles: ["input"] },
+      {
+        id: "input",
+        get label() {
+          return webI18n.t("usage.chart.input");
+        },
+        role: "input",
+        roles: ["input"],
+      },
     ],
   },
   {
     id: "brand-content",
-    title: webI18n.t("settings.extraUi.ThemeEditorPanel.brand-content"),
+    get title() {
+      return webI18n.t("settings.extraUi.ThemeEditorPanel.brand-content");
+    },
     families: [
       {
         id: "subtle-surface",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.subtle-surface"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.subtle-surface");
+        },
         role: "secondary",
         roles: ["secondary", "secondaryForeground", "muted", "toolbarControl"],
       },
       {
         id: "highlight-surface",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.highlight-surface"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.highlight-surface");
+        },
         role: "accentSurface",
         roles: ["accentSurface", "accentSurfaceForeground", "toolbarControlHover"],
       },
       {
         id: "accent",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.accent"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.accent");
+        },
         role: "accent",
         roles: [
           "accent",
@@ -155,19 +186,25 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
       },
       {
         id: "action",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.action"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.action");
+        },
         role: "messageAction",
         roles: ["messageAction", "messageActionForeground", "messageActionHover"],
       },
       {
         id: "message-surface",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.message-surface"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.message-surface");
+        },
         role: "messageSurface",
         roles: ["messageSurface", "messageForeground"],
       },
       {
         id: "code-surface",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.code-surface"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.code-surface");
+        },
         role: "codeBackground",
         roles: ["codeBackground", "codeForeground"],
       },
@@ -175,17 +212,23 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
   },
   {
     id: "search",
-    title: webI18n.t("settings.extraUi.ThemeEditorPanel.search"),
+    get title() {
+      return webI18n.t("settings.extraUi.ThemeEditorPanel.search");
+    },
     families: [
       {
         id: "search-matches",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.search-matches"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.search-matches");
+        },
         role: "searchMatchBackground",
         roles: ["searchMatchBackground", "searchMatchForeground"],
       },
       {
         id: "current-match",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.current-match"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.current-match");
+        },
         role: "searchMatchActiveBackground",
         roles: ["searchMatchActiveBackground", "searchMatchActiveForeground"],
       },
@@ -193,29 +236,39 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
   },
   {
     id: "context",
-    title: webI18n.t("release3904.usage-context"),
+    get title() {
+      return webI18n.t("release3904.usage-context");
+    },
     families: [
       {
         id: "sidebar-background",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-background"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-background");
+        },
         role: "sidebar",
         roles: ["sidebar", "sidebarForeground"],
       },
       {
         id: "sidebar-controls",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-controls"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-controls");
+        },
         role: "sidebarControlSurface",
         roles: ["sidebarControlSurface"],
       },
       {
         id: "sidebar-selection",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-selection"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.sidebar-selection");
+        },
         role: "sidebarRowSelected",
         roles: ["sidebarRowHover", "sidebarRowActive", "sidebarRowSelected"],
       },
       {
         id: "terminal-background",
-        label: webI18n.t("settings.extraUi.ThemeEditorPanel.terminal-background"),
+        get label() {
+          return webI18n.t("settings.extraUi.ThemeEditorPanel.terminal-background");
+        },
         role: "terminalBackground",
         roles: [
           "terminalBackground",
@@ -229,17 +282,23 @@ const THEME_EDITOR_ROLE_GROUPS: ReadonlyArray<{
   },
   {
     id: "status",
-    title: webI18n.t("settings.extraUi.ThemeEditorPanel.status"),
+    get title() {
+      return webI18n.t("settings.extraUi.ThemeEditorPanel.status");
+    },
     families: [
       {
         id: "error",
-        label: webI18n.t("connection.diagnosis.error"),
+        get label() {
+          return webI18n.t("connection.diagnosis.error");
+        },
         role: "error",
         roles: ["error", "errorForeground", "errorSurface"],
       },
       {
         id: "warning",
-        label: webI18n.t("theme.role.warning"),
+        get label() {
+          return webI18n.t("theme.role.warning");
+        },
         role: "warning",
         roles: ["warning", "warningForeground", "warningSurface"],
       },

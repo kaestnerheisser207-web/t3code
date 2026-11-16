@@ -31,20 +31,36 @@ type ActionDetail = Pick<
 
 const MERGE_METHODS = {
   squash: {
-    title: mobileI18n.t("pr.method.squash"),
-    description: mobileI18n.t("pr.method.squashHint"),
+    get title() {
+      return mobileI18n.t("pr.method.squash");
+    },
+    get description() {
+      return mobileI18n.t("pr.method.squashHint");
+    },
   },
   merge: {
-    title: mobileI18n.t("pr.method.merge"),
-    description: mobileI18n.t("pr.method.mergeHint"),
+    get title() {
+      return mobileI18n.t("pr.method.merge");
+    },
+    get description() {
+      return mobileI18n.t("pr.method.mergeHint");
+    },
   },
   rebase: {
-    title: mobileI18n.t("pr.method.rebase"),
-    description: mobileI18n.t("pr.method.rebaseHint"),
+    get title() {
+      return mobileI18n.t("pr.method.rebase");
+    },
+    get description() {
+      return mobileI18n.t("pr.method.rebaseHint");
+    },
   },
   "fast-forward": {
-    title: mobileI18n.t("release4761.text038"),
-    description: mobileI18n.t("release4761.text039"),
+    get title() {
+      return mobileI18n.t("release4761.text038");
+    },
+    get description() {
+      return mobileI18n.t("release4761.text039");
+    },
   },
 } as const satisfies Record<PullRequestMergeMethod, { title: string; description: string }>;
 

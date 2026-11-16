@@ -68,8 +68,8 @@ export function MicrophoneOrderList(props: {
                 id={key}
                 name={
                   entry.kind === "default"
-                    ? "System default"
-                    : entry.label || device?.label || "Saved microphone"
+                    ? t("settings.controls.systemDefault")
+                    : entry.label || device?.label || t("release4761.savedMic")
                 }
                 position={index + 1}
                 count={order.length}

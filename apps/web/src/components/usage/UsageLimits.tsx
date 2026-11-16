@@ -49,9 +49,24 @@ import { UsageLimitsPooled } from "./UsageLimitsPooled";
 import { PROVIDER_PRESENTATION } from "./usageProviders";
 
 const PACE: Record<LimitPace, { readonly label: string; readonly icon: typeof GaugeIcon }> = {
-  ahead: { label: webI18n.t("usageReview.pace-ahead-detail"), icon: TrendingUpIcon },
-  on: { label: webI18n.t("usageReview.pace-on-detail"), icon: GaugeIcon },
-  under: { label: webI18n.t("usageReview.pace-under-detail"), icon: TrendingDownIcon },
+  ahead: {
+    get label() {
+      return webI18n.t("usageReview.pace-ahead-detail");
+    },
+    icon: TrendingUpIcon,
+  },
+  on: {
+    get label() {
+      return webI18n.t("usageReview.pace-on-detail");
+    },
+    icon: GaugeIcon,
+  },
+  under: {
+    get label() {
+      return webI18n.t("usageReview.pace-under-detail");
+    },
+    icon: TrendingDownIcon,
+  },
 };
 
 export function barColor(driver: ServerProvider["driver"]): string {

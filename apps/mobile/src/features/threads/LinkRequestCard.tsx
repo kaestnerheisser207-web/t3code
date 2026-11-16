@@ -55,8 +55,12 @@ const ACCESS_CHOICES: ReadonlyArray<{
 }> = [
   {
     access: "read-only",
-    label: mobileI18n.t("runtime.readOnly"),
-    description: mobileI18n.t("runtime.readOnlyDescription"),
+    get label() {
+      return mobileI18n.t("runtime.readOnly");
+    },
+    get description() {
+      return mobileI18n.t("runtime.readOnlyDescription");
+    },
   },
   ...RUNTIME_MODE_CHOICES.map((choice) => ({ ...choice, access: choice.mode })),
 ];

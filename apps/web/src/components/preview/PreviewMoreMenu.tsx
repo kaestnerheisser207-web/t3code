@@ -26,9 +26,24 @@ const COLOR_SCHEME_OPTIONS: ReadonlyArray<{
   value: DesktopPreviewColorScheme;
   label: string;
 }> = [
-  { value: "system", label: webI18n.t("web.dynamic.ThemeSettings.system") },
-  { value: "light", label: webI18n.t("web.dynamic.ThemeEditorPanel.light") },
-  { value: "dark", label: webI18n.t("web.dynamic.ThemeEditorPanel.dark") },
+  {
+    value: "system",
+    get label() {
+      return webI18n.t("web.dynamic.ThemeSettings.system");
+    },
+  },
+  {
+    value: "light",
+    get label() {
+      return webI18n.t("web.dynamic.ThemeEditorPanel.light");
+    },
+  },
+  {
+    value: "dark",
+    get label() {
+      return webI18n.t("web.dynamic.ThemeEditorPanel.dark");
+    },
+  },
 ];
 
 export interface PreviewMoreMenuActions {

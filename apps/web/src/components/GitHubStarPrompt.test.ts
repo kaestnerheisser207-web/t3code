@@ -1,3 +1,10 @@
+vi.mock("../i18n", async () => {
+  const { resources } = await import("@t3tools/client-runtime/i18n");
+  return {
+    webI18n: { t: (key: keyof typeof resources.en.translation) => resources.en.translation[key] },
+  };
+});
+
 import { EnvironmentId } from "@t3tools/contracts";
 import { describe, expect, it, vi } from "vite-plus/test";
 

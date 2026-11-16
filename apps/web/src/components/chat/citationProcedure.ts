@@ -40,14 +40,22 @@ const MAX_CITATION_PAGES = 20;
 
 const COULD_NOT_LOAD = {
   _tag: "failed",
-  title: webI18n.t("release4761.text185"),
-  description: webI18n.t("release4761.text186"),
+  get title() {
+    return webI18n.t("release4761.text185");
+  },
+  get description() {
+    return webI18n.t("release4761.text186");
+  },
 } as const;
 
 const UNAVAILABLE = {
   _tag: "failed",
-  title: webI18n.t("release4761.text187"),
-  description: webI18n.t("release4761.text188"),
+  get title() {
+    return webI18n.t("release4761.text187");
+  },
+  get description() {
+    return webI18n.t("release4761.text188");
+  },
 } as const;
 
 /**

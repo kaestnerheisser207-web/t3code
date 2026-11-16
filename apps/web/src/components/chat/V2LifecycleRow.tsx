@@ -193,14 +193,54 @@ const STATUS_VISUALS: Record<
   OrchestrationV2TurnItem["status"],
   { dotClass: string; label: string }
 > = {
-  pending: { dotClass: "bg-info", label: webI18n.t("lifecycle.pending") },
-  running: { dotClass: "bg-info", label: webI18n.t("lifecycle.running") },
-  waiting: { dotClass: "bg-info", label: webI18n.t("lifecycle.waiting") },
-  idle: { dotClass: "bg-muted-foreground/50", label: webI18n.t("lifecycle.idle") },
-  completed: { dotClass: "bg-success", label: webI18n.t("lifecycle.completed") },
-  failed: { dotClass: "bg-destructive", label: webI18n.t("lifecycle.failed") },
-  cancelled: { dotClass: "bg-muted-foreground/60", label: webI18n.t("lifecycle.cancelled") },
-  interrupted: { dotClass: "bg-muted-foreground/60", label: webI18n.t("lifecycle.cancelled") },
+  pending: {
+    dotClass: "bg-info",
+    get label() {
+      return webI18n.t("lifecycle.pending");
+    },
+  },
+  running: {
+    dotClass: "bg-info",
+    get label() {
+      return webI18n.t("lifecycle.running");
+    },
+  },
+  waiting: {
+    dotClass: "bg-info",
+    get label() {
+      return webI18n.t("lifecycle.waiting");
+    },
+  },
+  idle: {
+    dotClass: "bg-muted-foreground/50",
+    get label() {
+      return webI18n.t("lifecycle.idle");
+    },
+  },
+  completed: {
+    dotClass: "bg-success",
+    get label() {
+      return webI18n.t("lifecycle.completed");
+    },
+  },
+  failed: {
+    dotClass: "bg-destructive",
+    get label() {
+      return webI18n.t("lifecycle.failed");
+    },
+  },
+  cancelled: {
+    dotClass: "bg-muted-foreground/60",
+    get label() {
+      return webI18n.t("lifecycle.cancelled");
+    },
+  },
+  interrupted: {
+    dotClass: "bg-muted-foreground/60",
+    get label() {
+      return webI18n.t("lifecycle.cancelled");
+    },
+  },
 };
 
 function subagentStatusVisual(status: OrchestrationV2TurnItem["status"]) {

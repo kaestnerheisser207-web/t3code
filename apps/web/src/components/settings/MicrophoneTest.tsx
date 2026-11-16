@@ -210,7 +210,7 @@ export function MicrophoneTest({
     ) : (
       <Button size="sm" variant="outline" onClick={() => void start()}>
         {phase === "ready" ? <RotateCcwIcon /> : <MicIcon />}
-        {phase === "ready" ? t("release4262.record-again") : "Record"}
+        {phase === "ready" ? t("release4262.record-again") : t("release4761.record")}
       </Button>
     );
   const panel = error ? (

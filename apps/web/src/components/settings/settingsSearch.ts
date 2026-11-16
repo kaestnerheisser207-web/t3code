@@ -525,7 +525,9 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "screen-reader-announcements",
-    title: webI18n.t("release4761.text341"),
+    get title() {
+      return webI18n.t("release4761.text341");
+    },
     to: "/settings/chat",
     searchTerms: [
       "accessibility a11y screen reader nvda jaws voiceover orca narrator speech announce read aloud messages activity steps",
@@ -533,7 +535,9 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "screen-reader-window-title",
-    title: webI18n.t("release4761.text344"),
+    get title() {
+      return webI18n.t("release4761.text344");
+    },
     to: "/settings/chat",
     searchTerms: [
       "accessibility a11y screen reader nvda jaws voiceover orca narrator window title tab title alt tab taskbar thread status order working approval",
@@ -815,7 +819,9 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "keep-awake-while-agents-work",
-    title: webI18n.t("release4761.text068"),
+    get title() {
+      return webI18n.t("release4761.text068");
+    },
     to: "/settings/maintenance",
     scope: "environment-defaults",
     searchTerms: ["caffeinate sleep prevent stay awake power laptop lid inhibit"],
@@ -1043,7 +1049,9 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "scheduled-tasks",
-    title: webI18n.t("mobile.settings.SettingsScheduledTasksRouteScreen.scheduled-tasks"),
+    get title() {
+      return webI18n.t("mobile.settings.SettingsScheduledTasksRouteScreen.scheduled-tasks");
+    },
     to: "/settings/scheduled-tasks",
   },
   {
@@ -1320,7 +1328,9 @@ const SETTINGS_SEARCH_DEFINITIONS = [
   },
   {
     id: "connect-device-approval",
-    title: webI18n.t("release4761.text235"),
+    get title() {
+      return webI18n.t("release4761.text235");
+    },
     to: "/settings/access",
     targetId: "connections-environment",
     searchTerms: ["t3 connect devices approve deny trust revoke pairing code security account"],

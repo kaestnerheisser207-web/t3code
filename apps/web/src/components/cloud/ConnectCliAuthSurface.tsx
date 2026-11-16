@@ -16,8 +16,12 @@ import { Button } from "../ui/button";
 
 const invalidLinkMessage = {
   context: "Authorization request",
-  title: webI18n.t("release4761.text233"),
-  description: webI18n.t("release4761.text234"),
+  get title() {
+    return webI18n.t("release4761.text233");
+  },
+  get description() {
+    return webI18n.t("release4761.text234");
+  },
 } as const;
 
 export function ConnectCliAuthorizeSurface() {

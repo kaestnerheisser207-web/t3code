@@ -112,13 +112,48 @@ type ScheduledTaskRoutes = {
 };
 
 const DAYS = [
-  { index: 1, label: mobileI18n.t("release4761.text052") },
-  { index: 2, label: mobileI18n.t("release4761.text053") },
-  { index: 3, label: mobileI18n.t("release4761.text054") },
-  { index: 4, label: mobileI18n.t("release4761.text055") },
-  { index: 5, label: mobileI18n.t("release4761.text056") },
-  { index: 6, label: mobileI18n.t("release4761.text057") },
-  { index: 0, label: mobileI18n.t("release4761.text058") },
+  {
+    index: 1,
+    get label() {
+      return mobileI18n.t("release4761.text052");
+    },
+  },
+  {
+    index: 2,
+    get label() {
+      return mobileI18n.t("release4761.text053");
+    },
+  },
+  {
+    index: 3,
+    get label() {
+      return mobileI18n.t("release4761.text054");
+    },
+  },
+  {
+    index: 4,
+    get label() {
+      return mobileI18n.t("release4761.text055");
+    },
+  },
+  {
+    index: 5,
+    get label() {
+      return mobileI18n.t("release4761.text056");
+    },
+  },
+  {
+    index: 6,
+    get label() {
+      return mobileI18n.t("release4761.text057");
+    },
+  },
+  {
+    index: 0,
+    get label() {
+      return mobileI18n.t("release4761.text058");
+    },
+  },
 ] as const;
 
 const THREAD_MODE_LABELS: Record<ScheduledTaskThreadMode, TranslationKey> = {

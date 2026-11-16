@@ -26,13 +26,48 @@ const installSteps: ReadonlyArray<{
   readonly stage: RelayClientInstallProgressStage;
   readonly label: string;
 }> = [
-  { stage: "checking", label: webI18n.t("relay.stage.checking") },
-  { stage: "waiting_for_lock", label: webI18n.t("relay.stage.waiting_for_lock") },
-  { stage: "downloading", label: webI18n.t("relay.stage.downloading") },
-  { stage: "verifying", label: webI18n.t("relay.stage.verifying") },
-  { stage: "installing", label: webI18n.t("relay.stage.installing") },
-  { stage: "validating", label: webI18n.t("relay.stage.validating") },
-  { stage: "activating", label: webI18n.t("relay.stage.activating") },
+  {
+    stage: "checking",
+    get label() {
+      return webI18n.t("relay.stage.checking");
+    },
+  },
+  {
+    stage: "waiting_for_lock",
+    get label() {
+      return webI18n.t("relay.stage.waiting_for_lock");
+    },
+  },
+  {
+    stage: "downloading",
+    get label() {
+      return webI18n.t("relay.stage.downloading");
+    },
+  },
+  {
+    stage: "verifying",
+    get label() {
+      return webI18n.t("relay.stage.verifying");
+    },
+  },
+  {
+    stage: "installing",
+    get label() {
+      return webI18n.t("relay.stage.installing");
+    },
+  },
+  {
+    stage: "validating",
+    get label() {
+      return webI18n.t("relay.stage.validating");
+    },
+  },
+  {
+    stage: "activating",
+    get label() {
+      return webI18n.t("relay.stage.activating");
+    },
+  },
 ];
 
 export function RelayClientInstallDialog() {

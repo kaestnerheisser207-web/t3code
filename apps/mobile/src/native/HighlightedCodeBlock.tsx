@@ -32,10 +32,18 @@ const FENCE_DISPLAY_NAMES: Readonly<Record<string, string>> = {
 
 // The native block's long-press menu, with its labels and iOS symbols.
 const CODE_MENU_ACTIONS = [
-  { id: "copy-code", title: mobileI18n.t("nativeMenu.copy"), image: "doc.on.doc" },
+  {
+    id: "copy-code",
+    get title() {
+      return mobileI18n.t("nativeMenu.copy");
+    },
+    image: "doc.on.doc",
+  },
   {
     id: "copy-markdown",
-    title: mobileI18n.t("web.ui.MarkdownTable.copy-as-markdown"),
+    get title() {
+      return mobileI18n.t("web.ui.MarkdownTable.copy-as-markdown");
+    },
     image: "doc.text",
   },
 ];

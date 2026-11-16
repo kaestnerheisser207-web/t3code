@@ -225,7 +225,9 @@ export function T3ConnectProfilePage() {
 const ENVIRONMENT_MENU_ACTIONS = [
   {
     id: "deregister",
-    title: mobileI18n.t("web.dynamic.T3ConnectUserProfilePage.deregister"),
+    get title() {
+      return mobileI18n.t("web.dynamic.T3ConnectUserProfilePage.deregister");
+    },
     image: "trash",
     attributes: { destructive: true },
   },

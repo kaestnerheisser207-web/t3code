@@ -13,28 +13,36 @@ import { PullRequestGlyph } from "./pullRequestGlyphs";
 
 const STATES = {
   open: {
-    label: mobileI18n.t("pr.filters.open"),
+    get label() {
+      return mobileI18n.t("pr.filters.open");
+    },
     icon: PullRequestGlyph.pullRequest,
     tint: "accent-adaptive-emerald-600-400",
     text: "text-adaptive-emerald-600-400",
     background: "bg-adaptive-emerald-500-a12-a16",
   },
   merged: {
-    label: mobileI18n.t("pr.merge.status.merged"),
+    get label() {
+      return mobileI18n.t("pr.merge.status.merged");
+    },
     icon: PullRequestGlyph.merged,
     tint: "accent-adaptive-violet-600-400",
     text: "text-adaptive-violet-600-400",
     background: "bg-adaptive-violet-500-a12-a16",
   },
   closed: {
-    label: mobileI18n.t("pr.merge.status.closed"),
+    get label() {
+      return mobileI18n.t("pr.merge.status.closed");
+    },
     icon: PullRequestGlyph.closed,
     tint: "accent-danger-foreground",
     text: "text-danger-foreground",
     background: "bg-danger",
   },
   draft: {
-    label: mobileI18n.t("pr.status.draft"),
+    get label() {
+      return mobileI18n.t("pr.status.draft");
+    },
     icon: PullRequestGlyph.draft,
     tint: "accent-icon-muted",
     text: "text-foreground-muted",

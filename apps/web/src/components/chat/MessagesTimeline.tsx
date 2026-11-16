@@ -1837,6 +1837,18 @@ function WorkHistorySkeleton() {
 }
 
 function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-fold" }> }) {
+  const t = useTranslate();
+  const worked = /^Worked for (.+)$/.exec(row.label);
+  const stopped = /^You stopped after (.+)$/.exec(row.label);
+  const label = worked
+    ? t("release4761.workedFor", { duration: worked[1] })
+    : stopped
+      ? t("release4761.stoppedAfter", { duration: stopped[1] })
+      : row.label === "Worked"
+        ? t("release4761.worked")
+        : row.label === "You stopped this response"
+          ? t("release4761.stoppedResponse")
+          : row.label;
   const ctx = use(TimelineRowCtx);
   const { loading, error, toggle } = useDeferredWorkLoading(row, () =>
     ctx.onToggleTurnFold(row.runId),
@@ -1854,7 +1866,7 @@ function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-
           className="flex cursor-pointer select-none items-center gap-1 rounded-md px-1 text-sm leading-relaxed text-muted-foreground tabular-nums transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
         >
           <span>
-            {row.label}
+            {label}
             {error ? ` · ${error}` : ""}
           </span>
           {row.expanded ? (

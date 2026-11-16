@@ -166,7 +166,9 @@ const SETTINGS_SCREENS = {
     linking: "settings",
     options: {
       ...pageRoute({
-        title: mobileI18n.t("palette.groups.settings"),
+        get title() {
+          return mobileI18n.t("palette.groups.settings");
+        },
         itemStyle: "standard",
         root: true,
       }),
@@ -495,7 +497,11 @@ const RootStackConfig = createWorkspaceStackNavigator({
           ComponentCatalog: createNativeStackScreen({
             screen: ComponentCatalogScreen,
             linking: "dev/components",
-            options: { title: mobileI18n.t("release4262.ui-components") },
+            options: {
+              get title() {
+                return mobileI18n.t("release4262.ui-components");
+              },
+            },
           }),
         }
       : {}),
@@ -569,23 +575,39 @@ const RootStackConfig = createWorkspaceStackNavigator({
     NewTaskProject: createNativeStackScreen({
       screen: NewTaskRouteScreen,
       linking: { path: "new", alias: ["new/project"] },
-      options: pageRoute({ title: mobileI18n.t("mobile.schedule.chooseProject") }),
+      options: pageRoute({
+        get title() {
+          return mobileI18n.t("mobile.schedule.chooseProject");
+        },
+      }),
     }),
     NewTaskEnvironment: createNativeStackScreen({
       linking: "new/draft/environment",
       screen: NewTaskEnvironmentPickerRouteScreen,
-      options: pageRoute({ title: mobileI18n.t("release4262.environment") }),
+      options: pageRoute({
+        get title() {
+          return mobileI18n.t("release4262.environment");
+        },
+      }),
     }),
     NewTaskBranch: createNativeStackScreen({
       linking: "new/draft/branch",
       screen: NewTaskBranchPickerRouteScreen,
-      options: pageRoute({ title: mobileI18n.t("nativeMenu.branch") }),
+      options: pageRoute({
+        get title() {
+          return mobileI18n.t("nativeMenu.branch");
+        },
+      }),
     }),
     AddProject: createNativeStackScreen({
       linking: "new/add-project",
       screen: AddProjectSourceRoute,
 
-      options: pageRoute({ title: mobileI18n.t("web.palette.add-project") }),
+      options: pageRoute({
+        get title() {
+          return mobileI18n.t("web.palette.add-project");
+        },
+      }),
     }),
     AddProjectRepository: createNativeStackScreen({
       linking: "new/add-project/repository",
@@ -659,7 +681,11 @@ const RootStackConfig = createWorkspaceStackNavigator({
     ThreadFiles: createNativeStackScreen({
       screen: ThreadFilesTreeScreen,
       linking: `${THREAD_LINKING_PREFIX}/files`,
-      options: pageRoute({ title: mobileI18n.t("panels.files") }),
+      options: pageRoute({
+        get title() {
+          return mobileI18n.t("panels.files");
+        },
+      }),
     }),
     ThreadFile: createNativeStackScreen({
       screen: ThreadFileScreen,
@@ -723,14 +749,18 @@ const RootStackConfig = createWorkspaceStackNavigator({
       linking: "settings/legal",
       options: modalRoute({
         header: "solid",
-        title: mobileI18n.t("mobile.settings.SettingsAboutRouteScreen.legal"),
+        get title() {
+          return mobileI18n.t("mobile.settings.SettingsAboutRouteScreen.legal");
+        },
       }),
     }),
     ConnectOnboarding: createNativeStackScreen({
       screen: ConnectOnboardingRouteScreen,
       linking: "connect-onboarding",
       options: sheetRoute({
-        title: mobileI18n.t("web.ui.ConnectOnboardingDialog.set-up-t3-connect"),
+        get title() {
+          return mobileI18n.t("web.ui.ConnectOnboardingDialog.set-up-t3-connect");
+        },
         header: "solid",
         detent: 0.6,
         androidMaxDetent: 0.95,
@@ -740,7 +770,9 @@ const RootStackConfig = createWorkspaceStackNavigator({
       screen: ConnectionsRouteScreen,
       linking: "connections",
       options: sheetRoute({
-        title: mobileI18n.t("web.palette.environments"),
+        get title() {
+          return mobileI18n.t("web.palette.environments");
+        },
         detent: 0.55,
         maxDetent: 0.7,
         android: "card",
@@ -750,7 +782,9 @@ const RootStackConfig = createWorkspaceStackNavigator({
       screen: ConnectionsNewRouteScreen,
       linking: "connections/new",
       options: sheetRoute({
-        title: mobileI18n.t("environment.extra.add"),
+        get title() {
+          return mobileI18n.t("environment.extra.add");
+        },
         detent: 0.55,
         maxDetent: 0.7,
       }),

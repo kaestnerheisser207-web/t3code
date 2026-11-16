@@ -81,22 +81,32 @@ const SAVE_ZIP_HINT = "Save the ZIP to open it in another app.";
 const TOO_LARGE: ZipFailure = {
   kind: "too-large",
   causeMessage: null,
-  title: mobileI18n.t("zip.tooLarge"),
+  get title() {
+    return mobileI18n.t("zip.tooLarge");
+  },
   detail: `Browsing works up to ${formatAttachmentSize(ARCHIVE_MAX_BYTES)}. ${SAVE_ZIP_HINT}`,
   retry: false,
 };
 const CANCELLED: ZipFailure = {
   kind: "cancelled",
   causeMessage: null,
-  title: mobileI18n.t("zip.cancelled"),
-  detail: mobileI18n.t("zip.cancelledDetail"),
+  get title() {
+    return mobileI18n.t("zip.cancelled");
+  },
+  get detail() {
+    return mobileI18n.t("zip.cancelledDetail");
+  },
   retry: true,
 };
 const NETWORK: ZipFailure = {
   kind: "network",
   causeMessage: null,
-  title: mobileI18n.t("zip.network"),
-  detail: mobileI18n.t("zip.networkDetail"),
+  get title() {
+    return mobileI18n.t("zip.network");
+  },
+  get detail() {
+    return mobileI18n.t("zip.networkDetail");
+  },
   retry: true,
 };
 

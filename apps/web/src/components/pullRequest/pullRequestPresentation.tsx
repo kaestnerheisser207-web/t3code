@@ -218,37 +218,51 @@ export function PullRequestConflictGlyph({
 
 const CHECK_STATUS_PRESENTATION = {
   pending: {
-    label: webI18n.t("lifecycle.running"),
+    get label() {
+      return webI18n.t("lifecycle.running");
+    },
     Icon: Spinner,
     toneClassName: "text-amber-500",
   },
   "action-required": {
-    label: webI18n.t("web.pr.checks.awaitingAction"),
+    get label() {
+      return webI18n.t("web.pr.checks.awaitingAction");
+    },
     Icon: CircleDotIcon,
     toneClassName: "text-amber-600 dark:text-amber-400/90",
   },
   success: {
-    label: webI18n.t("pr.status.passed"),
+    get label() {
+      return webI18n.t("pr.status.passed");
+    },
     Icon: CircleCheckIcon,
     toneClassName: "text-emerald-600 dark:text-emerald-300/90",
   },
   failure: {
-    label: webI18n.t("lifecycle.failed"),
+    get label() {
+      return webI18n.t("lifecycle.failed");
+    },
     Icon: CircleXIcon,
     toneClassName: "text-destructive",
   },
   cancelled: {
-    label: webI18n.t("pr.status.cancelled"),
+    get label() {
+      return webI18n.t("pr.status.cancelled");
+    },
     Icon: OctagonXIcon,
     toneClassName: "text-muted-foreground/70",
   },
   skipped: {
-    label: webI18n.t("pr.status.skipped"),
+    get label() {
+      return webI18n.t("pr.status.skipped");
+    },
     Icon: CircleSlashIcon,
     toneClassName: "text-muted-foreground/70",
   },
   neutral: {
-    label: webI18n.t("pr.status.neutral"),
+    get label() {
+      return webI18n.t("pr.status.neutral");
+    },
     Icon: CircleDashedIcon,
     toneClassName: "text-muted-foreground/70",
   },
@@ -299,17 +313,23 @@ export function PullRequestCheckStatusIcon({ status }: { status: PullRequestChec
 
 const CHECKS_STATE_PRESENTATION = {
   passing: {
-    label: webI18n.t("web.pr.checks.passing"),
+    get label() {
+      return webI18n.t("web.pr.checks.passing");
+    },
     Icon: CircleCheckIcon,
     toneClassName: CHECK_STATUS_PRESENTATION.success.toneClassName,
   },
   failing: {
-    label: webI18n.t("web.pr.checks.failing"),
+    get label() {
+      return webI18n.t("web.pr.checks.failing");
+    },
     Icon: CircleXIcon,
     toneClassName: "text-destructive",
   },
   pending: {
-    label: webI18n.t("web.pr.checks.pending"),
+    get label() {
+      return webI18n.t("web.pr.checks.pending");
+    },
     Icon: CircleDotIcon,
     toneClassName: "text-amber-600 dark:text-amber-400/90",
   },
@@ -335,7 +355,9 @@ export function pullRequestChecksState(
 
 const REVIEW_OUTCOME_PRESENTATION = {
   approved: {
-    label: webI18n.t("pr.filters.approved"),
+    get label() {
+      return webI18n.t("pr.filters.approved");
+    },
     Icon: CircleCheckIcon,
     toneClassName: "text-emerald-600 dark:text-emerald-300/90",
     ringClassName: "ring-2 ring-emerald-500 dark:ring-emerald-400",
@@ -345,7 +367,9 @@ const REVIEW_OUTCOME_PRESENTATION = {
     badgeVariant: "success",
   },
   "changes-requested": {
-    label: webI18n.t("pr.filters.changesRequested"),
+    get label() {
+      return webI18n.t("pr.filters.changesRequested");
+    },
     Icon: CircleXIcon,
     toneClassName: "text-destructive",
     ringClassName: "ring-2 ring-destructive",
@@ -354,7 +378,9 @@ const REVIEW_OUTCOME_PRESENTATION = {
     badgeVariant: "error",
   },
   dismissed: {
-    label: webI18n.t("web.pr.review.dismissed"),
+    get label() {
+      return webI18n.t("web.pr.review.dismissed");
+    },
     Icon: CircleDashedIcon,
     toneClassName: "text-muted-foreground/70",
     ringClassName: "ring-2 ring-muted-foreground/60",

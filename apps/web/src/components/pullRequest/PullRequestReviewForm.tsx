@@ -33,19 +33,25 @@ const VERDICTS: ReadonlyArray<{
 }> = [
   {
     value: "comment",
-    label: webI18n.t("pr.review.comment"),
+    get label() {
+      return webI18n.t("pr.review.comment");
+    },
     sent: () => "Review submitted",
     icon: <MessageSquareIcon className="size-3" />,
   },
   {
     value: "approve",
-    label: webI18n.t("pr.review.approve"),
+    get label() {
+      return webI18n.t("pr.review.approve");
+    },
     sent: (term) => `${capitalizeTerm(term)} approved`,
     icon: <CheckIcon className="size-3" />,
   },
   {
     value: "request-changes",
-    label: webI18n.t("pr.review.requestChanges"),
+    get label() {
+      return webI18n.t("pr.review.requestChanges");
+    },
     sent: () => "Changes requested",
     icon: <XCircleIcon className="size-3" />,
   },

@@ -155,11 +155,29 @@ function CloudSpeechLogo({ provider }: { provider: CloudSpeechProvider }) {
 }
 const formatSize = (bytes: number) => `${Math.round(bytes / 1024 / 1024)} MB`;
 const SHORTCUT_MODES: Record<VoiceShortcutMode, { label: string; hint: string }> = {
-  auto: { label: webI18n.t("runtime.auto"), hint: "Tap to toggle, hold to talk" },
-  hold: { label: webI18n.t("settings.support.hold"), hint: "Record while held" },
+  auto: {
+    get label() {
+      return webI18n.t("runtime.auto");
+    },
+    get hint() {
+      return webI18n.t("release4761.voiceAutoHint");
+    },
+  },
+  hold: {
+    get label() {
+      return webI18n.t("settings.support.hold");
+    },
+    get hint() {
+      return webI18n.t("release4761.voiceHoldHint");
+    },
+  },
   toggle: {
-    label: webI18n.t("web.dynamic.CustomModelEditor.toggle"),
-    hint: "Tap to start, tap to stop",
+    get label() {
+      return webI18n.t("web.dynamic.CustomModelEditor.toggle");
+    },
+    get hint() {
+      return webI18n.t("release4761.voiceToggleHint");
+    },
   },
 };
 const UNLOAD_LABELS: Record<SpeechModelUnloadTimeout, TranslationKey> = {
@@ -493,8 +511,8 @@ function ProjectDictionaryRow() {
       }
       description={
         isProjectScope
-          ? `Used by everyone who dictates in ${scope.scope.label}.`
-          : "Used by everyone who dictates on this environment."
+          ? t("release4761.projectDictionary", { project: scope.scope.label })
+          : t("release4761.sharedDictionary")
       }
     >
       <div className="mt-3 pb-2">
@@ -1400,8 +1418,8 @@ export function VoiceSettingsPanel() {
           title={t("release4340.transcribe-with")}
           description={
             destination.environmentId && chosenUnsupported
-              ? `${chosenEnvironment.label} can’t transcribe audio locally. Choose another destination.`
-              : "Where your speech is turned into text."
+              ? t("release4761.voiceUnsupported", { environment: chosenEnvironment.label })
+              : t("release4761.voiceDestination")
           }
           control={
             <div className="flex w-full min-w-0 items-center gap-1.5 @min-[32rem]/settings-row:w-auto">
@@ -1590,7 +1608,7 @@ export function VoiceSettingsPanel() {
           description={
             destination.cloudProvider === "openai"
               ? "OpenAI handles silence itself."
-              : "Skip silence and background noise before transcribing."
+              : t("release4761.voiceFilter")
           }
           control={
             <Switch
