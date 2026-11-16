@@ -1,3 +1,9 @@
+vi.mock("../../i18n", async () => {
+  const { createI18n } = await import("@t3tools/client-runtime/i18n");
+  const webI18n = createI18n("en");
+  return { webI18n, useTranslate: () => webI18n.t };
+});
+
 import {
   AuthFilesystemReadScope,
   EnvironmentId,

@@ -390,12 +390,16 @@ export function snoozeWakeLabel(
   const wakeMs = Date.parse(snoozedUntil);
   const nowMs = Date.parse(options.now);
   if (Number.isNaN(wakeMs) || Number.isNaN(nowMs)) return options.t?.("snooze.now") ?? "now";
-  if (wakeMs <= nowMs) return "now";
+  if (wakeMs <= nowMs) return options.t?.("snooze.now") ?? "now";
   // Count clock minutes: callers pass a minute-floored or live `now`, and durations keep seconds.
   const minutes = Math.max(1, Math.floor(wakeMs / 60_000) - Math.floor(nowMs / 60_000));
-  if (minutes < 60) return `${minutes}m`;
-  if (minutes < 24 * 60) return `${Math.ceil(minutes / 60)}h`;
-  return `${Math.ceil(minutes / (24 * 60))}d`;
+  if (minutes < 60) return options.t?.("schedule.minute", { count: minutes }) ?? `${minutes}m`;
+  if (minutes < 24 * 60) {
+    const hours = Math.ceil(minutes / 60);
+    return options.t?.("schedule.hour", { count: hours }) ?? `${hours}h`;
+  }
+  const days = Math.ceil(minutes / (24 * 60));
+  return options.t?.("schedule.day", { count: days }) ?? `${days}d`;
 }
 
 export type CustomSnoozeInput =

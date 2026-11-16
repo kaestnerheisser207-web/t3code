@@ -307,7 +307,9 @@ function LinkRequestDialog(props: {
       <WizardPopup>
         <WizardHeader
           title={
-            pickMachine ? t("web.dynamic.LinkRequestCard.link-a-machine") : `Link ${targetName}`
+            pickMachine
+              ? t("web.dynamic.LinkRequestCard.link-a-machine")
+              : t("web.dynamic.LinkRequestCard.link-param", { targetName: targetName })
           }
           description={t("release4761.text154")}
         >

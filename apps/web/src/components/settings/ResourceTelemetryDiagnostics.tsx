@@ -1124,7 +1124,11 @@ function ResourceTelemetryDiagnosticsBody({
               label={t("settings.pages.ResourceTelemetryDiagnostics.current-cpu")}
               value={allT3 ? `${allT3.currentCpuPercent.toFixed(1)}%` : "..."}
               detail={
-                allT3 ? `${formatCpuTime(allT3.cpuTimeMs / 1_000)} observed CPU time` : undefined
+                allT3
+                  ? t("web.dynamic.ResourceTelemetryDiagnostics.param-observed-cpu-time", {
+                      value: formatCpuTime(allT3.cpuTimeMs / 1_000),
+                    })
+                  : undefined
               }
             />
             <IconStat

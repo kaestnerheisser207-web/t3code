@@ -111,11 +111,7 @@ function ModelPicker({
   return (
     <ListSection
       title={t("release4340.step-model")}
-      footer={
-        delisted
-          ? `OpenRouter no longer lists ${current}. Dictation stays off until you choose another model.`
-          : undefined
-      }
+      footer={delisted ? t("release4340.openrouter-delisted", { model: current }) : undefined}
     >
       <View className="px-4 py-3">
         <TextInput
@@ -323,14 +319,14 @@ function CloudChoices({ environment, active, onClose }: Props & { onClose: () =>
                     return;
                   }
                   Dialog.confirm({
-                    title: `Use ${label} for dictation?`,
+                    title: t("release4340.use-for-dictation", { name: label }),
                     message: t("release4340.disclosure-stop-sharing", {
                       disclosure: t("release4340.cloud-disclosure-provider", {
                         company: CLOUD_SPEECH_PROVIDER_NAMES[provider],
                         environment: environment.label,
                       }),
                     }),
-                    confirmText: `Use ${label}`,
+                    confirmText: t("release4340.use-name", { name: label }),
                     onConfirm: () => enable(pendingCloudVoiceChoice(id, provider)),
                   });
                 }}
@@ -387,8 +383,11 @@ function CloudChoices({ environment, active, onClose }: Props & { onClose: () =>
                 environment: environment.label,
               })
           : editing.enable
-            ? `Anyone with dictation access to ${environment.label} can bill this key.`
-            : `Updates the ${company} key on ${environment.label}. Your dictation destination stays the same.`;
+            ? t("release4340.anyone-can-bill-key", { environment: environment.label })
+            : t("release4340.updates-company-key", {
+                company: company,
+                environment: environment.label,
+              });
     return (
       <>
         <Text className="px-2 text-sm text-foreground-muted">{disclosure}</Text>

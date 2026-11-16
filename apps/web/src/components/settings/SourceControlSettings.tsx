@@ -324,7 +324,9 @@ function DiscoveryItemRow({
               <Switch
                 checked={item.status === "available"}
                 disabled
-                aria-label={`${item.label} availability`}
+                aria-label={t("web.dynamic.SourceControlSettings.param-availability", {
+                  label: item.label,
+                })}
               />
             ) : null}
           </div>

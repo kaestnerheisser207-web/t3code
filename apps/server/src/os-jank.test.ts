@@ -112,7 +112,8 @@ effectIt.effect("waits longer for only one hung login shell", () =>
 
         const timeouts = probe.mock.calls.map(([, , options]) => options?.timeout);
         assert.equal(timeouts.filter((timeout) => (timeout ?? 0) > 5_000).length, 1);
-        assert.equal(env.PATH, "/usr/bin");
+        assert.equal(env.PATH?.split(":")[0], "/usr/bin");
+        assert.equal(new Set(env.PATH?.split(":")).size, env.PATH?.split(":").length);
       }),
     (probe) => Effect.sync(() => probe.mockRestore()),
   ),

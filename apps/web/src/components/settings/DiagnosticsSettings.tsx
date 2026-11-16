@@ -1191,7 +1191,9 @@ function DiagnosticsSettingsBody() {
             value={data ? formatCount(data.slowSpanCount) : "..."}
             tooltip={
               data
-                ? `Spans with a duration of ${formatDiagnosticsDuration(data.slowSpanThresholdMs)} or longer.`
+                ? t("diagnostics.slowThreshold", {
+                    duration: formatDiagnosticsDuration(data.slowSpanThresholdMs),
+                  })
                 : t("diagnostics.slowConfigured")
             }
             tone={data && data.slowSpanCount > 0 ? "warning" : "default"}

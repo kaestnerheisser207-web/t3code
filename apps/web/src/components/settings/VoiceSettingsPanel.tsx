@@ -328,7 +328,7 @@ function ModelCard(props: ModelCardProps) {
               aria-label={
                 model.linkedFrom
                   ? `Stop using your ${model.name} file; the file stays on disk`
-                  : `Delete ${model.name}`
+                  : t("release4491.text077", { value0: model.name })
               }
               onClick={props.onDelete}
             >
@@ -397,7 +397,7 @@ function DictionaryEditor(props: {
             maxLength={5_100}
             disabled={disabled}
             placeholder={t("release4761.text376")}
-            aria-label={`Add a word or phrase to the ${label}`}
+            aria-label={t("release4491.text745", { value0: label })}
             onChange={(event) => setTermDraft(event.target.value)}
             onKeyDown={(event) => {
               if (event.nativeEvent.isComposing || event.keyCode === 229) return;
@@ -414,7 +414,7 @@ function DictionaryEditor(props: {
       </div>
       {words.length > 0 ? (
         <ul
-          aria-label={`${label} entries`}
+          aria-label={t("release4491.text746", { value0: label })}
           className="mt-2.5 flex flex-col gap-1.5 @min-[32rem]/settings-row:flex-row @min-[32rem]/settings-row:flex-wrap"
         >
           {words.map(({ term, aliases }) => (
@@ -900,7 +900,7 @@ function SpeechModelBrowser(props: {
       <SettingsRow
         {...searchableSetting("speech-models")}
         title={t("settings.pages.ProviderInstanceCard.models")}
-        description={`This environment can’t transcribe audio: ${status.reason}.`}
+        description={t("release4340.environment-cannot-transcribe", { reason: status.reason })}
       />
     );
   return (

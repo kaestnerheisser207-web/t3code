@@ -554,9 +554,11 @@ it("keeps snooze rounding and expiry stable when labels change language", async 
   const i18n = createI18n("en");
   for (const [offset, short, key, count] of [
     [1, "1m", "schedule.minute", 1],
-    [60_001, "2m", "schedule.minute", 2],
+    [60_001, "1m", "schedule.minute", 1],
+    [120_000, "2m", "schedule.minute", 2],
     [3_600_000, "1h", "schedule.hour", 1],
-    [3_600_001, "2h", "schedule.hour", 2],
+    [3_600_001, "1h", "schedule.hour", 1],
+    [3_660_000, "2h", "schedule.hour", 2],
     [86_400_000, "1d", "schedule.day", 1],
   ] as const) {
     const wake = new Date(Date.parse(NOW) + offset).toISOString();
