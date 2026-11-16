@@ -1838,12 +1838,12 @@ function WorkHistorySkeleton() {
 
 function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-fold" }> }) {
   const t = useTranslate();
-  const worked = /^Worked for (.+)$/.exec(row.label);
-  const stopped = /^You stopped after (.+)$/.exec(row.label);
+  const worked = /^Worked for (.+)$/.exec(row.label)?.[1];
+  const stopped = /^You stopped after (.+)$/.exec(row.label)?.[1];
   const label = worked
-    ? t("release4761.workedFor", { duration: worked[1] })
+    ? t("release4761.workedFor", { duration: worked })
     : stopped
-      ? t("release4761.stoppedAfter", { duration: stopped[1] })
+      ? t("release4761.stoppedAfter", { duration: stopped })
       : row.label === "Worked"
         ? t("release4761.worked")
         : row.label === "You stopped this response"
